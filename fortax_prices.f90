@@ -1,6 +1,5 @@
 
 ! This file is part of the FORTAX library;
-! (c) 2009 Andrew Shephard; andrubuntu@gmail.com
 
 ! FORTAX is free software: you can redistribute it and/or modify
 ! it under the terms of the GNU General Public License as published by
@@ -38,8 +37,8 @@ module fortax_prices
     end type
     
     public :: loadindex, setindex, getindex, upratefactor, upratesys
-    public :: sysindex_t, checkdate, loadsysindex, getsysindex
-    
+    public :: sysindex_t, checkdate, loadsysindex, getsysindex, rpi_saveF90
+    public :: rpidate, rpiindex
 contains
 
     ! setindex
@@ -412,4 +411,54 @@ contains
         
     end subroutine freesysindex
                         
+    subroutine rpi_saveF90(fname)
+
+        use fortax_util, only : getUnit, fortaxError, intToStr, dblToStr
+
+        use, intrinsic :: iso_fortran_env
+
+        implicit none
+
+        character(*), intent(in), optional :: fname
+
+        integer :: funit, ios, nindex, i
+
+        if ( (.not. (allocated(rpidate))) .or. (.not. (allocated(rpiindex))) ) then
+            call fortaxError('no price data for writing')
+        end if
+
+        nindex = size(rpidate)
+
+        if (present(fname)) then
+            call getUnit(funit)
+            open(funit,file=fname,action='write',status='replace',iostat=ios)
+            if (ios .ne. 0) call fortaxError('error opening file for writing')
+        else
+            funit = output_unit
+        end if
+
+        write(funit,'(a)') '! .f90 FORTAX Price index; generated using rpi_saveF90'
+        write(funit,*)
+
+        write(funit,'(a)') 'integer, parameter :: nindex_f90 ='//intToStr(nindex)
+        write(funit,*)        
+        write(funit,'(a)') 'integer, parameter :: rpidate_f90(nindex_f90) = (/ &'
+        do i = 1, nindex-1
+            write(funit,'(a)') '    '//intToStr(rpidate(i))//', &'
+        end do
+        write(funit,'(a)') '    '//intToStr(rpidate(nindex))//'/)'
+        write(funit,*)
+        write(funit,'(a)') 'real(dp), parameter :: rpiindex_f90(nindex_f90) = (/ &'
+        do i = 1, nindex-1
+            write(funit,'(a)') '    '//dblToStr(rpiindex(i))//'_dp, &'
+        end do
+        write(funit,'(a)') '    '//dblToStr(rpiindex(nindex))//'_dp/)'
+        write(funit,*)
+        write(funit,'(a)') '! .f90 FORTAX Price index; END-OF-FILE'
+        write(funit,*)
+
+        if (present(fname)) close(funit)
+
+    end subroutine rpi_saveF90
+
 end module fortax_prices
