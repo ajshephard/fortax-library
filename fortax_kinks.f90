@@ -22,7 +22,7 @@
 ! -----------------------------------------------------------------------
 ! module calculates piecewise linear income schedules, AS
 
-module fortax_kinks2
+module fortax_kinks
 
     use fortax_realtype, only : dp
 
@@ -1084,4 +1084,4 @@ loopmax : do
 
     end subroutine kinksearn
     
-end module fortax_kinks2
+end module fortax_kinks
