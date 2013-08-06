@@ -67,6 +67,21 @@ contains
         
     end function intToStrLen
 
+    ! logicalToStr
+    ! -----------------------------------------------------------------------
+    ! converts logical to string (.true. = T, .false. = F)
+
+    pure function logicalToStr(N)
+        
+        implicit none
+                 
+        logical, intent(in) :: N
+        character(1)        :: logicalToStr
+        
+        logicalToStr = merge('T','F',N)
+
+    end function logicalToStr
+
 
     ! dblToStr
     ! -----------------------------------------------------------------------
