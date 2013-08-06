@@ -193,7 +193,7 @@ contains
     end subroutine readFamCompareDatabase
 
 
-    subroutine compareFamDatabase(n,fam,sysname,net0,maxdiff,tolin,funitin)
+    subroutine compareFamDatabase(n,fam,sysdir,sysname,net0,maxdiff,tolin,funitin)
         use fortax_type, only : fam_t, sys_t, net_t
         use fortax_read, only : readFortaxParams
         use fortax_calc, only : calcNetInc
@@ -204,6 +204,7 @@ contains
         type(fam_t), intent(in) :: fam(n)
         type(net_t), intent(in) :: net0(n)
         integer, intent(in) :: maxdiff
+        character(len=*), intent(in) :: sysdir
         character(len=40), intent(in) :: sysname(n)
         real(dp), intent(in), optional :: tolin
         integer, intent(in), optional :: funitin
@@ -240,7 +241,7 @@ contains
         allocate(sys(n2))
 
         do i = 1, n2
-            call readFortaxParams(sys(i),'../systems/'//trim(syslist(i))//'.xml')
+            call readFortaxParams(sys(i),trim(adjustl(sysdir))//trim(adjustl(syslist(i)))//'.xml')
         end do
 
         verbose = .true.
@@ -261,7 +262,7 @@ contains
             diffid = diffid + merge(1,0,diff>0)
             difftot = difftot + diff
 
-            if (diffid==maxdiff) then
+            if (diffid==maxdiff .and. verbose) then
                 verbose = .false.
                 write(funit,*)
                 write(funit,'(A)') 'Printing of further detailed differences is supressed.'
