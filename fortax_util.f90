@@ -495,6 +495,8 @@ contains
 
     subroutine fortaxWarn(warnMsg,funit)
     
+        implicit none
+
         character(*),      intent(in) :: warnMsg
         integer, optional, intent(in) :: funit
         
