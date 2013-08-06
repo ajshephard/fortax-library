@@ -261,7 +261,8 @@ contains
         implicit none
 
         character(*), intent(inout) :: str
-        character(32)               :: ee, eestr
+        integer, parameter          :: eeLen = 32
+        character(eeLen)            :: ee, eestr
         character                   :: ch
         integer                     :: i, lstr, ipos, eex
 
@@ -270,12 +271,14 @@ contains
 
         if (ipos>0) then
             ee=str(ipos:)
-            read (ee(3:),*) eex
+!            read (ee(3:),*) eex
+            read (ee(3:eeLen),*) eex
             if (eex==0) then
             ee=''
             else
             write (eestr,'(I20)') eex
-            ee(3:) = adjustl(eestr)
+            ee(3:eeLen) = adjustl(eestr)
+!            ee(3:) = adjustl(eestr)
             end if
             str=str(1:ipos-1)
         end if
