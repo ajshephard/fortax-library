@@ -1924,8 +1924,8 @@ contains
                 
         real(dp)                 :: disregRebate
 
-        !if net_init is called it will set all elements to zero.
-        call net_init(net)
+        !if CalcNetInit is called it will set all elements to zero.
+        call CalcNetInit(net)
 
         ! Pre-tax summary measures
         !!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -2070,5 +2070,77 @@ contains
         net%tu%ccexp = fam%ccexp
         
     end subroutine CalcNetInc
+
+    ! CalcNetInit
+    ! -----------------------------------------------------------------------
+    ! intializes net_t type. unless defaults are coded here, integers are
+    ! set to 0, doubles to 0.0_dp and logicals to .false. (and similarly
+    ! for arrays)
+    ! 
+    ! this is the same as net_init in fortax_type, it is reproduced here so
+    ! we may inline without inter procedural optimization enabled. AS
+
+    !DEC$ ATTRIBUTES FORCEINLINE :: CalcNetInit
+    elemental subroutine CalcNetInit(net)
+
+        use fortax_type, only : net_t
+
+        implicit none
+
+        type(net_t), intent(inout) :: net
+        integer                    :: ad
+
+#       undef  _$header
+#       undef  _$footer
+#       undef  _$integer
+#       undef  _$double
+#       undef  _$logical
+#       undef  _$doublearray
+#       undef  _$integerarray
+#       undef  _$logicalarray
+
+#       define _$header
+#       define _$footer
+#       define _$integer(x,lab,y) net%_$level(ad)%x = 0
+#       define _$double(x,lab,y)  net%_$level(ad)%x = 0.0_dp
+#       define _$logical(x,lab,y) net%_$level(ad)%x = .false.
+#       define _$integerarray(x,lab,y,z) net%_$level(ad)%x = 0
+#       define _$doublearray(x,lab,y,z)  net%_$level(ad)%x = 0.0_dp
+#       define _$logicalarray(x,lab,y,z) net%_$level(ad)%x = .false.
+
+#       define _$level ad
+        do ad = 1, 2
+#           include 'includes/netad_t.inc'
+        end do
+#       undef _$level
+
+#       undef  _$integer
+#       undef  _$double
+#       undef  _$logical
+#       undef  _$doublearray
+#       undef  _$integerarray
+#       undef  _$logicalarray
+
+#       define _$integer(x,lab,y) net%_$level%x = 0
+#       define _$double(x,lab,y)  net%_$level%x = 0.0_dp
+#       define _$logical(x,lab,y) net%_$level%x = .false.
+#       define _$integerarray(x,lab,y,z) net%_$level%x = 0
+#       define _$doublearray(x,lab,y,z)  net%_$level%x = 0.0_dp
+#       define _$logicalarray(x,lab,y,z) net%_$level%x = .false.
+
+#       define _$level tu
+#       include 'includes/nettu_t.inc'
+#       undef _$level
+
+#       undef  _$header
+#       undef  _$footer
+#       undef  _$integer
+#       undef  _$double
+#       undef  _$logical
+#       undef  _$doublearray
+#       undef  _$integerarray
+#       undef  _$logicalarray
+
+    end subroutine CalcNetInit
 
 end module fortax_calc
