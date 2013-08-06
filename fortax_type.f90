@@ -46,6 +46,13 @@ module fortax_type
 #   endif
 #   undef _maxkids_
 
+#   ifndef _maxrpi_
+    integer, parameter :: maxRPI = 1024
+#   else
+    integer, parameter :: maxRPI = _maxrpi_
+#   endif
+#   undef _maxrpi_
+
     type :: lab_t
         character(32), dimension(7)  :: tenure
         character(32), dimension(12) :: region
@@ -66,6 +73,18 @@ module fortax_type
     integer, parameter :: ctax_bandg = 7
     integer, parameter :: ctax_bandh = 8
 
+    ! rpi_t TODO
+    ! -----------------------------------------------------------------------
+    ! defines the prices indexing for uprating
+
+!    type :: rpi_t
+!        integer  :: nRPI
+!        integer  :: rpidate(maxRPI)
+!        real(dp) :: rpiindex(maxRPI)
+!        logical  :: indexinit = .false.
+!        integer  :: date0(maxRPI), date1(maxRPI)
+!        character(255) :: fname(maxRPI)
+!    end type
 
     ! famad_t
     ! -----------------------------------------------------------------------
