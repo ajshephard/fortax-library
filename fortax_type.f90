@@ -1,6 +1,5 @@
 
 ! This file is part of the FORTAX library;
-! (c) 2009 Andrew Shephard; andrubuntu@gmail.com
 
 ! FORTAX is free software: you can redistribute it and/or modify
 ! it under the terms of the GNU General Public License as published by
