@@ -1230,7 +1230,7 @@ contains
 
             !Check TU is working enough
             elig = .false.
-            if (sys%rebatesys%rulesunderFC) then
+            if (sys%rebatesys%rulesunderFC .or. sys%rebatesys%rulesunderWFTC) then
                 if (_famcouple_) then
                     if ((fam%ad(1)%hrs >= sys%fc%hours1-tol) .and. (fam%ad(2)%hrs >= sys%fc%hours1-tol)) elig = .true.
                 else               
@@ -1823,7 +1823,7 @@ contains
             !Post-Apr-03: need to get IS/IB-JSA or > family element of CTC
             if (net%tu%incsup > tol) then
                 dogrant = .true.
-            else if (sys%rebatesys%rulesunderFC) then
+            else if (sys%rebatesys%rulesunderFC .or. sys%rebatesys%rulesunderWFTC) then
                 if (net%tu%fc > tol) dogrant = .true.
             else if (sys%rebatesys%rulesunderNTC) then
                 if (net%tu%ctc > MaxCTCFam(sys,fam) + tol) dogrant = .true.

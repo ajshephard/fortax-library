@@ -975,8 +975,13 @@ contains
             ! From Oct 99, childcare disregard set against WFTC/WTC/CTC as well as earnings
             if (sysdate < 19991005) then
                 sys%rebateSys%credInDisregCC = .false.
+               
             else
                 sys%rebateSys%credInDisregCC = .true.
+                if (.not. sys%rebateSys%rulesUnderNTC) then
+                    sys%rebateSys%rulesUnderWFTC = .true.
+                    sys%rebateSys%rulesUnderFC = .false.
+                end if
             end if
 
         else
