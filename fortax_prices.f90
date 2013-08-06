@@ -127,7 +127,7 @@ contains
             else
                 nrec           = nrec + 1
                 rpidate(nrec)  = tempdate
-                rpiindex(nrec) = tempindex                
+                rpiindex(nrec) = tempindex
             end if
             
         end do
