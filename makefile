@@ -8,7 +8,7 @@ OBJECTS  = fortax_realtype.o fortax_util.o fortax_type.o fortax_calc.o fortax_ex
 XMLOBJECTS = xmlparse.o read_xml_prims.o write_xml_prims.o xmltaxben_t.o xmlfortax_t.o
 
 # ------------------Macro-Defs---------------------
-#FFLAGS = -O0 -g -traceback -save-temps -fpp -check bounds -check all -warn unused -stand f03 -fPIC -gen-interfaces -module ../modules-dev
+FFLAGS = -O0 -g -traceback -save-temps -fpp -check bounds -check all -warn unused -stand f03 -fPIC -gen-interfaces -module $(MODPATH)
 #FFLAGS = -O1 -fpp -stand f03 -fPIC -gen-interfaces -module ../modules-dev
 #GPROF = -g -p
 DIAGDISABLE = -diag-disable 5268
@@ -17,8 +17,11 @@ F90 = ifort
 #DEFINES = -D_famcouple_=.false. -D_fammarried_=.false. -D_famkids_=.true.
 # -------------------End-macro-Defs---------------------------
 
-all:$(OBJECTS) $(XMLOBJECTS)
+all:$(OBJECTS) $(XMLOBJECTS) test.out
 	ar rc $(OUTPATH)/fortax.a $(OBJECTS) $(XMLOBJECTS)
+
+test.out:test.f90 $(OBJECTS) $(XMLOBJECTS) 
+	$(F90) $(FFLAGS) test.f90 $(OBJECTS) $(XMLOBJECTS) -o test.out
 
 xmlparse.o:xmlparse.f90  
 	$(F90) $(FFLAGS) -c xmlparse.f90 
@@ -31,10 +34,10 @@ write_xml_prims.o:write_xml_prims.f90 xmlparse.o
 	$(F90) $(FFLAGS) -c write_xml_prims.f90 
 
 xmltaxben_t.o:xmltaxben_t.f90 read_xml_prims.o xmlparse.o 
-	$(F90) $(FFLAGS) -c xmltaxben_t.f90 
+	$(F90) $(FFLAGS) -O1 -c xmltaxben_t.f90 
 
 xmlfortax_t.o:xmlfortax_t.f90 read_xml_prims.o write_xml_prims.o xmlparse.o 
-	$(F90) $(FFLAGS) -c xmlfortax_t.f90 
+	$(F90) $(FFLAGS) -O1 -c xmlfortax_t.f90 
 
 fortax_realtype.o:fortax_realtype.f90  
 	$(F90) $(FFLAGS) -c fortax_realtype.f90 
