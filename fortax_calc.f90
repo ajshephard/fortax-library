@@ -64,6 +64,7 @@ contains
     ! Taxable earnings (calculated for TU). Depends on couple, married, 
     ! nkids, and earn
 
+    !DEC$ ATTRIBUTES FORCEINLINE :: tearn
     pure subroutine tearn(sys,fam,net)
 
         use fortax_type, only : sys_t, fam_t, net_t
@@ -128,6 +129,7 @@ contains
     ! -----------------------------------------------------------------------
     ! Income tax (calculated for individual). Depends on tearn
 
+    !DEC$ ATTRIBUTES FORCEINLINE :: inctax
     pure subroutine inctax(sys,net,i)
 
         use fortax_type,   only : sys_t, net_t
@@ -171,6 +173,7 @@ contains
     ! Children's tax credit (calculated for TU). depends on couple, nkids, 
     ! yngkid, earn, tearn, and tax
     
+    !DEC$ ATTRIBUTES FORCEINLINE :: taxafterctc
     pure subroutine taxafterctc(sys,fam,net)
 
         use fortax_type,   only : sys_t, fam_t, net_t
@@ -241,6 +244,7 @@ contains
     ! Post Apr-94 MCA/APA (calculated for TU). Depends on couple, married,
     ! nkids, earn, and net
 
+    !DEC$ ATTRIBUTES FORCEINLINE :: taxaftermca
     pure subroutine taxaftermca(sys,fam,net)
 
         use fortax_type, only : sys_t, fam_t, net_t
@@ -300,6 +304,7 @@ contains
     ! sys%natins%rates(1) is the "entry fee" (cliff edge) if earnings exceed 
     ! sys%natins%bands(1). Depends on earn,selfemp
     
+    !DEC$ ATTRIBUTES FORCEINLINE :: NatIns
     pure subroutine NatIns(sys,fam,net,i)
         
         use fortax_type, only : sys_t, fam_t, net_t
@@ -389,7 +394,8 @@ contains
     ! for those 16-17 up to 1996/97. note that netearn, maint and othinc must 
     ! be in weekly terms. depends on couple, adage, hrs, nkids, kidage,
     ! netearn, maint, othinc
-    
+
+    !DEC$ ATTRIBUTES FORCEINLINE :: IncSup    
     pure subroutine IncSup(sys,fam,net)
         
         use fortax_type, only : sys_t, fam_t, net_t
@@ -490,7 +496,8 @@ contains
     ! IS/IB-JSA: applicable amount ("needs") - identical to first part of 
     ! HB/CTB needs (except for parameters). Doesn't do housing costs, should 
     ! it? depends on couple, adage, nkids, kidage
-    
+
+    !DEC$ ATTRIBUTES FORCEINLINE :: ISAppAmt    
     real(dp) pure function ISAppAmt(sys,fam)
 
         use fortax_type, only : sys_t, fam_t
@@ -559,6 +566,7 @@ contains
     ! -----------------------------------------------------------------------
     ! IS/IB-JSA: earnings disregard. Depends on couple and nkids
     
+    !DEC$ ATTRIBUTES FORCEINLINE :: ISDisreg
     real(dp) pure function ISDisreg(sys,fam)
     
         use fortax_type, only : sys_t, fam_t
@@ -605,6 +613,7 @@ contains
     ! Simplified council tax liability (e.g. doesn't deal with accomodation 
     ! type, students). Depends on couple, adage, nothads, band
 
+    !DEC$ ATTRIBUTES FORCEINLINE :: ctax
     pure subroutine ctax(sys,fam,net)
 
         use fortax_type, only : sys_t, fam_t, net_t, &
@@ -683,6 +692,7 @@ contains
     ! Simplified calculation of Community Charge liability. Depends on 
     ! couple, adage
 
+    !DEC$ ATTRIBUTES FORCEINLINE :: polltax
     pure subroutine polltax(sys,fam,net)
 
         use fortax_type, only : sys_t, fam_t, net_t
@@ -722,7 +732,8 @@ contains
     ! -----------------------------------------------------------------------
     ! Preliminary calculations HBen, CTBen and CCBen. Depends on couple, 
     ! adage, hrs, nkids, kidage, ccexp, incsup
-    
+
+    !DEC$ ATTRIBUTES FORCEINLINE :: prelimcalc
     pure subroutine prelimcalc(sys,fam,net,disregRebate)
     
         use fortax_type, only : sys_t, fam_t, net_t
@@ -755,6 +766,7 @@ contains
     ! disregStd, disregFT, disregCC, disregMnt, appamt, posttaxearn, fc, wtc,
     ! ctc, maint, chben
     
+    !DEC$ ATTRIBUTES FORCEINLINE :: RebateDisreg
     pure function RebateDisreg(sys,fam,net,appamt,disregStd,disregFT,disregCC,disregMnt)
 
         use fortax_type, only : sys_t, fam_t, net_t
@@ -811,7 +823,8 @@ contains
     ! HBen
     ! -----------------------------------------------------------------------
     ! Housing benefit. Depends on incsup, rent, disregRebate
-    
+
+    !DEC$ ATTRIBUTES FORCEINLINE :: HBen    
     pure subroutine HBen(sys,fam,net,disregRebate)
 
         use fortax_type, only : sys_t, fam_t, net_t
@@ -862,6 +875,7 @@ contains
     ! Tells you whether TU is entitled to full HB (i.e. whether any of the HB
     ! award has been tapered away). Depends on incsup, disregRebate
 
+    !DEC$ ATTRIBUTES FORCEINLINE :: HBFull
     logical pure function HBFull(sys,fam,net,disregRebate)
 
         use fortax_type, only : sys_t, fam_t, net_t
@@ -894,6 +908,7 @@ contains
     ! posttaxfamearn, fc, maint, othinc, incsup, ctax, band, appamt,
     ! disregStd, disregFT, disregCC, disregMnt
 
+    !DEC$ ATTRIBUTES FORCEINLINE :: ctaxBen
     pure subroutine ctaxBen(sys,fam,net,disregRebate)
 
         use fortax_type, only : sys_t, fam_t, net_t
@@ -956,6 +971,7 @@ contains
     ! Community Charge Benefit taper. Depends on couple, adage, netearn, fc,
     ! maint, othinc, incsup, cc, disregRebate
     
+    !DEC$ ATTRIBUTES FORCEINLINE :: pollTaxBen
     pure subroutine pollTaxBen(sys,fam,net,disregRebate)
 
         use fortax_type, only : sys_t, fam_t, net_t
@@ -1010,6 +1026,7 @@ contains
     ! child under 1 currently implemented as child addition - so error if 
     ! multiple kids under 1. Depends on couple, adage, nkids, kidage
 
+    !DEC$ ATTRIBUTES FORCEINLINE :: HBAppAmt
     real(dp) pure function HBAppAmt(sys,fam)
 
         use fortax_type, only : sys_t, fam_t
@@ -1071,7 +1088,8 @@ contains
     ! StdDisreg
     ! -----------------------------------------------------------------------
     ! HB/CCB/CTB: standard earnings disregard. Depends on couple, nkids
-    
+
+    !DEC$ ATTRIBUTES FORCEINLINE :: StdDisreg    
     real(dp) pure function StdDisreg(sys,fam)
     
         use fortax_type, only : sys_t, fam_t
@@ -1099,7 +1117,8 @@ contains
     ! -----------------------------------------------------------------------
     ! HB/CCB/CTB: disregard for workers (originally for those getting FT 
     ! premium with FC/WFTC/WTC). Depends on couple, adage, hrs, nkids
-    
+
+    !DEC$ ATTRIBUTES FORCEINLINE :: FTDisreg    
     real(dp) pure function FTDisreg(sys,fam,net)
  
         use fortax_type, only : sys_t, fam_t, net_t
@@ -1209,7 +1228,8 @@ contains
     ! -----------------------------------------------------------------------
     ! HB/CCB/CTB: disregard for childcare costs. Depends on couple, hrs, 
     ! nkids, kidage, ccexp
-    
+
+    !DEC$ ATTRIBUTES FORCEINLINE :: ChCareDisreg    
     real(dp) pure function ChCareDisreg(sys,fam,net)
     
         use fortax_type, only : sys_t, fam_t, net_t
@@ -1279,6 +1299,7 @@ contains
     ! -----------------------------------------------------------------------
     ! Maintenance disregard. Depends on nkids
 
+    !DEC$ ATTRIBUTES FORCEINLINE :: MaintDisreg
     real(dp) pure function MaintDisreg(sys,fam)
 
         use fortax_type, only : sys_t, fam_t
@@ -1316,6 +1337,7 @@ contains
     ! WTC/CTC entitlement. Depends on couple, age, hrs, nkids, kidage, ccexp,
     ! grearn
 
+    !DEC$ ATTRIBUTES FORCEINLINE :: NTC
     pure subroutine NTC(sys,fam,net)
 
         use fortax_type, only : sys_t, fam_t, net_t
@@ -1339,6 +1361,7 @@ contains
     ! Family element of CTC (separate from child element for later taper 
     ! calculation). Depends on nkids, ageyng
     
+    !DEC$ ATTRIBUTES FORCEINLINE :: MaxCTCFam    
     real(dp) pure function MaxCTCFam(sys,fam)
 
         use fortax_type, only : sys_t, fam_t
@@ -1369,6 +1392,7 @@ contains
     ! -----------------------------------------------------------------------
     ! Child element of CTC. Depends on nkids
 
+    !DEC$ ATTRIBUTES FORCEINLINE :: MaxCTCKid
     real(dp) pure function MaxCTCKid(sys,fam)
 
         use fortax_type, only : sys_t, fam_t
@@ -1393,6 +1417,7 @@ contains
     ! Working Tax Credit (including childcare element). Depends on couple, 
     ! age, hrs, nkids, kidage, ccexp
     
+    !DEC$ ATTRIBUTES FORCEINLINE :: MaxWTCamt
     pure subroutine MaxWTCamt(sys,fam,net,MaxWTC)
 
         use fortax_type, only : sys_t, fam_t, net_t
@@ -1499,6 +1524,7 @@ contains
     ! done. Doesn't check that WTC and CTC award values are sensible 
     ! (hopefully they should be!)
 
+    !DEC$ ATTRIBUTES FORCEINLINE :: NTCTaper
     pure subroutine NTCTaper(sys,fam,net,MaxWTC,MaxCTCFam,MaxCTCKid)
 
         use fortax_type, only : sys_t, fam_t, net_t
@@ -1557,6 +1583,7 @@ contains
     ! Family credit/WFTC awards. Depends on couple, hrs, nkids, kidage, 
     ! netearn, ccexp, maint
     
+    !DEC$ ATTRIBUTES FORCEINLINE :: FamCred
     pure subroutine FamCred(sys,fam,net)
 
         use fortax_type, only : sys_t, fam_t, net_t
@@ -1613,6 +1640,7 @@ contains
     ! FC/WFTC maximum entitlement. Depends on couple, hrs, nkids, kidage,
     ! ccexp
     
+    !DEC$ ATTRIBUTES FORCEINLINE :: MaxFCamt
     pure subroutine MaxFCamt(sys,fam,net,MaxFC)
 
         use fortax_type, only : sys_t, fam_t, net_t
@@ -1704,6 +1732,7 @@ contains
     ! adults in TU work 16+ hrs). Depends on couple, hrs, nkids, kidage,
     ! ccexp
     
+    !DEC$ ATTRIBUTES FORCEINLINE :: FCDisreg
     real(dp) pure function FCDisreg(sys,fam)
 
         use fortax_type, only : sys_t, fam_t
@@ -1774,6 +1803,7 @@ contains
     ! then on, even though existing claimants could still get it. Depends on
     ! couple, nkids
 
+    !DEC$ ATTRIBUTES FORCEINLINE :: ChBen
     pure subroutine ChBen(sys,fam,net)
 
         use fortax_type, only : sys_t, fam_t, net_t
@@ -1798,6 +1828,7 @@ contains
     ! -----------------------------------------------------------------------
     ! Maternity grant. Depends on nkids, kidage, incsup, fc, ctcred
     
+    !DEC$ ATTRIBUTES FORCEINLINE :: MatGrant
     pure subroutine MatGrant(sys,fam,net,calcmax)
 
         use fortax_type, only : sys_t, fam_t, net_t
@@ -1841,6 +1872,7 @@ contains
     ! -----------------------------------------------------------------------
     ! Free school meals, Depends on kidage, incsup, ctc, wtc, pretaxearn
 
+    !DEC$ ATTRIBUTES FORCEINLINE :: fsm
     pure subroutine fsm(sys,fam,net)
         
         use fortax_type, only : sys_t, fam_t, net_t
