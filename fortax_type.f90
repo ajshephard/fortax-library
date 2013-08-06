@@ -28,10 +28,11 @@ module fortax_type
     
     implicit none
             
+    ! TODO improve label handling
     private
     public :: fam_init, net_init, sys_init
     public :: fam_saveF90, sys_saveF90
-    public :: lab_t, fam_t, net_t, sys_t
+    public :: lab_t, fam_t, net_t, sys_t, rpi_t
     public :: lab, maxkids
     public :: fam_gen, fam_desc
     public :: net_desc
@@ -47,9 +48,9 @@ module fortax_type
 #   undef _maxkids_
 
 #   ifndef _maxrpi_
-    integer, parameter :: maxRPI = 1024
+    integer, public, parameter :: maxRPI = 1024
 #   else
-    integer, parameter :: maxRPI = _maxrpi_
+    integer, public, parameter :: maxRPI = _maxrpi_
 #   endif
 #   undef _maxrpi_
 
@@ -73,18 +74,15 @@ module fortax_type
     integer, parameter :: ctax_bandg = 7
     integer, parameter :: ctax_bandh = 8
 
-    ! rpi_t TODO
+    ! rpi_t
     ! -----------------------------------------------------------------------
     ! defines the prices indexing for uprating
 
-!    type :: rpi_t
-!        integer  :: nRPI
-!        integer  :: rpidate(maxRPI)
-!        real(dp) :: rpiindex(maxRPI)
-!        logical  :: indexinit = .false.
-!        integer  :: date0(maxRPI), date1(maxRPI)
-!        character(255) :: fname(maxRPI)
-!    end type
+    type rpi_t
+        integer  :: ndate
+        integer  :: date(maxRPI)
+        real(dp) :: index(maxRPI)
+    end type
 
     ! famad_t
     ! -----------------------------------------------------------------------

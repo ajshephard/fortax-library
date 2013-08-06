@@ -21,14 +21,14 @@
 ! -----------------------------------------------------------------------
 ! module provides date and price uprating capabilities for FORTAX, AS
 
+! updated 22/06/13. removed global variables for storing price index
+! introduced rpi_t defined in fortax_type
+
 module fortax_prices
 
     use fortax_realtype, only : dp
     
     private
-    
-    integer,  allocatable :: rpidate(:)
-    real(dp), allocatable :: rpiindex(:)
     
     type sysindex_t
         logical                     :: indexinit = .false.
@@ -38,7 +38,7 @@ module fortax_prices
     
     public :: loadindex, setindex, getindex, upratefactor, upratesys
     public :: sysindex_t, checkdate, loadsysindex, getsysindex, rpi_saveF90
-    public :: rpidate, rpiindex
+
 contains
 
     ! setindex
@@ -46,20 +46,28 @@ contains
     ! sets the price index data in sysindex using the specified date and
     ! index information
 
-    subroutine setindex(mydate,myindex,mysize)
+    subroutine setindex(rpi,mydate,myindex,mysize)
+
+        use fortax_util, only : fortaxwarn
+        use fortax_type, only : rpi_t, maxRPI
 
         implicit none
 
-        integer,  intent(in) :: mysize
-        real(dp), intent(in) :: myindex(mysize)
-        integer,  intent(in) :: mydate(mysize)
+        integer,     intent(in) :: mysize
+        real(dp),    intent(in) :: myindex(mysize)
+        integer,     intent(in) :: mydate(mysize)
+        type(rpi_t), intent(out) :: rpi
 
-        if (allocated(rpidate)) deallocate(rpidate)
-        if (allocated(rpiindex)) deallocate(rpiindex)
-        allocate(rpidate(mysize),rpiindex(mysize))
-
-        rpidate  = mydate
-        rpiindex = myindex
+        if (mysize<=maxRPI) then
+            rpi%date(1:mysize)  = mydate
+            rpi%index(1:mysize) = myindex
+            rpi%ndate = mysize
+        else
+            call fortaxwarn('out of range in call to setindex')
+            rpi%date  = mydate(1:maxRPI)
+            rpi%index = mydate(1:maxRPI)
+            rpi%ndate = maxRPI
+        end if
 
     end subroutine setindex
 
@@ -69,16 +77,19 @@ contains
     ! loads a price index file saved as a comma separated values (CSV) file. 
     ! If fname is not specified it defaults to 'prices/rpi.csv'
 
-    subroutine loadindex(fname)
+    subroutine loadindex(rpi,fname)
     
-        use fortax_util, only : getunit, fortaxerror, inttostr
+        use fortax_util, only : getunit, fortaxerror, fortaxwarn, inttostr
+        use fortax_type, only : rpi_t, maxRPI
         
         implicit none
        
+        type(rpi_t),  intent(out)          :: rpi
         character(*), intent(in), optional :: fname
         
         integer                            :: funit
-        integer                            :: istat, nrec
+        integer                            :: istat
+        integer                            :: nrec
         
         logical                            :: isfile
         integer                            :: tempdate, ndate
@@ -103,31 +114,33 @@ contains
         end if
         
         read (funit, *, iostat = istat) ndate
-
-        if (allocated(rpidate))  deallocate(rpidate)
-        if (allocated(rpiindex)) deallocate(rpiindex)
         
+        if (ndate>maxRPI) then
+            call fortaxwarn('declared ndate exceeds maxRPI')
+        end if
+
         if (istat .ne. 0) then
             call fortaxerror('error reading number of records on line 1')
-        else
-            allocate(rpidate(ndate))
-            allocate(rpiindex(ndate))
         end if
             
         nrec = 0
                 
         do
             
-            read(funit, *, iostat = istat) tempdate,tempindex
+            read(funit, *, iostat = istat) tempdate, tempindex
             
             if (istat==-1) then !eof
                 exit
-            elseif (istat>0) then !error
+            else if (istat>0) then !error
                 call fortaxerror('error reading record after '//inttostr(nrec))
             else
-                nrec           = nrec + 1
-                rpidate(nrec)  = tempdate
-                rpiindex(nrec) = tempindex
+                nrec = nrec + 1
+                if (nrec>maxRPI) then
+                    exit
+                else
+                    rpi%date(nrec)  = tempdate
+                    rpi%index(nrec) = tempindex
+                end if
             end if
             
         end do
@@ -136,6 +149,8 @@ contains
         
         if (nrec.ne.ndate) then
             call fortaxerror('number of records does not equal number declared on line 1')
+        else
+            rpi%ndate = ndate
         end if
         
     end subroutine loadindex
@@ -145,23 +160,26 @@ contains
     ! -----------------------------------------------------------------------
     ! returns the price index associated with the supplied YYYYMMDD date
 
-    real(dp) elemental function getindex(date)
+    real(dp) elemental function getindex(rpi,date)
             
+        use fortax_type, only : rpi_t
+
         implicit none
         
-        integer, intent(in) :: date
-        integer             :: year,  month
-        integer             :: year1, month1
+        type(rpi_t), intent(in) :: rpi
+        integer,     intent(in) :: date
+        integer                 :: year,  month
+        integer                 :: year1, month1
            
         !exploits structure of data
-        if (date<rpidate(1)) then
+        if (date<rpi%date(1)) then
             getindex = 0.0_dp
         else
             year     = date/10000
             month    = (date - year*10000)/100
-            year1    = rpidate(1)/10000
-            month1   = (rpidate(1) - year1*10000)/100
-            getindex = rpiindex((year-year1)*12 + month)
+            year1    = rpi%date(1)/10000
+            month1   = (rpi%date(1) - year1*10000)/100
+            getindex = rpi%index((year-year1)*12 + month)
         end if
         
     end function getindex
@@ -172,13 +190,16 @@ contains
     ! returns uprating factor from date0 to date1 prices (both in YYYYMMDD 
     ! format). it calls the function getindex.
 
-    real(dp) elemental function upratefactor(date0,date1)
+    real(dp) elemental function upratefactor(rpi,date0,date1)
         
+        use fortax_type, only : rpi_t
+
         implicit none
         
-        integer, intent(in) :: date0, date1
+        type(rpi_t), intent(in) :: rpi
+        integer,     intent(in) :: date0, date1
         
-        upratefactor = getindex(date1)/getindex(date0)
+        upratefactor = getindex(rpi,date1)/getindex(rpi,date0)
             
     end function upratefactor
     
@@ -411,23 +432,23 @@ contains
         
     end subroutine freesysindex
                         
-    subroutine rpi_saveF90(fname)
+    subroutine rpi_saveF90(rpi,fname)
 
         use fortax_util, only : getUnit, fortaxError, intToStr, dblToStr
+        use fortax_type, only : rpi_t
 
         use, intrinsic :: iso_fortran_env
 
         implicit none
 
+        type(rpi_t),  intent(in)           :: rpi
         character(*), intent(in), optional :: fname
 
-        integer :: funit, ios, nindex, i
+        integer :: funit, ios, i
 
-        if ( (.not. (allocated(rpidate))) .or. (.not. (allocated(rpiindex))) ) then
+        if ( (rpi%ndate<=0) ) then
             call fortaxError('no price data for writing')
         end if
-
-        nindex = size(rpidate)
 
         if (present(fname)) then
             call getUnit(funit)
@@ -440,19 +461,19 @@ contains
         write(funit,'(a)') '! .f90 FORTAX Price index; generated using rpi_saveF90'
         write(funit,*)
 
-        write(funit,'(a)') 'integer, parameter :: nindex_f90 ='//intToStr(nindex)
+        write(funit,'(a)') 'integer, parameter :: nindex_f90 ='//intToStr(rpi%ndate)
         write(funit,*)        
         write(funit,'(a)') 'integer, parameter :: rpidate_f90(nindex_f90) = (/ &'
-        do i = 1, nindex-1
-            write(funit,'(a)') '    '//intToStr(rpidate(i))//', &'
+        do i = 1, rpi%ndate-1
+            write(funit,'(a)') '    '//intToStr(rpi%date(i))//', &'
         end do
-        write(funit,'(a)') '    '//intToStr(rpidate(nindex))//'/)'
+        write(funit,'(a)') '    '//intToStr(rpi%date(rpi%ndate))//'/)'
         write(funit,*)
         write(funit,'(a)') 'real(dp), parameter :: rpiindex_f90(nindex_f90) = (/ &'
-        do i = 1, nindex-1
-            write(funit,'(a)') '    '//dblToStr(rpiindex(i))//'_dp, &'
+        do i = 1, rpi%ndate-1
+            write(funit,'(a)') '    '//dblToStr(rpi%index(i))//'_dp, &'
         end do
-        write(funit,'(a)') '    '//dblToStr(rpiindex(nindex))//'_dp/)'
+        write(funit,'(a)') '    '//dblToStr(rpi%index(rpi%ndate))//'_dp/)'
         write(funit,*)
         write(funit,'(a)') '! .f90 FORTAX Price index; END-OF-FILE'
         write(funit,*)
