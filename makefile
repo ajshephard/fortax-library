@@ -4,7 +4,7 @@ INCLUDESPATH = includes
 MODPATH = ./
 OUTPATH = ./
 
-OBJECTS  = fortax_realtype.o fortax_util.o fortax_type.o fortax_calc.o fortax_extra.o fortax_prices.o fortax_read.o fortax_write.o fortax_kinks.o
+OBJECTS  = fortax_realtype.o fortax_util.o fortax_type.o fortax_calc.o fortax_extra.o fortax_prices.o fortax_read.o fortax_readtaxben.o fortax_write.o fortax_kinks.o
 XMLOBJECTS = xmlparse.o read_xml_prims.o write_xml_prims.o xmltaxben_t.o xmlfortax_t.o
 
 # ------------------Macro-Defs---------------------
@@ -60,11 +60,16 @@ fortax_prices.o:fortax_prices.f90 fortax_realtype.o fortax_type.o fortax_util.o 
 	$(addprefix $(INCLUDESPATH)/system/, $(SYSINCLUDES))
 	$(F90) $(FFLAGS) -c fortax_prices.f90
 
-fortax_read.o:fortax_read.f90 fortax_realtype.o xmltaxben_t.o xmlfortax_t.o fortax_util.o fortax_type.o fortax_calc.o \
+fortax_read.o:fortax_read.f90 fortax_realtype.o xmlfortax_t.o fortax_util.o fortax_type.o \
 	$(addprefix $(INCLUDESPATH)/,fortax_typeread.inc fortax_read.inc) \
 	$(addprefix $(INCLUDESPATH)/system/, $(SYSINCLUDES))
 	$(F90) $(FFLAGS) -c fortax_read.f90 
 
+fortax_readtaxben.o:fortax_readtaxben.f90 fortax_realtype.o xmltaxben_t.o fortax_util.o fortax_type.o \
+	$(addprefix $(INCLUDESPATH)/,fortax_typeread.inc fortax_read.inc) \
+	$(addprefix $(INCLUDESPATH)/system/, $(SYSINCLUDES))
+	$(F90) $(FFLAGS) -c fortax_readtaxben.f90 
+	
 fortax_write.o:fortax_write.f90 fortax_type.o xmlparse.o fortax_realtype.o fortax_util.o \
 	$(addprefix $(INCLUDESPATH)/,fortax_write.inc fortax_print.inc) \
 	$(addprefix $(INCLUDESPATH)/system/, $(SYSINCLUDES))
