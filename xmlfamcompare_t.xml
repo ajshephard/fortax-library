@@ -1,0 +1,73 @@
+<?xml version="1.0" ?>
+<template>
+  <options strict="no" dynamicstrings="no" rootname="fortax">
+  <typedef name="finteger_t">
+    <component name="name" type="word" length="40"/>
+    <component name="value" type="integer"/>
+  </typedef>
+  <typedef name="flogical_t">
+    <component name="name" type="word" length="40"/>
+    <component name="value" type="logical"/>
+  </typedef>
+  <typedef name="fdouble_t">
+    <component name="name" type="word" length="40"/>
+    <component name="value" type="double"/>
+  </typedef>
+  <typedef name="fintegerarray_t">
+    <component name="name" type="word" length="40"/>
+    <component name="value" type="integer-array"/>
+  </typedef>
+  <typedef name="flogicalarray_t">
+    <component name="name" type="word" length="40"/>
+    <component name="value" type="logical-array"/>
+  </typedef>
+  <typedef name="fdoublearray_t">
+    <component name="name" type="word" length="40"/>
+    <component name="value" type="double-array"/>
+  </typedef>
+  <typedef name="ad_t">
+    <component name="finteger" type="finteger_t" dimension="1"/>
+    <component name="flogical" type="flogical_t" dimension="1"/>
+    <component name="fdouble" type="fdouble_t" dimension="1"/>
+    <component name="fintegerarray" type="fintegerarray_t" dimension="1"/>
+    <component name="flogicalarray" type="flogicalarray_t" dimension="1"/>
+    <component name="fdoublearray" type="fdoublearray_t" dimension="1"/>
+  </typedef>
+  <typedef name="nettu_t">
+    <component name="finteger" type="finteger_t" dimension="1"/>
+    <component name="flogical" type="flogical_t" dimension="1"/>
+    <component name="fdouble" type="fdouble_t" dimension="1"/>
+    <component name="fintegerarray" type="fintegerarray_t" dimension="1"/>
+    <component name="flogicalarray" type="flogicalarray_t" dimension="1"/>
+    <component name="fdoublearray" type="fdoublearray_t" dimension="1"/>
+  </typedef>
+  <typedef name="netad_t">
+    <component name="finteger" type="finteger_t" dimension="1"/>
+    <component name="flogical" type="flogical_t" dimension="1"/>
+    <component name="fdouble" type="fdouble_t" dimension="1"/>
+    <component name="fintegerarray" type="fintegerarray_t" dimension="1"/>
+    <component name="flogicalarray" type="flogicalarray_t" dimension="1"/>
+    <component name="fdoublearray" type="fdoublearray_t" dimension="1"/>
+  </typedef>
+  <typedef name="net_t">
+    <component name="system" type="word" length="40"/>
+    <component name="nettu" type="nettu_t"/>
+    <component name="netad1" type="netad_t"/>
+    <component name="netad2" type="netad_t"/>
+  </typedef>
+  <typedef name="fam_t">
+    <component name="finteger" type="finteger_t" dimension="1"/>
+    <component name="flogical" type="flogical_t" dimension="1"/>
+    <component name="fdouble" type="fdouble_t" dimension="1"/>
+    <component name="fintegerarray" type="fintegerarray_t" dimension="1"/>
+    <component name="flogicalarray" type="flogicalarray_t" dimension="1"/>
+    <component name="fdoublearray" type="fdoublearray_t" dimension="1"/>
+    <component name="ad1" type="ad_t"/>
+    <component name="ad2" type="ad_t"/>
+  </typedef>>
+  <typedef name="family_t">
+    <component name="fam" type="fam_t"/>
+    <component name="net" type="net_t"/>
+  </typedef>
+  <variable name="family" type="family_t" dimension="1"/>
+</template>

@@ -4,8 +4,8 @@ INCLUDESPATH = includes
 MODPATH = ./
 OUTPATH = ./
 
-OBJECTS  = fortax_realtype.o fortax_util.o fortax_type.o fortax_calc.o fortax_extra.o fortax_prices.o fortax_read.o fortax_readtaxben.o fortax_write.o fortax_kinks.o
-XMLOBJECTS = xmlparse.o read_xml_prims.o write_xml_prims.o xmltaxben_t.o xmlfortax_t.o
+OBJECTS  = fortax_realtype.o fortax_util.o fortax_type.o fortax_calc.o fortax_extra.o fortax_prices.o fortax_read.o fortax_readtaxben.o fortax_write.o fortax_kinks.o fortax_compare.o
+XMLOBJECTS = xmlparse.o read_xml_prims.o write_xml_prims.o xmltaxben_t.o xmlfortax_t.o xmlfamcompare_t.o
 
 # ------------------Macro-Defs---------------------
 FFLAGS = -O0 -g -traceback -save-temps -fpp -check bounds -check all -warn unused -stand f03 -fPIC -gen-interfaces -module $(MODPATH)
@@ -36,13 +36,19 @@ xmltaxben_t.o:xmltaxben_t.f90 read_xml_prims.o xmlparse.o
 xmlfortax_t.o:xmlfortax_t.f90 read_xml_prims.o write_xml_prims.o xmlparse.o 
 	$(F90) $(FFLAGS) -O1 -c xmlfortax_t.f90 
 
-fortax_realtype.o:fortax_realtype.f90  
+xmlfamcompare_t.o:xmlfamcompare_t.f90 read_xml_prims.o write_xml_prims.o xmlparse.o 
+	$(F90) $(FFLAGS) -O1 -c xmlfamcompare_t.f90
+
+fortax_realtype.o:fortax_realtype.f90
 	$(F90) $(FFLAGS) -c fortax_realtype.f90 
 
 fortax_util.o:fortax_util.f90 fortax_realtype.o 
 	$(F90) $(FFLAGS) -c fortax_util.f90 
 
-fortax_type.o:fortax_type.f90 fortax_realtype.o \
+fortax_compare.o:fortax_compare.f90 fortax_realtype.o fortax_type.o fortax_util.o fortax_write.o fortax_read.o xmlfamcompare_t.o fortax_calc.o
+	$(F90) $(FFLAGS) -c fortax_compare.f90
+
+fortax_type.o:fortax_type.f90 fortax_realtype.o fortax_util.o \
 	$(addprefix $(INCLUDESPATH)/, sys_t.inc sys_init.inc fam_t.inc famad_t.inc nettu_t.inc netad_t.inc) \
 	$(addprefix $(INCLUDESPATH)/system/, $(SYSINCLUDES))
 	$(F90) $(FFLAGS) -c fortax_type.f90 
