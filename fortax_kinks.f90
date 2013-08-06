@@ -131,7 +131,7 @@ contains
         integer,        intent(in), optional :: iin
         integer,        intent(out), optional :: iout
         integer :: i, j, k
-        real(dp) :: wage
+        
         i = 1
         j = bcout%kinks_num
 
@@ -218,9 +218,9 @@ contains
 
         type(fam_t)                :: fam0
         type(net_t), target        :: net
-        real(dp)                   :: taxcomp0, taxcomp1, taxcomp0b, taxcomp1b
-        real(dp)                   :: taxrate0, taxrate1, taxrate0b, taxrate1b
-        real(dp)                   :: hrs,hrs0,hrsb !,hrs0b
+        real(dp)                   :: taxcomp0, taxcomp1
+        real(dp)                   :: taxrate0, taxrate1
+        real(dp)                   :: hrs,hrs0 !,hrsb !,hrs0b
         integer                    :: i !,step, stepb
         
         real(dp), parameter :: mtrtol  = 1.0e-5_dp
@@ -673,8 +673,8 @@ loopmax : do
         character(32)              :: ltaxout, ltaxlevel
         type(fam_t)                :: fam0
         type(net_t), target        :: net
-        real(dp)                   :: taxcomp0, taxcomp1, taxcomp0b, taxcomp1b
-        real(dp)                   :: taxrate0, taxrate1, taxrate0b, taxrate1b
+        real(dp)                   :: taxcomp0, taxcomp1
+        real(dp)                   :: taxrate0, taxrate1
         real(dp)                   :: earn, earn0 !,ern0,ernb !,ern0b
         integer                    :: i !,step, stepb, i
         
@@ -1125,8 +1125,8 @@ loopmax : do
         character(32)              :: ltaxout, ltaxlevel
         type(fam_t)                :: fam0
         type(net_t), target        :: net
-        real(dp)                   :: taxcomp0, taxcomp1, taxcomp0b, taxcomp1b
-        real(dp)                   :: taxrate0, taxrate1, taxrate0b, taxrate1b
+        real(dp)                   :: taxcomp0, taxcomp1
+        real(dp)                   :: taxrate0, taxrate1
         real(dp)                   :: ccexp, ccexp0 !,ern0,ernb !,ern0b
         integer                    :: i !,step, stepb, i
         

@@ -11,7 +11,8 @@ XMLOBJECTS = xmlparse.o read_xml_prims.o write_xml_prims.o xmltaxben_t.o xmlfort
 #FFLAGS = -O0 -g -traceback -save-temps -fpp -check bounds -check all -warn unused -stand f03 -fPIC -gen-interfaces -module ../modules-dev
 #FFLAGS = -O1 -fpp -stand f03 -fPIC -gen-interfaces -module ../modules-dev
 #GPROF = -g -p
-FFLAGS = -O3 -fpp -stand f03 -inline speed -inline-forceinline -no-prec-div -xHost -static -fPIC -gen-interfaces -module $(MODPATH) $(GPROF)
+DIAGDISABLE = -diag-disable 5268
+FFLAGS = -O3 -fpp -stand f03 -warn all -inline speed -inline-forceinline -no-prec-div -xHost -static -fPIC -gen-interfaces $(DIAGDISABLE) $(GPROF) -module $(MODPATH)
 F90 = ifort
 #DEFINES = -D_famcouple_=.false. -D_fammarried_=.false. -D_famkids_=.true.
 # -------------------End-macro-Defs---------------------------
