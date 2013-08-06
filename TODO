@@ -1,0 +1,6 @@
+
+* IS single personal allowance. We really should have an under 18 amount as well as an under 25 amount. We only have the latter at the moment, and this is inconsistent with our treatment of the lone parent premium, which is lower for <18s. This comment doesn’t apply to HB because under 18s get the same amount as 18-24s
+* WTC family element currently includes the basic element. Remove this
+* Lots of the maxage parameters for childcare support are < age rather than <= age. The latter fits better with the name "maxage" so change this
+* IS/HB age limits are hard-coded – deal with this
+
