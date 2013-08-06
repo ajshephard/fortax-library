@@ -1098,70 +1098,76 @@ contains
         type(sys_t), intent(in) :: sys
         type(fam_t), intent(in) :: fam
 
+        !I have changed this so it condtions on dofamcred (and others) so it does
+        !not give the FT disregard under incomplete takeup, AS 16/06/10
+        
         !Additional disregard for workers (up to 2003: those eligible for FC/WFTC/WTC FT premium; from 2004: those eligible for WTC)
         FTDisreg = 0.0_dp
         !FC/WFTC (up to April 2003)
-        !if (sys%fc%dofamcred) then
-        if (sys%rebatesys%rulesunderFC) then
+        if (sys%fc%dofamcred) then
+            if (sys%rebatesys%rulesunderFC) then
 
-            if ((sys%fc%ftprem > tol) .and. (_famkids_)) then
-                if (.not. _famcouple_) then
-                    if (fam%ad(1)%hrs >= sys%fc%hours2-tol) FTDisreg = sys%fc%ftprem
-                else
-                    if ((fam%ad(1)%hrs >= sys%fc%hours2-tol) .or. (fam%ad(2)%hrs >= sys%fc%hours2-tol)) &
-                        & FTDisreg = sys%fc%ftprem
+                if ((sys%fc%ftprem > tol) .and. (_famkids_)) then
+                    if (.not. _famcouple_) then
+                        if (fam%ad(1)%hrs >= sys%fc%hours2-tol) FTDisreg = sys%fc%ftprem
+                    else
+                        if ((fam%ad(1)%hrs >= sys%fc%hours2-tol) .or. (fam%ad(2)%hrs >= sys%fc%hours2-tol)) &
+                            & FTDisreg = sys%fc%ftprem
+                    end if
                 end if
-            end if
 
+            end if
         end if
         
         !WTC (2003 onwards)
-        !if (sys%ntc%donewtaxcred) then
-        if (sys%rebatesys%rulesunderNTC) then
-            !Rules less generous in first year of WTC (2003)
-            if (.not. sys%wtc%NewDisregCon) then
-                if (_famkids_) then
-                    if (_famcouple_) then
-                        if (((fam%ad(1)%hrs >= sys%wtc%MinHrsKids-tol) .or. &
-                            & (fam%ad(2)%hrs >= sys%wtc%MinHrsKids-tol)) &
-                            & .and. (fam%ad(1)%hrs + fam%ad(2)%hrs >= sys%wtc%FTHrs-tol)) FTDisreg = sys%wtc%FT
+        if (sys%ntc%donewtaxcred) then
+            if (sys%rebatesys%rulesunderNTC) then
+                !Rules less generous in first year of WTC (2003)
+                if (.not. sys%wtc%NewDisregCon) then
+                    if (_famkids_) then
+                        if (_famcouple_) then
+                            if (((fam%ad(1)%hrs >= sys%wtc%MinHrsKids-tol) .or. &
+                                & (fam%ad(2)%hrs >= sys%wtc%MinHrsKids-tol)) &
+                                & .and. (fam%ad(1)%hrs + fam%ad(2)%hrs >= sys%wtc%FTHrs-tol)) FTDisreg = sys%wtc%FT
+                            else
+                                if (fam%ad(1)%hrs >= sys%wtc%FTHrs-tol) FTDisreg = sys%wtc%FT
+                        end if
+                    else
+                        if (_famcouple_) then
+                            if (((fam%ad(1)%hrs >= sys%wtc%MinHrsNoKids-tol) .and. &
+                                & (fam%ad(1)%age >= sys%wtc%MinAgeNoKids)) .or. &
+                                & ((fam%ad(2)%hrs >= sys%wtc%MinHrsNoKids-tol) .and. &
+                                & (fam%ad(2)%age >= sys%wtc%MinAgeNoKids))) &
+                                & FTDisreg = sys%wtc%FT
                         else
-                            if (fam%ad(1)%hrs >= sys%wtc%FTHrs-tol) FTDisreg = sys%wtc%FT
+                            if ((fam%ad(1)%hrs >= sys%wtc%MinHrsNoKids-tol) .and. &
+                                & (fam%ad(1)%age >= sys%wtc%MinAgeNoKids)) FTDisreg = sys%wtc%FT
+                        end if
+
                     end if
+
+                ! 2004 onwards
                 else
-                    if (_famcouple_) then
-                        if (((fam%ad(1)%hrs >= sys%wtc%MinHrsNoKids-tol) .and. &
-                            & (fam%ad(1)%age >= sys%wtc%MinAgeNoKids)) .or. &
-                            & ((fam%ad(2)%hrs >= sys%wtc%MinHrsNoKids-tol) .and. &
-                            & (fam%ad(2)%age >= sys%wtc%MinAgeNoKids))) &
-                            & FTDisreg = sys%wtc%FT
+                    if (_famkids_) then
+                        if (_famcouple_) then
+                            if ((fam%ad(1)%hrs >= sys%wtc%MinHrsKids-tol) &
+                                & .or. (fam%ad(2)%hrs >= sys%wtc%MinHrsKids-tol)) &
+                                & FTDisreg = sys%wtc%NewDisreg                       
+                        else
+                            if (fam%ad(1)%hrs >= sys%wtc%MinHrsKids-tol) FTDisreg = sys%wtc%NewDisreg
+                        end if
                     else
-                        if ((fam%ad(1)%hrs >= sys%wtc%MinHrsNoKids-tol) .and. &
-                            & (fam%ad(1)%age >= sys%wtc%MinAgeNoKids)) FTDisreg = sys%wtc%FT
+                        if (_famcouple_) then
+                            if ((fam%ad(1)%hrs >= sys%wtc%MinHrsNoKids-tol) .or. &
+                                & (fam%ad(2)%hrs >= sys%wtc%MinHrsNoKids-tol)) &
+                                & FTDisreg = sys%wtc%NewDisreg                        
+                        else
+                            if (fam%ad(1)%hrs >= sys%wtc%MinHrsNoKids-tol) FTDisreg = sys%wtc%NewDisreg
+                        end if
                     end if
 
                 end if
-
-            ! 2004 onwards
-            else
-                if (_famkids_) then
-                    if (_famcouple_) then
-                        if ((fam%ad(1)%hrs >= sys%wtc%MinHrsKids-tol) &
-                            & .or. (fam%ad(2)%hrs >= sys%wtc%MinHrsKids-tol)) &
-                            & FTDisreg = sys%wtc%NewDisreg                       
-                    else
-                        if (fam%ad(1)%hrs >= sys%wtc%MinHrsKids-tol) FTDisreg = sys%wtc%NewDisreg
-                    end if
-                else
-                    if (_famcouple_) then
-                        if ((fam%ad(1)%hrs >= sys%wtc%MinHrsNoKids-tol) .or. &
-                            & (fam%ad(2)%hrs >= sys%wtc%MinHrsNoKids-tol)) &
-                            & FTDisreg = sys%wtc%NewDisreg                        
-                    else
-                        if (fam%ad(1)%hrs >= sys%wtc%MinHrsNoKids-tol) FTDisreg = sys%wtc%NewDisreg
-                    end if
-                end if
-
+                
             end if
             
         end if
