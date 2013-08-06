@@ -236,6 +236,7 @@ subroutine xml_open( info, fname, mustread )
 
    integer                          :: i
    integer                          :: k
+   integer                          :: ios
    integer                          :: kend
    integer                          :: ierr
    logical                          :: opend
@@ -263,7 +264,12 @@ subroutine xml_open( info, fname, mustread )
          else
 !            open( unit = info%lun, file = fname, action='read', status='old')
 ! action and status arguments removed because this is also used to new open files to write to
-            open( unit = info%lun, file = fname) !, action='read', status='old')
+            open( unit = info%lun, file = fname, iostat = ios ) !, action='read', status='old')
+            if (ios.ne.0) then
+               call xml_report_errors( 'XML_OPEN: error opening file '//trim(adjustl(fname))//' with LU-number: ', info%lun )
+               call xml_close( info )
+               stop
+            end if
             call xml_report_details( 'XML_OPEN: opened file ', trim(fname) )
             call xml_report_details( 'at LU-number: ', info%lun )
          endif
