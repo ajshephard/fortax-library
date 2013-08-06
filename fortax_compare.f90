@@ -129,7 +129,6 @@ contains
         mustRead = .false.
 
         attribs(1,1) = 'system'
-        
         call xml_open(info,fname,mustRead)
         call xml_ftag(info,'fortax','open')
 
