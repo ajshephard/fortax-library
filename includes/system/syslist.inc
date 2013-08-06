@@ -1,12 +1,12 @@
 !income tax
 #undef   _$typelist
 #define  _$typelist inctax
-#include "/home/andrew/Dropbox/code/fortax-dev-test/includes/system/inctax.inc"
+#include "includes/system/inctax.inc"
 
 !national insurance
 #undef   _$typelist
 #define  _$typelist natins
-#include "natins.inc"
+#include "includes/system/natins.inc"
 
 !child benefit
 #undef   _$typelist
