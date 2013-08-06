@@ -1,6 +1,5 @@
 
 ! This file is part of the FORTAX library;
-! (c) 2009 Andrew Shephard; andrubuntu@gmail.com
 
 ! FORTAX is free software: you can redistribute it and/or modify
 ! it under the terms of the GNU General Public License as published by
@@ -194,6 +193,9 @@ contains
 
     subroutine kinkshours(sys,fam,ad,wage,hours1,hours2,bcout,taxlevel,taxout,correct,verbose)
 
+#       undef  _ZEROWAGE_
+#       define _ZEROWAGE_
+
         use fortax_type, only : fam_t, sys_t, net_t
         use fortax_util, only : lower, inttostr, fortaxerror, fortaxwarn
         use fortax_calc, only : calcnetinc
@@ -215,7 +217,7 @@ contains
         !character(len(taxout))             :: ltaxout
         !character(len(taxlevel))           :: ltaxlevel
         character(32) :: ltaxout,ltaxlevel
-
+        character(64) :: str
         type(fam_t)                :: fam0
         type(net_t), target        :: net
         real(dp)                   :: taxcomp0, taxcomp1
@@ -346,7 +348,11 @@ contains
 
         if (hours2-hours1<maxstep) return
         if (hours1<0.0_dp)         return
-        if (wage<=0.0_dp)          return
+#       ifdef _ZEROWAGE_        
+            if (wage<0.0_dp) return
+#       else
+            if (wage<=0.0_dp) return
+#       endif            
 
         select case(ad)
             case(1)
@@ -363,6 +369,17 @@ contains
         fam0%ad(ad)%earn = wage*hours1
         fam0%ad(ad)%hrs  = hours1        
         call calcNetInc(sys,fam0,net)
+        
+!        if (wage==0.0_dp) then
+!            temp_a = 0.0_dp
+!            do i=1,taxsize
+!                temp_a = temp_a + merge(taxpoint(i)%p,-taxpoint(i)%p,taxadd(i))
+!            end do  
+!            kinks_hrs(1)  = hours1
+!            kinks_earn(1) = 0.0_dp
+!            kinks_net(1)  = temp_a
+!            kinks_dis(1)  = .false.
+!        end if
         
 #       ifdef _TRACECOUNT_          
             ev = ev + 1
@@ -395,7 +412,13 @@ contains
         kinks_net(1)  = taxcomp0
         kinks_mtr(1)  = taxrate1
         kinks_dis(1)  = .false.
-                            
+
+#       ifdef _ZEROWAGE_
+            if (wage==0.0_dp) then
+                kinks_mtr(1) = 0.0_dp
+            end if
+#       endif
+                                            
         kinkidx = 2
 
         taxrate0 = -999.0_dp
@@ -433,6 +456,16 @@ loopmax : do
 
             taxrate1 = (taxcomp1-taxcomp0)/(wage*maxstep)
 
+            !if zero wage, use level not slope
+#           ifdef _ZEROWAGE_            
+                if (wage==0.0_dp) then
+                    taxrate1 = 0.0_dp
+                    do i=1,taxsize
+                        taxrate1 = taxrate1 + merge(taxpoint(i)%p,-taxpoint(i)%p,taxadd(i))
+                    end do  
+                end if
+#           endif
+            
             !if a mtr change detected
             if (abs(taxrate1-taxrate0)>mtrtol) then
 
@@ -550,10 +583,15 @@ loopmax : do
                 kinks_net(kinkidx)  = temp_b
                 kinks_mtr(kinkidx)  = taxrate1
                 kinks_dis(kinkidx)  = .false.
-                    
+
+#               ifdef _ZEROWAGE_                              
+                    if (wage==0.0_dp) then
+                        kinks_mtr(kinkidx) = 0.0_dp
+                    end if
+#               endif
+
                 kinkidx = kinkidx + 1
-                              
-                
+
             end if
             
             taxrate0 = taxrate1
@@ -584,6 +622,7 @@ loopmax : do
             kinks_earn(kinkidx) = fam0%ad(ad)%earn
             kinks_net(kinkidx)  = taxcomp1 !b
             kinks_mtr(kinkidx)  = kinks_mtr(kinkidx-1)
+                                    
         else
             if (present(verbose)) then
                 if (verbose) call fortaxwarn('maxkinks is exceeded')
@@ -598,8 +637,13 @@ loopmax : do
                 do i = 1, kinks_num
                     !if (.not. kinks_dis(i)) then
                         !round to 5 decimal places
-                        kinks_mtr(i)  = nint(kinks_mtr(i)*100000.0_dp)/100000.0_dp
-                        kinks_earn(i) = nint(kinks_earn(i)*1000.0_dp)/1000.0_dp
+                        !using nint could cause overflow problems
+!                        kinks_mtr(i)  = nint(kinks_mtr(i)*100000.0_dp)/100000.0_dp
+!                        kinks_earn(i) = nint(kinks_earn(i)*1000.0_dp)/1000.0_dp
+                        write(str,'(F18.5)') kinks_mtr(i)
+                        read(str,*) kinks_mtr(i)
+                        write(str,'(F18.5)') kinks_earn(i)
+                        read(str,*) kinks_earn(i)
                     !end if
                 end do
                 
@@ -607,7 +651,9 @@ loopmax : do
 
                 do i = 2, kinks_num
                     if (kinks_dis(i-1)) then
-                        kinks_net(i) = nint(kinks_net(i)*1000.0_dp)/1000.0_dp
+!                        kinks_net(i) = nint(kinks_net(i)*1000.0_dp)/1000.0_dp
+                        write(str,'(F18.5)') kinks_net(i)
+                        read(str,*) kinks_net(i)
                     else
                         kinks_net(i) = kinks_net(i-1) + kinks_mtr(i-1)*(kinks_earn(i)-kinks_earn(i-1))
                     end if
@@ -615,7 +661,7 @@ loopmax : do
 
             end if
         end if
-
+            
         bcout%kinks_num  = kinks_num
         bcout%kinks_hrs  = kinks_hrs
         bcout%kinks_earn = kinks_earn
@@ -671,6 +717,8 @@ loopmax : do
         !character(len(taxout))             :: ltaxout
         !character(len(taxlevel))           :: ltaxlevel
         character(32)              :: ltaxout, ltaxlevel
+        character(64) :: str
+        
         type(fam_t)                :: fam0
         type(net_t), target        :: net
         real(dp)                   :: taxcomp0, taxcomp1
@@ -1049,8 +1097,13 @@ loopmax : do
                 do i = 1, kinks_num
                     !if (.not. kinks_dis(i)) then
                         !round to 5 decimal places
-                        kinks_mtr(i)  = nint(kinks_mtr(i)*100000.0_dp)/100000.0_dp
-                        kinks_earn(i) = nint(kinks_earn(i)*1000.0_dp)/1000.0_dp
+!                        kinks_mtr(i)  = nint(kinks_mtr(i)*100000.0_dp)/100000.0_dp
+!                        kinks_earn(i) = nint(kinks_earn(i)*1000.0_dp)/1000.0_dp
+                        write(str,'(F18.5)') kinks_mtr(i)
+                        read(str,*) kinks_mtr(i)
+                        write(str,'(F18.5)') kinks_earn(i)
+                        read(str,*) kinks_earn(i)
+                        
                     !end if
                 end do
                 
@@ -1058,7 +1111,9 @@ loopmax : do
 
                 do i = 2, kinks_num
                     if (kinks_dis(i-1)) then
-                        kinks_net(i) = nint(kinks_net(i)*1000.0_dp)/1000.0_dp
+!                        kinks_net(i) = nint(kinks_net(i)*1000.0_dp)/1000.0_dp
+                        write(str,'(F18.5)') kinks_net(i)
+                        read(str,*) kinks_net(i)
                     else
                         kinks_net(i) = kinks_net(i-1) + kinks_mtr(i-1)*(kinks_earn(i)-kinks_earn(i-1))
                     end if
