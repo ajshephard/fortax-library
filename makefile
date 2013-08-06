@@ -17,11 +17,8 @@ F90 = ifort
 #DEFINES = -D_famcouple_=.false. -D_fammarried_=.false. -D_famkids_=.true.
 # -------------------End-macro-Defs---------------------------
 
-all:$(OBJECTS) $(XMLOBJECTS) test.out
+all:$(OBJECTS) $(XMLOBJECTS)
 	ar rc $(OUTPATH)/fortax.a $(OBJECTS) $(XMLOBJECTS)
-
-test.out:test.f90 $(OBJECTS) $(XMLOBJECTS) 
-	$(F90) $(FFLAGS) test.f90 $(OBJECTS) $(XMLOBJECTS) -o test.out
 
 xmlparse.o:xmlparse.f90  
 	$(F90) $(FFLAGS) -c xmlparse.f90 
