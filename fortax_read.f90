@@ -1,6 +1,5 @@
 
 ! This file is part of the FORTAX library;
-! (c) 2009-2010 Andrew Shephard
 
 ! FORTAX is free software: you can redistribute it and/or modify
 ! it under the terms of the GNU General Public License as published by
@@ -50,7 +49,7 @@ contains
     subroutine readFortaxParams(sys,systemFile,prices)
     
         use xml_data_xmlfortax_t, only : read_xml_file_xmlfortax_t, system
-        use fortax_util,          only : strToDouble, strToInt, strToLogical, lower, fortaxError, fortaxWarn
+        use fortax_util,          only : getunit, strToDouble, strToInt, strToLogical, lower, fortaxError, fortaxWarn
         use fortax_type,          only : sys_t, sys_init
                 
         implicit none
@@ -66,7 +65,8 @@ contains
         if (.not. isFile) then
             call fortaxError('system file does not exist ('//trim(adjustl(systemFile))//')')
         end if              
-            
+        
+        call getunit(xmlUnit)
         call read_xml_file_xmlfortax_t(systemFile,funit=xmlUnit)
         call sys_init(sys)
         !use fpp so that the reading will fully reflect the data structure                    
