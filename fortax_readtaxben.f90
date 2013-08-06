@@ -448,7 +448,9 @@ contains
                                 sys%wtc%FTHrs = strToDouble(cat2%value)
                             case('MinHoursNoKids')
                                 sys%wtc%minHrsNoKids = strToDouble(cat2%value)
-                            case('MinHoursKids')
+                            case('MinHoursCouKids')                             ! JS 06/02/12 changed from 'MinHoursKids' because that doesn't exist in .bp3 file
+                                                                                ! Note: also applies to LPs (.bp3 file distinguishes between couple parents and
+                                                                                ! LPs but both groups have always had the same hours threshold
                                 sys%wtc%minHrsKids = strToDouble(cat2%value)
                             case('MinimumAgeNoKids')
                                 sys%wtc%minAgeNoKids = strToInt(cat2%value)
