@@ -771,8 +771,7 @@ contains
 
         real(dp) :: disregCC1, disregCC2, disregCC3
         
-        !old calculation
-                
+        !old calculation 
 !        if (sys%rebatesys%CredInDisregCC) then        
 !            ! From Oct 99, WFTC/WTC/CTC could be set against disregCC
 !            RebateDisreg = max(max(max(max(net%tu%posttaxearn-disregStd,0.0_dp) &
@@ -795,13 +794,14 @@ contains
             disregCC2 = 0.0_dp
             disregCC3 = net%tu%ctc
         end if  
-            
+
         if (sys%rebatesys%rulesUnderWFTC .or. sys%rebatesys%rulesUnderNTC) then
             RebateDisreg = max(max(max(max(net%tu%posttaxearn-disregStd-disregCC1,0.0_dp) &
                 & + net%tu%fc+net%tu%wtc-disregFT, 0.0_dp) + disregCC2, 0.0_dp) &
                 & + max(fam%maint-disregMnt, 0.0_dp) + net%tu%chben + disregCC3 - appamt, 0.0_dp) 
         elseif (sys%rebatesys%rulesUnderFC) then
-            RebateDisreg = max(max(max(net%tu%fc+net%tu%wtc-disregFT, 0.0_dp) + disregCC2, 0.0_dp) &
+            RebateDisreg = max(max(max(max(net%tu%posttaxearn-disregStd-disregCC1,0.0_dp) &
+                & + max(net%tu%fc+net%tu%wtc-disregFT,0.0_dp), 0.0_dp) + disregCC2, 0.0_dp) &
                 & + max(fam%maint-disregMnt, 0.0_dp) + net%tu%chben + disregCC3 - appamt, 0.0_dp) 
         else
             RebateDisreg = 0.0_dp
