@@ -35,7 +35,8 @@ module fortax_type
     public :: lab_t, fam_t, net_t, sys_t
     public :: lab, maxkids
     public :: fam_gen, fam_desc
-
+    public :: net_desc
+    
     public :: ctax_banda, ctax_bandb, ctax_bandc, ctax_bandd, &
         & ctax_bande, ctax_bandf, ctax_bandg, ctax_bandh
 
@@ -738,6 +739,96 @@ contains
 
     end subroutine net_init
 
+
+    ! net_desc
+    ! -----------------------------------------------------------------------
+    ! will display the information contained in the net income structure and
+    ! write this to a file if fname is specified
+
+    subroutine net_desc(net,fname)
+
+        use fortax_util, only :  getUnit, intToStr, fortaxError
+
+        use, intrinsic :: iso_fortran_env
+
+        type(net_t),      intent(in) :: net
+        character(len=*), optional   :: fname
+
+        integer :: funit, i, ios
+
+        if (present(fname)) then
+            call getUnit(funit)
+            open(funit,file=fname,action='write',status='replace',iostat=ios)
+            if (ios .ne. 0) call fortaxError('error opening file for writing')
+        else
+            funit = output_unit
+        end if
+
+#       undef  _$header
+#       undef  _$footer
+#       undef  _$integer
+#       undef  _$double
+#       undef  _$logical
+#       undef  _$doublearray
+#       undef  _$integerarray
+#       undef  _$logicalarray
+
+#       define _$header write(funit,*); write(funit,'(A40)') 'TAX UNIT'; write(funit,*)
+#       define _$footer
+
+#       define _$integer(x,y,z) write(funit,'(A40,2X,I16)') y//' ('//#x//')', net%tu%x
+#       define _$double(x,y,z)  write(funit,'(A40,2X,F16.4)') y//' ('//#x//')', net%tu%x
+#       define _$logical(x,y,z) write(funit,'(A40,2X,L16)') y//' ('//#x//')', net%tu%x
+
+#       include 'includes/nettu_t.inc'
+
+#       undef  _$header
+#       undef  _$footer
+#       undef  _$integer
+#       undef  _$double
+#       undef  _$logical
+#       undef  _$doublearray
+#       undef  _$integerarray
+#       undef  _$logicalarray
+
+#       define _$header write(funit,*); write(funit,'(A40)') 'ADULT 1'; write(funit,*)
+#       define _$footer
+
+#       define _$integer(x,y,z) write(funit,'(A40,2X,I16)') y//' ('//#x//')', net%ad(1)%x
+#       define _$double(x,y,z)  write(funit,'(A40,2X,F16.4)') y//' ('//#x//')', net%ad(1)%x
+#       define _$logical(x,y,z) write(funit,'(A40,2X,L16)') y//' ('//#x//')', net%ad(1)%x
+
+#       include 'includes/netad_t.inc'
+
+#       undef  _$header
+#       undef  _$footer
+#       undef  _$integer
+#       undef  _$double
+#       undef  _$logical
+#       undef  _$doublearray
+#       undef  _$integerarray
+#       undef  _$logicalarray
+
+#       define _$header write(funit,*); write(funit,'(A40)') 'ADULT 2'; write(funit,*)
+#       define _$footer
+
+#       define _$integer(x,y,z) write(funit,'(A40,2X,I16)') y//' ('//#x//')', net%ad(2)%x
+#       define _$double(x,y,z)  write(funit,'(A40,2X,F16.4)') y//' ('//#x//')', net%ad(2)%x
+#       define _$logical(x,y,z) write(funit,'(A40,2X,L16)') y//' ('//#x//')', net%ad(2)%x
+
+#       include 'includes/netad_t.inc'
+
+#       undef  _$header
+#       undef  _$footer
+#       undef  _$integer
+#       undef  _$double
+#       undef  _$logical
+#       undef  _$doublearray
+#       undef  _$integerarray
+#       undef  _$logicalarray      
+          
+    end subroutine net_desc
+    
     !again, i include the file here as it contains a lot of
     !preprocessor directives, AS    
 #   include 'includes/sys_init.inc'
