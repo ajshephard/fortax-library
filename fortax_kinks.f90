@@ -1137,7 +1137,7 @@ loopmax : do
 !        real(dp), parameter :: minstep = maxstep/2000.0_dp
 
         real(dp), parameter :: mtrtol  = 1.0e-5_dp
-        real(dp), parameter :: distol  = 1.01_dp
+        real(dp), parameter :: distol  = 1.50_dp
 
         real(dp), parameter :: etol    = 0.00001_dp
         !maxstep is the main parameter that determines the number of evaluations, 
