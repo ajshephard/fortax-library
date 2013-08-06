@@ -1246,7 +1246,7 @@ subroutine read_xml_file_xmlfortax_t(fname, lurep, errout,funit)
    character(len=80)                      :: tag
    character(len=80)                      :: starttag
    logical                                :: endtag
-   character(len=80), dimension(1:2,1:20) :: attribs
+   character(len=255), dimension(1:2,1:20) :: attribs    ! JS 02/02/12 changed len from 80 to 255 to stop arrays of tax rates being truncated
    integer                                :: noattribs
    character(len=200), dimension(1:100)   :: data
    integer                                :: nodata
@@ -1259,7 +1259,8 @@ subroutine read_xml_file_xmlfortax_t(fname, lurep, errout,funit)
    call xml_open( info, fname, .true. )
    if (present(funit)) funit = info%lun !AS
 
-   call xml_options( info, report_errors=.true., ignore_whitespace=.true.)
+   call xml_options( info, report_errors=.true., ignore_whitespace=.true., &
+        no_data_truncation =.true.)
 
    lurep_ = 0
    if ( present(lurep) ) then

@@ -261,7 +261,9 @@ subroutine xml_open( info, fname, mustread )
             info%lun   = -1
             info%error = .true.
          else
-            open( unit = info%lun, file = fname, action='read', status='old')
+!            open( unit = info%lun, file = fname, action='read', status='old')
+! action and status arguments removed because this is also used to new open files to write to
+            open( unit = info%lun, file = fname) !, action='read', status='old')
             call xml_report_details( 'XML_OPEN: opened file ', trim(fname) )
             call xml_report_details( 'at LU-number: ', info%lun )
          endif
@@ -484,6 +486,12 @@ subroutine xml_get( info, tag, endtag, attribs, no_attribs, &
             return
          endif
 
+         if ( ((ksecond-1)-(kfirst+1)+1) > len(attribs(2,idxat)) ) then !AS raise error if truncation
+             call xml_report_errors( 'XML_GET - not enough storage to fit in attribs ', &
+                 trim(info%line), info%lineno  )
+             stop
+         end if
+          
          attribs(2,idxat) = info%line(kfirst+1:ksecond-1)
          info%line = adjustl( info%line(ksecond+1:) )
       endif
