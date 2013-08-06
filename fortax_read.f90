@@ -26,7 +26,7 @@ module fortax_read
     use fortax_realtype, only : dp
 
     private
-    public  :: readFortaxParams
+    public  :: readFortaxParams, fortax_read_assign
 
     interface fortax_read_assign
         module procedure assign_integer
@@ -35,6 +35,9 @@ module fortax_read
         module procedure assign_integer_array
         module procedure assign_logical_array
         module procedure assign_double_array 
+        module procedure assign_integer_array_fixed
+        module procedure assign_logical_array_fixed
+        module procedure assign_double_array_fixed  
     end interface fortax_read_assign
     
 
@@ -131,6 +134,33 @@ contains
         x = y
     
     end subroutine assign_double_array
+
+    ! assign_double_array_fixed
+    ! -----------------------------------------------------------------------
+    ! copies pointer data to double array (used when readTaxParams is reading
+    ! a fortax system file)
+
+    subroutine assign_double_array_fixed(x,y,n)
+        
+        implicit none
+    
+        integer,  intent(in)  :: n   
+        real(dp), intent(out) :: x(n)
+        real(dp), pointer     :: y(:)
+        integer :: ny
+
+        ny = size(y)
+
+        if (ny<n) then
+            x(1:ny)   = y
+            x(ny+1:n) = 0.0_dp
+        else if (ny==n) then
+            x = y
+        else if (ny>n) then
+            x = y(1:n)
+        end if
+    
+    end subroutine assign_double_array_fixed
    
     
     ! assign_integer_array
@@ -152,6 +182,33 @@ contains
     
     end subroutine assign_integer_array
 
+    ! assign_integer_array_fixed
+    ! -----------------------------------------------------------------------
+    ! copies pointer data to integer array (used when readTaxParams is reading
+    ! a fortax system file)
+
+    subroutine assign_integer_array_fixed(x,y,n)
+        
+        implicit none
+    
+        integer, intent(in)    :: n
+        integer, intent(out)   :: x(n)
+        integer, pointer       :: y(:)
+        integer :: ny
+
+        ny = size(y)
+
+        if (ny<n) then
+            x(1:ny)   = y
+            x(ny+1:n) = 0
+        else if (ny==n) then
+            x = y
+        else if (ny>n) then
+            x = y(1:n)
+        end if
+    
+    end subroutine assign_integer_array_fixed
+
     
     ! assign_logical_array
     ! -----------------------------------------------------------------------
@@ -172,6 +229,32 @@ contains
     
     end subroutine assign_logical_array
 
+    ! assign_logical_array_fixed
+    ! -----------------------------------------------------------------------
+    ! copies pointer data to logical array (used when readTaxParams is reading
+    ! a fortax system file)
+
+    subroutine assign_logical_array_fixed(x,y,n)
+        
+        implicit none
+    
+        integer, intent(in)  :: n
+        logical, intent(out) :: x(n)
+        logical, pointer     :: y(:)
+        integer :: ny
+
+        ny = size(y)
+
+        if (ny<n) then
+            x(1:ny)    = y
+            x(ny+1:ny) = .false.
+        else if (ny==n) then
+            x = y
+        else if (ny>n) then
+            x = y(1:n)
+        end if
+
+    end subroutine assign_logical_array_fixed
 
     ! assign_double
     ! -----------------------------------------------------------------------
