@@ -1914,7 +1914,7 @@ contains
 
     pure subroutine CalcNetInc(sys,fam,net)
 
-        use fortax_type, only : sys_t, fam_t, net_t , net_init
+        use fortax_type, only : sys_t, fam_t, net_t !, net_init
 
         implicit none
 
