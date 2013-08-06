@@ -215,11 +215,16 @@ subroutine xml_report_errors_extern_( info, text )
    type(XML_PARSE),   intent(in)     :: info
    character(len=*),  intent(in)     :: text
 
-   if ( report_lun_ .eq. XML_STDOUT ) then
-      write(*,*) trim(text), ' - at or near line', info%lineno
-   else
-      write(report_lun_,*) trim(text), ' - at or near line', info%lineno
-   endif
+   if ( report_errors_ .or. report_details_ ) then
+
+      if ( report_lun_ .eq. XML_STDOUT ) then
+         write(*,*) trim(text), ' - at or near line', info%lineno
+      else
+         write(report_lun_,*) trim(text), ' - at or near line', info%lineno
+      endif
+
+   end if
+   
 end subroutine xml_report_errors_extern_
 
 ! xml_open --

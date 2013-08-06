@@ -8,7 +8,7 @@ OBJECTS  = fortax_realtype.o fortax_util.o fortax_type.o fortax_calc.o fortax_ex
 XMLOBJECTS = xmlparse.o read_xml_prims.o write_xml_prims.o xmltaxben_t.o xmlfortax_t.o xmlfamcompare_t.o
 
 # ------------------Macro-Defs---------------------
-FFLAGS = -O0 -g -traceback -save-temps -fpp -check bounds -check all -warn unused -stand f03 -fPIC -gen-interfaces -module $(MODPATH)
+# FFLAGS = -O0 -g -traceback -fpp -check bounds -check all -warn unused -stand f03 -fPIC -gen-interfaces -module $(MODPATH)
 #FFLAGS = -O1 -fpp -stand f03 -fPIC -gen-interfaces -module ../modules-dev
 # GPROF = -g -p
 DIAGDISABLE = -diag-disable 5268,7025

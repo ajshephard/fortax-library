@@ -2295,7 +2295,7 @@ subroutine read_xml_file_xmlfamcompare_t(fname, lurep, errout)
 
    call init_xml_file_xmlfamcompare_t
    call xml_open( info, fname, .true. )
-   call xml_options( info, report_errors=.true., ignore_whitespace=.true.)
+   call xml_options( info, report_errors=.false., ignore_whitespace=.true.)
    lurep_ = 0
    if ( present(lurep) ) then
       lurep_ = lurep
@@ -2364,9 +2364,9 @@ subroutine write_xml_file_xmlfamcompare_t(fname, lurep)
    integer                                :: indent = 0
 
    call xml_open( info, fname, .false. )
-   call xml_options( info, report_errors=.true.)
+   call xml_options( info, report_errors=.false.)
    if ( present(lurep) ) then
-       call xml_options( info, report_errors=.true.)
+       call xml_options( info, report_errors=.false.)
    endif
    write(info%lun,'(a)') &
       '<fortax>'
