@@ -1,21 +1,23 @@
 SYSINCLUDES = syslist.inc ccben.inc fc.inc rebatesys.inc chben.inc inctax.inc ctc.inc incsup.inc ctax.inc natins.inc ctaxben.inc ntc.inc wtc.inc extra.inc
 XMLINCLUDES = read_from_buffer.inc read_xml_array.inc read_xml_scalar.inc
 INCLUDESPATH = includes
+MODPATH = ./
+OUTPATH = ./
 
-OBJECTS  = fortax_realtype.o fortax_util.o fortax_type.o fortax_calc.o fortax_extra.o fortax_prices.o fortax_read.o fortax_write.o fortax_kinks.o fortax_kinks2.o
+OBJECTS  = fortax_realtype.o fortax_util.o fortax_type.o fortax_calc.o fortax_extra.o fortax_prices.o fortax_read.o fortax_write.o fortax_kinks.o
 XMLOBJECTS = xmlparse.o read_xml_prims.o write_xml_prims.o xmltaxben_t.o xmlfortax_t.o
 
 # ------------------Macro-Defs---------------------
 #FFLAGS = -O0 -g -traceback -save-temps -fpp -check bounds -check all -warn unused -stand f03 -fPIC -gen-interfaces -module ../modules-dev
 #FFLAGS = -O1 -fpp -stand f03 -fPIC -gen-interfaces -module ../modules-dev
 #GPROF = -g -p
-FFLAGS = -O3 -fpp -stand f03 -inline speed -inline-forceinline -no-prec-div -xHost -static -fPIC -gen-interfaces -module ../modules-dev $(GPROF)
+FFLAGS = -O3 -fpp -stand f03 -inline speed -inline-forceinline -no-prec-div -xHost -static -fPIC -gen-interfaces -module $(MODPATH) $(GPROF)
 F90 = ifort
 #DEFINES = -D_famcouple_=.false. -D_fammarried_=.false. -D_famkids_=.true.
 # -------------------End-macro-Defs---------------------------
 
 all:$(OBJECTS) $(XMLOBJECTS)
-	ar rc ../modules-dev/fortax.a $(OBJECTS) $(XMLOBJECTS)
+	ar rc $(OUTPATH)/fortax.a $(OBJECTS) $(XMLOBJECTS)
 
 xmlparse.o:xmlparse.f90  
 	$(F90) $(FFLAGS) -c xmlparse.f90 
@@ -69,9 +71,6 @@ fortax_write.o:fortax_write.f90 fortax_type.o xmlparse.o fortax_realtype.o forta
 
 fortax_kinks.o:fortax_kinks.f90 fortax_type.o fortax_util.o fortax_realtype.o fortax_calc.o
 	$(F90) $(FFLAGS) -c fortax_kinks.f90
-
-fortax_kinks2.o:fortax_kinks2.f90 fortax_type.o fortax_util.o fortax_realtype.o fortax_calc.o
-	$(F90) $(FFLAGS) -c fortax_kinks2.f90
 
 clean:
 	rm -f $(OBJECTS)  $(XMLOBJECTS) 
