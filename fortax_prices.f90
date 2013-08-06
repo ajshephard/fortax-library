@@ -50,9 +50,9 @@ contains
 
         implicit none
 
+        integer,  intent(in) :: mysize
         real(dp), intent(in) :: myindex(mysize)
         integer,  intent(in) :: mydate(mysize)
-        integer,  intent(in) :: mysize
 
         if (allocated(rpidate)) deallocate(rpidate)
         if (allocated(rpiindex)) deallocate(rpiindex)
