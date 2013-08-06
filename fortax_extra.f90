@@ -1,6 +1,5 @@
 
 ! This file is part of the FORTAX library;
-! (c) 2009 Andrew Shephard; andrubuntu@gmail.com
 
 ! FORTAX is free software: you can redistribute it and/or modify
 ! it under the terms of the GNU General Public License as published by
@@ -182,5 +181,58 @@ contains
         netoutNum = i-1
 
     end subroutine netoutDesc
+
+    ! netoutDesc
+    ! -----------------------------------------------------------------------
+    ! provides the shortname, level and amount of net in arrays of size
+    ! netoutSize. Useful for passing data without using derived types
+
+    pure subroutine netoutDescNoName(net,netoutAmt)
+
+        use fortax_type, only : net_t
+
+        implicit none
+        
+        type(net_t),   intent(in)  :: net
+        real(dp),      intent(out) :: netoutAmt(netoutSize)
+
+        integer :: i
+        
+        i = 1
+#       undef  _$header
+#       undef  _$footer
+#       undef  _$double
+#       define _$header
+#       define _$footer
+#       define _$double(x,lab,y) netoutAmt(i) = net%tu%x; i=i+1
+#       include 'includes/nettu_t.inc'
+#       undef  _$header
+#       undef  _$footer
+#       undef  _$double
+
+#       undef  _$header
+#       undef  _$footer
+#       undef  _$double
+#       define _$header
+#       define _$footer
+#       define _$double(x,lab,y) netoutAmt(i) = net%ad(1)%x; i=i+1
+#       include 'includes/netad_t.inc'
+#       undef  _$header
+#       undef  _$footer
+#       undef  _$double
+
+#       undef  _$header
+#       undef  _$footer
+#       undef  _$double
+#       define _$header
+#       define _$footer
+#       define _$double(x,lab,y) netoutAmt(i) = net%ad(2)%x; i=i+1
+#       include 'includes/netad_t.inc'
+#       undef  _$header
+#       undef  _$footer
+#       undef  _$double
+
+    end subroutine netoutDescNoName
+
 
 end module
