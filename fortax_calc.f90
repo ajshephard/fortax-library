@@ -596,6 +596,7 @@ contains
     ! FTDisreg     - Calculates disregard for workers for HB/CTB/CCB (called by prelimcalc)
     ! ChCareDisreg - Calculates childcare disregard for HB/CTB/CCB (called by prelimcalc)
     ! MaintDisreg  - Calculates maintenance disregard for HB/CTB/CCB (called by prelimcalc)
+    ! RebateDisreg - Calculates total disregard for HB/CTB/CCB (called by prelimcalc)
 
     ! ----------------------REBATE SYSTEM----------------------
 
@@ -723,7 +724,7 @@ contains
     ! Preliminary calculations HBen, CTBen and CCBen. Depends on couple, 
     ! adage, hrs, nkids, kidage, ccexp, incsup
     
-    pure subroutine prelimcalc(sys,fam,net,appamt,disregStd,disregFT,disregCC,disregMnt)
+    pure subroutine prelimcalc(sys,fam,net,disregRebate)
     
         use fortax_type, only : sys_t, fam_t, net_t
         
@@ -732,26 +733,87 @@ contains
         type(sys_t), intent(in)    :: sys
         type(fam_t), intent(in)    :: fam
         type(net_t), intent(inout) :: net
-
-        real(dp),    intent(out)   :: appamt,disregStd,disregFT,disregCC,disregMnt
+        real(dp),    intent(out)   :: disregRebate
   
+        real(dp) :: appamt, disregStd, disregFT, disregCC, disregMnt
+        
         if (net%tu%incsup <= tol) then !JS: I changed ">" to "<" (I think this is what it should be)
-            appamt    = HBAppAmt(sys,fam)
-            disregStd = StdDisreg(sys,fam)
-            disregFT  = FTDisreg(sys,fam)
-            disregCC  = ChCareDisreg(sys,fam,net)
-            disregMnt = MaintDisreg(sys,fam)
+            appamt       = HBAppAmt(sys,fam)
+            disregStd    = StdDisreg(sys,fam)
+            disregFT     = FTDisreg(sys,fam,net)
+            disregCC     = ChCareDisreg(sys,fam,net)
+            disregMnt    = MaintDisreg(sys,fam)
+            disregRebate = RebateDisreg(sys,fam,net,appamt,disregStd,disregFT,disregCC,disregMnt)
+        else
+            disregRebate = 0.0_dp
         end if
         
     end subroutine prelimcalc
     
+    ! disregRebate
+    ! -----------------------------------------------------------------------
+    ! Disregard used in calculation of Hben, ctaxBen, pollTaxBen. Depends on
+    ! disregStd, disregFT, disregCC, disregMnt, appamt, posttaxearn, fc, wtc,
+    ! ctc, maint, chben
+    
+    pure function RebateDisreg(sys,fam,net,appamt,disregStd,disregFT,disregCC,disregMnt)
 
+        use fortax_type, only : sys_t, fam_t, net_t
+        
+        implicit none
+        
+        type(sys_t), intent(in) :: sys
+        type(fam_t), intent(in) :: fam
+        type(net_t), intent(in) :: net
+        real(dp),    intent(in) :: appamt, disregStd, disregFT, disregCC, disregMnt
+        
+        real(dp) :: RebateDisreg
+
+        real(dp) :: disregCC1, disregCC2, disregCC3
+        
+        !old calculation
+                
+!        if (sys%rebatesys%CredInDisregCC) then        
+!            ! From Oct 99, WFTC/WTC/CTC could be set against disregCC
+!            RebateDisreg = max(max(max(max(net%tu%posttaxearn-disregStd,0.0_dp) &
+!                & + net%tu%fc+net%tu%wtc-disregFT, 0.0_dp) + net%tu%ctc-disregCC, 0.0_dp) &
+!                & + max(fam%maint-disregMnt, 0.0_dp) + net%tu%chben - appamt, 0.0_dp)
+!        else
+!            RebateDisreg = max(max(max(net%tu%posttaxearn-disregStd-disregCC,0.0_dp) &
+!                & + net%tu%fc+net%tu%wtc-disregFT, 0.0_dp) &
+!                & + max(fam%maint-disregMnt, 0.0_dp) + net%tu%chben+net%tu%ctc-appamt, 0.0_dp)           
+!        end if    
+        
+
+        !corrected version
+        if (sys%rebatesys%CredInDisregCC) then
+            disregCC1 = 0.0_dp
+            disregCC2 = net%tu%ctc-disregCC
+            disregCC3 = 0.0_dp
+        else
+            disregCC1 = disregCC
+            disregCC2 = 0.0_dp
+            disregCC3 = net%tu%ctc
+        end if  
+            
+        if (sys%rebatesys%rulesUnderWFTC .or. sys%rebatesys%rulesUnderNTC) then
+            RebateDisreg = max(max(max(max(net%tu%posttaxearn-disregStd-disregCC1,0.0_dp) &
+                & + net%tu%fc+net%tu%wtc-disregFT, 0.0_dp) + disregCC2, 0.0_dp) &
+                & + max(fam%maint-disregMnt, 0.0_dp) + net%tu%chben + disregCC3 - appamt, 0.0_dp) 
+        elseif (sys%rebatesys%rulesUnderFC) then
+            RebateDisreg = max(max(max(net%tu%fc+net%tu%wtc-disregFT, 0.0_dp) + disregCC2, 0.0_dp) &
+                & + max(fam%maint-disregMnt, 0.0_dp) + net%tu%chben + disregCC3 - appamt, 0.0_dp) 
+        else
+            RebateDisreg = 0.0_dp
+        end if
+                                        
+    end function RebateDisreg
+    
     ! HBen
     ! -----------------------------------------------------------------------
-    ! Housing benefit. Depends on netearn, fc, maint, chben, ctc, incsup,
-    ! rent, appamt, disregStd, disregFT, disregCC, disregMnt
+    ! Housing benefit. Depends on incsup, rent, disregRebate
     
-    pure subroutine HBen(sys,fam,net,appamt,disregStd,disregFT,disregCC,disregMnt)
+    pure subroutine HBen(sys,fam,net,disregRebate)
 
         use fortax_type, only : sys_t, fam_t, net_t
         
@@ -760,7 +822,7 @@ contains
         type(sys_t), intent(in)    :: sys
         type(fam_t), intent(in)    :: fam
         type(net_t), intent(inout) :: net
-        real(dp),    intent(in)    :: appamt,disregStd,disregFT,disregCC,disregMnt
+        real(dp),    intent(in)    :: disregRebate
 
         real(dp)                   :: eligrent
                 
@@ -780,17 +842,7 @@ contains
             else
                     
                 !HB taper
-                if (sys%rebatesys%CredInDisregCC) then
-                    ! From Oct 99, WFTC/WTC/CTC could be set against disregCC
-                    net%tu%hben = max(eligrent - max(max(max(max(net%tu%posttaxearn-disregStd,0.0_dp) &
-                        & + net%tu%fc+net%tu%wtc-disregFT, 0.0_dp) + net%tu%ctc-disregCC, 0.0_dp) &
-                        & + max(fam%maint-disregMnt, 0.0_dp) + net%tu%chben - appamt, 0.0_dp)*sys%rebatesys%taper,0.0_dp)
-                else
-                    net%tu%hben = max(eligrent - max(max(max(net%tu%posttaxearn-disregStd-disregCC,0.0_dp) &
-                        & + net%tu%fc+net%tu%wtc-disregFT, 0.0_dp) + max(fam%maint-disregMnt, 0.0_dp) &
-                    & + net%tu%chben+net%tu%ctc-appamt, 0.0_dp)*sys%rebatesys%taper,0.0_dp)            
-                end if
-                
+                net%tu%hben = max(eligrent - disregRebate*sys%rebatesys%taper,0.0_dp)
 
                 !Zero if award < 50p
                 if (net%tu%hben < sys%rebatesys%MinAmt) net%tu%hben = 0.0_dp
@@ -809,10 +861,9 @@ contains
     ! HBFull
     ! -----------------------------------------------------------------------
     ! Tells you whether TU is entitled to full HB (i.e. whether any of the HB
-    ! award has been tapered away). Depends on netearn, fc, maint, chben, 
-    ! ctc, incsup, appamt, disregStd, disregFT, disregCC, disregMnt
+    ! award has been tapered away). Depends on incsup, disregRebate
 
-    logical pure function HBFull(sys,fam,net,appamt,disregStd,disregFT,disregCC,disregMnt)
+    logical pure function HBFull(sys,fam,net,disregRebate)
 
         use fortax_type, only : sys_t, fam_t, net_t
         
@@ -821,26 +872,13 @@ contains
         type(sys_t), intent(in) :: sys
         type(fam_t), intent(in) :: fam
         type(net_t), intent(in) :: net
-        real(dp),    intent(in) :: appamt,disregStd,disregFT,disregCC,disregMnt
-
-        real(dp)                :: ExcessInc
+        real(dp),    intent(in) :: disregRebate
         
         if (net%tu%incsup > tol) then
             HBFull = .true.
         else
 
-            if (sys%rebatesys%CredInDisregCC) then
-                ! From Oct 99, WFTC/WTC/CTC could be set against disregCC
-                ExcessInc = max(max(max(max(net%tu%posttaxearn-disregStd,0.0_dp) &
-                    & + net%tu%fc+net%tu%wtc-disregFT, 0.0_dp) + net%tu%ctc-disregCC, 0.0_dp) &
-                    & + max(fam%maint-disregMnt, 0.0_dp) + net%tu%chben - appamt, 0.0_dp)
-            else
-                ExcessInc = max(max(max(net%tu%posttaxearn-disregStd-disregCC,0.0_dp) &
-                    & + net%tu%fc+net%tu%wtc-disregFT, 0.0_dp) + max(fam%maint-disregMnt, 0.0_dp) &
-                    & + net%tu%chben+net%tu%ctc-appamt, 0.0_dp)
-            end if
-
-            if (ExcessInc > tol) then
+            if (disregRebate > tol) then
                 HBFull = .false.
             else
                 HBFull = .true.
@@ -857,7 +895,7 @@ contains
     ! posttaxfamearn, fc, maint, othinc, incsup, ctax, band, appamt,
     ! disregStd, disregFT, disregCC, disregMnt
 
-    pure subroutine ctaxBen(sys,fam,net,appamt,disregStd,disregFT,disregCC,disregMnt)
+    pure subroutine ctaxBen(sys,fam,net,disregRebate)
 
         use fortax_type, only : sys_t, fam_t, net_t
         
@@ -866,7 +904,7 @@ contains
         type(sys_t), intent(in)    :: sys
         type(fam_t), intent(in)    :: fam
         type(net_t), intent(inout) :: net
-        real(dp),    intent(in)    :: appamt,disregStd,disregFT,disregCC,disregMnt
+        real(dp),    intent(in)    :: disregRebate
         
         real(dp)                   :: maxctb
         integer                    :: maxage
@@ -904,25 +942,8 @@ contains
                 net%tu%ctaxben = maxctb
             else
                 !CTB taper (no minimum award)
-!                if (sys%extra%date
-!                net%tu%ctaxben = max(maxctb - max(max(max(net%tu%posttaxearn-disreg1,0.0_dp)+net%tu%fc+net%tu%wtc-disreg2, 0.0_dp) &
-!                    & + max(fam%maint-disreg3, 0.0_dp) + net%tu%chben+net%tu%ctc-appamt, 0.0_dp)*sys%ctaxben%taper,0.0_dp)
-                !net%tu%ctaxben = max(maxctb - max(max(max(net%tu%posttaxearn-disreg1,0.0_dp)+net%tu%fc+net%tu%wtc-disreg2, 0.0_dp) &
-                !    & + max(fam%maint-disreg3, 0.0_dp) + net%tu%chben+net%tu%ctc-appamt, 0.0_dp)*sys%ctaxben%taper,0.0_dp)
-!                net%tu%ctaxben = max(maxctb - max(max(max(net%tu%posttaxearn-disreg1-disreg2,0.0_dp)+net%tu%fc+net%tu%wtc, 0.0_dp) &
-!                    & + max(fam%maint-disreg3, 0.0_dp) + net%tu%chben+net%tu%ctc-appamt, 0.0_dp)*sys%ctaxben%taper,0.0_dp)
-
                 ! From Oct 99, WFTC/WTC/CTC could be set against disregCC
-                if (sys%rebatesys%CredInDisregCC) then
-                    net%tu%ctaxben = max(maxctb - max(max(max(max(net%tu%posttaxearn-disregStd,0.0_dp) &
-                        & + net%tu%fc+net%tu%wtc-disregFT, 0.0_dp) + net%tu%ctc-disregCC, 0.0_dp) &
-                        & + max(fam%maint-disregMnt, 0.0_dp) + net%tu%chben-appamt, 0.0_dp)*sys%ctaxben%taper,0.0_dp)
-                else
-                    net%tu%ctaxben = max(maxctb - max(max(max(net%tu%posttaxearn-disregStd-disregCC,0.0_dp) + net%tu%fc+net%tu%wtc-disregFT, 0.0_dp) &
-                        & + max(fam%maint-disregMnt, 0.0_dp) + net%tu%chben+net%tu%ctc-appamt, 0.0_dp)*sys%ctaxben%taper,0.0_dp)
-
-                end if
-
+                net%tu%ctaxben = max(maxctb - disregRebate*sys%ctaxben%taper,0.0_dp)
 
             end if
 
@@ -930,14 +951,13 @@ contains
 
     end subroutine ctaxBen
 
-    
+    ! 
     ! pollTaxBen
     ! -----------------------------------------------------------------------
     ! Community Charge Benefit taper. Depends on couple, adage, netearn, fc,
-    ! maint, othinc, incsup, cc, appamt, disregStd, disregFT, disregCC, 
-    ! disregMnt
+    ! maint, othinc, incsup, cc, disregRebate
     
-    pure subroutine pollTaxBen(sys,fam,net,appamt,disregStd,disregFT,disregCC,disregMnt)
+    pure subroutine pollTaxBen(sys,fam,net,disregRebate)
 
         use fortax_type, only : sys_t, fam_t, net_t
         
@@ -946,7 +966,7 @@ contains
         type(sys_t), intent(in)    :: sys
         type(fam_t), intent(in)    :: fam
         type(net_t), intent(inout) :: net
-        real(dp),    intent(in)    :: appamt,disregStd,disregFT,disregCC,disregMnt
+        real(dp),    intent(in)    :: disregRebate
         
         real(dp)                   :: eligcc
         integer                    :: maxage
@@ -973,15 +993,7 @@ contains
 !                net%tu%polltaxben = max(eligcc - max(max(max(net%tu%posttaxearn-disreg1,0.0_dp)+net%tu%fc+net%tu%wtc-disreg2, 0.0_dp) &
 !                    & + max(fam%maint-disreg3, 0.0_dp) + net%tu%chben+net%tu%ctc-appamt, 0.0_dp)*sys%ccben%taper,0.0_dp)
 
-                if (sys%rebatesys%CredInDisregCC) then
-                    net%tu%polltaxben = max(eligcc - max(max(max(max(net%tu%posttaxearn-disregStd,0.0_dp) & 
-                        & + net%tu%fc+net%tu%wtc-disregFT, 0.0_dp) +net%tu%ctc-disregCC , 0.0_dp) &
-                        & + max(fam%maint-disregMnt, 0.0_dp) + net%tu%chben-appamt, 0.0_dp)*sys%ccben%taper,0.0_dp)
-                else
-                    net%tu%polltaxben = max(eligcc - max(max(max(net%tu%posttaxearn-disregStd-disregCC,0.0_dp)+net%tu%fc+net%tu%wtc-disregFT, 0.0_dp) &
-                        & + max(fam%maint-disregMnt, 0.0_dp) + net%tu%chben+net%tu%ctc-appamt, 0.0_dp)*sys%ccben%taper,0.0_dp)
-                end if
-
+                net%tu%polltaxben = max(eligcc - disregRebate*sys%ccben%taper,0.0_dp)
 
                 !Zero if award < 50p
                 if (net%tu%polltaxben < sys%ccben%MinAmt) net%tu%polltaxben = 0.0_dp
@@ -1089,23 +1101,42 @@ contains
     ! HB/CCB/CTB: disregard for workers (originally for those getting FT 
     ! premium with FC/WFTC/WTC). Depends on couple, adage, hrs, nkids
     
-    real(dp) pure function FTDisreg(sys,fam)
+    real(dp) pure function FTDisreg(sys,fam,net)
  
-        use fortax_type, only : sys_t, fam_t
+        use fortax_type, only : sys_t, fam_t, net_t
         
         implicit none
 
         type(sys_t), intent(in) :: sys
         type(fam_t), intent(in) :: fam
-
+        type(net_t), intent(in) :: net
+        
         !I have changed this so it condtions on dofamcred (and others) so it does
         !not give the FT disregard under incomplete takeup, AS 16/06/10
         
         !Additional disregard for workers (up to 2003: those eligible for FC/WFTC/WTC FT premium; from 2004: those eligible for WTC)
         FTDisreg = 0.0_dp
-        !FC/WFTC (up to April 2003)
-        if (sys%fc%dofamcred) then
+        
+        !if (sys%fc%dofamcred) then
+        
+            !under FC system, need actual receipt of Family Credit (pre-October 1999)
             if (sys%rebatesys%rulesunderFC) then
+
+                if ((sys%fc%ftprem > tol) .and. (_famkids_)) then
+                    if (net%tu%fc>tol) then
+                        if (.not. _famcouple_) then
+                            if (fam%ad(1)%hrs >= sys%fc%hours2-tol) FTDisreg = sys%fc%ftprem
+                        else
+                            if ((fam%ad(1)%hrs >= sys%fc%hours2-tol) .or. (fam%ad(2)%hrs >= sys%fc%hours2-tol)) &
+                                & FTDisreg = sys%fc%ftprem
+                        end if
+                    end if
+                end if
+
+            end if
+            
+            !under WFTC system, need only to be working full-time
+            if (sys%rebatesys%rulesunderWFTC) then
 
                 if ((sys%fc%ftprem > tol) .and. (_famkids_)) then
                     if (.not. _famcouple_) then
@@ -1117,10 +1148,10 @@ contains
                 end if
 
             end if
-        end if
+        !end if
         
         !WTC (2003 onwards)
-        if (sys%ntc%donewtaxcred) then
+        !if (sys%ntc%donewtaxcred) then
             if (sys%rebatesys%rulesunderNTC) then
                 !Rules less generous in first year of WTC (2003)
                 if (.not. sys%wtc%NewDisregCon) then
@@ -1170,7 +1201,7 @@ contains
                 
             end if
             
-        end if
+        !end if
         
     end function FTDisreg
 
@@ -1860,7 +1891,7 @@ contains
         type(fam_t), intent(in)  :: fam
         type(net_t), intent(out) :: net
                 
-        real(dp)                 :: appamt, disregStd,disregFT,disregCC,disregMnt
+        real(dp)                 :: disregRebate
 
         !if net_init is called it will set all elements to zero.
         call net_init(net)
@@ -1958,16 +1989,16 @@ contains
         !6. HB, CTB AND CCB
         !!!!!!!!!!!!!!!!!!!
 
-        ! Preliminary calculations (appamt, disregStd,disregFT,disregCC,disregMnt passed to subsequent routines)
-        call prelimcalc(sys,fam,net,appamt,disregStd,disregFT,disregCC,disregMnt)
+        ! Preliminary calculations (disregRebate passed to subsequent routines)
+        call prelimcalc(sys,fam,net,disregRebate)
         
         ! Housing benefit
-        call HBen(sys,fam,net,appamt,disregStd,disregFT,disregCC,disregMnt)
+        call HBen(sys,fam,net,disregRebate)
 
         ! Poll tax (what about Northern Ireland?)
         if (sys%ccben%dopolltax) then
             call polltax(sys,fam,net)
-            call polltaxBen(sys,fam,net,appamt,disregStd,disregFT,disregCC,disregMnt)
+            call polltaxBen(sys,fam,net,disregRebate)
         else
             net%tu%polltax    = 0.0_dp
             net%tu%polltaxben = 0.0_dp
@@ -1976,7 +2007,7 @@ contains
         ! Council tax
         if (sys%ctax%docounciltax) then
             call ctax(sys,fam,net)
-            call ctaxBen(sys,fam,net,appamt,disregStd,disregFT,disregCC,disregMnt)
+            call ctaxBen(sys,fam,net,disregRebate)
         else
             net%tu%ctax    = 0.0_dp
             net%tu%ctaxben = 0.0_dp

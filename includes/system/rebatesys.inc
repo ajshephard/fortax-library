@@ -1,6 +1,7 @@
 _$header
 
 _$logical(RulesUnderFC,null)
+_$logical(RulesUnderWFTC,null)
 _$logical(RulesUnderNTC,null)
 _$integer(NumAgeRng,range)
 _$logical(Restrict,null)

@@ -226,7 +226,9 @@ contains
         real(dp), parameter :: mtrtol  = 1.0e-5_dp
         real(dp), parameter :: distol  = 1.01_dp
         real(dp), parameter :: htol    = 0.00001_dp
-        real(dp), parameter :: maxstep = 1.00_dp !this is the main parameter that determines the number of evaluations, if too large then may miss some discontinuities
+        !maxstep is the main parameter that determines the number of evaluations, 
+        !if too large then may miss some discontinuities
+        real(dp), parameter :: maxstep = 1.00_dp                                                  
         real(dp), parameter :: minstep = maxstep/10000.0_dp
         
         integer            :: kinkidx
@@ -683,7 +685,9 @@ loopmax : do
         real(dp), parameter :: mtrtol  = 1.0e-5_dp
         real(dp), parameter :: distol  = 1.01_dp
         real(dp), parameter :: etol    = 0.00001_dp
-        real(dp), parameter :: maxstep = 5.00_dp !this is the main parameter that determines the number of evaluations, if too large then may miss some discontinuities
+        !maxstep is the main parameter that determines the number of evaluations, 
+        !if too large then may miss some discontinuities
+        real(dp), parameter :: maxstep = 5.00_dp
         real(dp), parameter :: minstep = maxstep/10000.0_dp
         
         !integer, parameter :: maxkinks = 200
