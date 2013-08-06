@@ -1,6 +1,5 @@
 
 ! This file is part of the FORTAX library;
-! (c) 2009 Andrew Shephard (andrubuntu@gmail.com) and Jonathan Shaw
 
 ! FORTAX is free software: you can redistribute it and/or modify
 ! it under the terms of the GNU General Public License as published by
@@ -2017,12 +2016,15 @@ contains
         ! Disposable income
         !!!!!!!!!!!!!!!!!!!
 
-        net%tu%tottax = net%ad(1)%inctax + net%ad(1)%natinsc1 + net%ad(1)%natinsc2 &
+        net%tu%totben = net%tu%chben + net%tu%matgrant + net%tu%fc + net%tu%wtc + net%tu%ctc &
+            & + net%tu%incsup + net%tu%fsm + net%tu%hben + net%tu%ctaxben + net%tu%polltaxben
+            
+        net%tu%nettax = net%ad(1)%inctax + net%ad(1)%natinsc1 + net%ad(1)%natinsc2 &
             & + net%ad(1)%natinsc4 + net%tu%ctax + net%tu%polltax &
             & - (net%tu%chben + net%tu%matgrant + net%tu%fc + net%tu%wtc + net%tu%ctc &
             & + net%tu%incsup + net%tu%fsm + net%tu%hben + net%tu%ctaxben + net%tu%polltaxben)
 
-        if (_famcouple_) net%tu%tottax = net%tu%tottax + net%ad(2)%inctax &
+        if (_famcouple_) net%tu%nettax = net%tu%nettax + net%ad(2)%inctax &
             & + net%ad(2)%natinsc1 + net%ad(2)%natinsc2 + net%ad(2)%natinsc4
 
         !family pre-tax income
@@ -2030,8 +2032,11 @@ contains
         if (_famcouple_) net%tu%pretax = net%tu%pretax + fam%ad(2)%earn
 
         !family post-tax income (main disposable income measure)
-        net%tu%dispinc = net%tu%pretax - net%tu%tottax
+        net%tu%dispinc = net%tu%pretax - net%tu%nettax
 
+        !set childcare expenditure
+        net%tu%ccexp = fam%ccexp
+        
     end subroutine CalcNetInc
 
 end module fortax_calc
