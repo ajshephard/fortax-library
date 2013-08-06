@@ -30,6 +30,7 @@ module fortax_write
     public  :: fortaxPrint, fortaxWrite
 
     interface ftxmlwrite
+        module procedure xml_write_fchar
         module procedure xml_write_finteger
         module procedure xml_write_fdouble
         module procedure xml_write_flogical
@@ -120,6 +121,36 @@ contains
 
     end subroutine fortaxWrite
             
+
+
+    ! xml_write_fchar
+    ! -----------------------------------------------------------------------
+    ! xml writing of string when saving system file (called by fortaxWrite)
+
+    subroutine xml_write_fchar(info,field,fieldname)
+    
+        use xmlparse, only : xml_parse, xml_put
+        
+        implicit none
+        
+        type(xml_parse), intent(inout) :: info
+        character(*),    intent(in)    :: field
+        character(*),    intent(in)    :: fieldName
+        
+        character(255) :: myData(1)
+        character(255) :: attribs(2,2)
+        
+        attribs(1,1) = 'name'
+        attribs(2,1) = fieldName
+        attribs(1,2) = 'value'
+        write(attribs(2,2),*) field
+               
+        call xml_put(info, 'fchar',adjustl(attribs), 2, &
+            myData, 0, 'elem')
+            
+        return
+
+    end subroutine xml_write_fchar
 
     ! xml_write_finteger
     ! -----------------------------------------------------------------------
