@@ -1980,6 +1980,14 @@ contains
             else if (sys%rebatesys%rulesunderNTC) then
                 if (net%tu%ctc > MaxCTCFam(sys,fam) + tol) dogrant = .true.
             end if
+            
+            !From Apr-11: no maternity grant if there's another child aged under 16 in the family (except for multiple births)
+            if (sys%chBen%MatGrantOnlyFirstKid) then
+              do i=1,fam%nkids
+                  if ((fam%kidage(i) > 0) .and. (fam%kidage(i) < 16)) dogrant = .false.
+              end do
+            end if
+            
             if (dogrant) then
                 do i=1,fam%nkids
                     if (fam%kidage(i) == 0) net%tu%matgrant = net%tu%matgrant + (sys%chben%MatGrantVal/52.0_dp)
