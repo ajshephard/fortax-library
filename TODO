@@ -4,3 +4,14 @@
 * Lots of the maxage parameters for childcare support are < age rather than <= age. The latter fits better with the name "maxage" so change this
 * IS/HB age limits are hard-coded – deal with this
 
+CTB
+* How are one pensioner one non-pensioner households treated for CTB localisation/cuts?
+
+IT
+* Rounding in taper of personal allowance includes hard-coded 52s (weeks per year). Should we use an annualise() function? Or ideally work in annual terms?
+
+Child benefit
+* Rounding in taper of child benefit includes hard-coded 52s (weeks per year). Should we use an annualise() function?
+
+UC/CTB
+* Decide whether to include UC in CTB taper

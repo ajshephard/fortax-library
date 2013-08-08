@@ -1,0 +1,11 @@
+
+- Until July 2000, the childcare disregard for HB/CTB was set against family earnings. Since that date it has effectively been set against the sum of family earnings and any tax credit award
+- This is implemented in TAXBEN as happening in April 2000
+- Consequently, there is disagreement for April 2000 system
+
+Restricting proportion of CT eligible for CTB
+- From April 2013, CTB was localised and, in England, was made less generous
+- Different local authorities took different approaches to dealing with the fall in funding
+- The most common approach (according to Stuart) was to set the proportion of CT eligible for CTB to less than one
+- James and others used this in April15_WI.bp3, but it hasn't made it into the main April13.bp3 system
+- Therefore, to compare FORTAX and TAXBEN, it is necessary to turn off sys%ctaxben%doEntitlementCut
