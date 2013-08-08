@@ -1894,12 +1894,54 @@ contains
         type(fam_t), intent(in)    :: fam
         type(net_t), intent(inout) :: net
 
+        integer                    :: pe
+        real(dp)                   :: excessAnnualEarnings
+        real(dp)                   :: percentLost
+        real(dp)                   :: chBenCharge
+
         if (_famkids_) then
             net%tu%chben = sys%chben%basic*fam%nkids + sys%chben%kid1xtr
             if (.not. _famcouple_) net%tu%chben = net%tu%chben + sys%chben%opf
+            
+            ! High income child benefit charge (from Jan 2013)
+            
+            if (sys%chben%doTaper) then
+            
+                ! Find primary earner
+                if (.not. _famcouple_) then
+                    pe = 1
+                else
+                    if (fam%ad(1)%earn >= fam%ad(2)%earn) then
+                        pe = 1
+                    else
+                        pe = 2
+                    end if
+                end if
+
+                ! Find annual amount by which earnings of primary earner exceeds threshold (rounded down to nearest pound in annual terms)
+                excessAnnualEarnings = max(0.0_dp, real(floor((fam%ad(pe)%earn - sys%chben%taperStart)*52.0_dp + tol), dp))
+                
+                ! Find percentage of child benefit award tapered away (calculated on rounded excess earnings, rounded down to nearest percent)
+                percentLost = min(1.0_dp, real(floor(excessAnnualEarnings * sys%chben%taperRate + tol) / 100.0_dp, dp))
+                
+                ! Find weekly high income child benefit charge (rounded down to nearest pound at annual level)
+                chBenCharge = real(floor(net%tu%chben*52.0_dp * percentLost), dp) / 52.0_dp
+                
+                ! Subtract charge from child benefit award (or increase income tax)
+                if (sys%chben%taperIsIncTax) then
+                  net%ad(pe)%inctax = net%ad(pe)%inctax + chBenCharge
+                  net%ad(pe)%posttaxearn = net%ad(pe)%posttaxearn - chBenCharge
+                  net%tu%posttaxearn = net%tu%posttaxearn - chBenCharge
+                else
+                  net%tu%chben = net%tu%chben - chBenCharge
+                end if
+                                
+                
+            end if !doTaper
+            
         else
             net%tu%chben = 0.0_dp
-        end if
+        end if !kids
     
     end subroutine ChBen
 
