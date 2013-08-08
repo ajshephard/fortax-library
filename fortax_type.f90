@@ -35,6 +35,7 @@ module fortax_type
     public :: lab_t, fam_t, net_t, sys_t, rpi_t
     public :: lab, maxkids
     public :: fam_gen, fam_desc
+    public :: operator(+), operator(*), operator(/)
     public :: net_desc
     
     public :: ctax_banda, ctax_bandb, ctax_bandc, ctax_bandd, &
@@ -252,6 +253,30 @@ module fortax_type
         type(netad_t) :: ad(2)
         type(nettu_t) :: tu
     end type net_t
+
+
+    ! Associate "net_plus_net" routine with "+" operator
+    interface operator(+)
+      module procedure net_plus_net
+    end interface
+
+    ! Associate "net_minus_net" routine with "-" operator
+    interface operator(-)
+      module procedure net_minus_net
+    end interface
+
+
+    ! Associate "net_times_scalar" and "scalar_times_net" routines with "*" operator
+    interface operator(*)
+      module procedure net_times_scalar
+      module procedure scalar_times_net
+    end interface
+
+    ! Associate "net_div_scalar" routine with "/" operator
+    interface operator(/)
+      module procedure net_div_scalar
+    end interface
+
 
 
     ! sys_t
@@ -688,7 +713,185 @@ contains
 
     end function fam_gen
 
-    
+
+
+
+    ! net_plus_net
+    ! ------------------------------------
+    ! Addition of two net_t type variables
+
+    type(net_t) function net_plus_net(net1, net2)
+
+        type(net_t), intent(in) :: net1, net2
+        integer                 :: ad
+
+#       define _$header
+#       define _$footer
+#       define _$double(x,lab,y)  net_plus_net%_$level(ad)%x = net1%_$level(ad)%x + net2%_$level(ad)%x
+
+#       define _$level ad
+        do ad = 1, 2
+#         include 'includes/netad_t.inc'
+        end do
+#       undef _$level
+
+#       undef  _$double
+#       define _$double(x,lab,y)  net_plus_net%_$level%x = net1%_$level%x + net2%_$level%x
+
+#       define _$level tu
+#       include 'includes/nettu_t.inc'
+#       undef _$level
+
+#       undef  _$header
+#       undef  _$footer
+#       undef  _$double
+
+    end function net_plus_net
+
+
+
+    ! net_minus_net
+    ! --------------------------------------
+    ! Difference of two net_t type variables
+
+    type(net_t) function net_minus_net(net1, net2)
+
+        type(net_t), intent(in) :: net1, net2
+        integer                 :: ad
+
+#       define _$header
+#       define _$footer
+#       define _$double(x,lab,y)  net_minus_net%_$level(ad)%x = net1%_$level(ad)%x - net2%_$level(ad)%x
+
+#       define _$level ad
+        do ad = 1, 2
+#         include 'includes/netad_t.inc'
+        end do
+#       undef _$level
+
+#       undef  _$double
+#       define _$double(x,lab,y)  net_minus_net%_$level%x = net1%_$level%x - net2%_$level%x
+
+#       define _$level tu
+#       include 'includes/nettu_t.inc'
+#       undef _$level
+
+#       undef  _$header
+#       undef  _$footer
+#       undef  _$double
+
+    end function net_minus_net
+
+
+
+    ! net_times_scalar
+    ! ------------------------------------
+    ! Multiply net_t type variable by scalar
+
+    type(net_t) function net_times_scalar(net, scalar)
+
+        use fortax_realtype, only : dp
+        type(net_t), intent(in) :: net
+        real(dp), intent(in)    :: scalar
+        integer                 :: ad
+
+#       define _$header
+#       define _$footer
+#       define _$double(x,lab,y)  net_times_scalar%_$level(ad)%x = net%_$level(ad)%x * scalar
+
+#       define _$level ad
+        do ad = 1, 2
+#         include 'includes/netad_t.inc'
+        end do
+#       undef _$level
+
+#       undef  _$double
+#       define _$double(x,lab,y)  net_times_scalar%_$level%x = net%_$level%x * scalar
+
+#       define _$level tu
+#       include 'includes/nettu_t.inc'
+#       undef _$level
+
+#       undef  _$header
+#       undef  _$footer
+#       undef  _$double
+
+    end function net_times_scalar
+
+
+    ! scalar_times_net
+    ! ------------------------------------
+    ! Multiply net_t type variable by scalar
+
+    type(net_t) function scalar_times_net(scalar, net)
+
+        use fortax_realtype, only : dp
+        real(dp), intent(in)    :: scalar
+        type(net_t), intent(in) :: net
+        integer                 :: ad
+
+#       define _$header
+#       define _$footer
+#       define _$double(x,lab,y)  scalar_times_net%_$level(ad)%x = net%_$level(ad)%x * scalar
+
+#       define _$level ad
+        do ad = 1, 2
+#         include 'includes/netad_t.inc'
+        end do
+#       undef _$level
+
+#       undef  _$double
+#       define _$double(x,lab,y)  scalar_times_net%_$level%x = net%_$level%x * scalar
+
+#       define _$level tu
+#       include 'includes/nettu_t.inc'
+#       undef _$level
+
+#       undef  _$header
+#       undef  _$footer
+#       undef  _$double
+
+    end function scalar_times_net
+
+
+
+    ! net_div_scalar
+    ! ------------------------------------
+    ! Divide net_t type variable by scalar
+
+    type(net_t) function net_div_scalar(net, scalar)
+
+        use fortax_realtype, only : dp
+        type(net_t), intent(in) :: net
+        real(dp), intent(in)    :: scalar
+        integer                 :: ad
+
+#       define _$header
+#       define _$footer
+#       define _$double(x,lab,y)  net_div_scalar%_$level(ad)%x = net%_$level(ad)%x / scalar
+
+#       define _$level ad
+        do ad = 1, 2
+#         include 'includes/netad_t.inc'
+        end do
+#       undef _$level
+
+#       undef  _$double
+#       define _$double(x,lab,y)  net_div_scalar%_$level%x = net%_$level%x / scalar
+
+#       define _$level tu
+#       include 'includes/nettu_t.inc'
+#       undef _$level
+
+#       undef  _$header
+#       undef  _$footer
+#       undef  _$double
+
+    end function net_div_scalar
+
+
+
+
     ! net_init
     ! -----------------------------------------------------------------------
     ! intializes net_t type. unless defaults are coded here, integers are
