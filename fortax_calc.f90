@@ -831,7 +831,7 @@ contains
         
         real(dp) :: RebateDisreg
 
-        real(dp) :: disregCC1, disregCC2, disregCC3
+        real(dp) :: disregCC1, disregCC2, disregCC3, chben
         
         !old calculation 
 !        if (sys%rebatesys%CredInDisregCC) then        
@@ -855,16 +855,19 @@ contains
             disregCC1 = disregCC
             disregCC2 = 0.0_dp
             disregCC3 = net%tu%ctc
-        end if  
+        end if
+        
+        chben = 0.0_dp
+        if (sys%rebateSys%ChbenIsIncome) chben = net%tu%chben
 
         if (sys%rebatesys%rulesUnderWFTC .or. sys%rebatesys%rulesUnderNTC) then
             RebateDisreg = max(max(max(max(net%tu%posttaxearn-disregStd-disregCC1,0.0_dp) &
                 & + net%tu%fc+net%tu%wtc-disregFT, 0.0_dp) + disregCC2, 0.0_dp) &
-                & + max(fam%maint-disregMnt, 0.0_dp) + net%tu%chben + disregCC3 - appamt, 0.0_dp) 
+                & + max(fam%maint-disregMnt, 0.0_dp) + chben + disregCC3 - appamt, 0.0_dp) 
         elseif (sys%rebatesys%rulesUnderFC) then
             RebateDisreg = max(max(max(max(net%tu%posttaxearn-disregStd-disregCC1,0.0_dp) &
                 & + max(net%tu%fc+net%tu%wtc-disregFT,0.0_dp), 0.0_dp) + disregCC2, 0.0_dp) &
-                & + max(fam%maint-disregMnt, 0.0_dp) + net%tu%chben + disregCC3 - appamt, 0.0_dp) 
+                & + max(fam%maint-disregMnt, 0.0_dp) + chben + disregCC3 - appamt, 0.0_dp) 
         else
             RebateDisreg = 0.0_dp
         end if
