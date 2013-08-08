@@ -75,15 +75,66 @@ contains
         type(fam_t), intent(in)    :: fam
         type(net_t), intent(inout) :: net
         
+        real(dp)                   :: earningsOverThresh
+        real(dp)                   :: persAllow
+        
         !integer                    :: pe !pe = primary earner
 
         !Personal allowance
-        net%ad(1)%taxable = max(fam%ad(1)%earn-sys%inctax%pa, 0.0_dp)
+
+        ! Calculate personal allowance for adult 1 (tapering it away from high income individuals from April 2010 onwards)
+        if (sys%inctax%doPATaper) then
+
+            ! Calculate earnings over threshold
+            earningsOverThresh = max(fam%ad(1)%earn - sys%inctax%paTaperThresh, 0.0_dp)
+            if (earningsOverThresh > tol) then
+                ! Taper personal allowance away
+                persAllow =  max(sys%inctax%pa - earningsOverThresh * sys%inctax%paTaperRate, 0.0_dp)
+                ! Round up to nearest pound (rounding done on annual basis)
+                persAllow = real(ceiling(persAllow*52.0_dp), dp) / 52.0_dp
+            else
+                persAllow = sys%inctax%pa
+            end if
+
+        else
+            persAllow = sys%inctax%pa
+        
+        end if
+
+        ! Calculate taxable income
+        net%ad(1)%taxable = max(fam%ad(1)%earn-persAllow, 0.0_dp)
+
+        
+        ! Calculate personal allowance for adult 2 if present (tapering it away from high income individuals from April 2010 onwards)
         if (_famcouple_) then
-            net%ad(2)%taxable = max(fam%ad(2)%earn-sys%inctax%pa, 0.0_dp)
+
+            if (sys%inctax%doPATaper) then
+
+                ! Calculate earnings over threshold
+                earningsOverThresh = max(fam%ad(2)%earn - sys%inctax%paTaperThresh, 0.0_dp)
+                if (earningsOverThresh > tol) then
+                    ! Taper personal allowance away
+                    persAllow =  max(sys%inctax%pa - earningsOverThresh * sys%inctax%paTaperRate, 0.0_dp)
+                    ! Round up to nearest pound (rounding done on annual basis)
+                    persAllow = real(ceiling(persAllow*52.0_dp), dp) / 52.0_dp
+                else
+                    persAllow = sys%inctax%pa
+                end if
+
+            else
+                persAllow = sys%inctax%pa
+            
+            end if
+
+            ! Calculate taxable income
+            net%ad(2)%taxable = max(fam%ad(2)%earn-persAllow, 0.0_dp)
+
+
+        ! If no partner
         else
             net%ad(2)%taxable = 0.0_dp
         end if
+
 
         ! Rebate for Class 4 NI contributions (1985/86-1995/96)
         if (sys%inctax%c4rebate > tol) then
