@@ -662,9 +662,9 @@ contains
                         cat2 => cat%field(j)
                         select case(cat2%name)
                             case('Taper')
-                                sys%rebateSys%taper = strToDouble(cat2%value)
+                                sys%hben%taper = strToDouble(cat2%value)
                             case('MinPayment')
-                                sys%rebateSys%minAmt = strToDouble(cat2%value)
+                                sys%hben%minAmt = strToDouble(cat2%value)
                         end select
                     end do
 

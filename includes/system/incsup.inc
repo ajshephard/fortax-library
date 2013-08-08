@@ -1,5 +1,6 @@
 _$header
 
+_$logical(doIncSup,null)
 _$logical(IncChben,null)
 _$integer(NumAgeRng,range)
 _$double(MainCou,amount)     

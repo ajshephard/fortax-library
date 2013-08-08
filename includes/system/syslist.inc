@@ -48,6 +48,11 @@
 #define  _$typelist rebatesys
 #include "includes/system/rebatesys.inc"
 
+!housing benefit
+#undef   _$typelist
+#define  _$typelist hben
+#include "includes/system/hben.inc"
+
 !council tax benefit
 #undef   _$typelist
 #define  _$typelist ctaxben
@@ -57,6 +62,21 @@
 #undef   _$typelist
 #define  _$typelist ccben
 #include "includes/system/ccben.inc"
+
+!universal credit
+#undef   _$typelist
+#define  _$typelist uc
+#include "includes/system/uc.inc"
+
+!state pension
+#undef   _$typelist
+#define  _$typelist statepen
+#include "includes/system/statepen.inc"
+
+!benefit cap
+#undef   _$typelist
+#define  _$typelist bencap
+#include "includes/system/bencap.inc"
 
 !additional information
 #undef   _$typelist

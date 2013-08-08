@@ -2,6 +2,9 @@ _$header
 
 _$integer(numbands,range)
 _$double(pa,amount)
+_$logical(doPATaper,null)
+_$double(paTaperThresh,amount)
+_$double(paTaperRate,rate)
 _$double(mma,amount)
 _$double(ctc,amount)
 _$double(ctcyng,amount)

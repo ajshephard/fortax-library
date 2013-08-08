@@ -849,15 +849,15 @@ contains
 
                 net%tu%hben = eligrent
                 !Zero if award < 50p
-                if (net%tu%hben < sys%rebatesys%MinAmt) net%tu%hben = 0.0_dp
+                if (net%tu%hben < sys%hben%MinAmt) net%tu%hben = 0.0_dp
 
             else
                     
                 !HB taper
-                net%tu%hben = max(eligrent - disregRebate*sys%rebatesys%taper,0.0_dp)
+                net%tu%hben = max(eligrent - disregRebate*sys%hben%taper,0.0_dp)
 
                 !Zero if award < 50p
-                if (net%tu%hben < sys%rebatesys%MinAmt) net%tu%hben = 0.0_dp
+                if (net%tu%hben < sys%hben%MinAmt) net%tu%hben = 0.0_dp
 
             end if
 
