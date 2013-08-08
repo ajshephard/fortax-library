@@ -1526,7 +1526,8 @@ contains
 
             if (_famcouple_) then
                 ! Couple parents
-                if (fam%ad(1)%hrs >= sys%wtc%MinHrsKids-tol .or. fam%ad(2)%hrs >= sys%wtc%MinHrsKids-tol) then
+                if ((fam%ad(1)%hrs >= sys%wtc%MinHrsKids-tol .or. fam%ad(2)%hrs >= sys%wtc%MinHrsKids-tol) &
+                    & .and. (fam%ad(1)%hrs + fam%ad(2)%hrs >= sys%wtc%MinHrsCouKids-tol)) then
                     if (fam%ad(1)%hrs + fam%ad(2)%hrs >= sys%wtc%FTHrs-tol) then
                         MaxWTC = sys%wtc%CouLP + sys%wtc%FT
                     else
