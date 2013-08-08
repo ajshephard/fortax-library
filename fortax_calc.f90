@@ -2031,6 +2031,383 @@ contains
 
 
 
+
+    ! ----------------------UNIVERSAL CREDIT-----------------------------------
+
+    ! UnivCred      - Calculates overall universal credit award
+    ! UCStdAllow    - Calculates standard allowance
+    ! UCKid         - Calculates child element
+    ! UCChCare      - Calculates childcare element
+    ! UCHousing     - Calculates housing costs element (currently ignores help for mortgage interest)
+    ! UCDisreg      - Calculates earnings disregard
+
+    ! ----------------------UNIVERSAL CREDIT-----------------------------------
+
+
+
+
+    pure subroutine UnivCred(sys,fam,net)
+
+        use fortax_type, only : sys_t, fam_t, net_t
+        
+        implicit none
+
+        type(sys_t), intent(in)    :: sys
+        type(fam_t), intent(in)    :: fam
+        type(net_t), intent(inout) :: net
+        
+        real(dp)                   :: maxUC, UCChCareElement, UCHousingElement, UCDisregAmt
+        
+        ! Entitlement conditions need implementing but are a bit complicated
+          ! Need one adult below SPA
+          ! If one member of a couple aged under 18, he/she is ignored in calculating maximum UC, but earnings is taken into account
+          ! 16-17 year olds entitled if have dependent children or have no parental support
+          ! These last two points make it sound like BU is penalised if one adult is under 18 but not if both! Is this right?
+        
+        UCHousingElement = UCHousing(sys,fam)
+        UCChCareElement = UCChCare(sys,fam)
+        net%tu%chcaresub = UCChCareElement
+        maxUC = UCStdAllow(sys,fam) + UCKid(sys,fam) + UCChCareElement + UCHousingElement
+        UCDisregAmt = UCDisreg(sys,fam,UCHousingElement)
+
+        ! Taper award
+        net%tu%uc = max(maxUC - (max(net%tu%posttaxearn-UCDisregAmt,0.0_dp)*sys%uc%taper), 0.0_dp)
+
+        ! Note: child maintenance ignored altogether but not spousal maintenance
+        ! (I'm assuming fam%maint is child maintenance)
+        
+        ! Minimum award
+        if (net%tu%uc < sys%uc%MinAmt) net%tu%uc = 0.0_dp
+
+        ! Minimum award 1p
+        ! Child maintenance disregarded altogether
+        ! Tapering of council tax benefit - either included in each tapler calc?
+
+    end subroutine UnivCred
+
+
+
+    ! UCStdAllow
+    ! -----------------------------------------------------------------------
+    ! Calculates standard allowance for Universal Credit
+    ! Equivalent to personal allowance in IS/income-based JSA
+    
+    real(dp) pure function UCStdAllow(sys,fam)
+
+        use fortax_type, only : sys_t, fam_t
+        
+        implicit none
+
+        type(sys_t), intent(in)    :: sys
+        type(fam_t), intent(in)    :: fam
+
+
+        ! Single
+        if (.not. _famcouple_) then
+        
+            if (fam%ad(1)%age < sys%uc%MinAgeMain) then
+                UCStdAllow = sys%uc%YngSin
+            else
+                UCStdAllow = sys%uc%MainSin
+            end if
+
+
+        ! Couple
+        else
+
+            ! Simplified relative to IS: higher allowance if at least one adult is 25+
+            if ((fam%ad(1)%age < sys%uc%MinAgeMain) .and. (fam%ad(2)%age < sys%uc%MinAgeMain)) then
+                UCStdAllow = sys%incsup%YngCou
+            else
+                UCStdAllow = sys%incsup%MainCou
+            end if
+            
+            
+        end if
+
+
+    end function UCStdAllow
+
+
+
+
+    ! UCKid
+    ! -----------------------------------------------------------------------
+    ! Child element of Universal Credit
+    ! Same as child components of CTC
+    ! Note that this includes the baby element (unlike the MaxCTCKid procedure)
+
+    real(dp) pure function UCKid(sys,fam)
+
+        use fortax_type, only : sys_t, fam_t
+        
+        implicit none
+        
+        type(sys_t), intent(in) :: sys
+        type(fam_t), intent(in) :: fam
+        
+        select case (fam%nkids)
+        case (0)
+            UCKid = 0.0_dp
+        case (1:)
+            UCKid = sys%uc%FirstKid + real(fam%nkids-1,dp)*sys%uc%OtherKid
+        end select
+        
+    end function UCKid
+
+
+
+
+
+
+    ! UCChCare
+    ! -----------------------------------------------------------------------
+    ! Childcare element of Universal Credit
+    ! Same as childcare element of WTC
+    ! Note that it does NOT set net%tu%chcaresub. This is done in UnivCred so that UCChCare can be called later without disrupting chcaresub
+    
+    real(dp) pure function UCChCare(sys,fam)
+
+        use fortax_type, only : sys_t, fam_t
+        
+        implicit none
+        
+        type(sys_t), intent(in)    :: sys
+        type(fam_t), intent(in)    :: fam
+        
+        integer                    :: i, nkidscc
+        
+        if ((_famkids_) .and. (fam%ccexp > tol)) then
+
+            ! Count number of children young enough to be eligible for childcare support
+            nkidscc = 0
+            do i = 1, fam%nkids
+                if (fam%kidage(i) <= sys%uc%MaxAgeCC) nkidscc = nkidscc + 1
+            end do
+
+            ! Calculate childcare support
+            if (nkidscc == 1) then
+                if (.not. _famcouple_) then
+                    if (fam%ad(1)%hrs > tol) &
+                      & UCChCare = min(fam%ccexp,sys%uc%MaxCC1)*sys%uc%PropCC
+                
+                else
+                    if ((fam%ad(1)%hrs > tol) .and. (fam%ad(2)%hrs > tol)) &
+                      & UCChCare = min(fam%ccexp,sys%uc%MaxCC1)*sys%uc%PropCC
+                end if
+
+            else if (nkidscc > 1) then
+                if (.not. _famcouple_) then
+                    if (fam%ad(1)%hrs > tol) &
+                        & UCChCare = min(fam%ccexp,sys%uc%MaxCC2)*sys%uc%PropCC
+                else
+                    if ((fam%ad(1)%hrs > tol) .and. (fam%ad(2)%hrs > tol)) &
+                        & UCChCare = min(fam%ccexp,sys%uc%MaxCC2)*sys%uc%PropCC
+                end if
+            end if
+
+        end if
+        
+    end function UCChCare
+
+
+
+
+
+
+    ! UCHousing
+    ! -----------------------------------------------------------------------
+    ! Housing costs element of Universal Credit (currently ignores help towards mortgage costs)
+    
+    real(dp) pure function UCHousing(sys,fam)
+
+        use fortax_type, only : sys_t, fam_t
+        
+        implicit none
+
+        type(sys_t), intent(in)    :: sys
+        type(fam_t), intent(in)    :: fam
+
+                
+        ! Rent cap (implemented for ALL renters, not just private renters (as with HB))
+        UCHousing = fam%rent
+        if (sys%uc%doRentCap) UCHousing = min(fam%rent,fam%rentcap)
+
+    end function UCHousing
+
+
+
+
+
+    ! UCDisreg
+    ! -----------------------------------------------------------------------
+    ! Earnings disregard for Universal Credit
+
+    real(dp) pure function UCDisreg(sys,fam,UCHousing)
+
+        use fortax_type, only : sys_t, fam_t
+        
+        implicit none
+
+        type(sys_t), intent(in)    :: sys
+        type(fam_t), intent(in)    :: fam
+        real(dp),    intent(in)    :: UCHousing
+
+        ! Disregard depends on (couple x parent x help with housing costs)
+
+        if (_famcouple_) then
+            if (_famkids_) then
+                if (UCHousing > tol) then
+                    UCDisreg = sys%uc%DisregCouKidsLo
+                else
+                    UCDisreg = sys%uc%DisregCouKidsHi
+                end if
+
+            else
+                if (UCHousing > tol) then
+                    UCDisreg = sys%uc%DisregCouNoKidsLo
+                else
+                    UCDisreg = sys%uc%DisregCouNoKidsHi
+                end if
+            end if
+
+        else
+            if (_famkids_) then
+                if (UCHousing > tol) then
+                    UCDisreg = sys%uc%DisregSinKidsLo
+                else
+                    UCDisreg = sys%uc%DisregSinKidsHi
+                end if
+
+            else
+                if (UCHousing > tol) then
+                    UCDisreg = sys%uc%DisregSinNoKidsLo
+                else
+                    UCDisreg = sys%uc%DisregSinNoKidsHi
+                end if
+            end if
+        end if
+
+    end function UCDisreg
+
+
+
+
+    ! ----------------------BENEFIT CAP-----------------------------------
+
+    ! ImposeBenCap - Imposes benefit cap
+    ! BenCapLevel  - Calculate benefit cap that applies
+
+    ! ----------------------BENEFIT CAP-----------------------------------
+
+
+
+    ! ImposeBenCap
+    ! ----------------------------------------------
+    ! Imposes benefit cap
+
+    pure subroutine ImposeBenCap(sys,fam,net)
+
+        use fortax_type, only : sys_t, fam_t, net_t
+        
+        implicit none
+
+        type(sys_t), intent(in)    :: sys
+        type(fam_t), intent(in)    :: fam
+        type(net_t), intent(inout) :: net
+
+        integer                    :: maxage
+        real(dp)                   :: preCapBens
+        real(dp)                   :: excess
+        real(dp)                   :: UCChCareElement
+
+
+        ! If through UC
+        if (sys%bencap%doThruUC) then
+            
+            ! UC benefit cap applies if:
+                ! Positive UC award
+                ! Family earnings below some limit
+
+            if ((net%tu%uc > tol) .and. (net%tu%posttaxearn + tol < sys%bencap%UCEarnThr)) then
+
+                ! Total benefits to be capped (note it excludes childcare element of UC)
+                preCapBens = max(0.0_dp, net%tu%uc - UCChCare(sys,fam)) + net%tu%chben
+
+                ! Amount of excess
+                excess = max(0.0_dp, preCapBens - BenCapLevel(sys,fam))
+
+                ! Reduce UC by excess
+                net%tu%uc = max(0.0_dp, net%tu%uc - excess)
+            
+            end if
+
+
+        ! If through HB
+        else
+
+            ! HB benefit cap applies if:
+                ! Positive HB award
+                ! Not entitled to WTC (taken to mean a zero award)
+                ! Neither adult has reached qualifying age for pension credit
+
+            maxage = fam%ad(1)%age
+            if (_famcouple_) maxage = max(maxage,fam%ad(2)%age)
+
+            if ((net%tu%hben > tol) .and. (net%tu%wtc < tol) .and. (maxage < sys%statepen%penAgeWoman)) then
+            
+                ! Total benefits to be capped
+                preCapBens = net%tu%incsup + net%tu%hben + net%tu%chben + net%tu%ctc
+
+                ! Amount of excess
+                excess = max(0.0_dp, preCapBens - BenCapLevel(sys,fam))
+
+                ! Reduce HB by excess (or until HB award is minimum HB award)
+                net%tu%hben = max(sys%hben%minAmt, net%tu%hben - excess)
+            
+            end if
+
+        end if
+
+    end subroutine ImposeBenCap
+
+
+
+
+    ! BenCapLevel
+    ! -----------------------------------------------------------------------
+    ! Calculate benefit cap that applies
+
+    real(dp) pure function BenCapLevel(sys,fam)
+
+        use fortax_type, only : sys_t, fam_t
+        
+        implicit none
+
+        type(sys_t), intent(in)    :: sys
+        type(fam_t), intent(in)    :: fam
+
+        ! Level of cap depends only on family composition
+        if (_famcouple_) then
+            if (_famkids_) then
+                BenCapLevel = sys%bencap%couKids
+            else
+                BenCapLevel = sys%bencap%couNoKids
+            end if !_famkids_
+        else
+            if (_famkids_) then
+                BenCapLevel = sys%bencap%sinKids
+            else
+                BenCapLevel = sys%bencap%sinNoKids
+            end if !_famkids_
+        end if !_famcouple_
+
+
+    end function BenCapLevel
+
+
+
+
     ! ----------------------NET INCOME----------------------
 
     ! CalcNetInc - Calculates family net income
