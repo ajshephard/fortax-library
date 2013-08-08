@@ -990,20 +990,33 @@ contains
             net%tu%ctaxben = 0.0_dp
 
         else
+
+            maxctb = net%tu%ctax
         
             !Cap CTB at band E from 1998 to 2003
             if ((fam%ctband > 5) .and. sys%rebatesys%Restrict) then
                 select case (fam%ctband)
                     case (6)
-                        maxctb = net%tu%ctax*sys%ctax%RatioE/sys%ctax%RatioF
+                        maxctb = maxctb*sys%ctax%RatioE/sys%ctax%RatioF
                     case (7)
-                        maxctb = net%tu%ctax*sys%ctax%RatioE/sys%ctax%RatioG
+                        maxctb = maxctb*sys%ctax%RatioE/sys%ctax%RatioG
                     case (8)
-                        maxctb = net%tu%ctax*sys%ctax%RatioE/sys%ctax%RatioH
+                        maxctb = maxctb*sys%ctax%RatioE/sys%ctax%RatioH
                 end select
-            else
-                maxctb = net%tu%ctax
             end if
+
+
+            ! From April 2013, refund only a fraction of council tax liability
+            if (sys%ctaxben%doEntitlementCut) then
+            
+              ! Note: in England, cut only applies to nonpensioners (we ignore this because FORTAX only works for working age individuals)
+              ! Wales is region 10, Scotland is region 11
+              if ((fam%region .ne. 10) .and. (fam%region .ne. 11)) then
+                maxctb = maxctb * sys%ctaxben%entitlementShare
+              end if
+            
+            end if
+
 
             if (net%tu%incsup > tol) then
                 !Passport to full entitlement if on IS or income-based JSA
@@ -1018,6 +1031,7 @@ contains
         end if
 
     end subroutine ctaxBen
+
 
     ! 
     ! pollTaxBen
