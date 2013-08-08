@@ -2496,7 +2496,9 @@ contains
         !3. CHILD BENEFIT
         !!!!!!!!!!!!!!!!!
         
-        call ChBen(sys,fam,net)
+        if (sys%chben%doChBen) then
+            call ChBen(sys,fam,net)
+        end if
 
         
         !4. TAX CREDITS
@@ -2522,7 +2524,9 @@ contains
         !5. IS AND IB-JSA
         !!!!!!!!!!!!!!!!!
         
-        call IncSup(sys,fam,net)
+        if (sys%incsup%doIncSup) then
+            call IncSup(sys,fam,net)
+        end if
 
         ! Maternity grant
         if (.not. sys%extra%matgrant) call MatGrant(sys,fam,net)
@@ -2538,7 +2542,9 @@ contains
         call prelimcalc(sys,fam,net,disregRebate)
         
         ! Housing benefit
-        call HBen(sys,fam,net,disregRebate)
+        if (sys%hben%doHBen) then
+            call HBen(sys,fam,net,disregRebate)
+        end if
 
         ! Poll tax (what about Northern Ireland?)
         if (sys%ccben%dopolltax) then
@@ -2552,10 +2558,22 @@ contains
         ! Council tax
         if (sys%ctax%docounciltax) then
             call ctax(sys,fam,net)
-            call ctaxBen(sys,fam,net,disregRebate)
         else
             net%tu%ctax    = 0.0_dp
+        end if
+        ! Council tax benefit
+        if (sys%ctaxben%docounciltaxben) then
+            call ctaxBen(sys,fam,net,disregRebate)
+        else
             net%tu%ctaxben = 0.0_dp
+        end if
+
+
+        ! Univeral Credit
+        if (sys%uc%doUnivCred) then
+            call UnivCred(sys,fam,net)
+        else
+            net%tu%uc = 0.0_dp
         end if
 
 
@@ -2563,12 +2581,12 @@ contains
         !!!!!!!!!!!!!!!!!!!
 
         net%tu%totben = net%tu%chben + net%tu%matgrant + net%tu%fc + net%tu%wtc + net%tu%ctc &
-            & + net%tu%incsup + net%tu%fsm + net%tu%hben + net%tu%ctaxben + net%tu%polltaxben
+            & + net%tu%incsup + net%tu%fsm + net%tu%hben + net%tu%ctaxben + net%tu%polltaxben &
+            & + net%tu%uc
             
         net%tu%nettax = net%ad(1)%inctax + net%ad(1)%natinsc1 + net%ad(1)%natinsc2 &
             & + net%ad(1)%natinsc4 + net%tu%ctax + net%tu%polltax &
-            & - (net%tu%chben + net%tu%matgrant + net%tu%fc + net%tu%wtc + net%tu%ctc &
-            & + net%tu%incsup + net%tu%fsm + net%tu%hben + net%tu%ctaxben + net%tu%polltaxben)
+            & - net%tu%totben
 
         if (_famcouple_) net%tu%nettax = net%tu%nettax + net%ad(2)%inctax &
             & + net%ad(2)%natinsc1 + net%ad(2)%natinsc2 + net%ad(2)%natinsc4
