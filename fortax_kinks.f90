@@ -629,7 +629,7 @@ loopmax : do
             end if
         end if
 
-        kinks_num = kinkidx
+        kinks_num = min(kinkidx,maxkinks)
 
         !rounding correction to ensure consistency
         if (present(correct)) then
@@ -1089,12 +1089,13 @@ loopmax : do
             end if
         end if
 
-        kinks_num = kinkidx
+        kinks_num = min(kinkidx,maxkinks)
 
         !rounding correction to ensure consistency
         if (present(correct)) then
             if (correct) then
                 do i = 1, kinks_num
+                    print *, i, kinks_num
                     !if (.not. kinks_dis(i)) then
                         !round to 5 decimal places
 !                        kinks_mtr(i)  = nint(kinks_mtr(i)*100000.0_dp)/100000.0_dp
@@ -1554,7 +1555,7 @@ loopmax : do
             end if
         end if
 
-        kinks_num = kinkidx
+        kinks_num = min(kinkidx,maxkinks)
 
         !rounding correction to ensure consistency
         if (present(correct)) then
