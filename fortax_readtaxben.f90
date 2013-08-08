@@ -74,6 +74,12 @@ contains
                         select case(cat2%name)
                             case('SA')
                                 sys%incTax%pa = strToDouble(cat2%value)
+                            case('DoSATaper')
+                                sys%incTax%doPATaper = strToLogical(cat2%value)
+                            case('SATaperRate')
+                                sys%incTax%paTaperRate = strToDouble(cat2%value)
+                            case('SATaperThreshold')
+                                sys%incTax%paTaperThresh = strToDouble(cat2%value)
                             case('MMA')
                                 sys%incTax%mma = strToDouble(cat2%value)
                             case('CTC')
@@ -245,10 +251,18 @@ contains
                         select case(cat2%name)
                             case('CB1')
                                 sys%chBen%basic = strToDouble(cat2%value)
+                                if (cat2%value .ne. '0') sys%chBen%doChBen = .true.
                             case('CB2')
                                 sys%chBen%kid1xtr = strToDouble(cat2%value)
                             case('OPB')
                                 sys%chBen%opf = strToDouble(cat2%value)
+                            case('WithdrawCB')
+                                sys%chBen%doTaper = StrToLogical(cat2%value)
+                            case('CBTaperStart')
+                                sys%chBen%taperStart = strToDouble(cat2%value)
+                            case('CBTaperEnd')
+                                ! This assumes that sys%chBen%taperStart has already been read in
+                                sys%chBen%taperRate = 100.0_dp / (52.0_dp * (strToDouble(cat2%value) - sys%chBen%taperStart))
                         end select
                     end do
 
@@ -261,6 +275,8 @@ contains
                         select case(cat2%name)
                             case('SSMatGrant')
                                 sys%chBen%matGrantVal = strToDouble(cat2%value)
+                            case('OnlyFirstKid')
+                                sys%chBen%MatGrantOnlyFirstKid = StrToLogical(cat2%value)
                         end select
                     end do
 
@@ -416,6 +432,8 @@ contains
                                 sys%ntc%taper1 = strToDouble(cat2%value)
                             case('HighIncomeTaper')
                                 sys%ntc%taper2 = strToDouble(cat2%value)
+                            case('TaperElementsTogether')
+                                sys%ntc%taperCTCInOneGo = strToLogical(cat2%value)
                         end select
                     end do
 
@@ -448,10 +466,10 @@ contains
                                 sys%wtc%FTHrs = strToDouble(cat2%value)
                             case('MinHoursNoKids')
                                 sys%wtc%minHrsNoKids = strToDouble(cat2%value)
-                            case('MinHoursCouKids')                             ! JS 06/02/12 changed from 'MinHoursKids' because that doesn't exist in .bp3 file
-                                                                                ! Note: also applies to LPs (.bp3 file distinguishes between couple parents and
-                                                                                ! LPs but both groups have always had the same hours threshold
-                                sys%wtc%minHrsKids = strToDouble(cat2%value)
+                            case('MinHoursLP')
+                                sys%wtc%MinHrsKids = strToDouble(cat2%value)
+                            case('MinHoursCouKids')
+                                sys%wtc%MinHrsCouKids = strToDouble(cat2%value)
                             case('MinimumAgeNoKids')
                                 sys%wtc%minAgeNoKids = strToInt(cat2%value)
                             case('MinimumAgeKids')
@@ -500,6 +518,7 @@ contains
                         select case(cat2%name)
                             case('CouOver18')
                                 sys%incSup%mainCou = strToDouble(cat2%value)
+                                if (cat2%value .ne. '0') sys%incsup%doIncSup = .true.
                             case('CouUnder18')
                                 sys%incSup%yngCou = strToDouble(cat2%value)
                             case('OPFOver18')
@@ -607,7 +626,7 @@ contains
                     end do
 
                                      
-                !HB, CCB and CTB: allowances and disregards
+                !HB, CCB and CTB: allowances and disregards; benefit cap values
                 case('PrmFowler.Reb')
                 
                     nfield = size(cat%field)
@@ -633,10 +652,22 @@ contains
                                 sys%rebateSys%disregLP = strToDouble(cat2%value)
                             case('MainDis')
                                 sys%rebateSys%maintDisreg = strToDouble(cat2%value)
+                            case('ChildcareDisUnearnedInc')
+                                sys%rebateSys%CredInDisregCC = StrToLogical(cat2%value)
                             case('NumAgeRanges')
                                 sys%rebateSys%numAgeRng = strToInt(cat2%value)
                             case('RestrictCTB')
                                 sys%rebateSys%restrict = StrToLogical(cat2%value)
+                            case('DoBenefitCap')
+                                sys%bencap%doCap = StrToLogical(cat2%value)
+                            case('BenefitCapSinglenoKids')
+                                sys%bencap%sinNoKids = strToDouble(cat2%value)
+                            case('BenefitCapLoneParent')
+                                sys%bencap%sinKids = strToDouble(cat2%value)
+                            case('BenefitCapCoupleNoKids')
+                                sys%bencap%couNoKids = strToDouble(cat2%value)
+                            case('BenefitCapCoupleKids')
+                                sys%bencap%couKids = strToDouble(cat2%value)
                         end select
                     end do
 
@@ -654,7 +685,21 @@ contains
                         end select
                     end do
 
-                    
+
+                !HB, CCB and CTB: whether child benefit counts as income in the taper calculation
+                  ! Note: the ChildBenefit component in the PrmFowler.Reb.OthInc structure only exists when child benefit counts as income
+                  ! So this code relies on sys%rebateSys%ChbenIsIncome being initialised to .false. by sys_init
+                case('PrmFowler.Reb.OthInc')
+                    nfield = size(cat%field)
+                    do j = 1, nfield
+                        cat2 => cat%field(j)
+                        select case(cat2%name)
+                            case('ChildBenefit')
+                                sys%rebateSys%ChbenIsIncome = merge(.true., .false., (strToInt(cat2%value)==1))
+                        end select
+                    end do
+
+
                 !Housing Benefit: taper
                 case('PrmFowler.Reb.OneRebate[Reb_Rent]')
                     nfield = size(cat%field)
@@ -663,6 +708,7 @@ contains
                         select case(cat2%name)
                             case('Taper')
                                 sys%hben%taper = strToDouble(cat2%value)
+                                if (cat2%value .ne. '0') sys%hben%doHBen = .true.
                             case('MinPayment')
                                 sys%hben%minAmt = strToDouble(cat2%value)
                         end select
@@ -719,6 +765,7 @@ contains
                                 select case(cat2%value)
                                     case('CouncilTax')
                                         sys%ctax%doCouncilTax = .true.
+                                        sys%ctaxben%doCouncilTaxBen = .true.
                                     case('PollTax')
                                         sys%ccBen%doPollTax = .true.
                                     case default
@@ -785,6 +832,22 @@ contains
                                 sys%rebateSys%maxCC1 = strToDouble(cat2%value)
                             case('2')
                                 sys%rebateSys%maxCC2 = strToDouble(cat2%value)
+                        end select
+                    end do
+
+
+                ! State pension (at the moment, it's just the state pension age)
+                case('PrmNIBen')
+                    nfield = size(cat%field)
+                    do j = 1, nfield
+                        cat2 => cat%field(j)
+                        select case(cat2%name)
+                            case('Abolished')
+                                sys%statepen%doStatePen = strToLogical(cat2%value)
+                            case('RePenAgeMan')
+                                sys%statepen%penAgeMan = strToDouble(cat2%value)
+                            case('RetPenAgeWoman')
+                                sys%statepen%penAgeWoman = strToDouble(cat2%value)
                         end select
                     end do
 
@@ -879,16 +942,23 @@ contains
         !50p rules for FC/WFTC and NTC's, and different rules under tax credits
         if (sys%fc%doFamCred) then
             sys%fc%minAmt = 0.50_dp
-            sys%rebateSys%rulesUnderFC  = .true.
+            if (sys%fc%MaxCC1 > tol) then
+              sys%rebateSys%rulesUnderFC   = .true.
+              sys%rebateSys%rulesUnderWFTC = .false.
+            else
+              sys%rebateSys%rulesUnderFC   = .false.
+              sys%rebateSys%rulesUnderWFTC = .true.
+            end if
             sys%rebateSys%rulesUnderNTC = .false.
             sys%incSup%incChBen         = .true.
         end if
 
         if (sys%ntc%donewtaxcred) then
             sys%ntc%MinAmt = 0.5_dp
-            sys%rebateSys%rulesUnderFC  = .false.
-            sys%rebateSys%rulesUnderNTC = .true.
-            sys%incSup%incChBen         = .false.
+            sys%rebateSys%rulesUnderFC   = .false.
+            sys%rebateSys%rulesUnderWFTC = .false.
+            sys%rebateSys%rulesUnderNTC  = .true.
+            sys%incSup%incChBen          = .false.
         end if
         
         !taper rate for CHILDREN's tax credit
@@ -898,6 +968,7 @@ contains
         sys%incSup%hours = sys%fc%hours1
                                 
         if (present(sysDate)) then
+
             ! IS/IB-JSA: is disregard shared for couples?
             ! I think that the date from which the disregard was pooled across couples is 7th Oct 1996
             if (sysdate < 19961007) then
@@ -905,27 +976,53 @@ contains
             else
                 sys%incSup%disregShared = .true.
             end if
-            ! From Oct 99, childcare disregard set against WFTC/WTC/CTC as well as earnings
-            if (sysdate < 19991005) then
+
+            ! From Jul 00, childcare disregard set against WFTC/WTC/CTC as well as earnings (TAXBEN says Apr 00, so this is a correction)
+            if ((sysdate >= 20000401) .and. (sysdate < 20000703)) then
                 sys%rebateSys%credInDisregCC = .false.
-               
-            else
-                sys%rebateSys%credInDisregCC = .true.
-                if (.not. sys%rebateSys%rulesUnderNTC) then
-                    sys%rebateSys%rulesUnderWFTC = .true.
-                    sys%rebateSys%rulesUnderFC = .false.
-                end if
             end if
+               
 
         else
             ! Note: if taxbensysfix is not called, then ...%DisregShared = .true.
             sys%incSup%disregShared = .true.
-            sys%rebateSys%credInDisregCC = .true.
         end if
 
         ! Minimum age for FSM
         !sys%incSup%MinAgeFSM = 5
         
+        ! Set child benefit taper to be recorded as a reduction in child benefit (rather than an increase in income tax)
+        if (sys%chBen%doTaper) then
+          sys%chBen%taperIsIncTax = .false.
+        end if
+        
+        
+        ! Reduce maximum entitlement for council tax benefit (April 2013)
+        if (present(sysDate)) then
+            if (sysdate >= 20130401) then
+                sys%ctaxben%doEntitlementCut = .true.
+                sys%ctaxben%entitlementShare = 0.896_dp
+            else
+                sys%ctaxben%doEntitlementCut = .false.
+            end if
+        else
+            sys%ctaxben%doEntitlementCut = .false.
+        end if
+
+
+        ! Impose benefit cap through UC from October 2013
+        if (present(sysDate)) then
+            if (sysdate >= 20131001) then
+                sys%bencap%doThruUC = .true.
+            else
+                sys%bencap%doThruUC = .false.
+            end if
+        else
+            sys%bencap%doThruUC = .false.
+        end if
+
+
+        
     end subroutine taxbenSysFix
-    
+
 end module fortax_taxbenread

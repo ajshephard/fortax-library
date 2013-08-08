@@ -125,7 +125,84 @@ contains
         
     end subroutine tapermatgrant
 
+
+    ! imposeUC
+    !----------------------------------------------------
+    ! Imposes UC onto sys, eliminating entitlement to benefits it replaces
+
+    subroutine imposeUC(sys)
     
+        use fortax_type, only : sys_t
+        
+        implicit none
+        
+        type(sys_t), intent(inout)    :: sys
+        
+        ! UC replaces IS, HB, CTC, WTC
+
+        ! Standard allowance (from IS)
+        sys%uc%MainCou = sys%incsup%MainCou
+        sys%uc%YngCou = sys%incsup%YngCou
+        ! Check whether these single rates are the right ones TODO
+        sys%uc%MainSin = sys%incsup%MainSin
+        sys%uc%YngSin = sys%incsup%YngSin
+        sys%uc%MinAgeMain = 25  ! IS has this information hard-coded (should change this)
+
+        ! Child element (from CTC)
+        sys%uc%FirstKid = sys%ctc%fam + sys%ctc%kid
+        sys%uc%OtherKid = sys%ctc%kid
+
+        ! Childcare element (from WTC)
+        sys%uc%MaxCC1 = sys%wtc%MaxCC1
+        sys%uc%MaxCC2 = sys%wtc%MaxCC2
+        sys%uc%PropCC = sys%wtc%PropCC
+        sys%uc%MaxAgeCC = sys%wtc%MaxAgeCC
+
+        ! Housing costs components
+        sys%uc%doRentCap = .false.
+
+        ! Disregards (monthly figures from legislation - need to be weeklyised)
+        sys%uc%DisregSinNoKidsHi  = 111.0_dp*12.0_dp/52.0_dp
+        sys%uc%DisregSinNoKidsLo  = 111.0_dp*12.0_dp/52.0_dp
+        sys%uc%DisregSinKidsHi    = 734.0_dp*12.0_dp/52.0_dp
+        sys%uc%DisregSinKidsLo    = 263.0_dp*12.0_dp/52.0_dp
+        sys%uc%DisregCouNoKidsHi  = 111.0_dp*12.0_dp/52.0_dp
+        sys%uc%DisregCouNoKidsLo  = 111.0_dp*12.0_dp/52.0_dp
+        sys%uc%DisregCouKidsHi    = 536.0_dp*12.0_dp/52.0_dp
+        sys%uc%DisregCouKidsLo    = 222.0_dp*12.0_dp/52.0_dp
+
+        ! Disregards (annual figures from TAXBEN - need to be weeklyised)
+        sys%uc%DisregSinNoKidsHi  = 1330.0_dp/52.0_dp
+        sys%uc%DisregSinNoKidsLo  = 1330.0_dp/52.0_dp
+        sys%uc%DisregSinKidsHi    = 8812.0_dp/52.0_dp
+        sys%uc%DisregSinKidsLo    = 3159.0_dp/52.0_dp
+        sys%uc%DisregCouNoKidsHi  = 1330.0_dp/52.0_dp
+        sys%uc%DisregCouNoKidsLo  = 1330.0_dp/52.0_dp
+        sys%uc%DisregCouKidsHi    = 6429.0_dp/52.0_dp
+        sys%uc%DisregCouKidsLo    = 2660.0_dp/52.0_dp
+
+        ! Taper
+        sys%uc%taper = sys%hben%taper
+
+        ! Minimum UC (monthly figure from legislation - need to be weeklyised)
+        sys%uc%MinAmt = 0.01_dp*12.0_dp/52.0_dp
+
+        ! Also need to set some benefit cap parameters
+        sys%bencap%doThruUC = .true.
+        sys%bencap%UCEarnThr = 430.0_dp*12.0_dp/52.0_dp
+
+        ! Turn UC on
+        sys%uc%doUnivCred     = .true.
+        
+        ! Turn IS, HB and all tax credits (FC/WFTC/WTC/CTC) off
+        sys%incsup%doIncSup   = .false.
+        sys%hben%doHBen       = .false.
+        sys%fc%dofamcred      = .false.
+        sys%ntc%doNewTaxCred  = .false.
+        
+
+    end subroutine imposeUC
+
     ! netoutDesc
     ! -----------------------------------------------------------------------
     ! provides the shortname, level and amount of net in arrays of size
