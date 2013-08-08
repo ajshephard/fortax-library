@@ -1,0 +1,7 @@
+# Compiled source #
+###################
+*.o
+*.a
+*.so
+*.mod
+*.exe
