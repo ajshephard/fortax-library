@@ -2045,7 +2045,7 @@ contains
 
 
 
-
+    !DEC$ ATTRIBUTES FORCEINLINE :: UnivCred
     pure subroutine UnivCred(sys,fam,net)
 
         use fortax_type, only : sys_t, fam_t, net_t
@@ -2092,6 +2092,7 @@ contains
     ! Calculates standard allowance for Universal Credit
     ! Equivalent to personal allowance in IS/income-based JSA
     
+    !DEC$ ATTRIBUTES FORCEINLINE :: UCStdAllow
     real(dp) pure function UCStdAllow(sys,fam)
 
         use fortax_type, only : sys_t, fam_t
@@ -2137,6 +2138,7 @@ contains
     ! Same as child components of CTC
     ! Note that this includes the baby element (unlike the MaxCTCKid procedure)
 
+    !DEC$ ATTRIBUTES FORCEINLINE :: UCKid
     real(dp) pure function UCKid(sys,fam)
 
         use fortax_type, only : sys_t, fam_t
@@ -2166,6 +2168,7 @@ contains
     ! Same as childcare element of WTC
     ! Note that it does NOT set net%tu%chcaresub. This is done in UnivCred so that UCChCare can be called later without disrupting chcaresub
     
+    !DEC$ ATTRIBUTES FORCEINLINE :: UCChCare
     real(dp) pure function UCChCare(sys,fam)
 
         use fortax_type, only : sys_t, fam_t
@@ -2219,6 +2222,7 @@ contains
     ! -----------------------------------------------------------------------
     ! Housing costs element of Universal Credit (currently ignores help towards mortgage costs)
     
+    !DEC$ ATTRIBUTES FORCEINLINE :: UCHousing
     real(dp) pure function UCHousing(sys,fam)
 
         use fortax_type, only : sys_t, fam_t
@@ -2243,6 +2247,7 @@ contains
     ! -----------------------------------------------------------------------
     ! Earnings disregard for Universal Credit
 
+    !DEC$ ATTRIBUTES FORCEINLINE :: UCDisreg
     real(dp) pure function UCDisreg(sys,fam,UCHousing)
 
         use fortax_type, only : sys_t, fam_t
@@ -2306,6 +2311,7 @@ contains
     ! ----------------------------------------------
     ! Imposes benefit cap
 
+    !DEC$ ATTRIBUTES FORCEINLINE :: ImposeBenCap
     pure subroutine ImposeBenCap(sys,fam,net)
 
         use fortax_type, only : sys_t, fam_t, net_t
@@ -2378,6 +2384,7 @@ contains
     ! -----------------------------------------------------------------------
     ! Calculate benefit cap that applies
 
+    !DEC$ ATTRIBUTES FORCEINLINE :: BenCapLevel
     real(dp) pure function BenCapLevel(sys,fam)
 
         use fortax_type, only : sys_t, fam_t
