@@ -1899,6 +1899,8 @@ contains
         real(dp)                   :: percentLost
         real(dp)                   :: chBenCharge
 
+        real(dp), parameter :: chben_tol = 1.0e-8_dp
+
         if (_famkids_) then
             net%tu%chben = sys%chben%basic*fam%nkids + sys%chben%kid1xtr
             if (.not. _famcouple_) net%tu%chben = net%tu%chben + sys%chben%opf
@@ -1919,7 +1921,7 @@ contains
                 end if
 
                 ! Find annual amount by which earnings of primary earner exceeds threshold (rounded down to nearest pound in annual terms)
-                excessAnnualEarnings = max(0.0_dp, real(floor((fam%ad(pe)%earn - sys%chben%taperStart)*52.0_dp + tol), dp))
+                excessAnnualEarnings = max(0.0_dp, real(floor((fam%ad(pe)%earn - sys%chben%taperStart)*52.0_dp + chben_tol), dp))
                 
                 ! Find percentage of child benefit award tapered away (calculated on rounded excess earnings, rounded down to nearest percent)
                 percentLost = min(1.0_dp, real(floor(excessAnnualEarnings * sys%chben%taperRate + tol) / 100.0_dp, dp))
