@@ -1627,14 +1627,25 @@ contains
             ! Taper WTC first
             net%tu%wtc = max(MaxWTC - max(net%tu%pretaxearn - Thr1, 0.0_dp)*sys%ntc%taper1, 0.0_dp)
 
-            ! Next taper child elements of CTC
-            net%tu%ctc = max(MaxCTCKid - max(net%tu%pretaxearn - Thr1 - MaxWTC/sys%ntc%taper1, 0.0_dp)*sys%ntc%taper1, 0.0_dp)
-            
-            ! Second threshold
-            Thr2 = max((MaxWTC+MaxCTCKid)/sys%ntc%taper1 + Thr1, sys%ntc%thr2)
-            
-            ! Finally taper family element of CTC
-            net%tu%ctc = net%tu%ctc + max(MaxCTCFam - max(net%tu%pretaxearn - Thr2, 0.0_dp)*sys%ntc%taper2, 0.0_dp)
+            ! From April 2012, second threshold (for family element of CTC) was abolished
+            if (sys%ntc%taperCTCInOneGo) then
+
+                ! Next taper CTC
+                net%tu%ctc = max(MaxCTCKid + MaxCTCFam - max(net%tu%pretaxearn - Thr1 - MaxWTC/sys%ntc%taper1, 0.0_dp)*sys%ntc%taper1, 0.0_dp)
+
+            else
+
+                ! Next taper child elements of CTC
+                net%tu%ctc = max(MaxCTCKid - max(net%tu%pretaxearn - Thr1 - MaxWTC/sys%ntc%taper1, 0.0_dp)*sys%ntc%taper1, 0.0_dp)
+                
+                ! Second threshold
+                Thr2 = max((MaxWTC+MaxCTCKid)/sys%ntc%taper1 + Thr1, sys%ntc%thr2)
+                
+                ! Finally taper family element of CTC
+                net%tu%ctc = net%tu%ctc + max(MaxCTCFam - max(net%tu%pretaxearn - Thr2, 0.0_dp)*sys%ntc%taper2, 0.0_dp)
+
+            end if
+
 
             ! Award not made below a minimum level (50p)
             if (net%tu%wtc+net%tu%ctc < sys%ntc%MinAmt) then
