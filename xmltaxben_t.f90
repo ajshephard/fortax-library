@@ -11,6 +11,11 @@ type field_t
    character(len=80)                                :: Value
 end type field_t
 
+type fieldheader_t
+   character(len=80)                                :: Type
+   character(len=80)                                :: Value
+end type fieldheader_t
+
 type namedfields_t
    character(len=80)                                :: BaseName
    type(field_t), dimension(:), pointer            :: Field => null()
@@ -19,6 +24,7 @@ end type namedfields_t
 type object_t
    integer                                         :: ClassNum
    character(len=80)                                :: Name
+   type(fieldheader_t), dimension(:), pointer      :: Field => null()
    type(namedfields_t), dimension(:), pointer      :: NamedFields => null()
 end type object_t
    type(object_t)                                  :: Object
@@ -167,6 +173,140 @@ end subroutine init_xml_type_field_t_array
 subroutine init_xml_type_field_t(dvar)
    type(field_t) :: dvar
 end subroutine init_xml_type_field_t
+subroutine read_xml_type_fieldheader_t_array( &
+      info, tag, endtag, attribs, noattribs, data, nodata, &
+      dvar, has_dvar )
+   type(XML_PARSE)                                 :: info
+   character(len=*), intent(inout)                 :: tag
+   logical, intent(inout)                          :: endtag
+   character(len=*), dimension(:,:), intent(inout) :: attribs
+   integer, intent(inout)                          :: noattribs
+   character(len=*), dimension(:), intent(inout)   :: data
+   integer, intent(inout)                          :: nodata
+   type(fieldheader_t), dimension(:), pointer :: dvar
+   logical, intent(inout)                       :: has_dvar
+
+   integer                                      :: newsize
+   type(fieldheader_t), dimension(:), pointer :: newvar
+
+   newsize = size(dvar) + 1
+   allocate( newvar(1:newsize) )
+   newvar(1:newsize-1) = dvar
+   deallocate( dvar )
+   dvar => newvar
+
+   call read_xml_type_fieldheader_t( info, tag, endtag, attribs, noattribs, data, nodata, &
+              dvar(newsize), has_dvar )
+end subroutine read_xml_type_fieldheader_t_array
+
+subroutine read_xml_type_fieldheader_t( info, starttag, endtag, attribs, noattribs, data, nodata, &
+              dvar, has_dvar )
+   type(XML_PARSE)                                 :: info
+   character(len=*), intent(in)                    :: starttag
+   logical, intent(inout)                          :: endtag
+   character(len=*), dimension(:,:), intent(inout) :: attribs
+   integer, intent(inout)                          :: noattribs
+   character(len=*), dimension(:), intent(inout)   :: data
+   integer, intent(inout)                          :: nodata
+   type(fieldheader_t), intent(inout)  :: dvar
+   logical, intent(inout)                       :: has_dvar
+
+   integer                                      :: att_
+   integer                                      :: noatt_
+   logical                                      :: error
+   logical                                      :: endtag_org
+   character(len=80)                            :: tag
+   logical                                         :: has_Type
+   logical                                         :: has_Value
+   has_Type                             = .false.
+   has_Value                            = .false.
+   call init_xml_type_fieldheader_t(dvar)
+   has_dvar = .true.
+   error  = .false.
+   att_   = 0
+   noatt_ = noattribs+1
+   endtag_org = endtag
+   do
+      if ( nodata .ne. 0 ) then
+         noattribs = 0
+         tag = starttag
+      elseif ( att_ .lt. noatt_ .and. noatt_ .gt. 1 ) then
+         att_      = att_ + 1
+         if ( att_ .le. noatt_-1 ) then
+            tag       = attribs(1,att_)
+            data(1)   = attribs(2,att_)
+            noattribs = 0
+            nodata    = 1
+            endtag    = .false.
+         else
+            tag       = starttag
+            noattribs = 0
+            nodata    = 0
+            endtag    = .true.
+            cycle
+         endif
+      else
+         if ( endtag_org ) then
+            return
+         else
+            call xml_get( info, tag, endtag, attribs, noattribs, data, nodata )
+            if ( xml_error(info) ) then
+               write(lurep_,*) 'Error reading input file!'
+               error = .true.
+               return
+            endif
+         endif
+      endif
+      if ( endtag .and. tag .eq. starttag ) then
+         exit
+      endif
+      if ( endtag .and. noattribs .eq. 0 ) then
+         if ( xml_ok(info) ) then
+            cycle
+         else
+            exit
+         endif
+      endif
+      select case( tag )
+      case('Type')
+         call read_xml_word( &
+            info, tag, endtag, attribs, noattribs, data, nodata, &
+            dvar%Type, has_Type )
+      case('Value')
+         call read_xml_line( &
+            info, tag, endtag, attribs, noattribs, data, nodata, &
+            dvar%Value, has_Value )
+      case ('comment', '!--')
+         ! Simply ignore
+      case default
+         if ( strict_ ) then
+            error = .true.
+            call xml_report_errors( info, &
+               'Unknown or wrongly placed tag: ' // trim(tag))
+         endif
+      end select
+      nodata = 0
+      if ( .not. xml_ok(info) ) exit
+   end do
+   if ( .not. has_Type ) then
+      has_dvar = .false.
+      call xml_report_errors(info, 'Missing data on Type')
+   endif
+   if ( .not. has_Value ) then
+      has_dvar = .false.
+      call xml_report_errors(info, 'Missing data on Value')
+   endif
+end subroutine read_xml_type_fieldheader_t
+subroutine init_xml_type_fieldheader_t_array( dvar )
+   type(fieldheader_t), dimension(:), pointer :: dvar
+   if ( associated( dvar ) ) then
+      deallocate( dvar )
+   endif
+   allocate( dvar(0) )
+end subroutine init_xml_type_fieldheader_t_array
+subroutine init_xml_type_fieldheader_t(dvar)
+   type(fieldheader_t) :: dvar
+end subroutine init_xml_type_fieldheader_t
 subroutine read_xml_type_namedfields_t_array( &
       info, tag, endtag, attribs, noattribs, data, nodata, &
       dvar, has_dvar )
@@ -284,8 +424,7 @@ subroutine read_xml_type_namedfields_t( info, starttag, endtag, attribs, noattri
       if ( .not. xml_ok(info) ) exit
    end do
    if ( .not. has_BaseName ) then
-      has_dvar = .false.
-      call xml_report_errors(info, 'Missing data on BaseName')
+      dvar%BaseName = ""
    endif
 end subroutine read_xml_type_namedfields_t
 subroutine init_xml_type_namedfields_t_array( dvar )
@@ -343,9 +482,12 @@ subroutine read_xml_type_object_t( info, starttag, endtag, attribs, noattribs, d
    character(len=80)                            :: tag
    logical                                         :: has_ClassNum
    logical                                         :: has_Name
+   logical                                         :: has_Field
    logical                                         :: has_NamedFields
    has_ClassNum                         = .false.
    has_Name                             = .false.
+   has_Field                            = .false.
+   allocate(dvar%Field(0))
    has_NamedFields                      = .false.
    allocate(dvar%NamedFields(0))
    call init_xml_type_object_t(dvar)
@@ -404,6 +546,10 @@ subroutine read_xml_type_object_t( info, starttag, endtag, attribs, noattribs, d
          call read_xml_word( &
             info, tag, endtag, attribs, noattribs, data, nodata, &
             dvar%Name, has_Name )
+      case('Field')
+         call read_xml_type_fieldheader_t_array( &
+            info, tag, endtag, attribs, noattribs, data, nodata, &
+            dvar%Field, has_Field )
       case('NamedFields')
          call read_xml_type_namedfields_t_array( &
             info, tag, endtag, attribs, noattribs, data, nodata, &
@@ -427,6 +573,10 @@ subroutine read_xml_type_object_t( info, starttag, endtag, attribs, noattribs, d
    if ( .not. has_Name ) then
       has_dvar = .false.
       call xml_report_errors(info, 'Missing data on Name')
+   endif
+   if ( .not. has_Field ) then
+      has_dvar = .false.
+      call xml_report_errors(info, 'Missing data on Field')
    endif
    if ( .not. has_NamedFields ) then
       has_dvar = .false.

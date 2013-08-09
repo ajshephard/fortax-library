@@ -6,13 +6,18 @@
     <component name="Type" type="word" length="80"/>
     <component name="Value" type="word" length="80"/>
   </typedef>
+  <typedef name="fieldheader_t">
+    <component name="Type" type="word" length="80"/>
+    <component name="Value" type="character" length="80"/>
+  </typedef>
   <typedef name="namedfields_t">
-    <component name="BaseName" type="word" length="80"/>
+    <component name="BaseName" type="word" length="80" required="no"/>
     <component name="Field" type="field_t" dimension="1" required="no"/>
   </typedef>
   <typedef name="object_t">
     <component name="ClassNum" type="integer"/>
     <component name="Name" type="word" length="80"/>
+    <component name="Field" type="fieldheader_t" dimension="1"/>
     <component name="NamedFields" type="namedfields_t" dimension="1"/>
   </typedef>
   <variable name="Object" type="object_t"/>
