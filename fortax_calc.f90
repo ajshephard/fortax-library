@@ -1930,15 +1930,19 @@ contains
                     excessAnnualEarnings = max(0.0_dp, real(floor((fam%ad(pe)%earn - sys%chben%taperStart)*52.0_dp + chben_tol), dp))
 
                     ! Find percentage of child benefit award tapered away (calculated on rounded excess earnings, rounded down to nearest percent)
-                    percentLost = min(1.0_dp, real(floor(excessAnnualEarnings * sys%chben%taperRate + tol) / 100.0_dp, dp))
+!                     percentLost = min(1.0_dp, real(floor(excessAnnualEarnings * sys%chben%taperRate + tol) / 100.0_dp, dp))
+                    percentLost = real(floor(excessAnnualEarnings * sys%chben%taperRate + tol) / 100.0_dp, dp)
 
                     ! Find weekly high income child benefit charge (rounded down to nearest pound at annual level)
-                    chBenCharge = real(floor(net%tu%chben*52.0_dp * percentLost), dp) / 52.0_dp
+!                     chBenCharge = real(floor(net%tu%chben*52.0_dp * percentLost), dp) / 52.0_dp
+                    chBenCharge = min(real(floor(net%tu%chben*52.0_dp * percentLost), dp) / 52.0_dp, net%tu%chben)
 
                 else
                     excessAnnualEarnings = max(0.0_dp, (fam%ad(pe)%earn - sys%chben%taperStart)*52.0_dp)
-                    percentLost = min(1.0_dp, (excessAnnualEarnings * sys%chben%taperRate) / 100.0_dp )
-                    chBenCharge = net%tu%chben*percentLost
+!                    percentLost = min(1.0_dp, (excessAnnualEarnings * sys%chben%taperRate) / 100.0_dp )
+                    percentLost = (excessAnnualEarnings * sys%chben%taperRate) / 100.0_dp
+!                     chBenCharge = net%tu%chben*percentLost
+                    chBenCharge = min(net%tu%chben*percentLost, net%tu%chben)
                 end if
 
                 ! Subtract charge from child benefit award (or increase income tax)
