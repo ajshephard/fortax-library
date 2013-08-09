@@ -91,7 +91,9 @@ contains
                 ! Taper personal allowance away
                 persAllow =  max(sys%inctax%pa - earningsOverThresh * sys%inctax%paTaperRate, 0.0_dp)
                 ! Round up to nearest pound (rounding done on annual basis)
-                persAllow = real(ceiling(persAllow*52.0_dp), dp) / 52.0_dp
+                if (.not. sys%inctax%disablePATaperRounding) then
+                    persAllow = real(ceiling(persAllow*52.0_dp), dp) / 52.0_dp
+                end if
             else
                 persAllow = sys%inctax%pa
             end if
@@ -116,7 +118,9 @@ contains
                     ! Taper personal allowance away
                     persAllow =  max(sys%inctax%pa - earningsOverThresh * sys%inctax%paTaperRate, 0.0_dp)
                     ! Round up to nearest pound (rounding done on annual basis)
-                    persAllow = real(ceiling(persAllow*52.0_dp), dp) / 52.0_dp
+                    if (.not. sys%inctax%disablePATaperRounding) then
+                        persAllow = real(ceiling(persAllow*52.0_dp), dp) / 52.0_dp
+                    end if
                 else
                     persAllow = sys%inctax%pa
                 end if
@@ -1920,15 +1924,23 @@ contains
                     end if
                 end if
 
-                ! Find annual amount by which earnings of primary earner exceeds threshold (rounded down to nearest pound in annual terms)
-                excessAnnualEarnings = max(0.0_dp, real(floor((fam%ad(pe)%earn - sys%chben%taperStart)*52.0_dp + chben_tol), dp))
-                
-                ! Find percentage of child benefit award tapered away (calculated on rounded excess earnings, rounded down to nearest percent)
-                percentLost = min(1.0_dp, real(floor(excessAnnualEarnings * sys%chben%taperRate + tol) / 100.0_dp, dp))
-                
-                ! Find weekly high income child benefit charge (rounded down to nearest pound at annual level)
-                chBenCharge = real(floor(net%tu%chben*52.0_dp * percentLost), dp) / 52.0_dp
-                
+                if (.not. sys%chben%disableTaperRounding) then
+
+                    ! Find annual amount by which earnings of primary earner exceeds threshold (rounded down to nearest pound in annual terms)
+                    excessAnnualEarnings = max(0.0_dp, real(floor((fam%ad(pe)%earn - sys%chben%taperStart)*52.0_dp + chben_tol), dp))
+
+                    ! Find percentage of child benefit award tapered away (calculated on rounded excess earnings, rounded down to nearest percent)
+                    percentLost = min(1.0_dp, real(floor(excessAnnualEarnings * sys%chben%taperRate + tol) / 100.0_dp, dp))
+
+                    ! Find weekly high income child benefit charge (rounded down to nearest pound at annual level)
+                    chBenCharge = real(floor(net%tu%chben*52.0_dp * percentLost), dp) / 52.0_dp
+
+                else
+                    excessAnnualEarnings = max(0.0_dp, (fam%ad(pe)%earn - sys%chben%taperStart)*52.0_dp)
+                    percentLost = min(1.0_dp, (excessAnnualEarnings * sys%chben%taperRate) / 100.0_dp )
+                    chBenCharge = net%tu%chben*percentLost
+                end if
+
                 ! Subtract charge from child benefit award (or increase income tax)
                 if (sys%chben%taperIsIncTax) then
                   net%ad(pe)%inctax = net%ad(pe)%inctax + chBenCharge
