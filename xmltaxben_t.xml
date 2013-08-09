@@ -1,0 +1,19 @@
+<?xml version="1.0" ?>
+<template>
+  <options strict="no" dynamicstrings="no" rootname="DataStream_Id3726" write="no">
+  <typedef name="field_t">
+    <component name="Name" type="word" length="80"/>
+    <component name="Type" type="word" length="80"/>
+    <component name="Value" type="word" length="80"/>
+  </typedef>
+  <typedef name="namedfields_t">
+    <component name="BaseName" type="word" length="80"/>
+    <component name="Field" type="field_t" dimension="1" required="no"/>
+  </typedef>
+  <typedef name="object_t">
+    <component name="ClassNum" type="integer"/>
+    <component name="Name" type="word" length="80"/>
+    <component name="NamedFields" type="namedfields_t" dimension="1"/>
+  </typedef>
+  <variable name="Object" type="object_t"/>
+</template>

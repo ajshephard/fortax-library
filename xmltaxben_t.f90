@@ -1,37 +1,27 @@
-!this has been automatically generated from the .xml template file, but i have removed
-!the write routines and have reduced symbol length where necessary. also added charlen
-!and added save attribute to object (of type object_t) AS
-
 module xml_data_xmltaxben_t
    use READ_XML_PRIMITIVES
-   !use WRITE_XML_PRIMITIVES
    use XMLPARSE
    implicit none
    integer, private :: lurep_
    logical, private :: strict_
 
-   !change this if any of the data is getting truncated when read in
-   integer, parameter, private :: charlen = 80
-   
 type field_t
-   character(len=charlen)                          :: Name
-   character(len=charlen)                          :: Type
-   character(len=charlen)                          :: Value
+   character(len=80)                                :: Name
+   character(len=80)                                :: Type
+   character(len=80)                                :: Value
 end type field_t
 
 type namedfields_t
-   character(len=charlen)                          :: BaseName
+   character(len=80)                                :: BaseName
    type(field_t), dimension(:), pointer            :: Field => null()
 end type namedfields_t
 
 type object_t
    integer                                         :: ClassNum
-   character(len=charlen)                          :: Name
+   character(len=80)                                :: Name
    type(namedfields_t), dimension(:), pointer      :: NamedFields => null()
 end type object_t
-
-    type(object_t), save                           :: Object
-
+   type(object_t)                                  :: Object
 contains
 subroutine read_xml_type_field_t_array( &
       info, tag, endtag, attribs, noattribs, data, nodata, &
@@ -177,36 +167,7 @@ end subroutine init_xml_type_field_t_array
 subroutine init_xml_type_field_t(dvar)
    type(field_t) :: dvar
 end subroutine init_xml_type_field_t
-!subroutine write_xml_type_field_t_array( &
-!      info, tag, indent, dvar )
-!   type(XML_PARSE)                                 :: info
-!   character(len=*), intent(in)                    :: tag
-!   integer                                         :: indent
-!   type(field_t), dimension(:)        :: dvar
-!   integer                                         :: i
-!   do i = 1,size(dvar)
-!       call write_xml_type_field_t( info, tag, indent, dvar(i) )
-!   enddo
-!end subroutine write_xml_type_field_t_array
-!
-!subroutine write_xml_type_field_t( &
-!      info, tag, indent, dvar )
-!   type(XML_PARSE)                                 :: info
-!   character(len=*), intent(in)                    :: tag
-!   integer                                         :: indent
-!   type(field_t)                      :: dvar
-!   character(len=100)                              :: indentation
-!   indentation = ' '
-!   write(info%lun, '(4a)' ) indentation(1:min(indent,100)),&
-!       '<',trim(tag), '>'
-!   call write_to_xml_word( info, 'Name', indent+3, dvar%Name)
-!   call write_to_xml_word( info, 'Type', indent+3, dvar%Type)
-!   call write_to_xml_word( info, 'Value', indent+3, dvar%Value)
-!   write(info%lun,'(4a)') indentation(1:min(indent,100)), &
-!       '</' //trim(tag) // '>'
-!end subroutine write_xml_type_field_t
-
-subroutine read_xml_type_nmfields_t_array( &
+subroutine read_xml_type_namedfields_t_array( &
       info, tag, endtag, attribs, noattribs, data, nodata, &
       dvar, has_dvar )
    type(XML_PARSE)                                 :: info
@@ -230,7 +191,7 @@ subroutine read_xml_type_nmfields_t_array( &
 
    call read_xml_type_namedfields_t( info, tag, endtag, attribs, noattribs, data, nodata, &
               dvar(newsize), has_dvar )
-end subroutine read_xml_type_nmfields_t_array
+end subroutine read_xml_type_namedfields_t_array
 
 subroutine read_xml_type_namedfields_t( info, starttag, endtag, attribs, noattribs, data, nodata, &
               dvar, has_dvar )
@@ -327,45 +288,16 @@ subroutine read_xml_type_namedfields_t( info, starttag, endtag, attribs, noattri
       call xml_report_errors(info, 'Missing data on BaseName')
    endif
 end subroutine read_xml_type_namedfields_t
-subroutine init_xml_type_nmfields_t_array( dvar )
+subroutine init_xml_type_namedfields_t_array( dvar )
    type(namedfields_t), dimension(:), pointer :: dvar
    if ( associated( dvar ) ) then
       deallocate( dvar )
    endif
    allocate( dvar(0) )
-end subroutine init_xml_type_nmfields_t_array
+end subroutine init_xml_type_namedfields_t_array
 subroutine init_xml_type_namedfields_t(dvar)
    type(namedfields_t) :: dvar
-   dvar%Field = field_t('','','')
 end subroutine init_xml_type_namedfields_t
-!subroutine write_xml_type_namedfields_t_array( &
-!      info, tag, indent, dvar )
-!   type(XML_PARSE)                                 :: info
-!   character(len=*), intent(in)                    :: tag
-!   integer                                         :: indent
-!   type(namedfields_t), dimension(:)        :: dvar
-!   integer                                         :: i
-!   do i = 1,size(dvar)
-!       call write_xml_type_namedfields_t( info, tag, indent, dvar(i) )
-!   enddo
-!end subroutine write_xml_type_namedfields_t_array
-
-!subroutine write_xml_type_namedfields_t( &
-!      info, tag, indent, dvar )
-!   type(XML_PARSE)                                 :: info
-!   character(len=*), intent(in)                    :: tag
-!   integer                                         :: indent
-!   type(namedfields_t)                      :: dvar
-!   character(len=100)                              :: indentation
-!   indentation = ' '
-!   write(info%lun, '(4a)' ) indentation(1:min(indent,100)),&
-!       '<',trim(tag), '>'
-!   call write_to_xml_word( info, 'BaseName', indent+3, dvar%BaseName)
-!   call write_xml_type_field_t_array( info, 'Field', indent+3, dvar%Field)
-!   write(info%lun,'(4a)') indentation(1:min(indent,100)), &
-!       '</' //trim(tag) // '>'
-!end subroutine write_xml_type_namedfields_t
-
 subroutine read_xml_type_object_t_array( &
       info, tag, endtag, attribs, noattribs, data, nodata, &
       dvar, has_dvar )
@@ -473,7 +405,7 @@ subroutine read_xml_type_object_t( info, starttag, endtag, attribs, noattribs, d
             info, tag, endtag, attribs, noattribs, data, nodata, &
             dvar%Name, has_Name )
       case('NamedFields')
-         call read_xml_type_nmfields_t_array( &
+         call read_xml_type_namedfields_t_array( &
             info, tag, endtag, attribs, noattribs, data, nodata, &
             dvar%NamedFields, has_NamedFields )
       case ('comment', '!--')
@@ -511,35 +443,6 @@ end subroutine init_xml_type_object_t_array
 subroutine init_xml_type_object_t(dvar)
    type(object_t) :: dvar
 end subroutine init_xml_type_object_t
-!subroutine write_xml_type_object_t_array( &
-!      info, tag, indent, dvar )
-!   type(XML_PARSE)                                 :: info
-!   character(len=*), intent(in)                    :: tag
-!   integer                                         :: indent
-!   type(object_t), dimension(:)        :: dvar
-!   integer                                         :: i
-!   do i = 1,size(dvar)
-!       call write_xml_type_object_t( info, tag, indent, dvar(i) )
-!   enddo
-!end subroutine write_xml_type_object_t_array
-
-!subroutine write_xml_type_object_t( &
-!      info, tag, indent, dvar )
-!   type(XML_PARSE)                                 :: info
-!   character(len=*), intent(in)                    :: tag
-!   integer                                         :: indent
-!   type(object_t)                      :: dvar
-!   character(len=100)                              :: indentation
-!   indentation = ' '
-!   write(info%lun, '(4a)' ) indentation(1:min(indent,100)),&
-!       '<',trim(tag), '>'
-!   call write_to_xml_integer( info, 'ClassNum', indent+3, dvar%ClassNum)
-!   call write_to_xml_word( info, 'Name', indent+3, dvar%Name)
-!   call write_xml_type_namedfields_t_array( info, 'NamedFields', indent+3, dvar%NamedFields)
-!   write(info%lun,'(4a)') indentation(1:min(indent,100)), &
-!       '</' //trim(tag) // '>'
-!end subroutine write_xml_type_object_t
-
 subroutine read_xml_file_xmltaxben_t(fname, lurep, errout,funit)
    character(len=*), intent(in)           :: fname
    integer, intent(in), optional          :: lurep
@@ -551,7 +454,7 @@ subroutine read_xml_file_xmltaxben_t(fname, lurep, errout,funit)
    character(len=80)                      :: tag
    character(len=80)                      :: starttag
    logical                                :: endtag
-   character(len=255), dimension(1:2,1:20) :: attribs   ! JS 02/02/12 changed len from 80 to 255 to stop arrays of tax rates being truncated
+   character(len=255), dimension(1:2,1:20) :: attribs
    integer                                :: noattribs
    character(len=200), dimension(1:100)   :: data
    integer                                :: nodata
@@ -560,9 +463,8 @@ subroutine read_xml_file_xmltaxben_t(fname, lurep, errout,funit)
 
    call init_xml_file_xmltaxben_t
    call xml_open( info, fname, .true. )
-   if (present(funit)) funit = info%lun !AS
-
-   call xml_options( info, report_errors=.true., ignore_whitespace=.true.)
+   if (present(funit)) funit = info%lun
+   call xml_options( info, report_errors=.true., ignore_whitespace=.true., no_data_truncation =.true.)
    lurep_ = 0
    if ( present(lurep) ) then
       lurep_ = lurep
@@ -623,24 +525,23 @@ subroutine read_xml_file_xmltaxben_t(fname, lurep, errout,funit)
    if ( present(errout) ) errout = error
 end subroutine
 
-!subroutine write_xml_file_xmltaxben_t(fname, lurep)
-!   character(len=*), intent(in)           :: fname
-!   integer, intent(in), optional          :: lurep
-!
-!   type(XML_PARSE)                        :: info
-!   integer                                :: indent = 0
-!
-!   call xml_open( info, fname, .false. )
-!   call xml_options( info, report_errors=.true.)
-!   if ( present(lurep) ) then
-!       call xml_options( info, report_errors=.true.)
-!   endif
-!   write(info%lun,'(a)') &
-!      '<DataStream_Id3726>'
-!   call write_xml_type_object_t( info, 'Object', indent+3, Object)
-!   write(info%lun,'(a)') '</DataStream_Id3726>'
-!   call xml_close(info)
-!end subroutine
+subroutine write_xml_file_xmltaxben_t(fname, lurep)
+   character(len=*), intent(in)           :: fname
+   integer, intent(in), optional          :: lurep
+
+   type(XML_PARSE)                        :: info
+   integer                                :: indent = 0
+
+   call xml_open( info, fname, .false. )
+   call xml_options( info, report_errors=.true.)
+   if ( present(lurep) ) then
+       call xml_options( info, report_errors=.true.)
+   endif
+   write(info%lun,'(a)') &
+      '<DataStream_Id3726>'
+   write(info%lun,'(a)') '</DataStream_Id3726>'
+   call xml_close(info)
+end subroutine
 
 subroutine init_xml_file_xmltaxben_t
 
