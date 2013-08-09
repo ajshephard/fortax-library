@@ -4,15 +4,15 @@ INCLUDESPATH = includes
 MODPATH = ./
 OUTPATH = ./
 
-OBJECTS  = fortax_realtype.o fortax_util.o fortax_type.o fortax_calc.o fortax_extra.o fortax_prices.o fortax_read.o fortax_readtaxben.o fortax_write.o fortax_kinks.o fortax_compare.o
+OBJECTS  = fortax_realtype.o fortax_util.o fortax_type.o fortax_calc.o fortax_extra.o fortax_prices.o fortax_read.o fortax_taxbenread.o fortax_write.o fortax_kinks.o fortax_compare.o
 XMLOBJECTS = xmlparse.o read_xml_prims.o write_xml_prims.o xmltaxben_t.o xmlfortax_t.o xmlfamcompare_t.o
 
 # ------------------Macro-Defs---------------------
-# FFLAGS = -O0 -g -traceback -fpp -check bounds -check all -warn unused -stand f03 -fPIC -gen-interfaces -module $(MODPATH)
+DIAGDISABLE = -diag-disable 5268,7025
+FFLAGS = -O0 -debug -g -traceback -fpp -check bounds -check all -warn unused -stand f03 -fPIC -gen-interfaces $(DIAGDISABLE) -module $(MODPATH)
 #FFLAGS = -O1 -fpp -stand f03 -fPIC -gen-interfaces -module ../modules-dev
 # GPROF = -g -p
-DIAGDISABLE = -diag-disable 5268,7025
-FFLAGS = -O3 -fpp -stand f03 -warn all -inline speed -inline-forceinline -no-prec-div -xHost -static -fPIC -gen-interfaces $(DIAGDISABLE) $(GPROF) -module $(MODPATH)
+#FFLAGS = -O3 -fpp -stand f03 -warn all -inline speed -inline-forceinline -no-prec-div -xHost -static -fPIC -gen-interfaces $(DIAGDISABLE) $(GPROF) -module $(MODPATH)
 F90 = ifort
 #DEFINES = -D_famcouple_=.false. -D_fammarried_=.false. -D_famkids_=.true.
 # -------------------End-macro-Defs---------------------------
@@ -71,10 +71,10 @@ fortax_read.o:fortax_read.f90 fortax_realtype.o xmlfortax_t.o fortax_util.o fort
 	$(addprefix $(INCLUDESPATH)/system/, $(SYSINCLUDES))
 	$(F90) $(FFLAGS) -c fortax_read.f90 
 
-fortax_readtaxben.o:fortax_readtaxben.f90 fortax_realtype.o xmltaxben_t.o fortax_util.o fortax_type.o \
+fortax_taxbenread.o:fortax_taxbenread.f90 fortax_realtype.o xmltaxben_t.o fortax_util.o fortax_type.o \
 	$(addprefix $(INCLUDESPATH)/,fortax_typeread.inc fortax_read.inc) \
 	$(addprefix $(INCLUDESPATH)/system/, $(SYSINCLUDES))
-	$(F90) $(FFLAGS) -c fortax_readtaxben.f90 
+	$(F90) $(FFLAGS) -c fortax_taxbenread.f90 
 	
 fortax_write.o:fortax_write.f90 fortax_type.o xmlparse.o fortax_realtype.o fortax_util.o \
 	$(addprefix $(INCLUDESPATH)/,fortax_write.inc fortax_print.inc) \
