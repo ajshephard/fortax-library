@@ -83,6 +83,12 @@ contains
             write(funit,'(1X,(A))') trim(sys%sysname)
         end if
 
+        if ( sys%sysdesc .ne. "" ) then
+            write(funit,*)
+            write(funit,'(1X,(A))') 'SYSDESC:'
+            write(funit,'(1X,(A))') trim(sys%sysdesc)
+        end if
+
 #       include "includes/fortax_print.inc"
 
         if (present(fname)) close(funit)
@@ -120,6 +126,12 @@ contains
             attribs(1,1) = 'value'
             attribs(2,1) = trim(sys%sysname)
             call xml_ftag(info,'sysname','openclose',attribs)
+        end if
+
+        if ( sys%sysdesc .ne. "" ) then
+            attribs(1,1) = 'value'
+            attribs(2,1) = trim(sys%sysdesc)
+            call xml_ftag(info,'sysdesc','openclose',attribs)
         end if
 
         attribs(1,1) = 'basename'

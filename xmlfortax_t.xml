@@ -36,4 +36,5 @@
   </typedef>
   <variable name="system" type="system_t" dimension="1"/>
   <variable name="sysname" type="character" length="40" required="no"/>
+  <variable name="sysdesc" type="character" length="80" required="no"/>
 </template>

@@ -46,6 +46,7 @@
 
 type :: sys_t
 character(len=40) :: sysname
+character(len=80) :: sysdesc
 #include 'includes/system/syslist.inc'
 end type
 

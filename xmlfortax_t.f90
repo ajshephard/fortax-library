@@ -47,6 +47,7 @@ type system_t
 end type system_t
    type(system_t), dimension(:), pointer           :: system => null()
    character(len=40)                                :: sysname
+   character(len=80)                                :: sysdesc
 contains
 subroutine read_xml_type_finteger_t_array( &
       info, tag, endtag, attribs, noattribs, data, nodata, &
@@ -1236,9 +1237,11 @@ subroutine read_xml_file_xmlfortax_t(fname, lurep, errout,funit)
    integer                                :: nodata
    logical                                         :: has_system
    logical                                         :: has_sysname
+   logical                                         :: has_sysdesc
    has_system                           = .false.
    allocate(system(0))
    has_sysname                          = .false.
+   has_sysdesc                          = .false.
 
    call init_xml_file_xmlfortax_t
    call xml_open( info, fname, .true. )
@@ -1289,6 +1292,10 @@ subroutine read_xml_file_xmlfortax_t(fname, lurep, errout,funit)
          call read_xml_line( &
             info, tag, endtag, attribs, noattribs, data, nodata, &
             sysname, has_sysname )
+      case('sysdesc')
+         call read_xml_line( &
+            info, tag, endtag, attribs, noattribs, data, nodata, &
+            sysdesc, has_sysdesc )
       case ('comment', '!--')
          ! Simply ignore
       case default
@@ -1307,6 +1314,9 @@ subroutine read_xml_file_xmlfortax_t(fname, lurep, errout,funit)
    endif
    if ( .not. has_sysname ) then
       sysname = ""
+   endif
+   if ( .not. has_sysdesc ) then
+      sysdesc = ""
    endif
    if ( present(errout) ) errout = error
 end subroutine
@@ -1327,6 +1337,7 @@ subroutine write_xml_file_xmlfortax_t(fname, lurep)
       '<fortax>'
    call write_xml_type_system_t_array( info, 'system', indent+3, system)
    call write_to_xml_line( info, 'sysname', indent+3, sysname)
+   call write_to_xml_line( info, 'sysdesc', indent+3, sysdesc)
    write(info%lun,'(a)') '</fortax>'
    call xml_close(info)
 end subroutine

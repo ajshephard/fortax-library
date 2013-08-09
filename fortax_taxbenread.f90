@@ -32,7 +32,7 @@ contains
     ! -----------------------------------------------------------------------
     ! reads tax parameters from systemfile into a sys_t derived type.
 
-    subroutine readTaxbenParams(sys,systemFile,prices,sysFix,sysDate,sysname)
+    subroutine readTaxbenParams(sys,systemFile,prices,sysFix,sysDate,sysname,sysdesc)
     
         use xml_data_xmltaxben_t, only : read_xml_file_xmltaxben_t, object, namedFields_t, field_t
         use fortax_util,          only : getunit, strToDouble, strToInt, strToLogical, lower, fortaxError, fortaxWarn
@@ -46,6 +46,7 @@ contains
         logical, optional, intent(in)  :: sysFix !default = .true.
         integer, optional, intent(in)  :: sysDate
         character(*), optional, intent(in)  :: sysname
+        character(*), optional, intent(in)  :: sysdesc
         type(namedfields_t), pointer   :: cat
         type(field_t),       pointer   :: cat2
         integer                        :: i, j, nField, nnamedFields, xmlUnit
@@ -63,6 +64,11 @@ contains
         
         nnamedFields = size(object%namedFields)
         sys%sysname = object%name
+
+        if (size(object%field)==3) then
+            sys%sysdesc = object%field(3)%value
+        end if
+
         do i = 1, nnamedFields
             cat => Object%namedFields(i)
             select case(cat%baseName)
@@ -916,9 +922,13 @@ contains
                 call taxbenSysFix(sys)
             end if
         end if    
-        
+
         if (present(sysname)) then
             sys%sysname = sysname
+        end if
+
+        if (present(sysdesc)) then
+            sys%sysdesc = sysdesc
         end if
 
         if (present(prices)) sys%extra%prices = prices
