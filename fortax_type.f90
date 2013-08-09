@@ -1065,6 +1065,8 @@ contains
 
         type(sys_t), intent(inout) :: sys
         
+        sys%sysname = ''
+        
 #       undef  _$header
 #       undef  _$footer
 #       undef  _$integer

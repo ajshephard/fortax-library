@@ -77,6 +77,12 @@ contains
             funit = output_unit
         end if
 
+        if ( sys%sysname .ne. "" ) then
+            write(funit,*)
+            write(funit,'(1X,(A))') 'SYSNAME:'
+            write(funit,'(1X,(A))') trim(sys%sysname)
+        end if
+
 #       include "includes/fortax_print.inc"
 
         if (present(fname)) close(funit)
@@ -107,10 +113,16 @@ contains
 
         mustRead = .false.
 
-        attribs(1,1) = 'basename'
-        
         call xml_open(info,fname,mustRead)
         call xml_ftag(info,'fortax','open')
+
+        if ( sys%sysname .ne. "" ) then
+            attribs(1,1) = 'value'
+            attribs(2,1) = trim(sys%sysname)
+            call xml_ftag(info,'sysname','openclose',attribs)
+        end if
+
+        attribs(1,1) = 'basename'
 
 #       include "includes/fortax_write.inc"
 

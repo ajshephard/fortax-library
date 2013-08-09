@@ -45,6 +45,7 @@
 #define _$logicalarray(x,y,z)
 
 type :: sys_t
+character(len=40) :: sysname
 #include 'includes/system/syslist.inc'
 end type
 

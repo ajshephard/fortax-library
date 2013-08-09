@@ -1,4 +1,3 @@
-!tidy up like in taxben_t
 module xml_data_xmlfortax_t
    use READ_XML_PRIMITIVES
    use WRITE_XML_PRIMITIVES
@@ -47,6 +46,7 @@ type system_t
    type(flogicalarray_t), dimension(:), pointer    :: flogicalarray => null()
 end type system_t
    type(system_t), dimension(:), pointer           :: system => null()
+   character(len=40)                                :: sysname
 contains
 subroutine read_xml_type_finteger_t_array( &
       info, tag, endtag, attribs, noattribs, data, nodata, &
@@ -1070,34 +1070,25 @@ subroutine read_xml_type_system_t( info, starttag, endtag, attribs, noattribs, d
    logical                                         :: has_fintegerarray
    logical                                         :: has_fdoublearray
    logical                                         :: has_flogicalarray
-
    has_basename                         = .false.
    has_finteger                         = .false.
-
    allocate(dvar%finteger(0))
    has_fdouble                          = .false.
-
    allocate(dvar%fdouble(0))
    has_flogical                         = .false.
-
    allocate(dvar%flogical(0))
    has_fintegerarray                    = .false.
-
    allocate(dvar%fintegerarray(0))
    has_fdoublearray                     = .false.
-
    allocate(dvar%fdoublearray(0))
    has_flogicalarray                    = .false.
-
    allocate(dvar%flogicalarray(0))
-
    call init_xml_type_system_t(dvar)
    has_dvar = .true.
    error  = .false.
    att_   = 0
    noatt_ = noattribs+1
    endtag_org = endtag
-
    do
       if ( nodata .ne. 0 ) then
          noattribs = 0
@@ -1139,7 +1130,6 @@ subroutine read_xml_type_system_t( info, starttag, endtag, attribs, noattribs, d
             exit
          endif
       endif
-
       select case( tag )
       case('basename')
          call read_xml_word( &
@@ -1195,12 +1185,6 @@ subroutine init_xml_type_system_t_array( dvar )
 end subroutine init_xml_type_system_t_array
 subroutine init_xml_type_system_t(dvar)
    type(system_t) :: dvar
-   !dvar%finteger = finteger_t('',0)
-   !dvar%fdouble = fdouble_t('',0.0d0)
-   !dvar%flogical = flogical_t('',.false.)
-   !dvar%fintegerarray = fintegerarray_t('',(/0/))
-   !dvar%fdoublearray = fdoublearray_t('',0.0d0)
-   !dvar%flogicalarray = flogicalarray_t('',.false.)
 end subroutine init_xml_type_system_t
 subroutine write_xml_type_system_t_array( &
       info, tag, indent, dvar )
@@ -1246,34 +1230,30 @@ subroutine read_xml_file_xmlfortax_t(fname, lurep, errout,funit)
    character(len=80)                      :: tag
    character(len=80)                      :: starttag
    logical                                :: endtag
-   character(len=255), dimension(1:2,1:20) :: attribs    ! JS 02/02/12 changed len from 80 to 255 to stop arrays of tax rates being truncated
+   character(len=255), dimension(1:2,1:20) :: attribs
    integer                                :: noattribs
    character(len=200), dimension(1:100)   :: data
    integer                                :: nodata
    logical                                         :: has_system
-
+   logical                                         :: has_sysname
    has_system                           = .false.
    allocate(system(0))
+   has_sysname                          = .false.
 
-   call init_xml_file_fortax_t5
+   call init_xml_file_xmlfortax_t
    call xml_open( info, fname, .true. )
-   if (present(funit)) funit = info%lun !AS
-
-   call xml_options( info, report_errors=.true., ignore_whitespace=.true., &
-        no_data_truncation =.true.)
-
+   if (present(funit)) funit = info%lun
+   call xml_options( info, report_errors=.true., ignore_whitespace=.true., no_data_truncation =.true.)
    lurep_ = 0
    if ( present(lurep) ) then
       lurep_ = lurep
       call xml_options( info, report_lun=lurep )
    endif
-
    do
       call xml_get( info, starttag, endtag, attribs, noattribs, &
          data, nodata)
       if ( starttag .ne. '!--' ) exit
    enddo
-
    if ( starttag .ne. "fortax" ) then
       call xml_report_errors( info, &
          'XML-file should have root element "fortax"')
@@ -1281,11 +1261,9 @@ subroutine read_xml_file_xmlfortax_t(fname, lurep, errout,funit)
       call xml_close(info)
       return
    endif
-
    strict_ = .true.
    error = .false.
    do
-      
       call xml_get( info, tag, endtag, attribs, noattribs, data, nodata )
       if ( xml_error(info) ) then
          write(lurep_,*) 'Error reading input file!'
@@ -1307,6 +1285,10 @@ subroutine read_xml_file_xmlfortax_t(fname, lurep, errout,funit)
          call read_xml_type_system_t_array( &
             info, tag, endtag, attribs, noattribs, data, nodata, &
             system, has_system )
+      case('sysname')
+         call read_xml_line( &
+            info, tag, endtag, attribs, noattribs, data, nodata, &
+            sysname, has_sysname )
       case ('comment', '!--')
          ! Simply ignore
       case default
@@ -1323,10 +1305,13 @@ subroutine read_xml_file_xmlfortax_t(fname, lurep, errout,funit)
       error = .true.
       call xml_report_errors(info, 'Missing data on system')
    endif
+   if ( .not. has_sysname ) then
+      sysname = ""
+   endif
    if ( present(errout) ) errout = error
 end subroutine
 
-subroutine write_xml_file_fortax_t5(fname, lurep)
+subroutine write_xml_file_xmlfortax_t(fname, lurep)
    character(len=*), intent(in)           :: fname
    integer, intent(in), optional          :: lurep
 
@@ -1341,11 +1326,12 @@ subroutine write_xml_file_fortax_t5(fname, lurep)
    write(info%lun,'(a)') &
       '<fortax>'
    call write_xml_type_system_t_array( info, 'system', indent+3, system)
+   call write_to_xml_line( info, 'sysname', indent+3, sysname)
    write(info%lun,'(a)') '</fortax>'
    call xml_close(info)
 end subroutine
 
-subroutine init_xml_file_fortax_t5
+subroutine init_xml_file_xmlfortax_t
 
 end subroutine
 

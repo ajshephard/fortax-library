@@ -51,7 +51,7 @@ contains
 
     subroutine readFortaxParams(sys,systemFile,prices)
     
-        use xml_data_xmlfortax_t, only : read_xml_file_xmlfortax_t, system
+        use xml_data_xmlfortax_t, only : read_xml_file_xmlfortax_t, system, sysname
         use fortax_util,          only : getunit, strToDouble, strToInt, strToLogical, lower, fortaxError, fortaxWarn
         use fortax_type,          only : sys_t, sys_init
                 
@@ -74,6 +74,9 @@ contains
         call sys_init(sys)
         !use fpp so that the reading will fully reflect the data structure                    
 #       include 'includes/fortax_typeread.inc'
+
+        ! internal system name
+        sys%sysname = sysname
 
         !free up memory
         do i = 1, size(system)

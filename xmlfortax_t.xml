@@ -1,0 +1,39 @@
+<?xml version="1.0" ?>
+<template>
+  <options strict="yes" dynamicstrings="no" rootname="fortax">
+  <typedef name="finteger_t">
+    <component name="name" type="word" length="40"/>
+    <component name="value" type="integer"/>
+  </typedef>
+  <typedef name="fdouble_t">
+    <component name="name" type="word" length="40"/>
+    <component name="value" type="double"/>
+  </typedef>
+  <typedef name="flogical_t">
+    <component name="name" type="word" length="40"/>
+    <component name="value" type="logical"/>
+  </typedef>
+  <typedef name="fintegerarray_t">
+    <component name="name" type="word" length="40"/>
+    <component name="value" type="integer-array"/>
+  </typedef>
+  <typedef name="fdoublearray_t">
+    <component name="name" type="word" length="40"/>
+    <component name="value" type="double-array"/>
+  </typedef>
+  <typedef name="flogicalarray_t">
+    <component name="name" type="word" length="40"/>
+    <component name="value" type="logical-array"/>
+  </typedef>
+  <typedef name="system_t">
+    <component name="basename" type="word" length="40"/>
+    <component name="finteger" type="finteger_t" dimension="1" required="no"/>
+    <component name="fdouble" type="fdouble_t" dimension="1" required="no"/>
+    <component name="flogical" type="flogical_t" dimension="1" required="no"/>
+    <component name="fintegerarray" type="fintegerarray_t" dimension="1" required="no"/>
+    <component name="fdoublearray" type="fdoublearray_t" dimension="1" required="no"/>
+    <component name="flogicalarray" type="flogicalarray_t" dimension="1" required="no"/>
+  </typedef>
+  <variable name="system" type="system_t" dimension="1"/>
+  <variable name="sysname" type="character" length="40" required="no"/>
+</template>
