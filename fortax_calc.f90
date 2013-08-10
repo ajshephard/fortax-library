@@ -1924,6 +1924,10 @@ contains
                     end if
                 end if
 
+                ! the way the rounding of the child benefit charge works, it is possible that families with very high income will
+                ! not have their benefit completely withdrawn. To prevent this, the percentLost may now exceed 100%, and the
+                ! charge may not exceed the full amonunt of child benefit
+
                 if (.not. sys%chben%disableTaperRounding) then
 
                     ! Find annual amount by which earnings of primary earner exceeds threshold (rounded down to nearest pound in annual terms)
