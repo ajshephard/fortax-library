@@ -1,9 +1,12 @@
 <?xml version="1.0"?>
 <fortax>
+<sysname value="April13"></sysname>
+<sysdesc value="TB system as at 01/04/2013"></sysdesc>
 <system basename="inctax">
    <finteger name="numbands" value="4"/>
    <fdouble name="pa" value="181.538461538462"/>
    <flogical name="doPATaper" value="T"/>
+   <flogical name="disablePATaperRounding" value="F"/>
    <fdouble name="paTaperThresh" value="1923.07692307692"/>
    <fdouble name="paTaperRate" value="0.500000000000000"/>
    <fdouble name="mma" value="0.000000000000000E+000"/>
@@ -34,6 +37,7 @@
    <fdouble name="MatGrantVal" value="500.000000000000"/>
    <flogical name="MatGrantOnlyFirstKid" value="T"/>
    <flogical name="doTaper" value="T"/>
+   <flogical name="disableTaperRounding" value="F"/>
    <fdouble name="taperStart" value="961.538461538462"/>
    <fdouble name="taperRate" value="1.000000000000023E-002"/>
    <flogical name="taperIsIncTax" value="F"/>
