@@ -152,6 +152,22 @@ contains
     end function strToInt
 
 
+    ! strToIntCheck
+    ! -----------------------------------------------------------------------
+    ! converts a string to an integer. Returns ifail.ne.0 if error
+
+    pure subroutine strToIntCheck(string,intout,istat)
+
+        implicit none
+
+        character(*), intent(in)  :: string
+        integer,      intent(out) :: intout
+        integer,      intent(out) :: istat
+
+        read (string,*,iostat=istat) intout
+
+    end subroutine strToIntCheck
+
     ! strToLogical
     ! -----------------------------------------------------------------------
     ! converts a string to a logical. No error checking is performed.
