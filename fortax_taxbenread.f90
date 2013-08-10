@@ -937,7 +937,135 @@ contains
 
     end subroutine readTaxbenParams
 
-    
+
+    ! batchConvertTaxben
+    ! -----------------------------------------------------------------------
+    ! this finds all taxben system files in path fpathin and saves them as
+    ! fortax system files in fpathout. it attempts to interpret date based
+    ! on the file name. this uses system calls to get the folder listing
+    ! and at the moment only will not work on windows systems
+
+    subroutine batchConvertTaxben(fpathin,fpathout,fname)
+        use fortax_util
+        use fortax_type
+        use fortax_write
+        implicit none
+        character(len=*), intent(in)           :: fpathin
+        character(len=*), intent(in)           :: fpathout
+        character(len=*), intent(in), optional :: fname
+
+        type(sys_t) :: sys
+
+        integer :: tmpunit, funit, istat, pos, ifail
+        character(len=256) :: tmpname
+        character(len=256) :: fileline
+        character(len=256) :: yr
+        integer :: season, yrlen, yrint, yyyy, yyyymmdd
+        logical :: err
+
+        ! first, use system call to get contents of directory
+        if ( present(fname) ) then
+            call system( 'ls '//trim(fpathin)//'/*.bp3 | xargs -n1 basename >'//fname )
+            open( newunit=funit, file=fname, action='read', status='old', iostat=istat )
+
+        else
+            open( newunit=tmpunit, status='scratch' )
+            inquire(unit=tmpunit,name=tmpname)
+            call system('ls '//trim(fpathin)//'/*.bp3 | xargs -n1 basename >'//tmpname)
+            open(newunit=funit,file=tmpname,action='read',status='old',iostat=istat)
+        end if
+
+        err = .false.
+
+        ! now read file created and convert
+        do
+
+            read(funit,*,iostat=istat) fileline
+
+            if (istat==-1) then !eof
+                exit
+            else if (istat>0) then !error
+                err = .true.
+                write(*,*)  "error reading file list"
+            else
+                ! find position of file extension in original name
+                ! this will always be present given how we constructed
+                ! the file
+                pos = index( fileline, '.bp3', back=.true. )
+
+                ! we understand april and autumn (not case sensitive)
+                if ( lower(fileline(1:5))=='april' ) then
+                    season = 1
+                else if ( lower(fileline(1:6))=='autumn' ) then
+                    season = 2
+                else
+                    season = 0
+                end if
+
+                if (season>0) then
+                    ! extract the character string for year
+                    if (season == 1) then
+                        yr = fileline(6:pos-1)
+                        yrlen = len_trim(yr)
+                    else if (season == 2) then
+                        yr = fileline(7:pos-1)
+                        yrlen = len_trim(yr)
+                    end if
+
+                    if ( (yrlen==2) .and. yr(1:1)=='0' ) then
+                        yr = '1'//trim(yr)
+                    end if
+
+                    call strToIntCheck(yr,yrint,ifail)
+
+                    if (ifail==0) then
+                        if (yrint>0) then
+                            if (yrint<50) then
+                                yyyy = 2000 + yrint
+                            else if (yrint>=50 .and. yrint<1000) then
+                                yyyy = 1900 + yrint
+                            else
+                                yyyy = yrint
+                            end if
+                            yyyymmdd = yyyy*10000 + merge(400,1200,season==1) +1
+                        else
+                            yyyymmdd = -1
+                        end if
+                    else
+                        yyyymmdd = -1
+                    end if
+
+                else
+
+                    yyyymmdd = -1
+
+                end if
+
+                if (yyyymmdd>0) then
+                    call readTaxbenParams( sys, trim(fpathin)//'/'//trim(fileline), prices=yyyymmdd, sysDate=yyyymmdd )
+                    write(*,*) trim(fileline), yyyymmdd
+                else
+                    call readTaxbenParams( sys, trim(fpathin)//'/'//trim(fileline) )
+                    write(*,*) trim(fileline), -1
+                end if
+
+                fileline(pos:pos+3) = '.xml'
+                call fortaxWrite( sys, trim(fpathout)//'/'//trim(fileline) )
+
+            end if
+
+        end do
+
+        close(funit)
+        if (.not. present(fname)) close(tmpunit)
+
+        if (err) then
+            stop
+        end if
+
+    end subroutine batchConvertTaxben
+
+
     ! taxbenSysFix
     ! -----------------------------------------------------------------------
     ! this fix routine is used when reading taxben system files because

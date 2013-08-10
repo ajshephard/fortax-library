@@ -71,7 +71,7 @@ fortax_read.o:fortax_read.f90 fortax_realtype.o xmlfortax_t.o fortax_util.o fort
 	$(addprefix $(INCLUDESPATH)/system/, $(SYSINCLUDES))
 	$(F90) $(FFLAGS) -c fortax_read.f90 
 
-fortax_taxbenread.o:fortax_taxbenread.f90 fortax_realtype.o xmltaxben_t.o fortax_util.o fortax_type.o \
+fortax_taxbenread.o:fortax_taxbenread.f90 fortax_write.o fortax_realtype.o xmltaxben_t.o fortax_util.o fortax_type.o \
 	$(addprefix $(INCLUDESPATH)/,fortax_typeread.inc fortax_read.inc) \
 	$(addprefix $(INCLUDESPATH)/system/, $(SYSINCLUDES))
 	$(F90) $(FFLAGS) -c fortax_taxbenread.f90 
