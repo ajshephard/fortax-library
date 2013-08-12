@@ -1116,8 +1116,8 @@ contains
 
         implicit none
 
-        type(sys_t), intent(in) :: sys
-        character(*), intent(in), optional :: fname
+        type(sys_t),      intent(in) :: sys
+        character(len=*), intent(in), optional :: fname
 
         integer :: funit, ios
 
@@ -1187,7 +1187,7 @@ contains
         implicit none
 
         type(fam_t), intent(in) :: fam
-        character(*), intent(in), optional :: fname
+        character(len=*), intent(in), optional :: fname
 
         integer :: funit, ios, i
 

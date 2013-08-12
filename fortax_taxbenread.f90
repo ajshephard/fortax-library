@@ -41,12 +41,12 @@ contains
         implicit none
         
         type(sys_t),       intent(out) :: sys
-        character(*),      intent(in)  :: systemFile
+        character(len=*),  intent(in)  :: systemFile
         integer, optional, intent(in)  :: prices
         logical, optional, intent(in)  :: sysFix !default = .true.
         integer, optional, intent(in)  :: sysDate
-        character(*), optional, intent(in)  :: sysname
-        character(*), optional, intent(in)  :: sysdesc
+        character(len=*), optional, intent(in)  :: sysname
+        character(len=*), optional, intent(in)  :: sysdesc
         type(namedfields_t), pointer   :: cat
         type(field_t),       pointer   :: cat2
         integer                        :: i, j, nField, nnamedFields

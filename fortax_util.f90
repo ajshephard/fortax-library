@@ -128,8 +128,8 @@ contains
             
         implicit none
         
-        character(*), intent(in) :: string
-        real(dp)                 :: strToDouble
+        character(len=*), intent(in) :: string
+        real(dp)                     :: strToDouble
         
         read (string,*) strToDouble
                 
@@ -144,8 +144,8 @@ contains
 
         implicit none
         
-        character(*), intent(in) :: string
-        integer                  :: strToInt
+        character(len=*), intent(in) :: string
+        integer                      :: strToInt
         
         read (string,*) strToInt
     
@@ -160,9 +160,9 @@ contains
 
         implicit none
 
-        character(*), intent(in)  :: string
-        integer,      intent(out) :: intout
-        integer,      intent(out) :: istat
+        character(len=*), intent(in)  :: string
+        integer,          intent(out) :: intout
+        integer,          intent(out) :: istat
 
         read (string,*,iostat=istat) intout
 
@@ -177,8 +177,8 @@ contains
 
         implicit none
         
-        character(*), intent(in) :: str
-        logical                  :: strToLogical
+        character(len=*), intent(in) :: str
+        logical                      :: strToLogical
         
         if (adjustl(str) .eq. "0") then
             strToLogical = .false.
@@ -197,12 +197,12 @@ contains
 
         implicit none
         
-        character(*), intent(in) :: str
-        character(len(str))      :: lower
+        character(len=*), intent(in) :: str
+        character(len(str))          :: lower
         
-        character                :: ch
-        integer, parameter       :: offset = ichar('A') - ichar('a')
-        integer                  :: i
+        character                    :: ch
+        integer, parameter           :: offset = ichar('A') - ichar('a')
+        integer                      :: i
 
         do i = 1, len(str)
             ch = str(i:i)
@@ -221,7 +221,7 @@ contains
 
         implicit none
         
-        character(*), intent(in) :: str
+        character(len=*), intent(in) :: str
         character(len(str))      :: upper
         
         character                :: ch
@@ -246,12 +246,12 @@ contains
 
         implicit none
 
-        character(*), intent(inout) :: str
-        character(1)                :: ch
-        character(len_trim(str))    :: outstr
+        character(len=*), intent(inout) :: str
+        character(1)                    :: ch
+        character(len_trim(str))        :: outstr
 
-        integer                     :: i, k, isp, ich
-        integer                     :: lenstr
+        integer                         :: i, k, isp, ich
+        integer                         :: lenstr
 
         str    = adjustl(str)
         lenstr = len_trim(str)
@@ -291,11 +291,11 @@ contains
 
         implicit none
 
-        character(*), intent(inout) :: str
-        integer, parameter          :: eeLen = 32
-        character(eeLen)            :: ee, eestr
-        character                   :: ch
-        integer                     :: i, lstr, ipos, eex
+        character(len=*), intent(inout) :: str
+        integer, parameter              :: eeLen = 32
+        character(eeLen)                :: ee, eestr
+        character                       :: ch
+        integer                         :: i, lstr, ipos, eex
 
         str = adjustl(trim(str))
         ipos=scan(str,'eE')
@@ -341,9 +341,9 @@ contains
 
         implicit none
     
-        character(*), intent(in) :: str
-        integer,      intent(in) :: n
-        character(n)             :: strPad
+        character(len=*), intent(in) :: str
+        integer,          intent(in) :: n
+        character(n)                 :: strPad
 
         strPad = str
     
@@ -388,8 +388,8 @@ contains
 
         implicit none
         
-        character(*), intent(in)    :: str
-        integer,      intent(inout) :: x(:)
+        character(len=*), intent(in)    :: str
+        integer,          intent(inout) :: x(:)
         
         !character(len(string))   :: tmpstring
 
@@ -446,8 +446,8 @@ contains
 
         implicit none
         
-        character(*), intent(in)    :: str
-        real(dp),     intent(inout) :: x(:)
+        character(len=*), intent(in)    :: str
+        real(dp),         intent(inout) :: x(:)
         
         !character(len(string))      :: tmpstring
 
@@ -504,7 +504,7 @@ contains
 
         implicit none
 
-        character(*),      intent(in) :: errMsg
+        character(len=*),  intent(in) :: errMsg
         integer, optional, intent(in) :: funit
         
         if (present(funit)) then
@@ -528,7 +528,7 @@ contains
     
         implicit none
 
-        character(*),      intent(in) :: warnMsg
+        character(len=*),  intent(in) :: warnMsg
         integer, optional, intent(in) :: funit
         
         if (present(funit)) then

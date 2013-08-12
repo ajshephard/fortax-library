@@ -64,8 +64,8 @@ contains
 
         implicit none
 
-        type(sys_t),  intent(in)           :: sys
-        character(*), intent(in), optional :: fname
+        type(sys_t),      intent(in)           :: sys
+        character(len=*), intent(in), optional :: fname
 
         integer            :: funit, ios
         
@@ -110,8 +110,8 @@ contains
             
         implicit none
         
-        type(sys_t),  intent(in) :: sys
-        character(*), intent(in) :: fname
+        type(sys_t),      intent(in) :: sys
+        character(len=*), intent(in) :: fname
                 
         character(255)           :: attribs(2,1)
         logical                  :: mustRead
@@ -157,9 +157,9 @@ contains
         
         implicit none
         
-        type(xml_parse), intent(inout) :: info
-        character(*),    intent(in)    :: field
-        character(*),    intent(in)    :: fieldName
+        type(xml_parse),  intent(inout) :: info
+        character(len=*), intent(in)    :: field
+        character(len=*), intent(in)    :: fieldName
         
         character(255) :: myData(1)
         character(255) :: attribs(2,2)
@@ -186,9 +186,9 @@ contains
         
         implicit none
         
-        type(xml_parse), intent(inout) :: info
-        integer,         intent(in)    :: field
-        character(*),    intent(in)    :: fieldName
+        type(xml_parse),  intent(inout) :: info
+        integer,          intent(in)    :: field
+        character(len=*), intent(in)    :: fieldName
         
         character(255) :: myData(1)
         character(255) :: attribs(2,2)
@@ -217,9 +217,9 @@ contains
         
         implicit none
         
-        type(xml_parse), intent(inout) :: info
-        real(dp),        intent(in)    :: field
-        character(*),    intent(in)    :: fieldName
+        type(xml_parse),  intent(inout) :: info
+        real(dp),         intent(in)    :: field
+        character(len=*), intent(in)    :: fieldName
         
         character(255)                 :: myData(1)
         character(255)                 :: attribs(2,2)
@@ -248,11 +248,11 @@ contains
         
         implicit none
         
-        type(xml_parse), intent(inout) :: info
-        logical,         intent(in)    :: field
-        character(*),    intent(in)    :: fieldName
-        character(255)                 :: myData(1)
-        character(255)                 :: attribs(2,2)
+        type(xml_parse),  intent(inout) :: info
+        logical,          intent(in)    :: field
+        character(len=*), intent(in)    :: fieldName
+        character(255)                  :: myData(1)
+        character(255)                  :: attribs(2,2)
         
         attribs(1,1) = 'name'
         attribs(2,1) = fieldName
@@ -279,9 +279,9 @@ contains
         
         implicit none
         
-        type(xml_parse), intent(inout) :: info
-        integer,         intent(in)    :: field(:)
-        character(*),    intent(in)    :: fieldName
+        type(xml_parse),  intent(inout) :: info
+        integer,          intent(in)    :: field(:)
+        character(len=*), intent(in)    :: fieldName
         
         character(1)                   :: myData(1)
         character(255)                 :: attribs(2,2)
@@ -326,9 +326,9 @@ contains
         
         implicit none
         
-        type(xml_parse), intent(inout) :: info
-        real(dp),        intent(in)    :: field(:)
-        character(*),    intent(in)    :: fieldName
+        type(xml_parse),  intent(inout) :: info
+        real(dp),         intent(in)    :: field(:)
+        character(len=*), intent(in)    :: fieldName
         
         character(1)                   :: mydata(1)
         character(255)                 :: attribs(2,2)
@@ -373,9 +373,9 @@ contains
         
         implicit none
         
-        type(xml_parse), intent(inout) :: info
-        logical,         intent(in)    :: field(:)
-        character(*),    intent(in)    :: fieldName
+        type(xml_parse),  intent(inout) :: info
+        logical,          intent(in)    :: field(:)
+        character(len=*), intent(in)    :: fieldName
         
         character(1)                   :: myData(1)
         character(255)                 :: attribs(2,2)
@@ -418,10 +418,10 @@ contains
         
         implicit none
         
-        type(xml_parse),        intent(inout) :: info
-        character(*),           intent(in)    :: tag
-        character(*),           intent(in)    :: openClose
-        character(*), optional, intent(in)    :: attribs(:,:)
+        type(xml_parse),            intent(inout) :: info
+        character(len=*),           intent(in)    :: tag
+        character(len=*),           intent(in)    :: openClose
+        character(len=*), optional, intent(in)    :: attribs(:,:)
         
         character(255)                        :: myData(1)
 
@@ -447,9 +447,9 @@ contains
 
         implicit none
 
-        integer,      intent(in) :: funit
-        integer,      intent(in) :: finteger
-        character(*), intent(in) :: fname
+        integer,          intent(in) :: funit
+        integer,          intent(in) :: finteger
+        character(len=*), intent(in) :: fname
 
         write(funit,*) strPad(fname,16)//intToStr(finteger)
 
@@ -469,9 +469,9 @@ contains
 
         implicit none
 
-        integer,      intent(in) :: funit
-        real(dp),     intent(in) :: fdouble
-        character(*), intent(in) :: fname
+        integer,          intent(in) :: funit
+        real(dp),         intent(in) :: fdouble
+        character(len=*), intent(in) :: fname
         
         character(32) :: str
             
@@ -496,9 +496,9 @@ contains
 
         implicit none
 
-        integer,      intent(in) :: funit
-        logical,      intent(in) :: flogical
-        character(*), intent(in) :: fname
+        integer,          intent(in) :: funit
+        logical,          intent(in) :: flogical
+        character(len=*), intent(in) :: fname
 
         write(funit,*) strpad(fname,16)//merge('yes','no ',flogical)
 
@@ -518,9 +518,9 @@ contains
 
         implicit none
 
-        integer,      intent(in) :: funit
-        integer,      intent(in) :: fintegerarray(:)
-        character(*), intent(in) :: fname
+        integer,          intent(in) :: funit
+        integer,          intent(in) :: fintegerarray(:)
+        character(len=*), intent(in) :: fname
 
         integer :: i
         
@@ -544,9 +544,9 @@ contains
 
         implicit none
 
-        integer,      intent(in) :: funit
-        real(dp),     intent(in) :: fdoublearray(:)
-        character(*), intent(in) :: fname
+        integer,          intent(in) :: funit
+        real(dp),         intent(in) :: fdoublearray(:)
+        character(len=*), intent(in) :: fname
 
         integer       :: i
         character(32) :: str
@@ -573,9 +573,9 @@ contains
 
         implicit none
 
-        integer,      intent(in) :: funit
-        logical,      intent(in) :: flogicalarray(:)
-        character(*), intent(in) :: fname
+        integer,          intent(in) :: funit
+        logical,          intent(in) :: flogicalarray(:)
+        character(len=*), intent(in) :: fname
 
         integer :: i
 

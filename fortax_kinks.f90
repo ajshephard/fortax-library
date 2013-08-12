@@ -209,8 +209,8 @@ contains
         real(dp),       intent(in)  :: hours1, hours2
         type(bcout_t),  intent(out) :: bcout
 
-        character(*), intent(in), optional :: taxlevel
-        character(*), intent(in), optional :: taxout(:)
+        character(len=*), intent(in), optional :: taxlevel
+        character(len=*), intent(in), optional :: taxout(:)
         logical,      intent(in), optional :: correct
         logical,      intent(in), optional :: verbose
 
@@ -709,8 +709,8 @@ loopmax : do
         real(dp),       intent(in)  :: earn1, earn2
         type(bcout_t),  intent(out) :: bcout
 
-        character(*), intent(in), optional :: taxlevel
-        character(*), intent(in), optional :: taxout(:)
+        character(len=*), intent(in), optional :: taxlevel
+        character(len=*), intent(in), optional :: taxout(:)
         logical,      intent(in), optional :: correct
         logical,      intent(in), optional :: verbose
 
@@ -1170,8 +1170,8 @@ loopmax : do
         real(dp),       intent(in)  :: ccexp1, ccexp2
         type(bcout_t),  intent(out) :: bcout
 
-        character(*), intent(in), optional :: taxlevel
-        character(*), intent(in), optional :: taxout(:)
+        character(len=*), intent(in), optional :: taxlevel
+        character(len=*), intent(in), optional :: taxout(:)
         logical,      intent(in), optional :: correct
         logical,      intent(in), optional :: verbose
 

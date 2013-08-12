@@ -84,8 +84,8 @@ contains
         
         implicit none
        
-        type(rpi_t),  intent(out)          :: rpi
-        character(*), intent(in), optional :: fname
+        type(rpi_t),      intent(out)          :: rpi
+        character(len=*), intent(in), optional :: fname
         
         integer                            :: funit
         integer                            :: istat
@@ -289,7 +289,7 @@ contains
         implicit none
     
         type(sysindex_t), intent(out)          :: sysindex
-        character(*),     intent(in), optional :: sysindexfile
+        character(len=*), intent(in), optional :: sysindexfile
         
         integer                                :: funit
         integer                                :: istat, nrec
@@ -371,7 +371,7 @@ contains
                 
         type(sysindex_t), intent(in)  :: sysindex
         integer,          intent(in)  :: date
-        character(*),     intent(in)  :: systemformat
+        character(len=*), intent(in)  :: systemformat
         character(255),   intent(out) :: sysfilepath
         integer,          intent(out) :: sysnum        
         
@@ -441,8 +441,8 @@ contains
 
         implicit none
 
-        type(rpi_t),  intent(in)           :: rpi
-        character(*), intent(in), optional :: fname
+        type(rpi_t),      intent(in)           :: rpi
+        character(len=*), intent(in), optional :: fname
 
         integer :: funit, ios, i
 

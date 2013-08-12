@@ -58,7 +58,7 @@ contains
         implicit none
         
         type(sys_t),       intent(out) :: sys
-        character(*),      intent(in)  :: systemFile
+        character(len=*),  intent(in)  :: systemFile
         integer, optional, intent(in)  :: prices
         integer                        :: i, j
         logical                        :: isFile
