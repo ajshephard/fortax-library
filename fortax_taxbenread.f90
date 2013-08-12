@@ -1079,7 +1079,7 @@ contains
 
     subroutine taxbenSysFix(sys,sysDate)
     
-        use fortax_type, only : sys_t
+        use fortax_type, only : sys_t, sysHuge
 !        use params,      only : tol
         
         implicit none
@@ -1094,7 +1094,8 @@ contains
         !50p rules for FC/WFTC and NTC's, and different rules under tax credits
         if (sys%fc%doFamCred) then
             sys%fc%minAmt = 0.50_dp
-            if (sys%fc%MaxCC1 > tol) then
+!             if (sys%fc%MaxCC1 > tol) then
+            if (sys%fc%maintDisreg < sysHuge) then
               sys%rebateSys%rulesUnderFC   = .true.
               sys%rebateSys%rulesUnderWFTC = .false.
             else
