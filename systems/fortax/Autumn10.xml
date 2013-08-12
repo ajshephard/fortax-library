@@ -23,9 +23,9 @@
    <finteger name="c4nrates" value="3"/>
    <fdouble name="c2floor" value="97.6000000000000"/>
    <fdouble name="c2rate" value="2.40000000000000"/>
-   <fdouble name="ceiling" value="9999999.00000000"/>
+   <fdouble name="ceiling" value="9.999999999999990E+099"/>
    <fdoublearray name="rates" value="0.000000000000000E+000 0.000000000000000E+000 0.110000000000000 0.110000000000000 1.000000000000000E-002"></fdoublearray>
-   <fdoublearray name="bands" value="97.0000000000000 110.000000000000 770.000000000000 844.000000000000 9999999.00000000"></fdoublearray>
+   <fdoublearray name="bands" value="97.0000000000000 110.000000000000 770.000000000000 844.000000000000 9.999999999999990E+099"></fdoublearray>
    <fdoublearray name="c4rates" value="0.000000000000000E+000 8.000000000000000E-002 1.000000000000000E-002"></fdoublearray>
    <fdoublearray name="c4bands" value="109.900000000000 843.750000000000 1000000.00000000"></fdoublearray>
 </system>
@@ -53,7 +53,7 @@
    <fdouble name="hours2" value="30.0000000000000"/>
    <fdouble name="thres" value="0.000000000000000E+000"/>
    <fdouble name="taper" value="0.000000000000000E+000"/>
-   <fdouble name="MaintDisreg" value="99999.0000000000"/>
+   <fdouble name="MaintDisreg" value="9.999999999999990E+099"/>
    <fdouble name="MaxCC1" value="0.000000000000000E+000"/>
    <fdouble name="MaxCC2" value="0.000000000000000E+000"/>
    <fdouble name="WFTCMaxCC1" value="0.000000000000000E+000"/>
@@ -114,7 +114,7 @@
    <fdouble name="PremFam" value="0.000000000000000E+000"/>
    <fdouble name="PremLP" value="0.000000000000000E+000"/>
    <fdouble name="hours" value="16.0000000000000"/>
-   <fdouble name="MaintDisreg" value="99999.0000000000"/>
+   <fdouble name="MaintDisreg" value="9.999999999999990E+099"/>
    <fintegerarray name="AgeRngl" value="0"></fintegerarray>
    <fintegerarray name="AgeRngu" value="19"></fintegerarray>
    <fdoublearray name="AddKid" value="0.000000000000000E+000"></fdoublearray>
@@ -151,7 +151,7 @@
    <flogical name="ChbenIsIncome" value="F"/>
    <fdouble name="PremFam" value="17.4000000000000"/>
    <fdouble name="PremLP" value="0.000000000000000E+000"/>
-   <fdouble name="MaintDisreg" value="99999.0000000000"/>
+   <fdouble name="MaintDisreg" value="9.999999999999990E+099"/>
    <fdouble name="MaxCC1" value="175.000000000000"/>
    <fdouble name="MaxCC2" value="300.000000000000"/>
    <finteger name="MaxAgeCC" value="15"/>
@@ -210,10 +210,10 @@
 <system basename="bencap">
    <flogical name="doCap" value="F"/>
    <flogical name="doThruUC" value="F"/>
-   <fdouble name="sinNoKids" value="99999.0000000000"/>
-   <fdouble name="sinKids" value="99999.0000000000"/>
-   <fdouble name="couNoKids" value="99999.0000000000"/>
-   <fdouble name="couKids" value="99999.0000000000"/>
+   <fdouble name="sinNoKids" value="9.999999999999990E+099"/>
+   <fdouble name="sinKids" value="9.999999999999990E+099"/>
+   <fdouble name="couNoKids" value="9.999999999999990E+099"/>
+   <fdouble name="couKids" value="9.999999999999990E+099"/>
    <fdouble name="UCEarnThr" value="0.000000000000000E+000"/>
 </system>
 <system basename="extra">

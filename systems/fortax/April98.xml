@@ -210,10 +210,10 @@
 <system basename="bencap">
    <flogical name="doCap" value="F"/>
    <flogical name="doThruUC" value="F"/>
-   <fdouble name="sinNoKids" value="99999.0000000000"/>
-   <fdouble name="sinKids" value="99999.0000000000"/>
-   <fdouble name="couNoKids" value="99999.0000000000"/>
-   <fdouble name="couKids" value="99999.0000000000"/>
+   <fdouble name="sinNoKids" value="9.999999999999990E+099"/>
+   <fdouble name="sinKids" value="9.999999999999990E+099"/>
+   <fdouble name="couNoKids" value="9.999999999999990E+099"/>
+   <fdouble name="couKids" value="9.999999999999990E+099"/>
    <fdouble name="UCEarnThr" value="0.000000000000000E+000"/>
 </system>
 <system basename="extra">
