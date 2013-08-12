@@ -41,6 +41,10 @@ module fortax_type
     public :: ctax_banda, ctax_bandb, ctax_bandc, ctax_bandd, &
         & ctax_bande, ctax_bandf, ctax_bandg, ctax_bandh
 
+    public :: sysHuge
+
+    real(dp), parameter :: sysHuge = 9.99999999999999E+099_dp
+
 #   ifndef _maxkids_
     integer, parameter :: maxKids = 10
 #   else

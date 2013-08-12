@@ -1088,6 +1088,9 @@ contains
         integer, intent(in), optional :: sysDate
         real(dp),    parameter     :: tol = 0.0_dp
 
+        ! impose consistent large value for unbounded values
+        call taxbenLargeValue(sys)
+
         !50p rules for FC/WFTC and NTC's, and different rules under tax credits
         if (sys%fc%doFamCred) then
             sys%fc%minAmt = 0.50_dp
@@ -1169,9 +1172,59 @@ contains
         else
             sys%bencap%doThruUC = .false.
         end if
-
-
         
     end subroutine taxbenSysFix
+
+
+    ! taxbenLargeValue
+    ! -----------------------------------------------------------------------
+    ! this imposes a consistent large value the unbounded values. it is just
+    ! applied to components of sys manually.
+
+    subroutine taxbenLargeValue(sys)
+        use fortax_type, only : sys_t, sysHuge
+        implicit none
+        type(sys_t), intent(inout) :: sys
+        integer :: i
+
+        if (sys%natins%ceiling>9999998.0_dp) then
+            sys%natins%ceiling = sysHuge
+        end if
+
+        do i = 1, sys%natins%numrates
+            if ( sys%natins%bands(i)>9999998.0_dp ) then
+                sys%natins%bands(i) = sysHuge
+            end if
+        end do
+
+        if ( sys%fc%maintDisreg>99998.0_dp ) then
+            sys%fc%maintDisreg = sysHuge
+        end if
+
+        if ( sys%incsup%maintDisreg>99998.0_dp ) then
+            sys%incsup%maintDisreg = sysHuge
+        end if
+
+        if ( sys%rebatesys%maintDisreg>99998.0_dp ) then
+            sys%rebatesys%maintDisreg = sysHuge
+        end if
+
+        if ( sys%bencap%sinNoKids>99998.0_dp ) then
+            sys%bencap%sinNoKids = sysHuge
+        end if
+
+        if ( sys%bencap%sinKids>99998.0_dp ) then
+            sys%bencap%sinKids = sysHuge
+        end if
+
+        if ( sys%bencap%couNoKids>99998.0_dp ) then
+            sys%bencap%couNoKids = sysHuge
+        end if
+
+        if ( sys%bencap%couKids>99998.0_dp ) then
+            sys%bencap%couKids = sysHuge
+        end if
+
+    end subroutine taxbenLargeValue
 
 end module fortax_taxbenread
