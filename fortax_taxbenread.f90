@@ -962,13 +962,22 @@ contains
 
         ! first, use system call to get contents of directory
         if ( present(fname) ) then
-            call system( 'ls '//trim(fpathin)//'/*.bp3 | xargs -n1 basename >'//fname )
+#           ifdef _WIN32
+                call system( 'dir '//trim(fpathin)//'\*.bp3 /b >'//fname )
+#           endif
+#           ifdef __linux
+                call system( 'ls '//trim(fpathin)//'/*.bp3 | xargs -n1 basename >'//fname )
+#           endif
             open( newunit=funit, file=fname, action='read', status='old', iostat=istat )
-
         else
             open( newunit=tmpunit, status='scratch' )
             inquire(unit=tmpunit,name=tmpname)
-            call system('ls '//trim(fpathin)//'/*.bp3 | xargs -n1 basename >'//tmpname)
+#           ifdef _WIN32
+                call system('dir '//trim(fpathin)//'\*.bp3 /b >'//tmpname)
+#           endif
+#           ifdef __linux
+                call system('ls '//trim(fpathin)//'/*.bp3 | xargs -n1 basename >'//tmpname)
+#           endif
             open(newunit=funit,file=tmpname,action='read',status='old',iostat=istat)
         end if
 
