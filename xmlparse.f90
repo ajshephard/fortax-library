@@ -636,6 +636,8 @@ subroutine xml_put(info, tag, attribs, no_attribs, &
       case('elem')
          call xml_put_element_(info, tag, attribs, no_attribs, &
                   data, no_data)
+      case('openclose')
+         call xml_put_openclose_tag_(info, tag, attribs, no_attribs)
       case('close')
          call xml_put_close_tag_(info, tag)
    end select
@@ -677,6 +679,28 @@ subroutine xml_put_open_tag_(info, tag, attribs, no_attribs)
    info%level = info%level + 1
 
 end subroutine xml_put_open_tag_
+
+subroutine xml_put_openclose_tag_(info, tag, attribs, no_attribs)
+
+   type(XML_PARSE),  intent(inout)               :: info
+   character(len=*), intent(in)                  :: tag
+   character(len=*), intent(in), dimension(:,:)  :: attribs
+   integer,          intent(in)                  :: no_attribs
+   integer         :: i
+
+   character(len=300), parameter :: indent = ' '
+
+   write( info%lun, '(3a)', advance = 'no' ) &
+         indent(1:3*info%level), '<', adjustl(tag)
+   do i=1,no_attribs
+      if (attribs(2,i).ne.'') then
+         write( info%lun, '(5a)', advance = 'no' ) &
+            ' ',trim(attribs(1,i)),'="', trim(attribs(2,i)),'"'
+      endif
+   enddo
+   write( info%lun, '(a)' ) '></'//adjustl(tag)//'>'
+
+end subroutine xml_put_openclose_tag_
 
 !===============================================================================
 ! XML_PUT_ELEMENT_ --
