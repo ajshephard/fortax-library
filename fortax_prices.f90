@@ -31,9 +31,9 @@ module fortax_prices
     private
     
     type sysindex_t
-        logical                     :: indexinit = .false.
-        integer,        allocatable :: date0(:), date1(:)
-        character(255), allocatable :: fname(:)
+        logical                         :: indexinit = .false.
+        integer,            allocatable :: date0(:), date1(:)
+        character(len=255), allocatable :: fname(:)
     end type
     
     public :: loadindex, setindex, getindex, upratefactor, upratesys
@@ -296,7 +296,7 @@ contains
         
         logical                                :: isfile
         integer                                :: tempdate0, tempdate1, ndate
-        character(255)                         :: tempfname
+        character(len=255)                     :: tempfname
                     
         call getunit(funit)
 
@@ -369,15 +369,15 @@ contains
         
         implicit none
                 
-        type(sysindex_t), intent(in)  :: sysindex
-        integer,          intent(in)  :: date
-        character(len=*), intent(in)  :: systemformat
-        character(255),   intent(out) :: sysfilepath
-        integer,          intent(out) :: sysnum        
+        type(sysindex_t),   intent(in)  :: sysindex
+        integer,            intent(in)  :: date
+        character(len=*),   intent(in)  :: systemformat
+        character(len=255), intent(out) :: sysfilepath
+        integer,            intent(out) :: sysnum        
         
-        integer      :: i
-        character(4) :: fext !extension
-        character(7) :: fsub !subdirectory
+        integer          :: i
+        character(len=4) :: fext !extension
+        character(len=7) :: fsub !subdirectory
         
         if (.not. sysindex%indexinit) then
             call fortaxerror('system index file is not in memory')

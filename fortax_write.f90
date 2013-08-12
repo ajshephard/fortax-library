@@ -113,7 +113,7 @@ contains
         type(sys_t),      intent(in) :: sys
         character(len=*), intent(in) :: fname
                 
-        character(255)           :: attribs(2,1)
+        character(len=255)       :: attribs(2,1)
         logical                  :: mustRead
         type(xml_parse)          :: info
 
@@ -161,8 +161,8 @@ contains
         character(len=*), intent(in)    :: field
         character(len=*), intent(in)    :: fieldName
         
-        character(255) :: myData(1)
-        character(255) :: attribs(2,2)
+        character(len=255) :: myData(1)
+        character(len=255) :: attribs(2,2)
         
         attribs(1,1) = 'name'
         attribs(2,1) = fieldName
@@ -190,8 +190,8 @@ contains
         integer,          intent(in)    :: field
         character(len=*), intent(in)    :: fieldName
         
-        character(255) :: myData(1)
-        character(255) :: attribs(2,2)
+        character(len=255) :: myData(1)
+        character(len=255) :: attribs(2,2)
         
         attribs(1,1) = 'name'
         attribs(2,1) = fieldName
@@ -221,8 +221,8 @@ contains
         real(dp),         intent(in)    :: field
         character(len=*), intent(in)    :: fieldName
         
-        character(255)                 :: myData(1)
-        character(255)                 :: attribs(2,2)
+        character(len=255)                 :: myData(1)
+        character(len=255)                 :: attribs(2,2)
                                 
         attribs(1,1) = 'name'
         attribs(2,1) = fieldName
@@ -251,8 +251,8 @@ contains
         type(xml_parse),  intent(inout) :: info
         logical,          intent(in)    :: field
         character(len=*), intent(in)    :: fieldName
-        character(255)                  :: myData(1)
-        character(255)                  :: attribs(2,2)
+        character(len=255)                  :: myData(1)
+        character(len=255)                  :: attribs(2,2)
         
         attribs(1,1) = 'name'
         attribs(2,1) = fieldName
@@ -283,10 +283,10 @@ contains
         integer,          intent(in)    :: field(:)
         character(len=*), intent(in)    :: fieldName
         
-        character(1)                   :: myData(1)
-        character(255)                 :: attribs(2,2)
-        character(64)                  :: tempStr(size(field))
-        character(64*size(field)+1)    :: tempStr2
+        character(len=1)                   :: myData(1)
+        character(len=255)                 :: attribs(2,2)
+        character(len=64)                  :: tempStr(size(field))
+        character(len=64*size(field)+1)    :: tempStr2
         
         integer                        :: i
 
@@ -330,10 +330,10 @@ contains
         real(dp),         intent(in)    :: field(:)
         character(len=*), intent(in)    :: fieldName
         
-        character(1)                   :: mydata(1)
-        character(255)                 :: attribs(2,2)
-        character(64)                  :: tempStr(size(field))
-        character(64*size(field)+1)    :: tempStr2
+        character(len=1)                   :: mydata(1)
+        character(len=255)                 :: attribs(2,2)
+        character(len=64)                  :: tempStr(size(field))
+        character(len=64*size(field)+1)    :: tempStr2
         
         integer                        :: i
 
@@ -377,10 +377,10 @@ contains
         logical,          intent(in)    :: field(:)
         character(len=*), intent(in)    :: fieldName
         
-        character(1)                   :: myData(1)
-        character(255)                 :: attribs(2,2)
-        character(1)                   :: tempStr(size(field))
-        character(1*size(field)+1)     :: tempStr2
+        character(len=1)                   :: myData(1)
+        character(len=255)                 :: attribs(2,2)
+        character(len=1)                   :: tempStr(size(field))
+        character(len=1*size(field)+1)     :: tempStr2
         
         integer                        :: i
 
@@ -423,7 +423,7 @@ contains
         character(len=*),           intent(in)    :: openClose
         character(len=*), optional, intent(in)    :: attribs(:,:)
         
-        character(255)                        :: myData(1)
+        character(len=255)                        :: myData(1)
 
         if (present(attribs)) then
             call xml_put(info, tag, attribs, size(attribs,2), myData, 0, openClose)
@@ -473,7 +473,7 @@ contains
         real(dp),         intent(in) :: fdouble
         character(len=*), intent(in) :: fname
         
-        character(32) :: str
+        character(len=32) :: str
             
         write(str,*) fdouble
         call trimZero(str)
@@ -548,8 +548,8 @@ contains
         real(dp),         intent(in) :: fdoublearray(:)
         character(len=*), intent(in) :: fname
 
-        integer       :: i
-        character(32) :: str
+        integer           :: i
+        character(len=32) :: str
             
         do i = 1, size(fdoublearray)
             write(str,*) fdoublearray(i)

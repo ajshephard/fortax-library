@@ -106,7 +106,7 @@ contains
         type(net_t) :: net(nfam)
         type(sys_t), allocatable :: sys(:)
 
-        character(255)           :: attribs(2,1)
+        character(len=255)       :: attribs(2,1)
         logical                  :: mustRead
         type(xml_parse)          :: info
 

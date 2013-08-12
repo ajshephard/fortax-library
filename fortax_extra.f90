@@ -214,10 +214,10 @@ contains
 
         implicit none
         
-        type(net_t),   intent(in)  :: net
-        character(16), intent(out) :: netoutLevel(netoutSize), netoutName(netoutSize)
-        real(dp),      intent(out) :: netoutAmt(netoutSize)
-        integer,       intent(out) :: netoutNum
+        type(net_t),       intent(in)  :: net
+        character(len=16), intent(out) :: netoutLevel(netoutSize), netoutName(netoutSize)
+        real(dp),          intent(out) :: netoutAmt(netoutSize)
+        integer,           intent(out) :: netoutNum
 
         integer :: i
         

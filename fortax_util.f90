@@ -42,7 +42,7 @@ contains
                  
         integer, intent(in)       :: N
         character(intToStrLen(N)) :: intToStr
-        character(20)             :: tempStr20
+        character(len=20)         :: tempStr20
         
         write (tempStr20,'(I20)') N
         intToStr = adjustl(tempStr20)
@@ -60,7 +60,7 @@ contains
 
         integer, intent(in) :: N
         integer             :: intToStrLen
-        character(20)       :: tempStr20
+        character(len=20)   :: tempStr20
         
         write (tempStr20,'(I20)') N
         intToStrLen = len_trim(adjustl(tempStr20))
@@ -76,7 +76,7 @@ contains
         implicit none
                  
         logical, intent(in) :: N
-        character(1)        :: logicalToStr
+        character(len=1)    :: logicalToStr
         
         logicalToStr = merge('T','F',N)
 
@@ -94,7 +94,7 @@ contains
                  
         real(dp), intent(in)      :: N
         character(dblToStrLen(N)) :: dblToStr
-        character(40)             :: tempStr40
+        character(len=40)         :: tempStr40
         
         write (tempStr40,*) N
         dblToStr = adjustl(tempStr40)
@@ -112,7 +112,7 @@ contains
 
         real(dp), intent(in) :: N
         integer              :: dblToStrLen
-        character(40)        :: tempStr40
+        character(len=40)    :: tempStr40
         
         write (tempStr40,*) N
         dblToStrLen = len_trim(adjustl(tempStr40))
@@ -198,7 +198,7 @@ contains
         implicit none
         
         character(len=*), intent(in) :: str
-        character(len(str))          :: lower
+        character(len=len(str))      :: lower
         
         character                    :: ch
         integer, parameter           :: offset = ichar('A') - ichar('a')
@@ -222,7 +222,7 @@ contains
         implicit none
         
         character(len=*), intent(in) :: str
-        character(len(str))      :: upper
+        character(len=len(str))      :: upper
         
         character                :: ch
         integer, parameter       :: offset = ichar('a') - ichar('A')
@@ -247,8 +247,8 @@ contains
         implicit none
 
         character(len=*), intent(inout) :: str
-        character(1)                    :: ch
-        character(len_trim(str))        :: outstr
+        character(len=1)                :: ch
+        character(len=len_trim(str))    :: outstr
 
         integer                         :: i, k, isp, ich
         integer                         :: lenstr
@@ -293,8 +293,8 @@ contains
 
         character(len=*), intent(inout) :: str
         integer, parameter              :: eeLen = 32
-        character(eeLen)                :: ee, eestr
-        character                       :: ch
+        character(len=eeLen)            :: ee, eestr
+        character(len=1)                :: ch
         integer                         :: i, lstr, ipos, eex
 
         str = adjustl(trim(str))
@@ -343,7 +343,7 @@ contains
     
         character(len=*), intent(in) :: str
         integer,          intent(in) :: n
-        character(n)                 :: strPad
+        character(len=n)  :: strPad
 
         strPad = str
     
@@ -393,9 +393,9 @@ contains
         
         !character(len(string))   :: tmpstring
 
-        integer      :: n, i, i0, i1
-        integer      :: strLen, thisLen
-        character(8) :: strFor
+        integer          :: n, i, i0, i1
+        integer          :: strLen, thisLen
+        character(len=8) :: strFor
 
         n = size(x)
         strLen = len(str)
@@ -451,9 +451,9 @@ contains
         
         !character(len(string))      :: tmpstring
 
-        integer      :: n, i, i0, i1
-        integer      :: strLen, thisLen
-        character(8) :: strFor
+        integer          :: n, i, i0, i1
+        integer          :: strLen, thisLen
+        character(len=8) :: strFor
 
         n      = size(x)
         strlen = len(str)

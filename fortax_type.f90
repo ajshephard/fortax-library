@@ -56,8 +56,8 @@ module fortax_type
 #   undef _maxrpi_
 
     type :: lab_t
-        character(32), dimension(7)  :: tenure
-        character(32), dimension(12) :: region
+        character(len=32), dimension(7)  :: tenure
+        character(len=32), dimension(12) :: region
     end type lab_t
 
     type(lab_t), parameter :: lab = lab_t((/character(len=32) :: 'Own outright','Mortgage', &

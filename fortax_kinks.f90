@@ -216,8 +216,8 @@ contains
 
         !character(len(taxout))             :: ltaxout
         !character(len(taxlevel))           :: ltaxlevel
-        character(32) :: ltaxout,ltaxlevel
-        character(64) :: str
+        character(len=32) :: ltaxout,ltaxlevel
+        character(len=64) :: str
         type(fam_t)                :: fam0
         type(net_t), target        :: net
         real(dp)                   :: taxcomp0, taxcomp1
@@ -716,8 +716,8 @@ loopmax : do
 
         !character(len(taxout))             :: ltaxout
         !character(len(taxlevel))           :: ltaxlevel
-        character(32)              :: ltaxout, ltaxlevel
-        character(64) :: str
+        character(len=32)              :: ltaxout, ltaxlevel
+        character(len=64) :: str
         
         type(fam_t)                :: fam0
         type(net_t), target        :: net
@@ -1177,7 +1177,7 @@ loopmax : do
 
         !character(len(taxout))             :: ltaxout
         !character(len(taxlevel))           :: ltaxlevel
-        character(32)              :: ltaxout, ltaxlevel
+        character(len=32)              :: ltaxout, ltaxlevel
         type(fam_t)                :: fam0
         type(net_t), target        :: net
         real(dp)                   :: taxcomp0, taxcomp1
