@@ -1,7 +1,5 @@
 ! Part of XML-Fortran library:
 !
-! $Id: read_xml_scalar.inc,v 1.3 2007/02/26 20:33:38 arjenmarkus Exp $
-!
    type(XML_PARSE), intent(inout)               :: info
    character(len=*), intent(in)                 :: tag
    logical, intent(inout)                       :: endtag
@@ -27,7 +25,7 @@
    else
       do idx = 1,nodata
          if ( data(idx) .ne. ' ' ) then
-            read( data(idx), *, iostat=ierr ) var
+            read( data(idx), '(A)', iostat=ierr ) var
             has_var = .true.
             exit
          endif

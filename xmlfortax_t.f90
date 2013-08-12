@@ -3,6 +3,7 @@ module xml_data_xmlfortax_t
    use WRITE_XML_PRIMITIVES
    use XMLPARSE
    implicit none
+   save
    integer, private :: lurep_
    logical, private :: strict_
 
@@ -103,12 +104,12 @@ subroutine read_xml_type_finteger_t( info, starttag, endtag, attribs, noattribs,
    noatt_ = noattribs+1
    endtag_org = endtag
    do
-      if ( nodata .ne. 0 ) then
+      if ( nodata /= 0 ) then
          noattribs = 0
          tag = starttag
-      elseif ( att_ .lt. noatt_ .and. noatt_ .gt. 1 ) then
+      elseif ( att_ < noatt_ .and. noatt_ > 1 ) then
          att_      = att_ + 1
-         if ( att_ .le. noatt_-1 ) then
+         if ( att_ <= noatt_-1 ) then
             tag       = attribs(1,att_)
             data(1)   = attribs(2,att_)
             noattribs = 0
@@ -133,10 +134,10 @@ subroutine read_xml_type_finteger_t( info, starttag, endtag, attribs, noattribs,
             endif
          endif
       endif
-      if ( endtag .and. tag .eq. starttag ) then
+      if ( endtag .and. tag == starttag ) then
          exit
       endif
-      if ( endtag .and. noattribs .eq. 0 ) then
+      if ( endtag .and. noattribs == 0 ) then
          if ( xml_ok(info) ) then
             cycle
          else
@@ -265,12 +266,12 @@ subroutine read_xml_type_fdouble_t( info, starttag, endtag, attribs, noattribs, 
    noatt_ = noattribs+1
    endtag_org = endtag
    do
-      if ( nodata .ne. 0 ) then
+      if ( nodata /= 0 ) then
          noattribs = 0
          tag = starttag
-      elseif ( att_ .lt. noatt_ .and. noatt_ .gt. 1 ) then
+      elseif ( att_ < noatt_ .and. noatt_ > 1 ) then
          att_      = att_ + 1
-         if ( att_ .le. noatt_-1 ) then
+         if ( att_ <= noatt_-1 ) then
             tag       = attribs(1,att_)
             data(1)   = attribs(2,att_)
             noattribs = 0
@@ -295,10 +296,10 @@ subroutine read_xml_type_fdouble_t( info, starttag, endtag, attribs, noattribs, 
             endif
          endif
       endif
-      if ( endtag .and. tag .eq. starttag ) then
+      if ( endtag .and. tag == starttag ) then
          exit
       endif
-      if ( endtag .and. noattribs .eq. 0 ) then
+      if ( endtag .and. noattribs == 0 ) then
          if ( xml_ok(info) ) then
             cycle
          else
@@ -427,12 +428,12 @@ subroutine read_xml_type_flogical_t( info, starttag, endtag, attribs, noattribs,
    noatt_ = noattribs+1
    endtag_org = endtag
    do
-      if ( nodata .ne. 0 ) then
+      if ( nodata /= 0 ) then
          noattribs = 0
          tag = starttag
-      elseif ( att_ .lt. noatt_ .and. noatt_ .gt. 1 ) then
+      elseif ( att_ < noatt_ .and. noatt_ > 1 ) then
          att_      = att_ + 1
-         if ( att_ .le. noatt_-1 ) then
+         if ( att_ <= noatt_-1 ) then
             tag       = attribs(1,att_)
             data(1)   = attribs(2,att_)
             noattribs = 0
@@ -457,10 +458,10 @@ subroutine read_xml_type_flogical_t( info, starttag, endtag, attribs, noattribs,
             endif
          endif
       endif
-      if ( endtag .and. tag .eq. starttag ) then
+      if ( endtag .and. tag == starttag ) then
          exit
       endif
-      if ( endtag .and. noattribs .eq. 0 ) then
+      if ( endtag .and. noattribs == 0 ) then
          if ( xml_ok(info) ) then
             cycle
          else
@@ -589,12 +590,12 @@ subroutine read_xml_type_fintegerarray_t( info, starttag, endtag, attribs, noatt
    noatt_ = noattribs+1
    endtag_org = endtag
    do
-      if ( nodata .ne. 0 ) then
+      if ( nodata /= 0 ) then
          noattribs = 0
          tag = starttag
-      elseif ( att_ .lt. noatt_ .and. noatt_ .gt. 1 ) then
+      elseif ( att_ < noatt_ .and. noatt_ > 1 ) then
          att_      = att_ + 1
-         if ( att_ .le. noatt_-1 ) then
+         if ( att_ <= noatt_-1 ) then
             tag       = attribs(1,att_)
             data(1)   = attribs(2,att_)
             noattribs = 0
@@ -619,10 +620,10 @@ subroutine read_xml_type_fintegerarray_t( info, starttag, endtag, attribs, noatt
             endif
          endif
       endif
-      if ( endtag .and. tag .eq. starttag ) then
+      if ( endtag .and. tag == starttag ) then
          exit
       endif
-      if ( endtag .and. noattribs .eq. 0 ) then
+      if ( endtag .and. noattribs == 0 ) then
          if ( xml_ok(info) ) then
             cycle
          else
@@ -751,12 +752,12 @@ subroutine read_xml_type_fdoublearray_t( info, starttag, endtag, attribs, noattr
    noatt_ = noattribs+1
    endtag_org = endtag
    do
-      if ( nodata .ne. 0 ) then
+      if ( nodata /= 0 ) then
          noattribs = 0
          tag = starttag
-      elseif ( att_ .lt. noatt_ .and. noatt_ .gt. 1 ) then
+      elseif ( att_ < noatt_ .and. noatt_ > 1 ) then
          att_      = att_ + 1
-         if ( att_ .le. noatt_-1 ) then
+         if ( att_ <= noatt_-1 ) then
             tag       = attribs(1,att_)
             data(1)   = attribs(2,att_)
             noattribs = 0
@@ -781,10 +782,10 @@ subroutine read_xml_type_fdoublearray_t( info, starttag, endtag, attribs, noattr
             endif
          endif
       endif
-      if ( endtag .and. tag .eq. starttag ) then
+      if ( endtag .and. tag == starttag ) then
          exit
       endif
-      if ( endtag .and. noattribs .eq. 0 ) then
+      if ( endtag .and. noattribs == 0 ) then
          if ( xml_ok(info) ) then
             cycle
          else
@@ -913,12 +914,12 @@ subroutine read_xml_type_flogicalarray_t( info, starttag, endtag, attribs, noatt
    noatt_ = noattribs+1
    endtag_org = endtag
    do
-      if ( nodata .ne. 0 ) then
+      if ( nodata /= 0 ) then
          noattribs = 0
          tag = starttag
-      elseif ( att_ .lt. noatt_ .and. noatt_ .gt. 1 ) then
+      elseif ( att_ < noatt_ .and. noatt_ > 1 ) then
          att_      = att_ + 1
-         if ( att_ .le. noatt_-1 ) then
+         if ( att_ <= noatt_-1 ) then
             tag       = attribs(1,att_)
             data(1)   = attribs(2,att_)
             noattribs = 0
@@ -943,10 +944,10 @@ subroutine read_xml_type_flogicalarray_t( info, starttag, endtag, attribs, noatt
             endif
          endif
       endif
-      if ( endtag .and. tag .eq. starttag ) then
+      if ( endtag .and. tag == starttag ) then
          exit
       endif
-      if ( endtag .and. noattribs .eq. 0 ) then
+      if ( endtag .and. noattribs == 0 ) then
          if ( xml_ok(info) ) then
             cycle
          else
@@ -1091,12 +1092,12 @@ subroutine read_xml_type_system_t( info, starttag, endtag, attribs, noattribs, d
    noatt_ = noattribs+1
    endtag_org = endtag
    do
-      if ( nodata .ne. 0 ) then
+      if ( nodata /= 0 ) then
          noattribs = 0
          tag = starttag
-      elseif ( att_ .lt. noatt_ .and. noatt_ .gt. 1 ) then
+      elseif ( att_ < noatt_ .and. noatt_ > 1 ) then
          att_      = att_ + 1
-         if ( att_ .le. noatt_-1 ) then
+         if ( att_ <= noatt_-1 ) then
             tag       = attribs(1,att_)
             data(1)   = attribs(2,att_)
             noattribs = 0
@@ -1121,10 +1122,10 @@ subroutine read_xml_type_system_t( info, starttag, endtag, attribs, noattribs, d
             endif
          endif
       endif
-      if ( endtag .and. tag .eq. starttag ) then
+      if ( endtag .and. tag == starttag ) then
          exit
       endif
-      if ( endtag .and. noattribs .eq. 0 ) then
+      if ( endtag .and. noattribs == 0 ) then
          if ( xml_ok(info) ) then
             cycle
          else
@@ -1220,20 +1221,19 @@ subroutine write_xml_type_system_t( &
        '</' //trim(tag) // '>'
 end subroutine write_xml_type_system_t
 
-subroutine read_xml_file_xmlfortax_t(fname, lurep, errout,funit)
+subroutine read_xml_file_xmlfortax_t(fname, lurep, errout)
    character(len=*), intent(in)           :: fname
    integer, intent(in), optional          :: lurep
    logical, intent(out), optional         :: errout
-   integer, intent(out), optional         :: funit
 
    type(XML_PARSE)                        :: info
    logical                                :: error
    character(len=80)                      :: tag
    character(len=80)                      :: starttag
    logical                                :: endtag
-   character(len=255), dimension(1:2,1:20) :: attribs
+   character(len= 255), dimension(1:2,1:20) :: attribs
    integer                                :: noattribs
-   character(len=200), dimension(1:100)   :: data
+   character(len=200), dimension(1:1000)  :: data
    integer                                :: nodata
    logical                                         :: has_system
    logical                                         :: has_sysname
@@ -1245,8 +1245,7 @@ subroutine read_xml_file_xmlfortax_t(fname, lurep, errout,funit)
 
    call init_xml_file_xmlfortax_t
    call xml_open( info, fname, .true. )
-   if (present(funit)) funit = info%lun
-   call xml_options( info, report_errors=.true., ignore_whitespace=.true., no_data_truncation =.true.)
+   call xml_options( info, report_errors=.false., ignore_whitespace=.true.)
    lurep_ = 0
    if ( present(lurep) ) then
       lurep_ = lurep
@@ -1255,9 +1254,9 @@ subroutine read_xml_file_xmlfortax_t(fname, lurep, errout,funit)
    do
       call xml_get( info, starttag, endtag, attribs, noattribs, &
          data, nodata)
-      if ( starttag .ne. '!--' ) exit
+      if ( starttag /= '!--' ) exit
    enddo
-   if ( starttag .ne. "fortax" ) then
+   if ( starttag /= "fortax" ) then
       call xml_report_errors( info, &
          'XML-file should have root element "fortax"')
       error = .true.
@@ -1273,10 +1272,10 @@ subroutine read_xml_file_xmlfortax_t(fname, lurep, errout,funit)
          error = .true.
          return
       endif
-      if ( endtag .and. tag .eq. starttag ) then
+      if ( endtag .and. tag == starttag ) then
          exit
       endif
-      if ( endtag .and. noattribs .eq. 0 ) then
+      if ( endtag .and. noattribs == 0 ) then
          if ( xml_ok(info) ) then
             cycle
          else
@@ -1312,12 +1311,6 @@ subroutine read_xml_file_xmlfortax_t(fname, lurep, errout,funit)
       error = .true.
       call xml_report_errors(info, 'Missing data on system')
    endif
-   if ( .not. has_sysname ) then
-      sysname = ""
-   endif
-   if ( .not. has_sysdesc ) then
-      sysdesc = ""
-   endif
    if ( present(errout) ) errout = error
 end subroutine
 
@@ -1343,6 +1336,8 @@ subroutine write_xml_file_xmlfortax_t(fname, lurep)
 end subroutine
 
 subroutine init_xml_file_xmlfortax_t
+   sysname = ''
+   sysdesc = ''
 
 end subroutine
 

@@ -11,8 +11,8 @@
     <component name="Value" type="character" length="80"/>
   </typedef>
   <typedef name="namedfields_t">
-    <component name="BaseName" type="word" length="80" required="no"/>
-    <component name="Field" type="field_t" dimension="1" required="no"/>
+    <component name="BaseName" type="word" length="80" optional="yes"/>
+    <component name="Field" type="field_t" dimension="1" optional="yes"/>
   </typedef>
   <typedef name="object_t">
     <component name="ClassNum" type="integer"/>

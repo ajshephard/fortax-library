@@ -60,7 +60,7 @@ contains
         type(sys_t),       intent(out) :: sys
         character(*),      intent(in)  :: systemFile
         integer, optional, intent(in)  :: prices
-        integer                        :: i, j, xmlUnit
+        integer                        :: i, j
         logical                        :: isFile
         
         inquire(file=systemFile, exist=isFile)
@@ -69,8 +69,7 @@ contains
             call fortaxError('system file does not exist ('//trim(adjustl(systemFile))//')')
         end if              
         
-        call getunit(xmlUnit)
-        call read_xml_file_xmlfortax_t(systemFile,funit=xmlUnit)
+        call read_xml_file_xmlfortax_t(systemFile)
         call sys_init(sys)
         !use fpp so that the reading will fully reflect the data structure                    
 #       include 'includes/fortax_typeread.inc'
@@ -114,8 +113,6 @@ contains
         if (associated(system)) deallocate(system)
         
         if (present(prices)) sys%extra%prices = prices
-
-        close(xmlunit)
 
     end subroutine readFortaxParams
 

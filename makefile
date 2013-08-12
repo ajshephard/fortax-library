@@ -5,14 +5,14 @@ MODPATH = ./
 OUTPATH = ./
 
 OBJECTS  = fortax_realtype.o fortax_util.o fortax_type.o fortax_calc.o fortax_extra.o fortax_prices.o fortax_read.o fortax_taxbenread.o fortax_write.o fortax_kinks.o fortax_compare.o
-XMLOBJECTS = xmlparse.o read_xml_prims.o write_xml_prims.o xmltaxben_t.o xmlfortax_t.o xmlfamcompare_t.o
+XMLOBJECTS = xmlparse.o read_xml_primitives.o write_xml_primitives.o xmltaxben_t.o xmlfortax_t.o xmlfamcompare_t.o
 
 # ------------------Macro-Defs---------------------
 DIAGDISABLE = -diag-disable 5268,7025
 FFLAGS = -O0 -debug -g -traceback -fpp -check bounds -check all -warn unused -stand f03 -fPIC -gen-interfaces $(DIAGDISABLE) -module $(MODPATH)
 #FFLAGS = -O1 -fpp -stand f03 -fPIC -gen-interfaces -module ../modules-dev
 # GPROF = -g -p
-#FFLAGS = -O3 -fpp -stand f03 -warn all -inline speed -inline-forceinline -no-prec-div -xHost -static -fPIC -gen-interfaces $(DIAGDISABLE) $(GPROF) -module $(MODPATH)
+FFLAGS = -O3 -fpp -stand f03 -warn all -inline speed -inline-forceinline -no-prec-div -xHost -static -fPIC -gen-interfaces $(DIAGDISABLE) $(GPROF) -module $(MODPATH)
 F90 = ifort
 #DEFINES = -D_famcouple_=.false. -D_fammarried_=.false. -D_famkids_=.true.
 # -------------------End-macro-Defs---------------------------
@@ -23,20 +23,20 @@ all:$(OBJECTS) $(XMLOBJECTS)
 xmlparse.o:xmlparse.f90  
 	$(F90) $(FFLAGS) -c xmlparse.f90 
 
-read_xml_prims.o:read_xml_prims.f90 xmlparse.o \
+read_xml_primitives.o:read_xml_primitives.f90 xmlparse.o \
 	$(addprefix $(INCLUDESPATH)/xml/, $(XMLINCLUDES))
-	$(F90) $(FFLAGS) -c read_xml_prims.f90 
+	$(F90) $(FFLAGS) -I$(INCLUDESPATH)/xml -c read_xml_primitives.f90 
 
-write_xml_prims.o:write_xml_prims.f90 xmlparse.o 
-	$(F90) $(FFLAGS) -c write_xml_prims.f90 
+write_xml_primitives.o:write_xml_primitives.f90 xmlparse.o 
+	$(F90) $(FFLAGS) -c write_xml_primitives.f90 
 
-xmltaxben_t.o:xmltaxben_t.f90 read_xml_prims.o xmlparse.o 
+xmltaxben_t.o:xmltaxben_t.f90 read_xml_primitives.o xmlparse.o 
 	$(F90) $(FFLAGS) -O1 -c xmltaxben_t.f90 
 
-xmlfortax_t.o:xmlfortax_t.f90 read_xml_prims.o write_xml_prims.o xmlparse.o 
+xmlfortax_t.o:xmlfortax_t.f90 read_xml_primitives.o write_xml_primitives.o xmlparse.o 
 	$(F90) $(FFLAGS) -O1 -c xmlfortax_t.f90 
 
-xmlfamcompare_t.o:xmlfamcompare_t.f90 read_xml_prims.o write_xml_prims.o xmlparse.o 
+xmlfamcompare_t.o:xmlfamcompare_t.f90 read_xml_primitives.o write_xml_primitives.o xmlparse.o 
 	$(F90) $(FFLAGS) -O1 -c xmlfamcompare_t.f90
 
 fortax_realtype.o:fortax_realtype.f90

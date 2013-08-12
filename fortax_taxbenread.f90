@@ -49,7 +49,7 @@ contains
         character(*), optional, intent(in)  :: sysdesc
         type(namedfields_t), pointer   :: cat
         type(field_t),       pointer   :: cat2
-        integer                        :: i, j, nField, nnamedFields, xmlUnit
+        integer                        :: i, j, nField, nnamedFields
         logical                        :: isFile
         
         inquire(file=systemFile, exist=isFile)
@@ -58,8 +58,7 @@ contains
             call fortaxError('system file does not exist ('//trim(adjustl(systemFile))//')')
         end if               
 
-        call getunit(xmlUnit)
-        call read_xml_file_xmltaxben_t(systemFile,funit=xmlUnit)
+        call read_xml_file_xmltaxben_t(systemFile)
         call sys_init(sys)
         
         nnamedFields = size(object%namedFields)
@@ -932,8 +931,6 @@ contains
         end if
 
         if (present(prices)) sys%extra%prices = prices
-
-        close(xmlunit)
 
     end subroutine readTaxbenParams
 

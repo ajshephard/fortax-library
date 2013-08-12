@@ -56,7 +56,6 @@ subroutine skip_until_endtag( info, tag, attribs, data, error )
 
    integer                                         :: noattribs
    integer                                         :: nodata
-   integer                                         :: ierr
    logical                                         :: endtag
    character(len=len(tag))                         :: newtag
 
@@ -68,7 +67,7 @@ subroutine skip_until_endtag( info, tag, attribs, data, error )
          error = .true.
          exit
       endif
-      if ( endtag .and. newtag .eq. tag ) then
+      if ( endtag .and. newtag == tag ) then
          exit
       endif
    enddo
@@ -92,7 +91,7 @@ subroutine read_xml_integer( info, tag, endtag, attribs, noattribs, data, nodata
                              var, has_var )
    integer, intent(inout)                       :: var
 
-   include 'includes/xml/read_xml_scalar.inc'
+   include 'read_xml_scalar.inc'
 
 end subroutine read_xml_integer
 
@@ -124,7 +123,6 @@ subroutine read_xml_line( info, tag, endtag, attribs, noattribs, data, nodata, &
 
    character(len=len(attribs(1,1)))             :: buffer
    integer                                      :: idx
-   integer                                      :: ierr
 
    !
    ! The value can be stored in an attribute value="..." or in
@@ -132,12 +130,12 @@ subroutine read_xml_line( info, tag, endtag, attribs, noattribs, data, nodata, &
    !
    has_var = .false.
    idx = xml_find_attrib( attribs, noattribs, 'value', buffer )
-   if ( idx .gt. 0 ) then
+   if ( idx > 0 ) then
       var     = buffer
       has_var = .true.
    else
       do idx = 1,nodata
-         if ( data(idx) .ne. ' ' ) then
+         if ( data(idx) /= ' ' ) then
             var = data(idx)
             has_var = .true.
             exit
@@ -153,7 +151,7 @@ subroutine read_xml_real( info, tag, endtag, attribs, noattribs, data, nodata, &
                           var, has_var )
    real, intent(inout)                          :: var
 
-   include 'includes/xml/read_xml_scalar.inc'
+   include 'read_xml_scalar.inc'
 
 end subroutine read_xml_real
 
@@ -161,7 +159,7 @@ subroutine read_xml_double( info, tag, endtag, attribs, noattribs, data, nodata,
                             var, has_var )
    real(kind=kind(1.0d00)), intent(inout)       :: var
 
-   include 'includes/xml/read_xml_scalar.inc'
+   include 'read_xml_scalar.inc'
 
 end subroutine read_xml_double
 
@@ -169,7 +167,7 @@ subroutine read_xml_logical( info, tag, endtag, attribs, noattribs, data, nodata
                              var, has_var )
    logical, intent(inout)       :: var
 
-   include 'includes/xml/read_xml_scalar.inc'
+   include 'read_xml_scalar.inc'
 
 end subroutine read_xml_logical
 
@@ -177,7 +175,7 @@ subroutine read_xml_word( info, tag, endtag, attribs, noattribs, data, nodata, &
                           var, has_var )
    character(len=*), intent(inout)       :: var
 
-   include 'includes/xml/read_xml_scalar.inc'
+   include 'read_xml_word.inc'
 
 end subroutine read_xml_word
 
@@ -200,7 +198,7 @@ subroutine read_xml_integer_array( info, tag, endtag, attribs, noattribs, data, 
                                    nodata, var, has_var )
    integer, dimension(:), pointer                :: var
 
-   include 'includes/xml/read_xml_array.inc'
+   include 'read_xml_array.inc'
 
 end subroutine read_xml_integer_array
 
@@ -232,7 +230,6 @@ subroutine read_xml_line_array( info, tag, endtag, attribs, noattribs, data, &
    character(len=len(attribs(1,1)))              :: buffer
    integer                                       :: idx
    integer                                       :: idxv
-   integer                                       :: ierr
    logical                                       :: started
 
    !
@@ -241,17 +238,17 @@ subroutine read_xml_line_array( info, tag, endtag, attribs, noattribs, data, &
    !
    has_var = .false.
    idx = xml_find_attrib( attribs, noattribs, 'values', buffer )
-   if ( idx .gt. 0 ) then
+   if ( idx > 0 ) then
       allocate( var(1:1) )
       var(1) = buffer
-      if ( buffer .ne. ' ' ) then
+      if ( buffer /= ' ' ) then
          has_var = .true.
       endif
    else
       idxv    = 0
       started = .false.
       do idx = 1,nodata
-         if ( data(idx) .ne. ' ' .or. started ) then
+         if ( data(idx) /= ' ' .or. started ) then
             if ( .not. started ) then
                allocate( var(1:nodata-idx+1) )
                started = .true.
@@ -273,7 +270,7 @@ subroutine read_xml_real_array( info, tag, endtag, attribs, noattribs, data, &
                                 nodata, var, has_var )
    real, dimension(:), pointer :: var
 
-   include 'includes/xml/read_xml_array.inc'
+   include 'read_xml_array.inc'
 
 end subroutine read_xml_real_array
 
@@ -281,7 +278,7 @@ subroutine read_xml_double_array( info, tag, endtag, attribs, noattribs, data, &
                                   nodata, var, has_var )
    real(kind=kind(1.0d00)), dimension(:), pointer :: var
 
-   include 'includes/xml/read_xml_array.inc'
+   include 'read_xml_array.inc'
 
 end subroutine read_xml_double_array
 
@@ -289,7 +286,7 @@ subroutine read_xml_logical_array( info, tag, endtag, attribs, noattribs, data, 
                                    nodata, var, has_var )
    logical, dimension(:), pointer :: var
 
-   include 'includes/xml/read_xml_array.inc'
+   include 'read_xml_array.inc'
 
 end subroutine read_xml_logical_array
 
@@ -297,7 +294,7 @@ subroutine read_xml_word_array( info, tag, endtag, attribs, noattribs, data, &
                                 nodata, var, has_var )
    character(len=*), dimension(:), pointer :: var
 
-   include 'includes/xml/read_xml_array.inc'
+   include 'read_xml_array.inc'
 
 end subroutine read_xml_word_array
 
@@ -313,7 +310,7 @@ subroutine read_from_buffer_integers( buffer, var, ierror )
    integer, dimension(:), pointer                :: var
    integer, dimension(:), pointer                :: work
 
-   include 'includes/xml/read_from_buffer.inc'
+   include 'read_from_buffer.inc'
 
 end subroutine read_from_buffer_integers
 
@@ -324,7 +321,7 @@ subroutine read_from_buffer_reals( buffer, var, ierror )
    real, dimension(:), pointer                :: var
    real, dimension(:), pointer                :: work
 
-   include 'includes/xml/read_from_buffer.inc'
+   include 'read_from_buffer.inc'
 
 end subroutine read_from_buffer_reals
 
@@ -332,7 +329,7 @@ subroutine read_from_buffer_doubles( buffer, var, ierror )
    real(kind=kind(1.0d00)), dimension(:), pointer :: var
    real(kind=kind(1.0d00)), dimension(:), pointer :: work
 
-   include 'includes/xml/read_from_buffer.inc'
+   include 'read_from_buffer.inc'
 
 end subroutine read_from_buffer_doubles
 
@@ -340,7 +337,7 @@ subroutine read_from_buffer_logicals( buffer, var, ierror )
    logical, dimension(:), pointer :: var
    logical, dimension(:), pointer :: work
 
-   include 'includes/xml/read_from_buffer.inc'
+   include 'read_from_buffer.inc'
 
 end subroutine read_from_buffer_logicals
 
@@ -348,7 +345,7 @@ subroutine read_from_buffer_words( buffer, var, ierror )
    character(len=*), dimension(:), pointer :: var
    character(len=len(var)), dimension(:), pointer :: work
 
-   include 'includes/xml/read_from_buffer.inc'
+   include 'read_from_buffer.inc'
 
 end subroutine read_from_buffer_words
 
@@ -368,9 +365,7 @@ subroutine read_xml_integer_1dim( info, tag, endtag, attribs, noattribs, data, n
    logical, intent(inout)                        :: has_var
 
    integer,dimension(:), pointer                 :: newvar
-   character(len=len(attribs(1,1)))              :: buffer
    integer                                       :: newsize
-   integer                                       :: ierr
 
    newsize = size(var) + 1
    allocate( newvar(1:newsize) )
@@ -396,9 +391,7 @@ subroutine read_xml_real_1dim( info, tag, endtag, attribs, noattribs, data, noda
    logical, intent(inout)                        :: has_var
 
    real, dimension(:), pointer                   :: newvar
-   character(len=len(attribs(1,1)))              :: buffer
    integer                                       :: newsize
-   integer                                       :: ierr
 
    newsize = size(var) + 1
    allocate( newvar(1:newsize) )
@@ -424,9 +417,7 @@ subroutine read_xml_double_1dim( info, tag, endtag, attribs, noattribs, data, no
    logical, intent(inout)                        :: has_var
 
    real(kind=kind(1.0d00)), dimension(:), pointer:: newvar
-   character(len=len(attribs(1,1)))              :: buffer
    integer                                       :: newsize
-   integer                                       :: ierr
 
    newsize = size(var) + 1
    allocate( newvar(1:newsize) )
@@ -452,9 +443,7 @@ subroutine read_xml_logical_1dim( info, tag, endtag, attribs, noattribs, data, n
    logical, intent(inout)                        :: has_var
 
    logical, dimension(:), pointer                :: newvar
-   character(len=len(attribs(1,1)))              :: buffer
    integer                                       :: newsize
-   integer                                       :: ierr
 
    newsize = size(var) + 1
    allocate( newvar(1:newsize) )
@@ -480,9 +469,7 @@ subroutine read_xml_word_1dim( info, tag, endtag, attribs, noattribs, data, noda
    logical, intent(inout)                        :: has_var
 
    character(len=len(var)),dimension(:), pointer :: newvar
-   character(len=len(attribs(1,1)))              :: buffer
    integer                                       :: newsize
-   integer                                       :: ierr
 
    newsize = size(var) + 1
    allocate( newvar(1:newsize) )
@@ -508,9 +495,7 @@ subroutine read_xml_line_1dim( info, tag, endtag, attribs, noattribs, data, noda
    logical, intent(inout)                        :: has_var
 
    character(len=len(var)),dimension(:), pointer :: newvar
-   character(len=len(attribs(1,1)))              :: buffer
    integer                                       :: newsize
-   integer                                       :: ierr
 
    newsize = size(var) + 1
    allocate( newvar(1:newsize) )

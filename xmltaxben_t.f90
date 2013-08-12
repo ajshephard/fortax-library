@@ -2,6 +2,7 @@ module xml_data_xmltaxben_t
    use READ_XML_PRIMITIVES
    use XMLPARSE
    implicit none
+   save
    integer, private :: lurep_
    logical, private :: strict_
 
@@ -85,12 +86,12 @@ subroutine read_xml_type_field_t( info, starttag, endtag, attribs, noattribs, da
    noatt_ = noattribs+1
    endtag_org = endtag
    do
-      if ( nodata .ne. 0 ) then
+      if ( nodata /= 0 ) then
          noattribs = 0
          tag = starttag
-      elseif ( att_ .lt. noatt_ .and. noatt_ .gt. 1 ) then
+      elseif ( att_ < noatt_ .and. noatt_ > 1 ) then
          att_      = att_ + 1
-         if ( att_ .le. noatt_-1 ) then
+         if ( att_ <= noatt_-1 ) then
             tag       = attribs(1,att_)
             data(1)   = attribs(2,att_)
             noattribs = 0
@@ -115,10 +116,10 @@ subroutine read_xml_type_field_t( info, starttag, endtag, attribs, noattribs, da
             endif
          endif
       endif
-      if ( endtag .and. tag .eq. starttag ) then
+      if ( endtag .and. tag == starttag ) then
          exit
       endif
-      if ( endtag .and. noattribs .eq. 0 ) then
+      if ( endtag .and. noattribs == 0 ) then
          if ( xml_ok(info) ) then
             cycle
          else
@@ -227,12 +228,12 @@ subroutine read_xml_type_fieldheader_t( info, starttag, endtag, attribs, noattri
    noatt_ = noattribs+1
    endtag_org = endtag
    do
-      if ( nodata .ne. 0 ) then
+      if ( nodata /= 0 ) then
          noattribs = 0
          tag = starttag
-      elseif ( att_ .lt. noatt_ .and. noatt_ .gt. 1 ) then
+      elseif ( att_ < noatt_ .and. noatt_ > 1 ) then
          att_      = att_ + 1
-         if ( att_ .le. noatt_-1 ) then
+         if ( att_ <= noatt_-1 ) then
             tag       = attribs(1,att_)
             data(1)   = attribs(2,att_)
             noattribs = 0
@@ -257,10 +258,10 @@ subroutine read_xml_type_fieldheader_t( info, starttag, endtag, attribs, noattri
             endif
          endif
       endif
-      if ( endtag .and. tag .eq. starttag ) then
+      if ( endtag .and. tag == starttag ) then
          exit
       endif
-      if ( endtag .and. noattribs .eq. 0 ) then
+      if ( endtag .and. noattribs == 0 ) then
          if ( xml_ok(info) ) then
             cycle
          else
@@ -362,12 +363,12 @@ subroutine read_xml_type_namedfields_t( info, starttag, endtag, attribs, noattri
    noatt_ = noattribs+1
    endtag_org = endtag
    do
-      if ( nodata .ne. 0 ) then
+      if ( nodata /= 0 ) then
          noattribs = 0
          tag = starttag
-      elseif ( att_ .lt. noatt_ .and. noatt_ .gt. 1 ) then
+      elseif ( att_ < noatt_ .and. noatt_ > 1 ) then
          att_      = att_ + 1
-         if ( att_ .le. noatt_-1 ) then
+         if ( att_ <= noatt_-1 ) then
             tag       = attribs(1,att_)
             data(1)   = attribs(2,att_)
             noattribs = 0
@@ -392,10 +393,10 @@ subroutine read_xml_type_namedfields_t( info, starttag, endtag, attribs, noattri
             endif
          endif
       endif
-      if ( endtag .and. tag .eq. starttag ) then
+      if ( endtag .and. tag == starttag ) then
          exit
       endif
-      if ( endtag .and. noattribs .eq. 0 ) then
+      if ( endtag .and. noattribs == 0 ) then
          if ( xml_ok(info) ) then
             cycle
          else
@@ -497,12 +498,12 @@ subroutine read_xml_type_object_t( info, starttag, endtag, attribs, noattribs, d
    noatt_ = noattribs+1
    endtag_org = endtag
    do
-      if ( nodata .ne. 0 ) then
+      if ( nodata /= 0 ) then
          noattribs = 0
          tag = starttag
-      elseif ( att_ .lt. noatt_ .and. noatt_ .gt. 1 ) then
+      elseif ( att_ < noatt_ .and. noatt_ > 1 ) then
          att_      = att_ + 1
-         if ( att_ .le. noatt_-1 ) then
+         if ( att_ <= noatt_-1 ) then
             tag       = attribs(1,att_)
             data(1)   = attribs(2,att_)
             noattribs = 0
@@ -527,10 +528,10 @@ subroutine read_xml_type_object_t( info, starttag, endtag, attribs, noattribs, d
             endif
          endif
       endif
-      if ( endtag .and. tag .eq. starttag ) then
+      if ( endtag .and. tag == starttag ) then
          exit
       endif
-      if ( endtag .and. noattribs .eq. 0 ) then
+      if ( endtag .and. noattribs == 0 ) then
          if ( xml_ok(info) ) then
             cycle
          else
@@ -593,28 +594,26 @@ end subroutine init_xml_type_object_t_array
 subroutine init_xml_type_object_t(dvar)
    type(object_t) :: dvar
 end subroutine init_xml_type_object_t
-subroutine read_xml_file_xmltaxben_t(fname, lurep, errout,funit)
+subroutine read_xml_file_xmltaxben_t(fname, lurep, errout)
    character(len=*), intent(in)           :: fname
    integer, intent(in), optional          :: lurep
    logical, intent(out), optional         :: errout
-   integer, intent(out), optional         :: funit
 
    type(XML_PARSE)                        :: info
    logical                                :: error
    character(len=80)                      :: tag
    character(len=80)                      :: starttag
    logical                                :: endtag
-   character(len=255), dimension(1:2,1:20) :: attribs
+   character(len= 255), dimension(1:2,1:20) :: attribs
    integer                                :: noattribs
-   character(len=200), dimension(1:100)   :: data
+   character(len=200), dimension(1:1000)  :: data
    integer                                :: nodata
    logical                                         :: has_Object
    has_Object                           = .false.
 
    call init_xml_file_xmltaxben_t
    call xml_open( info, fname, .true. )
-   if (present(funit)) funit = info%lun
-   call xml_options( info, report_errors=.true., ignore_whitespace=.true., no_data_truncation =.true.)
+   call xml_options( info, report_errors=.false., ignore_whitespace=.true.)
    lurep_ = 0
    if ( present(lurep) ) then
       lurep_ = lurep
@@ -623,9 +622,9 @@ subroutine read_xml_file_xmltaxben_t(fname, lurep, errout,funit)
    do
       call xml_get( info, starttag, endtag, attribs, noattribs, &
          data, nodata)
-      if ( starttag .ne. '!--' ) exit
+      if ( starttag /= '!--' ) exit
    enddo
-   if ( starttag .ne. "DataStream_Id3726" ) then
+   if ( starttag /= "DataStream_Id3726" ) then
       call xml_report_errors( info, &
          'XML-file should have root element "DataStream_Id3726"')
       error = .true.
@@ -641,10 +640,10 @@ subroutine read_xml_file_xmltaxben_t(fname, lurep, errout,funit)
          error = .true.
          return
       endif
-      if ( endtag .and. tag .eq. starttag ) then
+      if ( endtag .and. tag == starttag ) then
          exit
       endif
-      if ( endtag .and. noattribs .eq. 0 ) then
+      if ( endtag .and. noattribs == 0 ) then
          if ( xml_ok(info) ) then
             cycle
          else
