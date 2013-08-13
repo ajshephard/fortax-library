@@ -671,9 +671,7 @@ contains
     !DEC$ ATTRIBUTES FORCEINLINE :: ctax
     pure subroutine ctax(sys,fam,net)
 
-        use fortax_type, only : sys_t, fam_t, net_t, &
-            ctax_banda, ctax_bandb, ctax_bandc, ctax_bandd, &
-            ctax_bande, ctax_bandf, ctax_bandg, ctax_bandh
+        use fortax_type, only : sys_t, fam_t, net_t, lab
         
         implicit none
 
@@ -702,21 +700,21 @@ contains
                 fracbu = real(nliabbu,dp)/real(nliabhh,dp)
                 !Calculate CT                    
                 select case (fam%ctband)
-                    case (ctax_banda)
+                    case (lab%ctax%banda)
                         ratio = sys%ctax%RatioA
-                    case (ctax_bandb)
+                    case (lab%ctax%bandb)
                         ratio = sys%ctax%RatioB
-                    case (ctax_bandc)
+                    case (lab%ctax%bandc)
                         ratio = sys%ctax%RatioC
-                    case (ctax_bandd)
+                    case (lab%ctax%bandd)
                         ratio = 1.0_dp
-                    case (ctax_bande)
+                    case (lab%ctax%bande)
                         ratio = sys%ctax%RatioE
-                    case (ctax_bandf)
+                    case (lab%ctax%bandf)
                         ratio = sys%ctax%RatioF
-                    case (ctax_bandg)
+                    case (lab%ctax%bandg)
                         ratio = sys%ctax%RatioG
-                    case (ctax_bandh)
+                    case (lab%ctax%bandh)
                         ratio = sys%ctax%RatioH
                 end select
 
@@ -885,7 +883,7 @@ contains
     !DEC$ ATTRIBUTES FORCEINLINE :: HBen    
     pure subroutine HBen(sys,fam,net,disregRebate)
 
-        use fortax_type, only : sys_t, fam_t, net_t
+        use fortax_type, only : sys_t, fam_t, net_t, lab
         
         implicit none
 
@@ -900,7 +898,9 @@ contains
         
             ! Rent cap (only implemented for PRIVATE renters (i.e. fam%tenure == 5))
             eligrent = fam%rent
-            if ((sys%rebatesys%docap) .and. (fam%tenure == 5)) eligrent = min(fam%rent,fam%rentcap)
+            if ((sys%rebatesys%docap) .and. (fam%tenure == lab%tenure%private_renter)) then
+                eligrent = min(fam%rent,fam%rentcap)
+            end if
 
             !Passport to full entitlement if on IS or income-based JSA
             if (net%tu%incsup > tol) then
@@ -969,7 +969,7 @@ contains
     !DEC$ ATTRIBUTES FORCEINLINE :: ctaxBen
     pure subroutine ctaxBen(sys,fam,net,disregRebate)
 
-        use fortax_type, only : sys_t, fam_t, net_t
+        use fortax_type, only : sys_t, fam_t, net_t, lab
         
         implicit none
 
@@ -998,13 +998,13 @@ contains
             maxctb = net%tu%ctax
         
             !Cap CTB at band E from 1998 to 2003
-            if ((fam%ctband > 5) .and. sys%rebatesys%Restrict) then
+            if ((fam%ctband > lab%ctax%bande) .and. sys%rebatesys%Restrict) then
                 select case (fam%ctband)
-                    case (6)
+                    case (lab%ctax%bandf)
                         maxctb = maxctb*sys%ctax%RatioE/sys%ctax%RatioF
-                    case (7)
+                    case (lab%ctax%bandg)
                         maxctb = maxctb*sys%ctax%RatioE/sys%ctax%RatioG
-                    case (8)
+                    case (lab%ctax%bandh)
                         maxctb = maxctb*sys%ctax%RatioE/sys%ctax%RatioH
                 end select
             end if
@@ -1015,7 +1015,7 @@ contains
             
               ! Note: in England, cut only applies to nonpensioners (we ignore this because FORTAX only works for working age individuals)
               ! Wales is region 10, Scotland is region 11
-              if ((fam%region .ne. 10) .and. (fam%region .ne. 11)) then
+              if ((fam%region .ne. lab%region%wales) .and. (fam%region .ne. lab%region%scotland)) then
                 maxctb = maxctb * sys%ctaxben%entitlementShare
               end if
             

@@ -32,17 +32,18 @@ module fortax_type
     private
     public :: fam_init, net_init, sys_init
     public :: fam_saveF90, sys_saveF90
-    public :: lab_t, fam_t, net_t, sys_t, rpi_t
+    public :: fam_t, net_t, sys_t, rpi_t
     public :: lab, maxkids
     public :: fam_gen, fam_desc
     public :: operator(+), operator(*), operator(/)
     public :: net_desc
-    
-    public :: ctax_banda, ctax_bandb, ctax_bandc, ctax_bandd, &
-        & ctax_bande, ctax_bandf, ctax_bandg, ctax_bandh
+
+!     public :: ctax_banda, ctax_bandb, ctax_bandc, ctax_bandd, &
+!         & ctax_bande, ctax_bandf, ctax_bandg, ctax_bandh
 
     public :: sysHuge
 
+    ! sysHuge is the internal value for unbounded values in sys
     real(dp), parameter :: sysHuge = 9.99999999999999E+099_dp
 
 #   ifndef _maxkids_
@@ -59,25 +60,37 @@ module fortax_type
 #   endif
 #   undef _maxrpi_
 
-    type :: lab_t
-        character(len=32), dimension(7)  :: tenure
-        character(len=32), dimension(12) :: region
-    end type lab_t
+    ! lab_t
+    ! -----------------------------------------------------------------------
+    ! defines various labels as specified in lablist and the associated
+    ! include files. at the moment I am not using the string values, but they
+    ! are still defined for possible future use
 
-    type(lab_t), parameter :: lab = lab_t((/character(len=32) :: 'Own outright','Mortgage', &
-        & 'Part own, part rent','Social renter','Private renter','Rent free','Other'/), &
-        & (/character(len=32) :: 'North East','North West and Merseyside','Yorks and Humberside',&
-        & 'East Midlands','West Midlands','Eastern','London','South East','South West','Wales',&
-        & 'Scotland','Northern Ireland'/))
+#   include 'includes/lab_t.inc'
 
-    integer, parameter :: ctax_banda = 1
-    integer, parameter :: ctax_bandb = 2
-    integer, parameter :: ctax_bandc = 3
-    integer, parameter :: ctax_bandd = 4
-    integer, parameter :: ctax_bande = 5
-    integer, parameter :: ctax_bandf = 6
-    integer, parameter :: ctax_bandg = 7
-    integer, parameter :: ctax_bandh = 8
+
+!   remove this code to implement my new style labeling...
+
+!     type :: lab_t
+!         character(len=32), dimension(7)  :: tenure
+!         character(len=32), dimension(12) :: region
+!     end type lab_t
+
+!     type(lab_t), parameter :: lab = lab_t((/character(len=32) :: 'Own outright','Mortgage', &
+!         & 'Part own, part rent','Social renter','Private renter','Rent free','Other'/), &
+!         & (/character(len=32) :: 'North East','North West and Merseyside','Yorks and Humberside',&
+!         & 'East Midlands','West Midlands','Eastern','London','South East','South West','Wales',&
+!         & 'Scotland','Northern Ireland'/))
+
+!     integer, parameter :: ctax_banda = 1
+!     integer, parameter :: ctax_bandb = 2
+!     integer, parameter :: ctax_bandc = 3
+!     integer, parameter :: ctax_bandd = 4
+!     integer, parameter :: ctax_bande = 5
+!     integer, parameter :: ctax_bandf = 6
+!     integer, parameter :: ctax_bandg = 7
+!     integer, parameter :: ctax_bandh = 8
+
 
     ! rpi_t
     ! -----------------------------------------------------------------------
