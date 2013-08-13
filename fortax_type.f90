@@ -373,9 +373,9 @@ contains
 
         fam%ad(1)%age  = 25
         fam%ad(2)%age  = 0
-        fam%tenure     = 1 !owner
-        fam%region     = 1 !north east
-        fam%ctBand     = 4 !band D
+        fam%tenure     = lab%tenure%own_outright !owner
+        fam%region     = lab%region%north_east   !north east
+        fam%ctBand     = lab%ctax%bandd          !band D
         fam%bandDRatio = 1.0_dp
         fam%intDate    = 19900101
 
