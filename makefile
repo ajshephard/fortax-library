@@ -4,7 +4,7 @@ INCLUDESPATH = includes
 MODPATH = ./
 OUTPATH = ./
 
-OBJECTS  = fortax_realtype.o fortax_util.o fortax_type.o fortax_calc.o fortax_extra.o fortax_prices.o fortax_read.o fortax_taxbenread.o fortax_write.o fortax_kinks.o fortax_compare.o
+OBJECTS  = fortax_library.o fortax_realtype.o fortax_util.o fortax_type.o fortax_calc.o fortax_extra.o fortax_prices.o fortax_read.o fortax_taxbenread.o fortax_write.o fortax_kinks.o fortax_compare.o
 XMLOBJECTS = xmlparse.o read_xml_primitives.o write_xml_primitives.o xmltaxben_t.o xmlfortax_t.o xmlfamcompare_t.o
 
 # ------------------Macro-Defs---------------------
@@ -83,6 +83,9 @@ fortax_write.o:fortax_write.f90 fortax_type.o xmlparse.o fortax_realtype.o forta
 
 fortax_kinks.o:fortax_kinks.f90 fortax_type.o fortax_util.o fortax_realtype.o fortax_calc.o
 	$(F90) $(FFLAGS) -c fortax_kinks.f90
+
+fortax_library.o:fortax_library.f90 fortax_calc.o fortax_compare.o fortax_extra.o fortax_kinks.o fortax_prices.o fortax_read.o fortax_realtype.o fortax_taxbenread.o fortax_type.o fortax_util.o fortax_write.o
+	$(F90) $(FFLAGS) -c fortax_library.f90
 
 clean:
 	rm -f $(OBJECTS)  $(XMLOBJECTS) *.mod *.a
