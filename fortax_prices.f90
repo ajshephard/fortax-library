@@ -27,6 +27,7 @@
 module fortax_prices
 
     use fortax_realtype, only : dp
+    private :: dp
     
     private
     

@@ -24,8 +24,8 @@
 module fortax_kinks
 
     use fortax_realtype, only : dp
-
     implicit none
+    private :: dp
 
 #   ifndef _maxkinks_
     integer, parameter :: maxkinks = 200

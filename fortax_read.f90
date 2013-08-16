@@ -24,7 +24,8 @@
 module fortax_read
 
     use fortax_realtype, only : dp
-
+    private :: dp
+    
     private
     public  :: readFortaxParams, fortax_read_assign
 

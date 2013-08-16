@@ -40,7 +40,8 @@
 module fortax_calc
 
     use fortax_realtype, only : dp
-
+    private :: dp
+    
     private
 
     real(dp), parameter :: tol = 0.0_dp

@@ -25,7 +25,8 @@
 module fortax_taxbenread
 
     use fortax_realtype, only : dp
-
+    private :: dp
+    
 contains
     
     ! readTaxbenParams

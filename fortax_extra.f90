@@ -25,9 +25,8 @@
 module fortax_extra
 
     use fortax_realtype, only : dp
-
     implicit none
-
+    private :: dp
     integer,  parameter :: netoutSize = 100
 
 contains

@@ -29,6 +29,7 @@ module fortax_type
     implicit none
             
     ! TODO improve label handling
+    private :: dp
     private
     public :: fam_init, net_init, sys_init
     public :: fam_saveF90, sys_saveF90

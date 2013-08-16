@@ -25,7 +25,8 @@
 
 module fortax_compare
 
-    use fortax_realtype
+    use fortax_realtype, only : dp
+    private :: dp
 
 contains
 
@@ -43,7 +44,7 @@ contains
         end do
     end subroutine getRnd_Logical
 
-    pure subroutine getRnd_Int(rnd,grid,y)        
+    pure subroutine getRnd_Int(rnd,grid,y)
         implicit none
         real(dp), intent(in)  :: rnd(:) 
         integer,  intent(in)  :: grid(:)
@@ -71,7 +72,7 @@ contains
         end do
     end subroutine getRnd_real
 
-    pure subroutine getRnd_Char(rnd,grid,y)        
+    pure subroutine getRnd_Char(rnd,grid,y)
         implicit none
         real(dp), intent(in)  :: rnd(:) 
         character(len=*), intent(in)  :: grid(:)
@@ -87,12 +88,12 @@ contains
 
     subroutine writeFamCompareDatabase(nfam,fam,sysname,sysdir,fname)
     
-        use fortax_type, only : fam_t, fam_init, net_t, net_init, sys_t
-        use fortax_write, only : xml_ftag,ftxmlwrite
-        use fortax_util, only : intToStr
-        use xmlparse,    only : xml_parse, xml_open, xml_close
-        use fortax_read, only : readFortaxParams
-        use fortax_calc, only : calcNetInc
+        use fortax_type,  only : fam_t, fam_init, net_t, net_init, sys_t
+        use fortax_write, only : xml_ftag, ftxmlwrite
+        use fortax_util,  only : intToStr
+        use xmlparse,     only : xml_parse, xml_open, xml_close
+        use fortax_read,  only : readFortaxParams
+        use fortax_calc,  only : calcNetInc
 
         implicit none
         

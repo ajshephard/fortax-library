@@ -25,7 +25,8 @@
 module fortax_util
 
     use fortax_realtype, only : dp
-
+    private :: dp
+    
     public 
     private :: intToStrLen
     
@@ -107,7 +108,7 @@ contains
     ! returns length of double N as a string
 
     pure function dblToStrLen(N)
-        
+
         implicit none
 
         real(dp), intent(in) :: N

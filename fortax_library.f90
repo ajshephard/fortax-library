@@ -30,10 +30,11 @@ module fortax_library
     use fortax_kinks
     use fortax_prices
     use fortax_read
-    use fortax_realtype
     use fortax_taxbenread
     use fortax_type
     use fortax_util
     use fortax_write
+    
+    use fortax_realtype, fortax_dp=>dp, fortax_sp=>sp, fortax_ep=>ep, fortax_qp=>qp
 
 end module fortax_library

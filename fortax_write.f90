@@ -25,7 +25,8 @@
 module fortax_write
 
     use fortax_realtype, only : dp
-
+    private :: dp
+    
     private
     public  :: fortaxPrint, fortaxWrite, xml_ftag, ftxmlwrite
 
