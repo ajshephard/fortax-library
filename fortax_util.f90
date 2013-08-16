@@ -5,12 +5,12 @@
 ! it under the terms of the GNU General Public License as published by
 ! the Free Software Foundation, either version 3 of the License, or
 ! (at your option) any later version.
-! 
+!
 ! FORTAX is distributed in the hope that it will be useful,
 ! but WITHOUT ANY WARRANTY; without even the implied warranty of
 ! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ! GNU General Public License for more details.
-! 
+!
 ! You should have received a copy of the GNU General Public License
 ! along with FORTAX.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -19,32 +19,32 @@
 
 ! fortax_util
 ! -----------------------------------------------------------------------
-! module provides a number of support utilities are available as well as 
+! module provides a number of support utilities are available as well as
 ! generic error handling routines, AS
 
 module fortax_util
 
     use fortax_realtype, only : dp
     private :: dp
-    
-    public 
+
+    public
     private :: intToStrLen
-    
+
 contains
-    
+
     ! intToStr
     ! -----------------------------------------------------------------------
     ! converts integer to variable length string by calling intToStrLen to
     ! determine return length
 
     pure function intToStr(N)
-        
+
         implicit none
-                 
+
         integer, intent(in)       :: N
         character(intToStrLen(N)) :: intToStr
         character(len=20)         :: tempStr20
-        
+
         write (tempStr20,'(I20)') N
         intToStr = adjustl(tempStr20)
 
@@ -56,16 +56,16 @@ contains
     ! returns length of integer N as a string
 
     pure function intToStrLen(N)
-        
+
         implicit none
 
         integer, intent(in) :: N
         integer             :: intToStrLen
         character(len=20)   :: tempStr20
-        
+
         write (tempStr20,'(I20)') N
         intToStrLen = len_trim(adjustl(tempStr20))
-        
+
     end function intToStrLen
 
     ! logicalToStr
@@ -73,12 +73,12 @@ contains
     ! converts logical to string (.true. = T, .false. = F)
 
     pure function logicalToStr(N)
-        
+
         implicit none
-                 
+
         logical, intent(in) :: N
         character(len=1)    :: logicalToStr
-        
+
         logicalToStr = merge('T','F',N)
 
     end function logicalToStr
@@ -90,13 +90,13 @@ contains
     ! determine return length
 
     pure function dblToStr(N)
-        
+
         implicit none
-                 
+
         real(dp), intent(in)      :: N
         character(dblToStrLen(N)) :: dblToStr
         character(len=40)         :: tempStr40
-        
+
         write (tempStr40,*) N
         dblToStr = adjustl(tempStr40)
 
@@ -114,10 +114,10 @@ contains
         real(dp), intent(in) :: N
         integer              :: dblToStrLen
         character(len=40)    :: tempStr40
-        
+
         write (tempStr40,*) N
         dblToStrLen = len_trim(adjustl(tempStr40))
-        
+
     end function dblToStrLen
 
 
@@ -126,14 +126,14 @@ contains
     ! converts a string to a double. No error checking is performed.
 
     pure function strToDouble(string)
-            
+
         implicit none
-        
+
         character(len=*), intent(in) :: string
         real(dp)                     :: strToDouble
-        
+
         read (string,*) strToDouble
-                
+
     end function strToDouble
 
 
@@ -144,12 +144,12 @@ contains
     pure function strToInt(string)
 
         implicit none
-        
+
         character(len=*), intent(in) :: string
         integer                      :: strToInt
-        
+
         read (string,*) strToInt
-    
+
     end function strToInt
 
 
@@ -177,30 +177,30 @@ contains
     pure function strToLogical(str)
 
         implicit none
-        
+
         character(len=*), intent(in) :: str
         logical                      :: strToLogical
-        
+
         if (adjustl(str) .eq. "0") then
             strToLogical = .false.
         else
             strToLogical = .true.
         end if
-       
+
     end function strToLogical
 
 
     ! lower
     ! -----------------------------------------------------------------------
     ! converts a string to a lowercase. Useful for string comparisons.
-    
+
     pure function lower(str)
 
         implicit none
-        
+
         character(len=*), intent(in) :: str
         character(len=len(str))      :: lower
-        
+
         character                    :: ch
         integer, parameter           :: offset = ichar('A') - ichar('a')
         integer                      :: i
@@ -210,21 +210,21 @@ contains
             if (ch >= 'A' .and. ch <= 'Z') ch = char(ichar(ch)-offset)
             lower(i:i) = ch
         end do
-        
+
     end function lower
 
 
     ! upper
     ! -----------------------------------------------------------------------
-    ! converts a string to a uppercase. Useful for string comparisons.    
+    ! converts a string to a uppercase. Useful for string comparisons.
 
     pure function upper(str)
 
         implicit none
-        
+
         character(len=*), intent(in) :: str
         character(len=len(str))      :: upper
-        
+
         character                :: ch
         integer, parameter       :: offset = ichar('a') - ichar('A')
         integer                  :: i
@@ -234,7 +234,7 @@ contains
             if (ch >= 'a' .and. ch <= 'z') ch = char(ichar(ch)-offset)
             upper(i:i) = ch
         end do
-        
+
     end function upper
 
 
@@ -242,7 +242,7 @@ contains
     ! -----------------------------------------------------------------------
     ! converts multiple spaces and tabs into single spaces. Also removes any
     ! initial whitespace, and deletes control characters
-    
+
     pure subroutine compact(str)
 
         implicit none
@@ -263,7 +263,7 @@ contains
         do i = 1,lenstr
             ch=str(i:i)
             ich=iachar(ch)
-          
+
             select case(ich)
             case(9,32)     ! space or tab character
                 if(isp==0) then
@@ -276,14 +276,14 @@ contains
                 outstr(k:k)=ch
                 isp=0
             end select
-                
+
         end do
 
         str=adjustl(outstr)
 
     end subroutine compact
 
-    
+
     ! compact
     ! -----------------------------------------------------------------------
     ! trims zeros from numeric string. no error checking is performed.
@@ -341,13 +341,13 @@ contains
     pure function strPad(str,n)
 
         implicit none
-    
+
         character(len=*), intent(in) :: str
         integer,          intent(in) :: n
         character(len=n)  :: strPad
 
         strPad = str
-    
+
     end function strPad
 
 
@@ -358,7 +358,7 @@ contains
     subroutine getUnit(funit)
 
         use, intrinsic :: iso_fortran_env
-        
+
         implicit none
 
         integer, intent(out) :: funit
@@ -388,10 +388,10 @@ contains
     subroutine strToIntArray(x,str)
 
         implicit none
-        
+
         character(len=*), intent(in)    :: str
         integer,          intent(inout) :: x(:)
-        
+
         !character(len(string))   :: tmpstring
 
         integer          :: n, i, i0, i1
@@ -402,7 +402,7 @@ contains
         strLen = len(str)
 
         i0 = 1
-        
+
         do i = 1, n
 
             i1 = index(str(i0:),',') + i0-1
@@ -446,10 +446,10 @@ contains
     subroutine strToDoubleArray(x,str)
 
         implicit none
-        
+
         character(len=*), intent(in)    :: str
         real(dp),         intent(inout) :: x(:)
-        
+
         !character(len(string))      :: tmpstring
 
         integer          :: n, i, i0, i1
@@ -460,7 +460,7 @@ contains
         strlen = len(str)
 
         i0 = 1
-        
+
         do i = 1, n
 
             i1 = index(str(i0:),',') + i0-1
@@ -507,7 +507,7 @@ contains
 
         character(len=*),  intent(in) :: errMsg
         integer, optional, intent(in) :: funit
-        
+
         if (present(funit)) then
             write (funit,*) 'Fortax error: ',errMsg
             stop 'program terminated by fortaxError'
@@ -526,12 +526,12 @@ contains
     ! displays a warning message.
 
     subroutine fortaxWarn(warnMsg,funit)
-    
+
         implicit none
 
         character(len=*),  intent(in) :: warnMsg
         integer, optional, intent(in) :: funit
-        
+
         if (present(funit)) then
             write (funit,*) 'Fortax warning: ', warnMsg
         else

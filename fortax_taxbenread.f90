@@ -5,12 +5,12 @@
 ! it under the terms of the GNU General Public License as published by
 ! the Free Software Foundation, either version 3 of the License, or
 ! (at your option) any later version.
-! 
+!
 ! FORTAX is distributed in the hope that it will be useful,
 ! but WITHOUT ANY WARRANTY; without even the implied warranty of
 ! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ! GNU General Public License for more details.
-! 
+!
 ! You should have received a copy of the GNU General Public License
 ! along with FORTAX.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -26,21 +26,21 @@ module fortax_taxbenread
 
     use fortax_realtype, only : dp
     private :: dp
-    
+
 contains
-    
+
     ! readTaxbenParams
     ! -----------------------------------------------------------------------
     ! reads tax parameters from systemfile into a sys_t derived type.
 
     subroutine readTaxbenParams(sys,systemFile,prices,sysFix,sysDate,sysname,sysdesc)
-    
+
         use xml_data_xmltaxben_t, only : read_xml_file_xmltaxben_t, object, namedFields_t, field_t
         use fortax_util,          only : getunit, strToDouble, strToInt, strToLogical, lower, fortaxError, fortaxWarn
         use fortax_type,          only : sys_t, sys_init
-                
+
         implicit none
-        
+
         type(sys_t),       intent(out) :: sys
         character(len=*),  intent(in)  :: systemFile
         integer, optional, intent(in)  :: prices
@@ -52,16 +52,16 @@ contains
         type(field_t),       pointer   :: cat2
         integer                        :: i, j, nField, nnamedFields
         logical                        :: isFile
-        
+
         inquire(file=systemFile, exist=isFile)
-        
+
         if (.not. isFile) then
             call fortaxError('system file does not exist ('//trim(adjustl(systemFile))//')')
-        end if               
+        end if
 
         call read_xml_file_xmltaxben_t(systemFile)
         call sys_init(sys)
-        
+
         nnamedFields = size(object%namedFields)
         sys%sysname = object%name
 
@@ -100,7 +100,7 @@ contains
                         end select
                     end do
 
-                    
+
                 !Income tax (MMA rate)
                 case('PrmIncTax.Options')
                     nfield = size(cat%field)
@@ -112,17 +112,17 @@ contains
                         end select
                     end do
 
-                    
+
                 !Income tax (bands)
                 case('PrmIncTax.Bands')
-                    
+
                     if (sys%incTax%numBands>0) then
                         allocate(sys%incTax%bands(sys%incTax%numBands))
                         sys%incTax%bands = 0.0_dp
                     else
                         call fortaxError('sys%incTax%numBands not set')
                     end if
-                    
+
                     nfield = size(cat%field)
                     do j = 1, nfield
                         cat2 => cat%field(j)
@@ -130,17 +130,17 @@ contains
                         sys%incTax%bands(strToInt(cat2%name)) = strToDouble(cat2%value)
                     end do
 
-                    
+
                 !Income tax (rates)
                 case('PrmIncTax.Rates')
-                    
+
                     if (sys%incTax%numBands>0) then
                         allocate(sys%incTax%rates(sys%incTax%numBands))
                         sys%incTax%rates = 0.0_dp
                     else
                         call fortaxError('sys%incTax%numBands not set')
                     end if
-                    
+
                     nfield = size(cat%field)
                     do j = 1, nfield
                         cat2 => cat%field(j)
@@ -148,7 +148,7 @@ contains
                         sys%incTax%rates(strToInt(cat2%name)) = strToDouble(cat2%value)
                     end do
 
-                
+
                 !NI
                 case('PrmNI')
                     nfield = size(cat%field)
@@ -171,14 +171,14 @@ contains
 
                 !NI (bands)
                 case('PrmNI.Ceilings')
-                                        
+
                     if (sys%natIns%numRates>0) then
                         allocate(sys%natIns%bands(sys%natIns%numRates))
                         sys%natIns%bands = 0.0_dp
                     else
-                        call fortaxError('sys%natIns%numRates not set')                                
+                        call fortaxError('sys%natIns%numRates not set')
                     end if
-                    
+
                     nfield = size(cat%field)
                     do j = 1, nfield
                         cat2 => cat%field(j)
@@ -188,14 +188,14 @@ contains
 
 
                 case('PrmNI.Class4Bands')
-                                        
+
                     if (sys%natIns%c4nRates>0) then
                         allocate(sys%natIns%c4Bands(sys%natIns%c4nRates))
                         sys%natIns%c4Bands = 0.0_dp
                     else
                         call fortaxError('sys%natIns%c4nRates not set')
                     end if
-                    
+
                     nfield = size(cat%field)
                     do j = 1, nfield
                         cat2 => cat%field(j)
@@ -205,7 +205,7 @@ contains
 
                 !NI (rates)
                 case('PrmNI.InRates')
-                
+
                     if (sys%natIns%numRates>0) then
                         !JS can't work out why "+1" in next line
 !                        allocate(sys%natIns%rates(sys%natIns%numRates+1))
@@ -214,19 +214,19 @@ contains
                     else
                         call fortaxError('sys%natIns%numRates not set')
                     end if
-                
+
                     nfield = size(cat%field)
                     do j = 1, nfield
                         cat2 => cat%field(j)
                         sys%natIns%rates(strToInt(cat2%name)) = strToDouble(cat2%value)
                     end do
-                
+
                 case('PrmNI.FeeRates')
-                
+
                     if (sys%natIns%numRates<=0) then
                         call fortaxError('sys%natIns%numRates not set')
                     end if
-                    
+
                     nfield = size(cat%field)
                     do j = 1, nfield
                         cat2 => cat%field(j)
@@ -235,21 +235,21 @@ contains
 
 
                 case('PrmNI.Class4Rates')
-                
+
                     if (sys%natIns%c4nRates>0) then
                         allocate(sys%natIns%c4Rates(sys%natIns%c4nRates))
                         sys%natIns%c4Rates = 0.0_dp
                     else
                         call fortaxError('sys%natIns%c4nRates not set')
                     end if
-                    
+
                     nfield = size(cat%field)
                     do j = 1, nfield
                         cat2 => cat%field(j)
                         sys%natIns%c4Rates(strToInt(cat2%name)) = strToDouble(cat2%value)
                     end do
 
-                      
+
                 !Child benefit
                 case('PrmCBen')
                     nfield = size(cat%field)
@@ -287,10 +287,10 @@ contains
                         end select
                     end do
 
-                    
+
                 !FC/WFTC
                 case('PrmFowler.FC')
-                
+
                     nfield = size(cat%field)
                     do j = 1, nfield
                         cat2 => cat%field(j)
@@ -314,10 +314,10 @@ contains
                         end select
                     end do
 
-                    
+
                 !FC/WFTC (Age limits)
                 case('PrmFowler.FC.AgeLim')
-                    
+
                     if (sys%fc%numAgeRng>0) then
                         allocate(sys%fc%kidagel(sys%fc%numAgeRng))
                         allocate(sys%fc%kidageu(sys%fc%numAgeRng))
@@ -326,7 +326,7 @@ contains
                     else
                         call fortaxError('sys%fc%numAgeRng not set')
                     end if
-                    
+
                     nfield = size(cat%field)
                     do j = 1, nfield
                         cat2 => cat%field(j)
@@ -334,23 +334,23 @@ contains
                         sys%fc%kidageu(strToInt(cat2%name)) = strToInt(cat2%value)
                     end do
 
-                    
+
                 !FC/WFTC (Child credit)
                 case('PrmFowler.FC.ChildCredit')
-                    
+
                     if (sys%fc%numAgeRng>0) then
                         allocate(sys%fc%kidCred(sys%fc%numAgeRng))
                         sys%fc%kidCred = 0.0_dp
                     else
                         call fortaxError('sys%fc%numAgeRng not set')
                     end if
-                    
+
                     nfield = size(cat%field)
                     do j = 1, nfield
                         cat2 => cat%field(j)
 !                        sys%fc%kidCred(j) = strToDouble(cat2%value)
                         sys%fc%kidCred(strToInt(cat2%name)) = strToDouble(cat2%value)
-                    end do 
+                    end do
 
 
                 !FC childcare disregard
@@ -404,7 +404,7 @@ contains
 
                 !New tax cred
                 case('PrmFowler.NewTaxCreds')
-                    
+
                     nfield = size(cat%field)
                     do j = 1, nfield
                         cat2 => cat%field(j)
@@ -417,10 +417,10 @@ contains
                                 end if
                         end select
                     end do
-                                                            
+
                 !CTC and CTC/WTC taper
                 case('PrmFowler.NewTaxCreds.PrmChildTaxCred')
-                
+
                     nfield = size(cat%field)
                     do j = 1, nfield
                         cat2 => cat%field(j)
@@ -458,7 +458,7 @@ contains
 
                 !WTC
                 case('PrmFowler.NewTaxCreds.PrmWorkingTaxCred')
-                    
+
                     nfield = size(cat%field)
                     do j = 1, nfield
                         cat2 => cat%field(j)
@@ -485,7 +485,7 @@ contains
                                 sys%wtc%newDisregCon = StrToLogical(cat2%value)
                             case('FTPremiumHBdisregardValue')
                                 sys%wtc%newDisreg = strToDouble(cat2%value)
-                                
+
                         end select
                     end do
 
@@ -518,7 +518,7 @@ contains
 
                 !Income Support
                 case('PrmFowler.ISys')
- 
+
                     nfield = size(cat%field)
                     do j = 1, nfield
                         cat2 => cat%field(j)
@@ -552,7 +552,7 @@ contains
                         end select
                     end do
 
-                    
+
                 !Income Support: premiums
                 case('PrmFowler.ISys.Prem')
                     nfield = size(cat%field)
@@ -566,10 +566,10 @@ contains
                         end select
                     end do
 
-                    
+
                 !Income Support: age limits
                 case('PrmFowler.ISys.AgeLim')
-                
+
                     if (sys%incSup%numAgeRng>0) then
                         allocate(sys%incSup%ageRngL(sys%incSup%numAgeRng))
                         allocate(sys%incSup%ageRngU(sys%incSup%numAgeRng))
@@ -578,7 +578,7 @@ contains
                     else
                         call fortaxError('sys%incSup%numAgeRng not set')
                     end if
-                    
+
                     nfield = size(cat%field)
                     do j = 1, nfield
                         cat2 => cat%field(j)
@@ -586,17 +586,17 @@ contains
                         sys%incSup%ageRngU(strToInt(cat2%name)) = strToInt(cat2%value)
                     end do
 
-                    
+
                 !Income Support: child additions
                 case('PrmFowler.ISys.ChildAdd')
-                
+
                     if (sys%incSup%numAgeRng>0) then
                         allocate(sys%incSup%addKid(sys%incSup%numAgeRng))
                         sys%incSup%addKid = 0.0_dp
                     else
                         call fortaxError('sys%incSup%numAgeRng not set')
                     end if
-                    
+
                     nfield = size(cat%field)
                     do j = 1, nfield
                         cat2 => cat%field(j)
@@ -604,7 +604,7 @@ contains
                         sys%incSup%addKid(strToInt(cat2%name)) = strToDouble(cat2%value)
                     end do
 
-                    
+
                 !Council Tax
                 case('PrmLocTax')
                     nfield = size(cat%field)
@@ -632,10 +632,10 @@ contains
                         end select
                     end do
 
-                                     
+
                 !HB, CCB and CTB: allowances and disregards; benefit cap values
                 case('PrmFowler.Reb')
-                
+
                     nfield = size(cat%field)
                     do j = 1, nfield
                         cat2 => cat%field(j)
@@ -678,7 +678,7 @@ contains
                         end select
                     end do
 
-                    
+
                 !HB, CCB and CTB: premiums
                 case('PrmFowler.Reb.Prem')
                     nfield = size(cat%field)
@@ -780,10 +780,10 @@ contains
                                 end select
                         end select
                     end do
-                                                          
+
                 !HB, CCB and CTB: age limits
                 case('PrmFowler.Reb.AgeLim')
-                    
+
                     if (sys%rebateSys%numAgeRng>0) then
                         allocate(sys%rebateSys%ageRngL(sys%rebateSys%numAgeRng))
                         allocate(sys%rebateSys%ageRngU(sys%rebateSys%numAgeRng))
@@ -792,7 +792,7 @@ contains
                     else
                         call fortaxError('sys%rebateSys%numAgeRng not set')
                     end if
-                    
+
                     nfield = size(cat%field)
                     do j = 1, nfield
                         cat2 => cat%field(j)
@@ -800,17 +800,17 @@ contains
                         sys%rebateSys%ageRngU(strToInt(cat2%name)) = strToInt(cat2%value)
                     end do
 
-                    
+
                 !HB, CCB and CTB: child addition
                 case('PrmFowler.Reb.ChildAdd')
-              
+
                     if (sys%rebateSys%numAgeRng>0) then
                         allocate(sys%rebateSys%AddKid(sys%rebateSys%numAgeRng))
                         sys%rebateSys%addKid = 0
                     else
                         call fortaxError('sys%rebateSys%numAgeRng not set')
                     end if
-                    
+
                     nfield = size(cat%field)
                     do j = 1, nfield
                         cat2 => cat%field(j)
@@ -867,7 +867,7 @@ contains
                         select case(cat2%name)
                         end select
                     end do
-                    
+
             end select
         end do
 
@@ -876,32 +876,32 @@ contains
                 sys%rebateSys%ageRngL(i) = sys%rebateSys%ageRngU(i-1)+1
             end do
         end if
-        
+
         if (sys%incSup%numAgeRng>0) then
             do i = 2, sys%incSup%numAgeRng
                 sys%incSup%ageRngL(i) = sys%incSup%ageRngU(i-1)+1
             end do
         end if
-        
+
         if (sys%fc%numAgeRng>0) then
             do i = 2, sys%fc%numAgeRng
                 sys%fc%kidAgeL(i) = sys%fc%kidAgeU(i-1)+1
             end do
         end if
-        
+
         sys%natIns%bands(sys%natIns%numRates) = sys%natIns%Ceiling
-        
+
 !                sys%incTax%ctctaper = 1.0_dp/15.0_dp
 !                sys%incSup%hours    = sys%fc%hours1
 !                sys%ntc%MinAmt = 0.5_dp
-   
+
         !free up memory
         do i = 1, nnamedFields
             if (associated(object%namedFields(i)%field)) then
                 deallocate(object%namedFields(i)%field)
-            end if 
+            end if
         end do
-        
+
         if (associated(object%namedFields)) then
             deallocate(object%namedFields)
         end if
@@ -921,7 +921,7 @@ contains
             else
                 call taxbenSysFix(sys)
             end if
-        end if    
+        end if
 
         if (present(sysname)) then
             sys%sysname = sysname
@@ -1079,12 +1079,12 @@ contains
     ! some of the necessary parameters are not included in the system file
 
     subroutine taxbenSysFix(sys,sysDate)
-    
+
         use fortax_type, only : sys_t, sysHuge
 !        use params,      only : tol
-        
+
         implicit none
-        
+
         type(sys_t), intent(inout)    :: sys
         integer, intent(in), optional :: sysDate
         real(dp),    parameter     :: tol = 0.0_dp
@@ -1114,13 +1114,13 @@ contains
             sys%rebateSys%rulesUnderNTC  = .true.
             sys%incSup%incChBen          = .false.
         end if
-        
+
         !taper rate for CHILDREN's tax credit
         if (sys%incTax%ctc>tol) sys%incTax%ctcTaper = 1.0_dp/15.0_dp
-        
+
         !hours for IS
         sys%incSup%hours = sys%fc%hours1
-                                
+
         if (present(sysDate)) then
 
             ! IS/IB-JSA: is disregard shared for couples?
@@ -1135,7 +1135,7 @@ contains
             if ((sysdate >= 20000401) .and. (sysdate < 20000703)) then
                 sys%rebateSys%credInDisregCC = .false.
             end if
-               
+
 
         else
             ! Note: if taxbensysfix is not called, then ...%DisregShared = .true.
@@ -1144,13 +1144,13 @@ contains
 
         ! Minimum age for FSM
         !sys%incSup%MinAgeFSM = 5
-        
+
         ! Set child benefit taper to be recorded as a reduction in child benefit (rather than an increase in income tax)
         if (sys%chBen%doTaper) then
           sys%chBen%taperIsIncTax = .false.
         end if
-        
-        
+
+
         ! Reduce maximum entitlement for council tax benefit (April 2013)
         if (present(sysDate)) then
             if (sysdate >= 20130401) then
@@ -1174,7 +1174,7 @@ contains
         else
             sys%bencap%doThruUC = .false.
         end if
-        
+
     end subroutine taxbenSysFix
 
 

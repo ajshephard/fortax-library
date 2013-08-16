@@ -5,12 +5,12 @@
 ! it under the terms of the GNU General Public License as published by
 ! the Free Software Foundation, either version 3 of the License, or
 ! (at your option) any later version.
-! 
+!
 ! FORTAX is distributed in the hope that it will be useful,
 ! but WITHOUT ANY WARRANTY; without even the implied warranty of
 ! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ! GNU General Public License for more details.
-! 
+!
 ! You should have received a copy of the GNU General Public License
 ! along with FORTAX.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -41,7 +41,7 @@ module fortax_calc
 
     use fortax_realtype, only : dp
     private :: dp
-    
+
     private
 
     real(dp), parameter :: tol = 0.0_dp
@@ -51,7 +51,7 @@ module fortax_calc
 contains
 
     ! ----------------------INCOME TAX----------------------
-    
+
     ! tearn       - Calculates taxable earnings of family
     ! inctax      - Calculates income tax of individual
     ! taxafterctc - Adjusts income tax of family for children’s tax credit
@@ -62,23 +62,23 @@ contains
 
     ! tearn
     ! -----------------------------------------------------------------------
-    ! Taxable earnings (calculated for TU). Depends on couple, married, 
+    ! Taxable earnings (calculated for TU). Depends on couple, married,
     ! nkids, and earn
 
     !DEC$ ATTRIBUTES FORCEINLINE :: tearn
     pure subroutine tearn(sys,fam,net)
 
         use fortax_type, only : sys_t, fam_t, net_t
-        
+
         implicit none
 
         type(sys_t), intent(in)    :: sys
         type(fam_t), intent(in)    :: fam
         type(net_t), intent(inout) :: net
-        
+
         real(dp)                   :: earningsOverThresh
         real(dp)                   :: persAllow
-        
+
         !integer                    :: pe !pe = primary earner
 
         !Personal allowance
@@ -101,13 +101,13 @@ contains
 
         else
             persAllow = sys%inctax%pa
-        
+
         end if
 
         ! Calculate taxable income
         net%ad(1)%taxable = max(fam%ad(1)%earn-persAllow, 0.0_dp)
 
-        
+
         ! Calculate personal allowance for adult 2 if present (tapering it away from high income individuals from April 2010 onwards)
         if (_famcouple_) then
 
@@ -128,7 +128,7 @@ contains
 
             else
                 persAllow = sys%inctax%pa
-            
+
             end if
 
             ! Calculate taxable income
@@ -155,7 +155,7 @@ contains
             !Lone parents
             if ((.not. _famcouple_) .and. (_famkids_)) then
                 net%ad(1)%taxable = max(net%ad(1)%taxable-sys%inctax%mma, 0.0_dp)
-            
+
             !Couples (married or with kids)
             else if ((_famcouple_) .and. ((_fammarried_) .or. (_famkids_))) then
                 !Identify primary earner
@@ -189,20 +189,20 @@ contains
     pure subroutine inctax(sys,net,i)
 
         use fortax_type,   only : sys_t, net_t
-        
+
         implicit none
 
         type(sys_t), intent(in)    :: sys
         type(net_t), intent(inout) :: net
         integer,     intent(in)    :: i
         !real(dp),       intent(in) :: tearn
-        
+
         integer                    :: j
 
         net%ad(i)%inctax = 0.0_dp
-        
+
         if (net%ad(i)%taxable > tol .and. sys%inctax%numbands>0) then
-        
+
             !1st band
             net%ad(i)%inctax = net%ad(i)%inctax + min(net%ad(i)%taxable,sys%inctax%bands(1))*sys%inctax%rates(1)
 
@@ -226,14 +226,14 @@ contains
 
     ! taxafterctc
     ! -----------------------------------------------------------------------
-    ! Children's tax credit (calculated for TU). depends on couple, nkids, 
+    ! Children's tax credit (calculated for TU). depends on couple, nkids,
     ! yngkid, earn, tearn, and tax
-    
+
     !DEC$ ATTRIBUTES FORCEINLINE :: taxafterctc
     pure subroutine taxafterctc(sys,fam,net)
 
         use fortax_type,   only : sys_t, fam_t, net_t
-        
+
         implicit none
 
         type(sys_t), intent(in)    :: sys
@@ -242,9 +242,9 @@ contains
 
         integer                    :: pe
         real(dp)                   :: ctc
-        
+
         if ((sys%inctax%ctc > tol) .and. (_famkids_)) then
-        
+
             if (fam%yngkid < 16) then
 
                 !Maximum ctc
@@ -267,7 +267,7 @@ contains
                     if (net%ad(1)%taxable > sys%inctax%bands(sys%inctax%numbands-1)) then
                         ctc = max(ctc - sys%inctax%ctctaper*(net%ad(1)%taxable-sys%inctax%bands(sys%inctax%numbands-1)),0.0_dp)
                     end if
-                                    
+
                     !Now reduce tax due
                     net%ad(1)%inctax = net%ad(1)%inctax - ctc
                     if (net%ad(1)%inctax < 0.0_dp) then
@@ -279,7 +279,7 @@ contains
                     if (net%ad(2)%taxable > sys%inctax%bands(sys%inctax%numbands-1)) then
                         ctc = max(ctc - sys%inctax%ctctaper*(net%ad(2)%taxable-sys%inctax%bands(sys%inctax%numbands-1)),0.0_dp)
                     end if
-                                    
+
                     !Now reduce tax due
                     net%ad(2)%inctax = net%ad(2)%inctax - ctc
                     if (net%ad(2)%inctax < 0.0_dp) then
@@ -304,13 +304,13 @@ contains
     pure subroutine taxaftermca(sys,fam,net)
 
         use fortax_type, only : sys_t, fam_t, net_t
-        
+
         implicit none
 
         type(sys_t), intent(in)    :: sys
         type(fam_t), intent(in)    :: fam
         type(net_t), intent(inout) :: net
-        
+
         !integer                    :: pe
 
         !MCA/APA post-Apr 94 (when it reduced tax due)
@@ -319,7 +319,7 @@ contains
             !Lone parents
             if ((.not. _famcouple_) .and. (_famkids_)) then
                 net%ad(1)%inctax = max(net%ad(1)%inctax-sys%inctax%mma*sys%inctax%mmarate, 0.0_dp)
-            
+
             !Couples
             else if ((_famcouple_) .and. ((_fammarried_) .or. (_famkids_))) then
 
@@ -343,7 +343,7 @@ contains
             end if
 
         end if
-    
+
     end subroutine taxaftermca
 
 
@@ -357,14 +357,14 @@ contains
     ! NatIns
     ! -----------------------------------------------------------------------
     ! National Insurance. Contracted in employees only. Note that
-    ! sys%natins%rates(1) is the "entry fee" (cliff edge) if earnings exceed 
+    ! sys%natins%rates(1) is the "entry fee" (cliff edge) if earnings exceed
     ! sys%natins%bands(1). Depends on earn,selfemp
-    
+
     !DEC$ ATTRIBUTES FORCEINLINE :: NatIns
     pure subroutine NatIns(sys,fam,net,i)
-        
+
         use fortax_type, only : sys_t, fam_t, net_t
-        
+
         implicit none
 
         type(sys_t), intent(in)    :: sys
@@ -376,7 +376,7 @@ contains
 
         ! Employed
         if ((.not. fam%ad(i)%selfemp) .and. sys%natins%numrates>0) then
-        
+
             ! Class 1 contributions
             if (fam%ad(i)%earn >= sys%natins%bands(1) - tol) then
                 net%ad(i)%natinsc1 = sys%natins%bands(1)*sys%natins%rates(1)
@@ -389,7 +389,7 @@ contains
             else
                 net%ad(i)%natinsc1 = 0.0_dp
             end if
-            
+
             ! Class 2 and 4 contributions
             net%ad(i)%natinsc2 = 0.0_dp
             net%ad(i)%natinsc4 = 0.0_dp
@@ -406,10 +406,10 @@ contains
             else
                 net%ad(i)%natinsc2 = 0.0_dp
             end if
-            
+
             ! Class 4 contributions
             net%ad(i)%natinsc4 = 0.0_dp
-            net%ad(i)%natinsc4 = net%ad(i)%natinsc4 + min(max(fam%ad(i)%earn,0.0_dp), sys%natins%c4bands(1))*sys%natins%c4rates(1) 
+            net%ad(i)%natinsc4 = net%ad(i)%natinsc4 + min(max(fam%ad(i)%earn,0.0_dp), sys%natins%c4bands(1))*sys%natins%c4rates(1)
             if (sys%natins%c4nrates > 2) then
                 do j = 2, sys%natins%c4nrates-1
                     net%ad(i)%natinsc4 = net%ad(i)%natinsc4 + max(min(fam%ad(i)%earn-sys%natins%c4bands(j-1),sys%natins%c4bands(j) &
@@ -446,25 +446,25 @@ contains
 
     ! IncSup
     ! -----------------------------------------------------------------------
-    ! Income support. Age range: works for 16-59; note additional conditions 
-    ! for those 16-17 up to 1996/97. note that netearn, maint and othinc must 
+    ! Income support. Age range: works for 16-59; note additional conditions
+    ! for those 16-17 up to 1996/97. note that netearn, maint and othinc must
     ! be in weekly terms. depends on couple, adage, hrs, nkids, kidage,
     ! netearn, maint, othinc
 
-    !DEC$ ATTRIBUTES FORCEINLINE :: IncSup    
+    !DEC$ ATTRIBUTES FORCEINLINE :: IncSup
     pure subroutine IncSup(sys,fam,net)
-        
+
         use fortax_type, only : sys_t, fam_t, net_t
-        
+
         implicit none
 
         type(sys_t), intent(in)    :: sys
         type(fam_t), intent(in)    :: fam
         type(net_t), intent(inout) :: net
-        
+
         real(dp)                   :: disreg, appamt, othinc, MatGrInIS
         integer                    :: i
-    
+
         integer                    :: maxage
         real(dp)                   :: maxhrs, MaintDisreg
 
@@ -484,7 +484,7 @@ contains
 
             if (sys%incsup%incchben) then
                 othinc = net%tu%chben + net%tu%fc + net%tu%wtc
-            else 
+            else
                 othinc = net%tu%fc + net%tu%wtc
             end if
 !             if (sys%incsup%incchben) then
@@ -501,7 +501,7 @@ contains
                     if (fam%kidage(i)>4) appamt = appamt + sys%incsup%ValFSM
                 end do
             end if
-            
+
             if (sys%extra%matgrant .and. fam%yngkid==0) then
                 !add maternity grant to applicable amount
                 !call MatGrant(sys,fam,net,.true.)
@@ -509,7 +509,7 @@ contains
                 MatGrInIS = 0.0_dp
                 do i=1,fam%nkids
                     if (fam%kidage(i) == 0) MatGrInIS = MatGrInIS + (sys%chben%MatGrantVal/52.0_dp)
-                end do                
+                end do
                 appamt = appamt + MatGrInIS
             end if
 
@@ -521,7 +521,7 @@ contains
 
 !            net%tu%incsup = max(appamt - max((net%tu%posttaxearn-disreg),0.0_dp) &
 !                & - max((fam%maint-MaintDisreg),0.0_dp) - othinc, 0.0_dp)
-        
+
             if ((.not. _famcouple_) .or. (sys%incsup%disregShared)) then
                 net%tu%incsup = max(appamt - max((net%tu%posttaxearn-disreg),0.0_dp) &
                     & - max((fam%maint-MaintDisreg),0.0_dp) - othinc, 0.0_dp)
@@ -538,7 +538,7 @@ contains
             end if
 
         else
-        
+
             net%tu%incsup = 0.0_dp
             !if (sys%extra%matgrant) net%tu%matgrant = 0.0_dp
 
@@ -549,15 +549,15 @@ contains
 
     ! ISAppAmt
     ! -----------------------------------------------------------------------
-    ! IS/IB-JSA: applicable amount ("needs") - identical to first part of 
-    ! HB/CTB needs (except for parameters). Doesn't do housing costs, should 
+    ! IS/IB-JSA: applicable amount ("needs") - identical to first part of
+    ! HB/CTB needs (except for parameters). Doesn't do housing costs, should
     ! it? depends on couple, adage, nkids, kidage
 
-    !DEC$ ATTRIBUTES FORCEINLINE :: ISAppAmt    
+    !DEC$ ATTRIBUTES FORCEINLINE :: ISAppAmt
     real(dp) pure function ISAppAmt(sys,fam)
 
         use fortax_type, only : sys_t, fam_t
-        
+
         implicit none
 
         type(sys_t), intent(in)    :: sys
@@ -565,16 +565,16 @@ contains
 
         integer                    :: i, j
 
-        !Note: LP premium abolished Apr 98 except for existing claimants. 
-        !TAXBEN parameter is zero for later years, so we effectively ignore 
+        !Note: LP premium abolished Apr 98 except for existing claimants.
+        !TAXBEN parameter is zero for later years, so we effectively ignore
         !the "existing claimants" condition
-        !Note: Family allowance and child additions transferred to CTC from Apr 03. 
+        !Note: Family allowance and child additions transferred to CTC from Apr 03.
         !TAXBEN parameters are zero for later years, so no need to worry
         !In both cases, could simplify by adding year conditions
 
         !Allowances and family/LP premiums
         if (.not. _famcouple_) then
-        
+
             if (_famkids_) then
                 !Lone parent
                 if (fam%ad(1)%age < 18) then
@@ -598,9 +598,9 @@ contains
             else
                 ISAppAmt = sys%incsup%MainCou
             end if
-            
+
             if (_famkids_) ISAppAmt = ISAppAmt + sys%incsup%PremFam
-            
+
         end if
 
         !Child additions (this could be more efficient if we required that kids age structure is sorted)
@@ -621,14 +621,14 @@ contains
     ! ISDisreg
     ! -----------------------------------------------------------------------
     ! IS/IB-JSA: earnings disregard. Depends on couple and nkids
-    
+
     !DEC$ ATTRIBUTES FORCEINLINE :: ISDisreg
     real(dp) pure function ISDisreg(sys,fam)
-    
+
         use fortax_type, only : sys_t, fam_t
-        
+
         implicit none
-        
+
         type(sys_t), intent(in) :: sys
         type(fam_t), intent(in) :: fam
 
@@ -666,30 +666,30 @@ contains
 
     ! ctax
     ! -----------------------------------------------------------------------
-    ! Simplified council tax liability (e.g. doesn't deal with accomodation 
+    ! Simplified council tax liability (e.g. doesn't deal with accomodation
     ! type, students). Depends on couple, adage, nothads, band
 
     !DEC$ ATTRIBUTES FORCEINLINE :: ctax
     pure subroutine ctax(sys,fam,net)
 
         use fortax_type, only : sys_t, fam_t, net_t, lab
-        
+
         implicit none
 
         type(sys_t), intent(in)    :: sys
         type(fam_t), intent(in)    :: fam
         type(net_t), intent(inout) :: net
-        
+
         real(dp)                   :: ratio, fracbu
         integer                    :: nliabbu, nliabhh
 
         if (sys%ctax%bandD > tol) then
-        
+
             ! Work out number of liable adults in TU
             nliabbu = 0
-        
+
             if (fam%ad(1)%age >= 18) nliabbu = 1
-        
+
             if (_famcouple_) then
                 if (fam%ad(2)%age >= 18) nliabbu = nliabbu + 1
             end if
@@ -699,7 +699,7 @@ contains
                 !Work out number of liable adults in hh (assume all other adults are 18+)
                 nliabhh = nliabbu + fam%nothads
                 fracbu = real(nliabbu,dp)/real(nliabhh,dp)
-                !Calculate CT                    
+                !Calculate CT
                 select case (fam%ctband)
                     case (lab%ctax%banda)
                         ratio = sys%ctax%RatioA
@@ -727,7 +727,7 @@ contains
                 end if
 
             else
-            
+
                 net%tu%ctax = 0.0_dp
 
             end if
@@ -743,14 +743,14 @@ contains
 
     ! polltax
     ! -----------------------------------------------------------------------
-    ! Simplified calculation of Community Charge liability. Depends on 
+    ! Simplified calculation of Community Charge liability. Depends on
     ! couple, adage
 
     !DEC$ ATTRIBUTES FORCEINLINE :: polltax
     pure subroutine polltax(sys,fam,net)
 
         use fortax_type, only : sys_t, fam_t, net_t
-        
+
         implicit none
 
         type(sys_t), intent(in)    :: sys
@@ -784,23 +784,23 @@ contains
 
     ! prelimcalc
     ! -----------------------------------------------------------------------
-    ! Preliminary calculations HBen, CTBen and CCBen. Depends on couple, 
+    ! Preliminary calculations HBen, CTBen and CCBen. Depends on couple,
     ! adage, hrs, nkids, kidage, ccexp, incsup
 
     !DEC$ ATTRIBUTES FORCEINLINE :: prelimcalc
     pure subroutine prelimcalc(sys,fam,net,disregRebate)
-    
+
         use fortax_type, only : sys_t, fam_t, net_t
-        
+
         implicit none
 
         type(sys_t), intent(in)    :: sys
         type(fam_t), intent(in)    :: fam
         type(net_t), intent(inout) :: net
         real(dp),    intent(out)   :: disregRebate
-  
+
         real(dp) :: appamt, disregStd, disregFT, disregCC, disregMnt
-        
+
         if (net%tu%incsup <= tol) then !JS: I changed ">" to "<" (I think this is what it should be)
             appamt       = HBAppAmt(sys,fam)
             disregStd    = StdDisreg(sys,fam)
@@ -811,33 +811,33 @@ contains
         else
             disregRebate = 0.0_dp
         end if
-        
+
     end subroutine prelimcalc
-    
+
     ! disregRebate
     ! -----------------------------------------------------------------------
     ! Disregard used in calculation of Hben, ctaxBen, pollTaxBen. Depends on
     ! disregStd, disregFT, disregCC, disregMnt, appamt, posttaxearn, fc, wtc,
     ! ctc, maint, chben
-    
+
     !DEC$ ATTRIBUTES FORCEINLINE :: RebateDisreg
     pure function RebateDisreg(sys,fam,net,appamt,disregStd,disregFT,disregCC,disregMnt)
 
         use fortax_type, only : sys_t, fam_t, net_t
-        
+
         implicit none
-        
+
         type(sys_t), intent(in) :: sys
         type(fam_t), intent(in) :: fam
         type(net_t), intent(in) :: net
         real(dp),    intent(in) :: appamt, disregStd, disregFT, disregCC, disregMnt
-        
+
         real(dp) :: RebateDisreg
 
         real(dp) :: disregCC1, disregCC2, disregCC3, chben
-        
-        !old calculation 
-!        if (sys%rebatesys%CredInDisregCC) then        
+
+        !old calculation
+!        if (sys%rebatesys%CredInDisregCC) then
 !            ! From Oct 99, WFTC/WTC/CTC could be set against disregCC
 !            RebateDisreg = max(max(max(max(net%tu%posttaxearn-disregStd,0.0_dp) &
 !                & + net%tu%fc+net%tu%wtc-disregFT, 0.0_dp) + net%tu%ctc-disregCC, 0.0_dp) &
@@ -845,9 +845,9 @@ contains
 !        else
 !            RebateDisreg = max(max(max(net%tu%posttaxearn-disregStd-disregCC,0.0_dp) &
 !                & + net%tu%fc+net%tu%wtc-disregFT, 0.0_dp) &
-!                & + max(fam%maint-disregMnt, 0.0_dp) + net%tu%chben+net%tu%ctc-appamt, 0.0_dp)           
-!        end if    
-        
+!                & + max(fam%maint-disregMnt, 0.0_dp) + net%tu%chben+net%tu%ctc-appamt, 0.0_dp)
+!        end if
+
 
         !corrected version
         if (sys%rebatesys%CredInDisregCC) then
@@ -859,33 +859,33 @@ contains
             disregCC2 = 0.0_dp
             disregCC3 = net%tu%ctc
         end if
-        
+
         chben = 0.0_dp
         if (sys%rebateSys%ChbenIsIncome) chben = net%tu%chben
 
         if (sys%rebatesys%rulesUnderWFTC .or. sys%rebatesys%rulesUnderNTC) then
             RebateDisreg = max(max(max(max(net%tu%posttaxearn-disregStd-disregCC1,0.0_dp) &
                 & + net%tu%fc+net%tu%wtc-disregFT, 0.0_dp) + disregCC2, 0.0_dp) &
-                & + max(fam%maint-disregMnt, 0.0_dp) + chben + disregCC3 - appamt, 0.0_dp) 
+                & + max(fam%maint-disregMnt, 0.0_dp) + chben + disregCC3 - appamt, 0.0_dp)
         elseif (sys%rebatesys%rulesUnderFC) then
             RebateDisreg = max(max(max(max(net%tu%posttaxearn-disregStd-disregCC1,0.0_dp) &
                 & + max(net%tu%fc+net%tu%wtc-disregFT,0.0_dp), 0.0_dp) + disregCC2, 0.0_dp) &
-                & + max(fam%maint-disregMnt, 0.0_dp) + chben + disregCC3 - appamt, 0.0_dp) 
+                & + max(fam%maint-disregMnt, 0.0_dp) + chben + disregCC3 - appamt, 0.0_dp)
         else
             RebateDisreg = 0.0_dp
         end if
-                                        
+
     end function RebateDisreg
-    
+
     ! HBen
     ! -----------------------------------------------------------------------
     ! Housing benefit. Depends on incsup, rent, disregRebate
 
-    !DEC$ ATTRIBUTES FORCEINLINE :: HBen    
+    !DEC$ ATTRIBUTES FORCEINLINE :: HBen
     pure subroutine HBen(sys,fam,net,disregRebate)
 
         use fortax_type, only : sys_t, fam_t, net_t, lab
-        
+
         implicit none
 
         type(sys_t), intent(in)    :: sys
@@ -894,9 +894,9 @@ contains
         real(dp),    intent(in)    :: disregRebate
 
         real(dp)                   :: eligrent
-                
+
         if (fam%rent > 0.0_dp) then
-        
+
             ! Rent cap (only implemented for PRIVATE renters (i.e. fam%tenure == 5))
             eligrent = fam%rent
             if ((sys%rebatesys%docap) .and. (fam%tenure == lab%tenure%private_renter)) then
@@ -911,7 +911,7 @@ contains
                 if (net%tu%hben < sys%hben%MinAmt) net%tu%hben = 0.0_dp
 
             else
-                    
+
                 !HB taper
                 net%tu%hben = max(eligrent - disregRebate*sys%hben%taper,0.0_dp)
 
@@ -921,13 +921,13 @@ contains
             end if
 
         else
-        
+
             net%tu%hben = 0.0_dp
-        
+
         end if
 
     end subroutine HBen
-    
+
 
     ! HBFull
     ! -----------------------------------------------------------------------
@@ -938,14 +938,14 @@ contains
     logical pure function HBFull(sys,fam,net,disregRebate)
 
         use fortax_type, only : sys_t, fam_t, net_t
-        
+
         implicit none
 
         type(sys_t), intent(in) :: sys
         type(fam_t), intent(in) :: fam
         type(net_t), intent(in) :: net
         real(dp),    intent(in) :: disregRebate
-        
+
         if (net%tu%incsup > tol) then
             HBFull = .true.
         else
@@ -960,10 +960,10 @@ contains
 
     end function HBFull
 
-    
+
     ! ctaxBen
     ! -----------------------------------------------------------------------
-    ! Council Tax Benefit taper (what about NI?). Depends on couple, adage, 
+    ! Council Tax Benefit taper (what about NI?). Depends on couple, adage,
     ! posttaxfamearn, fc, maint, othinc, incsup, ctax, band, appamt,
     ! disregStd, disregFT, disregCC, disregMnt
 
@@ -971,14 +971,14 @@ contains
     pure subroutine ctaxBen(sys,fam,net,disregRebate)
 
         use fortax_type, only : sys_t, fam_t, net_t, lab
-        
+
         implicit none
 
         type(sys_t), intent(in)    :: sys
         type(fam_t), intent(in)    :: fam
         type(net_t), intent(inout) :: net
         real(dp),    intent(in)    :: disregRebate
-        
+
         real(dp)                   :: maxctb
         integer                    :: maxage
 
@@ -997,7 +997,7 @@ contains
         else
 
             maxctb = net%tu%ctax
-        
+
             !Cap CTB at band E from 1998 to 2003
             if ((fam%ctband > lab%ctax%bande) .and. sys%rebatesys%Restrict) then
                 select case (fam%ctband)
@@ -1013,13 +1013,13 @@ contains
 
             ! From April 2013, refund only a fraction of council tax liability
             if (sys%ctaxben%doEntitlementCut) then
-            
+
               ! Note: in England, cut only applies to nonpensioners (we ignore this because FORTAX only works for working age individuals)
               ! Wales is region 10, Scotland is region 11
               if ((fam%region .ne. lab%region%wales) .and. (fam%region .ne. lab%region%scotland)) then
                 maxctb = maxctb * sys%ctaxben%entitlementShare
               end if
-            
+
             end if
 
 
@@ -1038,24 +1038,24 @@ contains
     end subroutine ctaxBen
 
 
-    ! 
+    !
     ! pollTaxBen
     ! -----------------------------------------------------------------------
     ! Community Charge Benefit taper. Depends on couple, adage, netearn, fc,
     ! maint, othinc, incsup, cc, disregRebate
-    
+
     !DEC$ ATTRIBUTES FORCEINLINE :: pollTaxBen
     pure subroutine pollTaxBen(sys,fam,net,disregRebate)
 
         use fortax_type, only : sys_t, fam_t, net_t
-        
+
         implicit none
 
         type(sys_t), intent(in)    :: sys
         type(fam_t), intent(in)    :: fam
         type(net_t), intent(inout) :: net
         real(dp),    intent(in)    :: disregRebate
-        
+
         real(dp)                   :: eligcc
         integer                    :: maxage
 
@@ -1067,16 +1067,16 @@ contains
 
         ! No CCB for under-18s
         if (maxage < 18) then
-            net%tu%polltaxben = 0.0_dp            
-        else        
+            net%tu%polltaxben = 0.0_dp
+        else
             !only 80% of CC eligible for CCB
             eligcc = net%tu%polltax*sys%ccben%PropElig
 
             if (net%tu%incsup > tol) then
                 !Passport to full entitlement if on IS (income-based JSA didn't exist when CCB was around)
                 net%tu%polltaxben = eligcc
-                
-            else             
+
+            else
                 !CCB taper (I think disregFT and disregCC ares irrelevant here - they are only > 0 from 1995)
 !                net%tu%polltaxben = max(eligcc - max(max(max(net%tu%posttaxearn-disreg1,0.0_dp)+net%tu%fc+net%tu%wtc-disreg2, 0.0_dp) &
 !                    & + max(fam%maint-disreg3, 0.0_dp) + net%tu%chben+net%tu%ctc-appamt, 0.0_dp)*sys%ccben%taper,0.0_dp)
@@ -1092,18 +1092,18 @@ contains
 
     end subroutine polltaxBen
 
-    
+
     ! HBAppAmt
     ! -----------------------------------------------------------------------
-    ! HB/CCB/CTB: applicable amount ("needs"). Note: Premium for family with 
-    ! child under 1 currently implemented as child addition - so error if 
+    ! HB/CCB/CTB: applicable amount ("needs"). Note: Premium for family with
+    ! child under 1 currently implemented as child addition - so error if
     ! multiple kids under 1. Depends on couple, adage, nkids, kidage
 
     !DEC$ ATTRIBUTES FORCEINLINE :: HBAppAmt
     real(dp) pure function HBAppAmt(sys,fam)
 
         use fortax_type, only : sys_t, fam_t
-        
+
         implicit none
 
         type(sys_t), intent(in) :: sys
@@ -1157,16 +1157,16 @@ contains
 
     end function HBAppAmt
 
-    
+
     ! StdDisreg
     ! -----------------------------------------------------------------------
     ! HB/CCB/CTB: standard earnings disregard. Depends on couple, nkids
 
-    !DEC$ ATTRIBUTES FORCEINLINE :: StdDisreg    
+    !DEC$ ATTRIBUTES FORCEINLINE :: StdDisreg
     real(dp) pure function StdDisreg(sys,fam)
-    
+
         use fortax_type, only : sys_t, fam_t
-        
+
         implicit none
 
         type(sys_t), intent(in) :: sys
@@ -1185,31 +1185,31 @@ contains
 
     end function StdDisreg
 
-    
+
     ! FTDisreg
     ! -----------------------------------------------------------------------
-    ! HB/CCB/CTB: disregard for workers (originally for those getting FT 
+    ! HB/CCB/CTB: disregard for workers (originally for those getting FT
     ! premium with FC/WFTC/WTC). Depends on couple, adage, hrs, nkids
 
-    !DEC$ ATTRIBUTES FORCEINLINE :: FTDisreg    
+    !DEC$ ATTRIBUTES FORCEINLINE :: FTDisreg
     real(dp) pure function FTDisreg(sys,fam,net)
- 
+
         use fortax_type, only : sys_t, fam_t, net_t
-        
+
         implicit none
 
         type(sys_t), intent(in) :: sys
         type(fam_t), intent(in) :: fam
         type(net_t), intent(in) :: net
-        
+
         !I have changed this so it condtions on dofamcred (and others) so it does
         !not give the FT disregard under incomplete takeup, AS 16/06/10
-        
+
         !Additional disregard for workers (up to 2003: those eligible for FC/WFTC/WTC FT premium; from 2004: those eligible for WTC)
         FTDisreg = 0.0_dp
-        
+
         !if (sys%fc%dofamcred) then
-        
+
             !under FC system, need actual receipt of Family Credit (pre-October 1999)
             if (sys%rebatesys%rulesunderFC) then
 
@@ -1225,7 +1225,7 @@ contains
                 end if
 
             end if
-            
+
             !under WFTC system, need only to be working full-time
             if (sys%rebatesys%rulesunderWFTC) then
 
@@ -1240,7 +1240,7 @@ contains
 
             end if
         !end if
-        
+
         !WTC (2003 onwards)
         !if (sys%ntc%donewtaxcred) then
             if (sys%rebatesys%rulesunderNTC) then
@@ -1274,7 +1274,7 @@ contains
                         if (_famcouple_) then
                             if ((fam%ad(1)%hrs >= sys%wtc%MinHrsKids-tol) &
                                 & .or. (fam%ad(2)%hrs >= sys%wtc%MinHrsKids-tol)) &
-                                & FTDisreg = sys%wtc%NewDisreg                       
+                                & FTDisreg = sys%wtc%NewDisreg
                         else
                             if (fam%ad(1)%hrs >= sys%wtc%MinHrsKids-tol) FTDisreg = sys%wtc%NewDisreg
                         end if
@@ -1282,31 +1282,31 @@ contains
                         if (_famcouple_) then
                             if ((fam%ad(1)%hrs >= sys%wtc%MinHrsNoKids-tol) .or. &
                                 & (fam%ad(2)%hrs >= sys%wtc%MinHrsNoKids-tol)) &
-                                & FTDisreg = sys%wtc%NewDisreg                        
+                                & FTDisreg = sys%wtc%NewDisreg
                         else
                             if (fam%ad(1)%hrs >= sys%wtc%MinHrsNoKids-tol) FTDisreg = sys%wtc%NewDisreg
                         end if
                     end if
 
                 end if
-                
+
             end if
-            
+
         !end if
-        
+
     end function FTDisreg
 
 
     ! ChCareDisreg
     ! -----------------------------------------------------------------------
-    ! HB/CCB/CTB: disregard for childcare costs. Depends on couple, hrs, 
+    ! HB/CCB/CTB: disregard for childcare costs. Depends on couple, hrs,
     ! nkids, kidage, ccexp
 
-    !DEC$ ATTRIBUTES FORCEINLINE :: ChCareDisreg    
+    !DEC$ ATTRIBUTES FORCEINLINE :: ChCareDisreg
     real(dp) pure function ChCareDisreg(sys,fam,net)
-    
+
         use fortax_type, only : sys_t, fam_t, net_t
-        
+
         implicit none
 
         type(sys_t), intent(in) :: sys
@@ -1317,7 +1317,7 @@ contains
         logical                 :: elig
 
         ChCareDisreg = 0.0_dp
-        
+
         if ((sys%rebatesys%MaxCC1 > tol) .and. (_famkids_) .and. (fam%ccexp > tol)) then
 
             !Check TU is working enough
@@ -1325,16 +1325,16 @@ contains
             if (sys%rebatesys%rulesunderFC .or. sys%rebatesys%rulesunderWFTC) then
                 if (_famcouple_) then
                     if ((fam%ad(1)%hrs >= sys%fc%hours1-tol) .and. (fam%ad(2)%hrs >= sys%fc%hours1-tol)) elig = .true.
-                else               
+                else
                     if (fam%ad(1)%hrs >= sys%fc%hours1-tol) elig = .true.
                 end if
             end if
-            
+
             if (sys%rebatesys%rulesunderNTC) then
-            
+
                 if (_famcouple_) then
                     if ((fam%ad(1)%hrs >= sys%wtc%MinHrsKids-tol) &
-                        & .and. (fam%ad(2)%hrs >= sys%wtc%MinHrsKids-tol)) elig = .true.                    
+                        & .and. (fam%ad(2)%hrs >= sys%wtc%MinHrsKids-tol)) elig = .true.
                 else
                     if (fam%ad(1)%hrs >= sys%wtc%MinHrsKids-tol) elig = .true.
                 end if
@@ -1376,12 +1376,12 @@ contains
     real(dp) pure function MaintDisreg(sys,fam)
 
         use fortax_type, only : sys_t, fam_t
-        
+
         implicit none
 
         type(sys_t), intent(in) :: sys
         type(fam_t), intent(in) :: fam
- 
+
         if (_famkids_) then
             MaintDisreg = sys%rebatesys%MaintDisreg
         else
@@ -1414,13 +1414,13 @@ contains
     pure subroutine NTC(sys,fam,net)
 
         use fortax_type, only : sys_t, fam_t, net_t
-                
+
         implicit none
 
         type(sys_t), intent(in)    :: sys
         type(fam_t), intent(in)    :: fam
         type(net_t), intent(inout) :: net
-        
+
         real(dp)                   :: MaxWTC
 
         call MaxWTCamt(sys,fam,net,MaxWTC)
@@ -1431,19 +1431,19 @@ contains
 
     ! MaxCTCFam
     ! -----------------------------------------------------------------------
-    ! Family element of CTC (separate from child element for later taper 
+    ! Family element of CTC (separate from child element for later taper
     ! calculation). Depends on nkids, ageyng
-    
-    !DEC$ ATTRIBUTES FORCEINLINE :: MaxCTCFam    
+
+    !DEC$ ATTRIBUTES FORCEINLINE :: MaxCTCFam
     real(dp) pure function MaxCTCFam(sys,fam)
 
         use fortax_type, only : sys_t, fam_t
-        
+
         implicit none
-        
+
         type(sys_t), intent(in) :: sys
         type(fam_t), intent(in) :: fam
-        
+
         select case (fam%nkids)
 
         case (0)
@@ -1457,10 +1457,10 @@ contains
             end select
 
         end select
-        
+
     end function MaxCTCFam
 
-    
+
     ! MaxCTCKid
     ! -----------------------------------------------------------------------
     ! Child element of CTC. Depends on nkids
@@ -1469,46 +1469,46 @@ contains
     real(dp) pure function MaxCTCKid(sys,fam)
 
         use fortax_type, only : sys_t, fam_t
-        
+
         implicit none
-        
+
         type(sys_t), intent(in) :: sys
         type(fam_t), intent(in) :: fam
-        
+
         select case (fam%nkids)
         case (0)
             MaxCTCKid = 0.0_dp
         case (1:)
             MaxCTCKid = real(fam%nkids,dp)*sys%ctc%kid
         end select
-        
+
     end function MaxCTCKid
 
-    
+
     ! MaxWTCamt
     ! -----------------------------------------------------------------------
-    ! Working Tax Credit (including childcare element). Depends on couple, 
+    ! Working Tax Credit (including childcare element). Depends on couple,
     ! age, hrs, nkids, kidage, ccexp
-    
+
     !DEC$ ATTRIBUTES FORCEINLINE :: MaxWTCamt
     pure subroutine MaxWTCamt(sys,fam,net,MaxWTC)
 
         use fortax_type, only : sys_t, fam_t, net_t
-        
+
         implicit none
-        
+
         type(sys_t), intent(in)    :: sys
         type(fam_t), intent(in)    :: fam
         type(net_t), intent(inout) :: net
         real(dp),    intent(out)   :: MaxWTC
-        
+
         integer                    :: i, nkidscc
-        
+
         net%tu%chcaresub = 0.0_dp
 
         select case (fam%nkids)
         case (0)
-                      
+
             if (_famcouple_) then
                 ! Childless couples
                 if ((fam%ad(1)%age >= sys%wtc%MinAgeNoKids .and. fam%ad(1)%hrs >= sys%wtc%MinHrsNoKids-tol) &
@@ -1524,7 +1524,7 @@ contains
                     MaxWTC = sys%wtc%Basic + sys%wtc%FT
                 else
                     MaxWTC = 0.0_dp
-                end if                    
+                end if
             end if
 
         case (1:)
@@ -1568,7 +1568,7 @@ contains
                 if (.not. _famcouple_) then
                     if (fam%ad(1)%hrs >= sys%wtc%MinHrsKids-tol) &
                         & net%tu%chcaresub = min(fam%ccexp,sys%wtc%MaxCC1)*sys%wtc%PropCC
-                
+
                 else
                     if ((fam%ad(1)%hrs >= sys%wtc%MinHrsKids-tol) .and. (fam%ad(2)%hrs >= sys%wtc%MinHrsKids-tol)) &
                         & net%tu%chcaresub = min(fam%ccexp,sys%wtc%MaxCC1)*sys%wtc%PropCC
@@ -1587,22 +1587,22 @@ contains
             MaxWTC = MaxWTC + net%tu%chcaresub
 
         end if
-        
+
     end subroutine MaxWTCamt
 
 
     ! NTCTaper
     ! -----------------------------------------------------------------------
-    ! New Tax Credits taper. Assumes receipt for whole year. Calculation is 
-    ! not on last year income (and 2500 disregard). Round(award/365)*365 not 
-    ! done. Doesn't check that WTC and CTC award values are sensible 
+    ! New Tax Credits taper. Assumes receipt for whole year. Calculation is
+    ! not on last year income (and 2500 disregard). Round(award/365)*365 not
+    ! done. Doesn't check that WTC and CTC award values are sensible
     ! (hopefully they should be!)
 
     !DEC$ ATTRIBUTES FORCEINLINE :: NTCTaper
     pure subroutine NTCTaper(sys,fam,net,MaxWTC,MaxCTCFam,MaxCTCKid)
 
         use fortax_type, only : sys_t, fam_t, net_t
-                
+
         implicit none
 
         type(sys_t), intent(in)    :: sys
@@ -1611,7 +1611,7 @@ contains
         real(dp),    intent(in)    :: MaxWTC, MaxCTCFam, MaxCTCKid
 
         real(dp)                   :: Thr1, Thr2 !, famearn
-                
+
 !        famearn = fam%ad(1)%earn
 !        if (_famcouple_) famearn = famearn + fam%ad(2)%earn
 
@@ -1642,10 +1642,10 @@ contains
 
                 ! Next taper child elements of CTC
                 net%tu%ctc = max(MaxCTCKid - max(net%tu%pretaxearn - Thr1 - MaxWTC/sys%ntc%taper1, 0.0_dp)*sys%ntc%taper1, 0.0_dp)
-                
+
                 ! Second threshold
                 Thr2 = max((MaxWTC+MaxCTCKid)/sys%ntc%taper1 + Thr1, sys%ntc%thr2)
-                
+
                 ! Finally taper family element of CTC
                 net%tu%ctc = net%tu%ctc + max(MaxCTCFam - max(net%tu%pretaxearn - Thr2, 0.0_dp)*sys%ntc%taper2, 0.0_dp)
 
@@ -1665,14 +1665,14 @@ contains
 
     ! FamCred
     ! -----------------------------------------------------------------------
-    ! Family credit/WFTC awards. Depends on couple, hrs, nkids, kidage, 
+    ! Family credit/WFTC awards. Depends on couple, hrs, nkids, kidage,
     ! netearn, ccexp, maint
-    
+
     !DEC$ ATTRIBUTES FORCEINLINE :: FamCred
     pure subroutine FamCred(sys,fam,net)
 
         use fortax_type, only : sys_t, fam_t, net_t
-        
+
         implicit none
 
         type(sys_t), intent(in)    :: sys
@@ -1683,7 +1683,7 @@ contains
         integer                     :: i
 
         call MaxFCamt(sys,fam,net,MaxFC)
-        
+
         if (MaxFC > tol) then
 
             FCDisregAmt = FCDisreg(sys,fam)
@@ -1695,7 +1695,7 @@ contains
                 MatGrInFC = 0.0_dp
                 do i=1,fam%nkids
                     if (fam%kidage(i) == 0) MatGrInFC = MatGrInFC + (sys%chben%MatGrantVal/52.0_dp)
-                end do                
+                end do
             else
                 MatGrInFC = 0.0_dp
             end if
@@ -1724,7 +1724,7 @@ contains
     ! -----------------------------------------------------------------------
     ! FC/WFTC maximum entitlement. Depends on couple, hrs, nkids, kidage,
     ! ccexp
-    
+
     !DEC$ ATTRIBUTES FORCEINLINE :: MaxFCamt
     pure subroutine MaxFCamt(sys,fam,net,MaxFC)
 
@@ -1737,7 +1737,7 @@ contains
         type(net_t), intent(inout) :: net
         real(dp),    intent(out)   :: MaxFC
 
-        integer                    :: i, j, nkidscc       
+        integer                    :: i, j, nkidscc
 
         net%tu%chcaresub = 0.0_dp
 
@@ -1754,7 +1754,7 @@ contains
                 else
                     MaxFC = 0.0_dp
                 end if
-           
+
             !single
             else
                 if (fam%ad(1)%hrs >= sys%fc%hours1-tol) then
@@ -1762,7 +1762,7 @@ contains
                     if (fam%ad(1)%hrs >= sys%fc%hours2-tol) MaxFC = MaxFC + sys%fc%ftprem
                 else
                     MaxFC = 0.0_dp
-                end if            
+                end if
             end if
 
             if (MaxFC > tol) then
@@ -1816,7 +1816,7 @@ contains
     ! FC: earnings disregard for childcare expenditure (only get this if all
     ! adults in TU work 16+ hrs). Depends on couple, hrs, nkids, kidage,
     ! ccexp
-    
+
     !DEC$ ATTRIBUTES FORCEINLINE :: FCDisreg
     real(dp) pure function FCDisreg(sys,fam)
 
@@ -1826,7 +1826,7 @@ contains
 
         type(sys_t), intent(in) :: sys
         type(fam_t), intent(in) :: fam
-        
+
         integer                 :: i, nkidscc
         logical                 :: elig
 
@@ -1837,7 +1837,7 @@ contains
             if (_famcouple_) then
                 if ((fam%ad(1)%hrs >= sys%fc%hours1-tol) .and. (fam%ad(2)%hrs >= sys%fc%hours1-tol)) elig = .true.
             else
-                if (fam%ad(1)%hrs >= sys%fc%hours1-tol) elig = .true.                
+                if (fam%ad(1)%hrs >= sys%fc%hours1-tol) elig = .true.
             end if
 
             !Number of children eligible for credit
@@ -1884,7 +1884,7 @@ contains
 
     ! ChBen
     ! -----------------------------------------------------------------------
-    ! Child benefit. LP rate was abolished in 1998. sys%chben%opf = 0 from 
+    ! Child benefit. LP rate was abolished in 1998. sys%chben%opf = 0 from
     ! then on, even though existing claimants could still get it. Depends on
     ! couple, nkids
 
@@ -1892,7 +1892,7 @@ contains
     pure subroutine ChBen(sys,fam,net)
 
         use fortax_type, only : sys_t, fam_t, net_t
-        
+
         implicit none
 
         type(sys_t), intent(in)    :: sys
@@ -1909,11 +1909,11 @@ contains
         if (_famkids_) then
             net%tu%chben = sys%chben%basic*fam%nkids + sys%chben%kid1xtr
             if (.not. _famcouple_) net%tu%chben = net%tu%chben + sys%chben%opf
-            
+
             ! High income child benefit charge (from Jan 2013)
-            
+
             if (sys%chben%doTaper) then
-            
+
                 ! Find primary earner
                 if (.not. _famcouple_) then
                     pe = 1
@@ -1958,26 +1958,26 @@ contains
                 else
                   net%tu%chben = net%tu%chben - chBenCharge
                 end if
-                                
-                
+
+
             end if !doTaper
-            
+
         else
             net%tu%chben = 0.0_dp
         end if !kids
-    
+
     end subroutine ChBen
 
 
     ! MatGrant
     ! -----------------------------------------------------------------------
     ! Maternity grant. Depends on nkids, kidage, incsup, fc, ctcred
-    
+
     !DEC$ ATTRIBUTES FORCEINLINE :: MatGrant
     pure subroutine MatGrant(sys,fam,net,calcmax)
 
         use fortax_type, only : sys_t, fam_t, net_t
-        
+
         implicit none
 
         type(sys_t), intent(in)           :: sys
@@ -2003,21 +2003,21 @@ contains
             else if (sys%rebatesys%rulesunderNTC) then
                 if (net%tu%ctc > MaxCTCFam(sys,fam) + tol) dogrant = .true.
             end if
-            
+
             !From Apr-11: no maternity grant if there's another child aged under 16 in the family (except for multiple births)
             if (sys%chBen%MatGrantOnlyFirstKid) then
               do i=1,fam%nkids
                   if ((fam%kidage(i) > 0) .and. (fam%kidage(i) < 16)) dogrant = .false.
               end do
             end if
-            
+
             if (dogrant) then
                 do i=1,fam%nkids
                     if (fam%kidage(i) == 0) net%tu%matgrant = net%tu%matgrant + (sys%chben%MatGrantVal/52.0_dp)
                 end do
             end if
         end if
-    
+
     end subroutine MatGrant
 
 
@@ -2027,15 +2027,15 @@ contains
 
     !DEC$ ATTRIBUTES FORCEINLINE :: fsm
     pure subroutine fsm(sys,fam,net)
-        
+
         use fortax_type, only : sys_t, fam_t, net_t
-        
+
         implicit none
 
         type(sys_t), intent(in)    :: sys
         type(fam_t), intent(in)    :: fam
         type(net_t), intent(inout) :: net
-        
+
         integer                     :: i
 
         ! Before April 2003, you get FSM if you're on IS/IB-JSA
@@ -2072,21 +2072,21 @@ contains
     pure subroutine UnivCred(sys,fam,net)
 
         use fortax_type, only : sys_t, fam_t, net_t
-        
+
         implicit none
 
         type(sys_t), intent(in)    :: sys
         type(fam_t), intent(in)    :: fam
         type(net_t), intent(inout) :: net
-        
+
         real(dp)                   :: maxUC, UCChCareElement, UCHousingElement, UCDisregAmt
-        
+
         ! Entitlement conditions need implementing but are a bit complicated
           ! Need one adult below SPA
           ! If one member of a couple aged under 18, he/she is ignored in calculating maximum UC, but earnings is taken into account
           ! 16-17 year olds entitled if have dependent children or have no parental support
           ! These last two points make it sound like BU is penalised if one adult is under 18 but not if both! Is this right?
-        
+
         UCHousingElement = UCHousing(sys,fam)
         UCChCareElement = UCChCare(sys,fam)
         net%tu%chcaresub = UCChCareElement
@@ -2098,7 +2098,7 @@ contains
 
         ! Note: child maintenance ignored altogether but not spousal maintenance
         ! (I'm assuming fam%maint is child maintenance)
-        
+
         ! Minimum award
         if (net%tu%uc < sys%uc%MinAmt) net%tu%uc = 0.0_dp
 
@@ -2114,12 +2114,12 @@ contains
     ! -----------------------------------------------------------------------
     ! Calculates standard allowance for Universal Credit
     ! Equivalent to personal allowance in IS/income-based JSA
-    
+
     !DEC$ ATTRIBUTES FORCEINLINE :: UCStdAllow
     real(dp) pure function UCStdAllow(sys,fam)
 
         use fortax_type, only : sys_t, fam_t
-        
+
         implicit none
 
         type(sys_t), intent(in)    :: sys
@@ -2128,7 +2128,7 @@ contains
 
         ! Single
         if (.not. _famcouple_) then
-        
+
             if (fam%ad(1)%age < sys%uc%MinAgeMain) then
                 UCStdAllow = sys%uc%YngSin
             else
@@ -2145,8 +2145,8 @@ contains
             else
                 UCStdAllow = sys%incsup%MainCou
             end if
-            
-            
+
+
         end if
 
 
@@ -2165,19 +2165,19 @@ contains
     real(dp) pure function UCKid(sys,fam)
 
         use fortax_type, only : sys_t, fam_t
-        
+
         implicit none
-        
+
         type(sys_t), intent(in) :: sys
         type(fam_t), intent(in) :: fam
-        
+
         select case (fam%nkids)
         case (0)
             UCKid = 0.0_dp
         case (1:)
             UCKid = sys%uc%FirstKid + real(fam%nkids-1,dp)*sys%uc%OtherKid
         end select
-        
+
     end function UCKid
 
 
@@ -2190,19 +2190,19 @@ contains
     ! Childcare element of Universal Credit
     ! Same as childcare element of WTC
     ! Note that it does NOT set net%tu%chcaresub. This is done in UnivCred so that UCChCare can be called later without disrupting chcaresub
-    
+
     !DEC$ ATTRIBUTES FORCEINLINE :: UCChCare
     real(dp) pure function UCChCare(sys,fam)
 
         use fortax_type, only : sys_t, fam_t
-        
+
         implicit none
-        
+
         type(sys_t), intent(in)    :: sys
         type(fam_t), intent(in)    :: fam
-        
+
         integer                    :: i, nkidscc
-        
+
         if ((_famkids_) .and. (fam%ccexp > tol)) then
 
             ! Count number of children young enough to be eligible for childcare support
@@ -2216,7 +2216,7 @@ contains
                 if (.not. _famcouple_) then
                     if (fam%ad(1)%hrs > tol) &
                       & UCChCare = min(fam%ccexp,sys%uc%MaxCC1)*sys%uc%PropCC
-                
+
                 else
                     if ((fam%ad(1)%hrs > tol) .and. (fam%ad(2)%hrs > tol)) &
                       & UCChCare = min(fam%ccexp,sys%uc%MaxCC1)*sys%uc%PropCC
@@ -2233,7 +2233,7 @@ contains
             end if
 
         end if
-        
+
     end function UCChCare
 
 
@@ -2244,18 +2244,18 @@ contains
     ! UCHousing
     ! -----------------------------------------------------------------------
     ! Housing costs element of Universal Credit (currently ignores help towards mortgage costs)
-    
+
     !DEC$ ATTRIBUTES FORCEINLINE :: UCHousing
     real(dp) pure function UCHousing(sys,fam)
 
         use fortax_type, only : sys_t, fam_t
-        
+
         implicit none
 
         type(sys_t), intent(in)    :: sys
         type(fam_t), intent(in)    :: fam
 
-                
+
         ! Rent cap (implemented for ALL renters, not just private renters (as with HB))
         UCHousing = fam%rent
         if (sys%uc%doRentCap) UCHousing = min(fam%rent,fam%rentcap)
@@ -2274,7 +2274,7 @@ contains
     real(dp) pure function UCDisreg(sys,fam,UCHousing)
 
         use fortax_type, only : sys_t, fam_t
-        
+
         implicit none
 
         type(sys_t), intent(in)    :: sys
@@ -2338,7 +2338,7 @@ contains
     pure subroutine ImposeBenCap(sys,fam,net)
 
         use fortax_type, only : sys_t, fam_t, net_t
-        
+
         implicit none
 
         type(sys_t), intent(in)    :: sys
@@ -2353,7 +2353,7 @@ contains
 
         ! If through UC
         if (sys%bencap%doThruUC) then
-            
+
             ! UC benefit cap applies if:
                 ! Positive UC award
                 ! Family earnings below some limit
@@ -2368,7 +2368,7 @@ contains
 
                 ! Reduce UC by excess
                 net%tu%uc = max(0.0_dp, net%tu%uc - excess)
-            
+
             end if
 
 
@@ -2384,7 +2384,7 @@ contains
             if (_famcouple_) maxage = max(maxage,fam%ad(2)%age)
 
             if ((net%tu%hben > tol) .and. (net%tu%wtc < tol) .and. (maxage < sys%statepen%penAgeWoman)) then
-            
+
                 ! Total benefits to be capped
                 preCapBens = net%tu%incsup + net%tu%hben + net%tu%chben + net%tu%ctc
 
@@ -2393,7 +2393,7 @@ contains
 
                 ! Reduce HB by excess (or until HB award is minimum HB award)
                 net%tu%hben = max(sys%hben%minAmt, net%tu%hben - excess)
-            
+
             end if
 
         end if
@@ -2411,7 +2411,7 @@ contains
     real(dp) pure function BenCapLevel(sys,fam)
 
         use fortax_type, only : sys_t, fam_t
-        
+
         implicit none
 
         type(sys_t), intent(in)    :: sys
@@ -2458,7 +2458,7 @@ contains
         type(sys_t), intent(in)  :: sys
         type(fam_t), intent(in)  :: fam
         type(net_t), intent(out) :: net
-                
+
         real(dp)                 :: disregRebate
 
         !if CalcNetInit is called it will set all elements to zero.
@@ -2473,11 +2473,11 @@ contains
 
         !1. NATIONAL INSURANCE
         !!!!!!!!!!!!!!!!!!!!!!
-        
+
         ! Note: NI before IT because of relief on class 4 contributions
 
         call NatIns(sys,fam,net,i=1)
-        
+
         if (_famcouple_) then
             call NatIns(sys,fam,net,i=2)
         else
@@ -2492,15 +2492,15 @@ contains
         !!!!!!!!!!!!!!
 
         call tearn(sys,fam,net)
-        
+
         call inctax(sys,net,i=1)
-        
+
         if (_famcouple_) then
             call inctax(sys,net,i=2)
         else
             net%ad(2)%inctax = 0.0_dp
         end if
-        
+
         call taxafterctc(sys,fam,net)
         call taxaftermca(sys,fam,net)
 
@@ -2515,17 +2515,17 @@ contains
             net%ad(2)%posttaxearn = 0.0_dp
         end if
 
-        
+
         !3. CHILD BENEFIT
         !!!!!!!!!!!!!!!!!
-        
+
         if (sys%chben%doChBen) then
             call ChBen(sys,fam,net)
         end if
 
-        
+
         !4. TAX CREDITS
-        !!!!!!!!!!!!!!!       
+        !!!!!!!!!!!!!!!
 
         net%tu%wtc = 0.0_dp
         net%tu%ctc = 0.0_dp
@@ -2537,16 +2537,16 @@ contains
         if (sys%fc%dofamcred) then
             call FamCred(sys,fam,net)
         end if
-        
+
         !WTC and CTC
         if (sys%ntc%donewtaxcred) then
-            call NTC(sys,fam,net)            
+            call NTC(sys,fam,net)
         end if
 
 
         !5. IS AND IB-JSA
         !!!!!!!!!!!!!!!!!
-        
+
         if (sys%incsup%doIncSup) then
             call IncSup(sys,fam,net)
         end if
@@ -2556,14 +2556,14 @@ contains
 
         ! Free school meals
         call fsm(sys,fam,net)
-        
+
 
         !6. HB, CTB AND CCB
         !!!!!!!!!!!!!!!!!!!
 
         ! Preliminary calculations (disregRebate passed to subsequent routines)
         call prelimcalc(sys,fam,net,disregRebate)
-        
+
         ! Housing benefit
         if (sys%hben%doHBen) then
             call HBen(sys,fam,net,disregRebate)
@@ -2577,7 +2577,7 @@ contains
             net%tu%polltax    = 0.0_dp
             net%tu%polltaxben = 0.0_dp
         end if
-        
+
         ! Council tax
         if (sys%ctax%docounciltax) then
             call ctax(sys,fam,net)
@@ -2606,7 +2606,7 @@ contains
         net%tu%totben = net%tu%chben + net%tu%matgrant + net%tu%fc + net%tu%wtc + net%tu%ctc &
             & + net%tu%incsup + net%tu%fsm + net%tu%hben + net%tu%ctaxben + net%tu%polltaxben &
             & + net%tu%uc
-            
+
         net%tu%nettax = net%ad(1)%inctax + net%ad(1)%natinsc1 + net%ad(1)%natinsc2 &
             & + net%ad(1)%natinsc4 + net%tu%ctax + net%tu%polltax &
             & - net%tu%totben
@@ -2623,7 +2623,7 @@ contains
 
         !set childcare expenditure
         net%tu%ccexp = fam%ccexp
-        
+
     end subroutine CalcNetInc
 
     ! CalcNetInit
@@ -2631,7 +2631,7 @@ contains
     ! intializes net_t type. unless defaults are coded here, integers are
     ! set to 0, doubles to 0.0_dp and logicals to .false. (and similarly
     ! for arrays)
-    ! 
+    !
     ! this is the same as net_init in fortax_type, it is reproduced here so
     ! we may inline without inter procedural optimization enabled. AS
 

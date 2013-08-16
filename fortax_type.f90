@@ -5,12 +5,12 @@
 ! it under the terms of the GNU General Public License as published by
 ! the Free Software Foundation, either version 3 of the License, or
 ! (at your option) any later version.
-! 
+!
 ! FORTAX is distributed in the hope that it will be useful,
 ! but WITHOUT ANY WARRANTY; without even the implied warranty of
 ! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ! GNU General Public License for more details.
-! 
+!
 ! You should have received a copy of the GNU General Public License
 ! along with FORTAX.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -19,15 +19,15 @@
 
 ! fortax_type
 ! -----------------------------------------------------------------------
-! module defines the main derived types that describe families, the tax 
+! module defines the main derived types that describe families, the tax
 ! system, and the information returned by the calculation routines, AS
 
 module fortax_type
-              
+
     use fortax_realtype, only : dp
-    
+
     implicit none
-            
+
     ! TODO improve label handling
     private :: dp
     private
@@ -142,9 +142,9 @@ module fortax_type
 
     ! fam_t
     ! -----------------------------------------------------------------------
-    ! defines the family type structure, containing information on 
-    ! demographic characteristics, earnings, hours of work, and other 
-    ! information. Anything that can affect the taxes and transfer payments 
+    ! defines the family type structure, containing information on
+    ! demographic characteristics, earnings, hours of work, and other
+    ! information. Anything that can affect the taxes and transfer payments
     ! of a family is defined in here.
 
     type :: fam_t
@@ -185,9 +185,9 @@ module fortax_type
 
     ! netad_t
     ! -----------------------------------------------------------------------
-    ! defines the adult level information returned following calls to the 
+    ! defines the adult level information returned following calls to the
     ! main calculation routines (see net_t below).
-        
+
     type :: netad_t
 
 #       undef  _$header
@@ -224,7 +224,7 @@ module fortax_type
 
     ! nettu_t
     ! -----------------------------------------------------------------------
-    ! defines the tax unit level information returned following calls to the 
+    ! defines the tax unit level information returned following calls to the
     ! main calculation routines (see net_t below).
 
     type :: nettu_t
@@ -263,8 +263,8 @@ module fortax_type
 
     ! net_t
     ! -----------------------------------------------------------------------
-    ! defines the information returned following calls to the main 
-    ! calculation routines within fortax_calc. It contains measures of net 
+    ! defines the information returned following calls to the main
+    ! calculation routines within fortax_calc. It contains measures of net
     ! income, together with various tax amounts and other components of income
 
     type :: net_t
@@ -299,22 +299,22 @@ module fortax_type
 
     ! sys_t
     ! -----------------------------------------------------------------------
-    ! defines the tax system structure which families of type fam_t face. 
+    ! defines the tax system structure which families of type fam_t face.
     ! It describes all the parameters which are interpreted within the
     ! module fortax_calc
 
     ! I use a lot of preprocessor stuff for handling the sys_t type
     ! we just "include" it here to keep the code tidy, AS
 #   include 'includes/sys_t.inc'
-       
+
 contains
-    
+
 
     ! fam_init
     ! -----------------------------------------------------------------------
     ! intializes family structure. unless defaults are coded here, integers
     ! are set to 0, doubles to 0.0_dp and logicals to .false. (and similarly
-    ! for arrays). Could possibly add defaults in fam_t, but given it is 
+    ! for arrays). Could possibly add defaults in fam_t, but given it is
     ! only referenced here, there probably isn't much advantage to that
 
     elemental subroutine fam_init(fam)
@@ -492,7 +492,7 @@ contains
 
     ! fam_gen
     ! -----------------------------------------------------------------------
-    ! will return fam setting any characteristics to the values that are 
+    ! will return fam setting any characteristics to the values that are
     ! specified. Adult information should be passed by adding a suffix 1 or 2
     ! for the respective adult number.
 
@@ -650,7 +650,7 @@ contains
             correct2 = .true.
         end if
 
-        !rules: 
+        !rules:
         !if kidage is specified, then set nkids equal to size unless nkids is present
         !in this case, set nkids = max(nkids,size of kidage). kidage for additional kids
         !is then set to zero (or to yngkid if present and .le. age of those specified)
@@ -678,9 +678,9 @@ contains
                                 fam_gen%yngkid = 0
                             end if
                             fam_gen%kidAge(kidSize+1:nkids) = 0
-                            fam_gen%yngKid = 0                    
+                            fam_gen%yngKid = 0
                         end if
-                    else    
+                    else
                         fam_gen%nkids  = kidSize
                         fam_gen%yngKid = minval(kidAge)
                     end if
@@ -697,13 +697,13 @@ contains
                     end if
                 end if
             end if
-        
+
             !if married true, then couple is true regardless of whether specified
             if (fam_gen%married) fam_gen%couple = .true.
-                    
+
             !automatically set couple=.true. if any second adult information is passed
             if (.not. (fam_gen%couple)) then
-            
+
 #               define _$header
 #               define _$footer
 #               define _$integer(x,y) if (present(x##2)) fam_gen%couple=.true.
@@ -722,9 +722,9 @@ contains
 #               undef  _$doublearray
 #               undef  _$integerarray
 #               undef  _$logicalarray
-            
+
             end if
-            
+
             if (.not. fam_gen%couple) fam_gen%ad(2)%age = 0
 
         end if
@@ -1062,14 +1062,14 @@ contains
 #       undef  _$logical
 #       undef  _$doublearray
 #       undef  _$integerarray
-#       undef  _$logicalarray      
-          
+#       undef  _$logicalarray
+
     end subroutine net_desc
-    
+
     !again, i include the file here as it contains a lot of
-    !preprocessor directives, AS    
+    !preprocessor directives, AS
 #   include 'includes/sys_init.inc'
-    
+
 
     ! sys_init
     ! -----------------------------------------------------------------------
@@ -1082,7 +1082,7 @@ contains
         implicit none
 
         type(sys_t), intent(inout) :: sys
-        
+
         sys%sysname = ''
         sys%sysdesc = ''
 
@@ -1120,11 +1120,11 @@ contains
 
     ! sys_saveF90
     ! -----------------------------------------------------------------------
-    ! write as a file the contents of the system file which can then be 
+    ! write as a file the contents of the system file which can then be
     ! directly included in the source code of the calling program
 
 #   include 'includes/sys_save.inc'
-    
+
     subroutine sys_saveF90(sys,fname)
 
         !use fortax_type, only : sys_t
@@ -1192,7 +1192,7 @@ contains
 
     ! fam_saveF90
     ! -----------------------------------------------------------------------
-    ! write as a file the contents of the family type which can then be 
+    ! write as a file the contents of the family type which can then be
     ! directly included in the source code of the calling program
 
     subroutine fam_saveF90(fam,fname)

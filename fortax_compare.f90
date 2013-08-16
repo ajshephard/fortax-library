@@ -5,12 +5,12 @@
 ! it under the terms of the GNU General Public License as published by
 ! the Free Software Foundation, either version 3 of the License, or
 ! (at your option) any later version.
-! 
+!
 ! FORTAX is distributed in the hope that it will be useful,
 ! but WITHOUT ANY WARRANTY; without even the implied warranty of
 ! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ! GNU General Public License for more details.
-! 
+!
 ! You should have received a copy of the GNU General Public License
 ! along with FORTAX.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -30,9 +30,9 @@ module fortax_compare
 
 contains
 
-    pure subroutine getRnd_Logical(rnd,grid,y)        
+    pure subroutine getRnd_Logical(rnd,grid,y)
         implicit none
-        real(dp), intent(in)  :: rnd(:) 
+        real(dp), intent(in)  :: rnd(:)
         logical,  intent(in)  :: grid(:)
         logical,  intent(out) :: y(size(rnd))
         integer :: ix, n
@@ -46,7 +46,7 @@ contains
 
     pure subroutine getRnd_Int(rnd,grid,y)
         implicit none
-        real(dp), intent(in)  :: rnd(:) 
+        real(dp), intent(in)  :: rnd(:)
         integer,  intent(in)  :: grid(:)
         integer,  intent(out) :: y(size(rnd))
         integer :: ix, n
@@ -60,7 +60,7 @@ contains
 
     pure subroutine getRnd_real(rnd,grid,y)
         implicit none
-        real(dp), intent(in)  :: rnd(:) 
+        real(dp), intent(in)  :: rnd(:)
         real(dp),  intent(in)  :: grid(:)
         real(dp),  intent(out) :: y(size(rnd))
         integer :: ix, n
@@ -74,7 +74,7 @@ contains
 
     pure subroutine getRnd_Char(rnd,grid,y)
         implicit none
-        real(dp), intent(in)  :: rnd(:) 
+        real(dp), intent(in)  :: rnd(:)
         character(len=*), intent(in)  :: grid(:)
         character(len=40), intent(out) :: y(size(rnd))
         integer :: ix, n
@@ -87,7 +87,7 @@ contains
     end subroutine getRnd_Char
 
     subroutine writeFamCompareDatabase(nfam,fam,sysname,sysdir,fname)
-    
+
         use fortax_type,  only : fam_t, fam_init, net_t, net_init, sys_t
         use fortax_write, only : xml_ftag, ftxmlwrite
         use fortax_util,  only : intToStr
@@ -96,7 +96,7 @@ contains
         use fortax_calc,  only : calcNetInc
 
         implicit none
-        
+
         integer, intent(in) :: nfam
         type(fam_t), intent(in)  :: fam(nfam)
         character(len=40), intent(in) :: sysname(nfam)
@@ -145,17 +145,17 @@ contains
         return
 
     end subroutine writeFamCompareDatabase
-            
+
 
     subroutine readFamCompareDatabase(familyFile,fam,net,sysname,nfam)
-    
+
         use xml_data_xmlfamcompare_t, only : read_xml_file_xmlfamcompare_t, family
         use fortax_util,          only : getunit, strToDouble, strToInt, strToLogical, lower, fortaxError, fortaxWarn
         use fortax_type,          only : sys_t, sys_init, fam_t, fam_init, fam_desc, net_t, net_init
         use fortax_read,          only : fortax_read_assign
 
         implicit none
-        
+
         character(len=*),  intent(in)               :: familyFile
         type(fam_t),       intent(out), allocatable :: fam(:)
         type(net_t),       intent(out), allocatable :: net(:)
@@ -166,10 +166,10 @@ contains
         logical :: isFile
 
         inquire(file=familyFile, exist=isFile)
-        
+
         if (.not. isFile) then
             call fortaxError('family file does not exist ('//trim(adjustl(familyFile))//')')
-        end if              
+        end if
 
         call getunit(xmlUnit)
         call read_xml_file_xmlfamcompare_t(familyFile,xmlUnit)
@@ -181,14 +181,14 @@ contains
 
         call fam_init(fam)
         call net_init(net)
-        
+
         !use fpp so that the reading will fully reflect the data structure
         do i = 1, size(family)
 #           include 'includes/famcompare_read.inc'
         end do
 
         if (associated(family)) deallocate(family)
-        
+
         close(xmlunit)
 
     end subroutine readFamCompareDatabase
@@ -279,9 +279,9 @@ contains
         else
             write(funit,'(A)') 'No differences were found.'
         end if
-        
+
         write(funit,*)
-        
+
     end subroutine compareFamDatabase
 
     pure subroutine uniqueList(list,list2,nlist,listid,nlist2)
@@ -340,7 +340,7 @@ contains
 #       define _$integer(x,y,z) call compareInteger(net0%tu%x,net1%tu%x,#x,funit,id,diff,verbose)
 #       define _$double(x,y,z)  call compareDouble(net0%tu%x,net1%tu%x,#x,funit,id,diff,verbose,tol)
 #       define _$logical(x,y,z) call compareLogical(net0%tu%x,net1%tu%x,#x,funit,id,diff,verbose)
-        
+
 #       include "includes/nettu_t.inc"
 
 #       undef _$header

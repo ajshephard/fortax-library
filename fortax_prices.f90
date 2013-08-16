@@ -5,12 +5,12 @@
 ! it under the terms of the GNU General Public License as published by
 ! the Free Software Foundation, either version 3 of the License, or
 ! (at your option) any later version.
-! 
+!
 ! FORTAX is distributed in the hope that it will be useful,
 ! but WITHOUT ANY WARRANTY; without even the implied warranty of
 ! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ! GNU General Public License for more details.
-! 
+!
 ! You should have received a copy of the GNU General Public License
 ! along with FORTAX.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -28,15 +28,15 @@ module fortax_prices
 
     use fortax_realtype, only : dp
     private :: dp
-    
+
     private
-    
+
     type sysindex_t
         logical                         :: indexinit = .false.
         integer,            allocatable :: date0(:), date1(:)
         character(len=255), allocatable :: fname(:)
     end type
-    
+
     public :: loadindex, setindex, getindex, upratefactor, upratesys
     public :: sysindex_t, checkdate, loadsysindex, getsysindex, rpi_saveF90
 
@@ -75,23 +75,23 @@ contains
 
     ! loadindex
     ! -----------------------------------------------------------------------
-    ! loads a price index file saved as a comma separated values (CSV) file. 
+    ! loads a price index file saved as a comma separated values (CSV) file.
     ! If fname is not specified it defaults to 'prices/rpi.csv'
 
     subroutine loadindex(rpi,fname)
-    
+
         use fortax_util, only : getunit, fortaxerror, fortaxwarn, inttostr
         use fortax_type, only : rpi_t, maxRPI
-        
+
         implicit none
-       
+
         type(rpi_t),      intent(out)          :: rpi
         character(len=*), intent(in), optional :: fname
-        
+
         integer                            :: funit
         integer                            :: istat
         integer                            :: nrec
-        
+
         logical                            :: isfile
         integer                            :: tempdate, ndate
         real(dp)                           :: tempindex
@@ -113,9 +113,9 @@ contains
                 call fortaxerror('default price index file does not exist')
             end if
         end if
-        
+
         read (funit, *, iostat = istat) ndate
-        
+
         if (ndate>maxRPI) then
             call fortaxwarn('declared ndate exceeds maxRPI')
         end if
@@ -123,13 +123,13 @@ contains
         if (istat .ne. 0) then
             call fortaxerror('error reading number of records on line 1')
         end if
-            
+
         nrec = 0
-                
+
         do
-            
+
             read(funit, *, iostat = istat) tempdate, tempindex
-            
+
             if (istat==-1) then !eof
                 exit
             else if (istat>0) then !error
@@ -143,35 +143,35 @@ contains
                     rpi%index(nrec) = tempindex
                 end if
             end if
-            
+
         end do
-        
+
         close(funit)
-        
+
         if (nrec.ne.ndate) then
             call fortaxerror('number of records does not equal number declared on line 1')
         else
             rpi%ndate = ndate
         end if
-        
+
     end subroutine loadindex
 
-    
+
     ! getindex
     ! -----------------------------------------------------------------------
     ! returns the price index associated with the supplied YYYYMMDD date
 
     real(dp) elemental function getindex(rpi,date)
-            
+
         use fortax_type, only : rpi_t
 
         implicit none
-        
+
         type(rpi_t), intent(in) :: rpi
         integer,     intent(in) :: date
         integer                 :: year,  month
         integer                 :: year1, month1
-           
+
         !exploits structure of data
         if (date<rpi%date(1)) then
             getindex = 0.0_dp
@@ -182,52 +182,52 @@ contains
             month1   = (rpi%date(1) - year1*10000)/100
             getindex = rpi%index((year-year1)*12 + month)
         end if
-        
+
     end function getindex
-    
+
 
     ! upratefactor
     ! -----------------------------------------------------------------------
-    ! returns uprating factor from date0 to date1 prices (both in YYYYMMDD 
+    ! returns uprating factor from date0 to date1 prices (both in YYYYMMDD
     ! format). it calls the function getindex.
 
     real(dp) elemental function upratefactor(rpi,date0,date1)
-        
+
         use fortax_type, only : rpi_t
 
         implicit none
-        
+
         type(rpi_t), intent(in) :: rpi
         integer,     intent(in) :: date0, date1
-        
+
         upratefactor = getindex(rpi,date1)/getindex(rpi,date0)
-            
+
     end function upratefactor
-    
+
 
     ! upratesys
     ! -----------------------------------------------------------------------
-    ! uprates the tax system sys using the specified uprating factor. If 
+    ! uprates the tax system sys using the specified uprating factor. If
     ! newdate is present, it will set the prices attribute to this value.
 
     subroutine upratesys(sys,factor,newdate)
-    
+
         use fortax_type, only : sys_t
         use fortax_util, only : fortaxwarn
 
         implicit none
-    
+
         type(sys_t), intent(inout)        :: sys
         real(dp),    intent(in)           :: factor
-        integer,     intent(in), optional :: newdate    
-        
-        logical, parameter :: null      = .false.          
+        integer,     intent(in), optional :: newdate
+
+        logical, parameter :: null      = .false.
         logical, parameter :: range     = .false.
-        logical, parameter :: scale     = .false.          
-        logical, parameter :: rate      = .false.          
+        logical, parameter :: scale     = .false.
+        logical, parameter :: rate      = .false.
         logical, parameter :: amount    = .true.
         logical, parameter :: minamount = .true.
-        
+
         if (present(newdate)) sys%extra%prices = newdate
 
         !use preprocessor commands here. we define the "type" in the
@@ -249,7 +249,7 @@ contains
 
         integer, intent(in) :: date
         integer             :: year, month, day, maxday
-        
+
         year  = date/10000
         month = (date - year*10000)/100
         day   = date - (date/100)*100
@@ -284,21 +284,21 @@ contains
     ! requires an external system index file (sysindexfile)
 
     subroutine loadsysindex(sysindex,sysindexfile)
-            
+
         use fortax_util, only : getunit, fortaxerror, inttostr
 
         implicit none
-    
+
         type(sysindex_t), intent(out)          :: sysindex
         character(len=*), intent(in), optional :: sysindexfile
-        
+
         integer                                :: funit
         integer                                :: istat, nrec
-        
+
         logical                                :: isfile
         integer                                :: tempdate0, tempdate1, ndate
         character(len=255)                     :: tempfname
-                    
+
         call getunit(funit)
 
         if (present(sysindexfile)) then
@@ -316,11 +316,11 @@ contains
                 call fortaxerror('default system index file does not exist')
             end if
         end if
-        
+
         read (funit, *, iostat = istat) ndate
 
         call freesysindex(sysindex)
-        
+
         if (istat .ne. 0) then
             call fortaxerror('error reading number of records on line 1')
         else
@@ -328,13 +328,13 @@ contains
             allocate(sysindex%date1(ndate))
             allocate(sysindex%fname(ndate))
         end if
-            
+
         nrec = 0
-                
+
         do
-            
+
             read(funit, *, iostat = istat) tempdate0,tempdate1,tempfname
-            
+
             if (istat==-1) then !eof
                 exit
             elseif (istat>0) then !error
@@ -345,45 +345,45 @@ contains
                 sysindex%date1(nrec) = tempdate1
                 sysindex%fname(nrec) = tempfname
             end if
-            
+
         end do
-        
+
         close(funit)
-        
+
         if (nrec.ne.ndate) then
             call fortaxerror('number of records does not equal number declared on line 1')
-        end if   
-        
+        end if
+
         sysindex%indexinit = .true.
-        
+
     end subroutine loadsysindex
-        
+
 
     ! getsysindex
     ! -----------------------------------------------------------------------
-    ! returns information which allows the user to easily identify which 
+    ! returns information which allows the user to easily identify which
     ! tax system operated at any given YYYYMMDD date as specified in sysindex
 
     subroutine getsysindex(sysindex,date,systemformat,sysfilepath,sysnum)
-    
+
         use fortax_util, only : lower, fortaxerror
-        
+
         implicit none
-                
+
         type(sysindex_t),   intent(in)  :: sysindex
         integer,            intent(in)  :: date
         character(len=*),   intent(in)  :: systemformat
         character(len=255), intent(out) :: sysfilepath
-        integer,            intent(out) :: sysnum        
-        
+        integer,            intent(out) :: sysnum
+
         integer          :: i
         character(len=4) :: fext !extension
         character(len=7) :: fsub !subdirectory
-        
+
         if (.not. sysindex%indexinit) then
             call fortaxerror('system index file is not in memory')
         end if
-        
+
         select case(lower(systemformat))
             case('taxben')
                 fsub = 'taxben/'
@@ -394,7 +394,7 @@ contains
             case default
                 call fortaxerror('Unknown system format specified ('//systemformat//') in getsysindex')
         end select
-        
+
         if (checkdate(date)) then
             sysnum = 0
             do i = 1, size(sysindex%date0,1)
@@ -413,26 +413,26 @@ contains
 
     end subroutine getsysindex
 
-       
+
     ! freesysindex
     ! -----------------------------------------------------------------------
     ! deallocates the data structures which store price information and set
     ! initialization variables to .false.
 
     subroutine freesysindex(sysindex)
-        
+
         implicit none
-        
+
         type(sysindex_t), intent(inout) :: sysindex
-        
+
         sysindex%indexinit = .false.
 
         if (allocated(sysindex%date0)) deallocate(sysindex%date0)
         if (allocated(sysindex%date1)) deallocate(sysindex%date1)
         if (allocated(sysindex%fname)) deallocate(sysindex%fname)
-        
+
     end subroutine freesysindex
-                        
+
     subroutine rpi_saveF90(rpi,fname)
 
         use fortax_util, only : getUnit, fortaxError, intToStr, dblToStr
@@ -463,7 +463,7 @@ contains
         write(funit,*)
 
         write(funit,'(a)') 'integer, parameter :: nindex_f90 ='//intToStr(rpi%ndate)
-        write(funit,*)        
+        write(funit,*)
         write(funit,'(a)') 'integer, parameter :: rpidate_f90(nindex_f90) = (/ &'
         do i = 1, rpi%ndate-1
             write(funit,'(a)') '    '//intToStr(rpi%date(i))//', &'

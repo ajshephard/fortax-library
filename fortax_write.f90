@@ -5,12 +5,12 @@
 ! it under the terms of the GNU General Public License as published by
 ! the Free Software Foundation, either version 3 of the License, or
 ! (at your option) any later version.
-! 
+!
 ! FORTAX is distributed in the hope that it will be useful,
 ! but WITHOUT ANY WARRANTY; without even the implied warranty of
 ! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ! GNU General Public License for more details.
-! 
+!
 ! You should have received a copy of the GNU General Public License
 ! along with FORTAX.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -26,7 +26,7 @@ module fortax_write
 
     use fortax_realtype, only : dp
     private :: dp
-    
+
     private
     public  :: fortaxPrint, fortaxWrite, xml_ftag, ftxmlwrite
 
@@ -50,11 +50,11 @@ module fortax_write
     end interface
 
 contains
-    
+
     ! fortaxPrint
     ! -----------------------------------------------------------------------
     ! outputs a summary of the tax system to the default output unit if fname
-    ! is not specified. Otherwise, this output summary will be written to 
+    ! is not specified. Otherwise, this output summary will be written to
     ! disk with file name fname. This printing code is self-maintaining
 
     subroutine fortaxPrint(sys,fname)
@@ -69,7 +69,7 @@ contains
         character(len=*), intent(in), optional :: fname
 
         integer            :: funit, ios
-        
+
         if (present(fname)) then
             call getUnit(funit)
             open(funit,file=fname,action='write',status='replace',iostat=ios)
@@ -101,19 +101,19 @@ contains
 
     ! fortaxWrite
     ! -----------------------------------------------------------------------
-    ! writes the system file sys to disk with file name fname in the native 
+    ! writes the system file sys to disk with file name fname in the native
     ! FORTAX file format. This writing code is self-maintaining.
 
     subroutine fortaxWrite(sys,fname)
-    
+
         use fortax_type, only : sys_t
         use xmlparse,    only : xml_parse, xml_open, xml_close
-            
+
         implicit none
-        
+
         type(sys_t),      intent(in) :: sys
         character(len=*), intent(in) :: fname
-                
+
         character(len=255)       :: attribs(2,1)
         logical                  :: mustRead
         type(xml_parse)          :: info
@@ -145,7 +145,7 @@ contains
         return
 
     end subroutine fortaxWrite
-            
+
 
 
     ! xml_write_fchar
@@ -153,26 +153,26 @@ contains
     ! xml writing of string when saving system file (called by fortaxWrite)
 
     subroutine xml_write_fchar(info,field,fieldname)
-    
+
         use xmlparse, only : xml_parse, xml_put
-        
+
         implicit none
-        
+
         type(xml_parse),  intent(inout) :: info
         character(len=*), intent(in)    :: field
         character(len=*), intent(in)    :: fieldName
-        
+
         character(len=255) :: myData(1)
         character(len=255) :: attribs(2,2)
-        
+
         attribs(1,1) = 'name'
         attribs(2,1) = fieldName
         attribs(1,2) = 'value'
         write(attribs(2,2),*) field
-               
+
         call xml_put(info, 'fchar',adjustl(attribs), 2, &
             myData, 0, 'elem')
-            
+
         return
 
     end subroutine xml_write_fchar
@@ -182,26 +182,26 @@ contains
     ! xml writing of integer when saving system file (called by fortaxWrite)
 
     subroutine xml_write_finteger(info,field,fieldname)
-    
+
         use xmlparse, only : xml_parse, xml_put
-        
+
         implicit none
-        
+
         type(xml_parse),  intent(inout) :: info
         integer,          intent(in)    :: field
         character(len=*), intent(in)    :: fieldName
-        
+
         character(len=255) :: myData(1)
         character(len=255) :: attribs(2,2)
-        
+
         attribs(1,1) = 'name'
         attribs(2,1) = fieldName
         attribs(1,2) = 'value'
         write(attribs(2,2),*) field
-               
+
         call xml_put(info, 'finteger',adjustl(attribs), 2, &
             myData, 0, 'elem')
-            
+
         return
 
     end subroutine xml_write_finteger
@@ -210,27 +210,27 @@ contains
     ! xml_write_fdouble
     ! -----------------------------------------------------------------------
     ! xml writing of double when saving system file (called by fortaxWrite)
-            
+
     subroutine xml_write_fdouble(info,field,fieldname)
-    
+
         use xmlparse,    only : xml_parse, xml_put
         use fortax_util, only : compact
-        
+
         implicit none
-        
+
         type(xml_parse),  intent(inout) :: info
         real(dp),         intent(in)    :: field
         character(len=*), intent(in)    :: fieldName
-        
+
         character(len=255)                 :: myData(1)
         character(len=255)                 :: attribs(2,2)
-                                
+
         attribs(1,1) = 'name'
         attribs(2,1) = fieldName
         attribs(1,2) = 'value'
-        
+
         write(attribs(2,2),*) field
-                
+
         call xml_put(info, 'fdouble',adjustl(attribs), 2, &
             & mydata, 0, 'elem')
 
@@ -242,24 +242,24 @@ contains
     ! xml_write_flogical
     ! -----------------------------------------------------------------------
     ! xml writing of logical when saving system file (called by fortaxWrite)
-        
+
     subroutine xml_write_flogical(info,field,fieldname)
-    
+
         use xmlparse, only : xml_parse, xml_put
-        
+
         implicit none
-        
+
         type(xml_parse),  intent(inout) :: info
         logical,          intent(in)    :: field
         character(len=*), intent(in)    :: fieldName
         character(len=255)                  :: myData(1)
         character(len=255)                  :: attribs(2,2)
-        
+
         attribs(1,1) = 'name'
         attribs(2,1) = fieldName
         attribs(1,2) = 'value'
         write(attribs(2,2),*) merge('T', 'F', field)
-        
+
         call xml_put(info, 'flogical',adjustl(attribs), 2, &
             & mydata, 0, 'elem')
 
@@ -270,35 +270,35 @@ contains
 
     ! xml_write_fintegerarray
     ! -----------------------------------------------------------------------
-    ! xml writing of integer array when saving system file (called by 
+    ! xml writing of integer array when saving system file (called by
     ! fortaxWrite)
 
     subroutine xml_write_fintegerarray(info,field,fieldname)
-    
+
         use xmlparse,    only : xml_parse, xml_put
         use fortax_util, only : compact
-        
+
         implicit none
-        
+
         type(xml_parse),  intent(inout) :: info
         integer,          intent(in)    :: field(:)
         character(len=*), intent(in)    :: fieldName
-        
+
         character(len=1)                   :: myData(1)
         character(len=255)                 :: attribs(2,2)
         character(len=64)                  :: tempStr(size(field))
         character(len=64*size(field)+1)    :: tempStr2
-        
+
         integer                        :: i
 
         attribs(1,1) = 'name'
         attribs(2,1) = fieldName
         attribs(1,2) = 'value'
-                
+
         do i = 1, size(field)
             write (tempStr(i),*) field(i)
         end do
-            
+
         write(tempStr2,*) (tempStr(i), i=1,size(field))
         call compact(tempStr2)
         attribs(2,2) = adjustl(trim(tempStr2))
@@ -306,46 +306,46 @@ contains
         if (len_trim(adjustl(trim(tempStr2)))>len(attribs)) then
             print *, 'warning: field truncated when writing integer array'
         end if
-                
+
         call xml_put(info, 'fintegerarray',adjustl(attribs), 2, &
-            & mydata, 0, 'openclose')       
+            & mydata, 0, 'openclose')
 
         return
 
     end subroutine xml_write_fintegerarray
-    
+
 
     ! xml_write_fdoublearray
     ! -----------------------------------------------------------------------
-    ! xml writing of double array when saving system file (called by 
+    ! xml writing of double array when saving system file (called by
     ! fortaxWrite)
 
     subroutine xml_write_fdoublearray(info,field,fieldName)
-    
+
         use xmlparse,    only : xml_parse, xml_put
         use fortax_util, only : compact
-        
+
         implicit none
-        
+
         type(xml_parse),  intent(inout) :: info
         real(dp),         intent(in)    :: field(:)
         character(len=*), intent(in)    :: fieldName
-        
+
         character(len=1)                   :: mydata(1)
         character(len=255)                 :: attribs(2,2)
         character(len=64)                  :: tempStr(size(field))
         character(len=64*size(field)+1)    :: tempStr2
-        
+
         integer                        :: i
 
         attribs(1,1) = 'name'
         attribs(2,1) = fieldname
         attribs(1,2) = 'value'
-                
+
         do i = 1, size(field)
             write (tempstr(i),*) field(i)
-        end do 
-            
+        end do
+
         write(tempStr2,*) (tempStr(i), i=1,size(field))
         call compact(tempStr2)
         attribs(2,2) = adjustl(trim(tempStr2))
@@ -353,9 +353,9 @@ contains
         if (len_trim(adjustl(trim(tempStr2)))>len(attribs)) then
             print *, 'warning: field truncated when writing logical array'
         end if
-                
+
         call xml_put(info, 'fdoublearray',adjustl(attribs), 2, &
-            & mydata, 0, 'openclose')       
+            & mydata, 0, 'openclose')
 
         return
 
@@ -364,35 +364,35 @@ contains
 
     ! xml_write_fdoublearray
     ! -----------------------------------------------------------------------
-    ! xml writing of double array when saving system file (called by 
+    ! xml writing of double array when saving system file (called by
     ! fortaxWrite)
-    
+
     subroutine xml_write_flogicalarray(info,field,fieldName)
-    
+
         use xmlparse,    only : xml_parse, xml_put
         use fortax_util, only : compact
-        
+
         implicit none
-        
+
         type(xml_parse),  intent(inout) :: info
         logical,          intent(in)    :: field(:)
         character(len=*), intent(in)    :: fieldName
-        
+
         character(len=1)                   :: myData(1)
         character(len=255)                 :: attribs(2,2)
         character(len=1)                   :: tempStr(size(field))
         character(len=1*size(field)+1)     :: tempStr2
-        
+
         integer                        :: i
 
         attribs(1,1) = 'name'
         attribs(2,1) = fieldname
         attribs(1,2) = 'value'
-                
+
         do i = 1, size(field)
             write (tempStr(i),*) merge('T', 'F', field(i))
-        end do 
-                    
+        end do
+
         write(tempStr2,*) (tempStr(i), i=1,size(field))
         call compact(tempStr2)
         attribs(2,2) = adjustl(trim(tempStr2))
@@ -400,7 +400,7 @@ contains
         if (len_trim(adjustl(trim(tempStr2)))>len(attribs)) then
             print *, 'warning: field truncated when writing logical array'
         end if
-                
+
         call xml_put(info, 'flogicalarray',adjustl(attribs), 2, &
             & mydata, 0, 'openclose')
 
@@ -412,18 +412,18 @@ contains
     ! xml_write_fintegerarray
     ! -----------------------------------------------------------------------
     ! xml writing of tags when saving system file (called by fortaxWrite)
-    
+
     subroutine xml_ftag(info,tag,openClose,attribs)
-    
+
         use xmlparse, only : xml_parse, xml_put
-        
+
         implicit none
-        
+
         type(xml_parse),            intent(inout) :: info
         character(len=*),           intent(in)    :: tag
         character(len=*),           intent(in)    :: openClose
         character(len=*), optional, intent(in)    :: attribs(:,:)
-        
+
         character(len=255)                        :: myData(1)
 
         if (present(attribs)) then
@@ -433,15 +433,15 @@ contains
         end if
 
         return
-        
+
     end subroutine xml_ftag
 
 
     ! ftprint_finteger
     ! -----------------------------------------------------------------------
-    ! fortax printing of integer when printing system file (called by 
+    ! fortax printing of integer when printing system file (called by
     ! fortaxPrint)
-    
+
     subroutine ftprint_finteger(funit,finteger,fname)
 
         use fortax_util, only: intToStr, strPad
@@ -461,7 +461,7 @@ contains
 
     ! ftprint_fdouble
     ! -----------------------------------------------------------------------
-    ! fortax printing of double when printing system file (called by 
+    ! fortax printing of double when printing system file (called by
     ! fortaxPrint)
 
     subroutine ftprint_fdouble(funit,fdouble,fname)
@@ -473,9 +473,9 @@ contains
         integer,          intent(in) :: funit
         real(dp),         intent(in) :: fdouble
         character(len=*), intent(in) :: fname
-        
+
         character(len=32) :: str
-            
+
         write(str,*) fdouble
         call trimZero(str)
 
@@ -488,7 +488,7 @@ contains
 
     ! ftprint_flogical
     ! -----------------------------------------------------------------------
-    ! fortax printing of logical when printing system file (called by 
+    ! fortax printing of logical when printing system file (called by
     ! fortaxPrint)
 
     subroutine ftprint_flogical(funit,flogical,fname)
@@ -510,7 +510,7 @@ contains
 
     ! ftprint_fintegerarray
     ! -----------------------------------------------------------------------
-    ! fortax printing of integer array when printing system file (called by 
+    ! fortax printing of integer array when printing system file (called by
     ! fortaxPrint)
 
     subroutine ftprint_fintegerarray(funit,fintegerarray,fname)
@@ -524,7 +524,7 @@ contains
         character(len=*), intent(in) :: fname
 
         integer :: i
-        
+
         do i = 1, size(fintegerarray)
             write(funit,*) strPad(fname//'('//IntToStr(i)//')',16)//inttostr(fintegerarray(i))
         end do
@@ -536,7 +536,7 @@ contains
 
     ! ftprint_fdoublearray
     ! -----------------------------------------------------------------------
-    ! fortax printing of double array when printing system file (called by 
+    ! fortax printing of double array when printing system file (called by
     ! fortaxPrint)
 
     subroutine ftprint_fdoublearray(funit,fdoublearray,fname)
@@ -551,7 +551,7 @@ contains
 
         integer           :: i
         character(len=32) :: str
-            
+
         do i = 1, size(fdoublearray)
             write(str,*) fdoublearray(i)
             call trimZero(str)
@@ -565,7 +565,7 @@ contains
 
     ! ftprint_flogicalarray
     ! -----------------------------------------------------------------------
-    ! fortax printing of logical array when printing system file (called by 
+    ! fortax printing of logical array when printing system file (called by
     ! fortaxPrint)
 
     subroutine ftprint_flogicalarray(funit,flogicalarray,fname)
@@ -583,7 +583,7 @@ contains
         do i = 1, size(flogicalarray)
             write(funit,*) strPad(fname//'('//intToStr(i)//')',16)//merge('yes','no ',flogicalarray(i))
         end do
-        
+
         return
 
     end subroutine ftprint_flogicalarray
