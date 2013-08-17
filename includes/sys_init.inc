@@ -23,7 +23,7 @@ implicit none; \
 type(_$append(_$typelist)_t), intent(inout) :: syst
 #define _$footer end subroutine _$append(_$typelist)_init
 
-#include 'includes/system/syslist.inc'
+#include "includes/system/syslist.inc"
 
 #undef  _$header
 #undef  _$footer

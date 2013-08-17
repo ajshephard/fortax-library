@@ -67,7 +67,7 @@ module fortax_type
     ! include files. at the moment I am not using the string values, but they
     ! are still defined for possible future use
 
-#   include 'includes/lab_t.inc'
+#   include "includes/lab_t.inc"
 
 
 !   remove this code to implement my new style labeling...
@@ -127,7 +127,7 @@ module fortax_type
 #       define _$doublearray(x,y,z)  real(dp) :: x(z)
 #       define _$logicalarray(x,y,z) logical  :: x(z)
 
-#       include 'includes/famad_t.inc'
+#       include "includes/famad_t.inc"
 
 #       undef  _$header
 #       undef  _$footer
@@ -167,7 +167,7 @@ module fortax_type
 #       define _$doublearray(x,y,z)  real(dp) :: x(z)
 #       define _$logicalarray(x,y,z) logical  :: x(z)
 
-#       include 'includes/fam_t.inc'
+#       include "includes/fam_t.inc"
 
 #       undef  _$header
 #       undef  _$footer
@@ -208,7 +208,7 @@ module fortax_type
 #       define _$doublearray(x,lab,y,z)  real(dp) :: x(z)
 #       define _$logicalarray(x,lab,y,z) logical  :: x(z)
 
-#       include 'includes/netad_t.inc'
+#       include "includes/netad_t.inc"
 
 #       undef  _$header
 #       undef  _$footer
@@ -247,7 +247,7 @@ module fortax_type
 #       define _$doublearray(x,lab,y,z)  real(dp) :: x(z)
 #       define _$logicalarray(x,lab,y,z) logical  :: x(z)
 
-#       include 'includes/nettu_t.inc'
+#       include "includes/nettu_t.inc"
 
 #       undef  _$header
 #       undef  _$footer
@@ -305,7 +305,7 @@ module fortax_type
 
     ! I use a lot of preprocessor stuff for handling the sys_t type
     ! we just "include" it here to keep the code tidy, AS
-#   include 'includes/sys_t.inc'
+#   include "includes/sys_t.inc"
 
 contains
 
@@ -341,7 +341,7 @@ contains
 #       define _$doublearray(x,y,z)  fam%x = 0.0_dp
 #       define _$logicalarray(x,y,z) fam%x = .false.
 
-#       include 'includes/fam_t.inc'
+#       include "includes/fam_t.inc"
 
 #       undef  _$header
 #       undef  _$footer
@@ -361,7 +361,7 @@ contains
 #       define _$doublearray(x,y,z)  fam%ad(1)%x = 0.0_dp; fam%ad(2)%x = 0.0_dp
 #       define _$logicalarray(x,y,z) fam%ad(1)%x = .false.; fam%ad(2)%x = .false.
 
-#       include 'includes/famad_t.inc'
+#       include "includes/famad_t.inc"
 
 #       undef  _$header
 #       undef  _$footer
@@ -425,7 +425,7 @@ contains
 #       define _$doublearray(x,y,z)  do i =1, size(fam%x); write(funit,'(A16,2X,F16.4)') #x//'('//inttostr(i)//')', fam%x(i); end do
 #       define _$logicalarray(x,y,z) do i =1, size(fam%x); write(funit,'(A16,2X,L16)') #x//'('//inttostr(i)//')', fam%x(i); end do
 
-#       include 'includes/fam_t.inc'
+#       include "includes/fam_t.inc"
 
 #       undef  _$header
 #       undef  _$footer
@@ -445,7 +445,7 @@ contains
 #       define _$doublearray(x,y,z)  do i =1, size(fam%ad(1)%x); write(funit,'(A16,2X,F16.4)') #x//'('//inttostr(i)//')', fam%ad(1)%x(i); end do
 #       define _$logicalarray(x,y,z) do i =1, size(fam%ad(1)%x); write(funit,'(A16,2X,L16)') #x//'('//inttostr(i)//')', fam%ad(1)%x(i); end do
 
-#       include 'includes/famad_t.inc'
+#       include "includes/famad_t.inc"
 
 #       undef  _$header
 #       undef  _$footer
@@ -475,7 +475,7 @@ contains
 #           define _$doublearray(x,y,z)  do i =1, size(fam%ad(2)%x); write(funit,'(A16,2X,F16.4)') #x//'('//inttostr(i)//')', fam%ad(2)%x(i); end do
 #           define _$logicalarray(x,y,z) do i =1, size(fam%ad(2)%x); write(funit,'(A16,2X,L16)') #x//'('//inttostr(i)//')', fam%ad(2)%x(i); end do
 
-#           include 'includes/famad_t.inc'
+#           include "includes/famad_t.inc"
 
 #           undef  _$header
 #           undef  _$footer
@@ -514,7 +514,7 @@ contains
 #       define _$integerarray(x,y,z) x, &
 #       define _$doublearray(x,y,z)  x, &
 #       define _$logicalarray(x,y,z) x, &
-#       include 'includes/fam_t.inc'
+#       include "includes/fam_t.inc"
 
 #       undef  _$header
 #       undef  _$footer
@@ -533,7 +533,7 @@ contains
 #       define _$integerarray(x,y,z) x##1, x##2, &
 #       define _$doublearray(x,y,z)  x##1, x##2, &
 #       define _$logicalarray(x,y,z) x##1, x##2, &
-#       include 'includes/famad_t.inc'
+#       include "includes/famad_t.inc"
 
 #       undef  _$header
 #       undef  _$footer
@@ -552,7 +552,7 @@ contains
 #       define _$integerarray(x,y,z) integer,  optional, intent(in) :: x(:)
 #       define _$doublearray(x,y,z)  real(dp), optional, intent(in) :: x(:)
 #       define _$logicalarray(x,y,z) logical,  optional, intent(in) :: x(:)
-#       include 'includes/fam_t.inc'
+#       include "includes/fam_t.inc"
 #       undef  _$header
 #       undef  _$footer
 #       undef  _$integer
@@ -576,7 +576,7 @@ contains
                                      real(dp), optional, intent(in) :: x##2(:)
 #       define _$logicalarray(x,y,z) logical,  optional, intent(in) :: x##1(:);\
                                      logical,  optional, intent(in) :: x##2(:)
-#       include 'includes/famad_t.inc'
+#       include "includes/famad_t.inc"
 #       undef  _$header
 #       undef  _$footer
 #       undef  _$integer
@@ -611,7 +611,7 @@ contains
 #       define _$integerarray(x,y,z) if (present(x)) fam_gen%x(1:size(x)) = x
 #       define _$doublearray(x,y,z)  if (present(x)) fam_gen%x(1:size(x)) = x
 #       define _$logicalarray(x,y,z) if (present(x)) fam_gen%x(1:size(x)) = x
-#       include 'includes/fam_t.inc'
+#       include "includes/fam_t.inc"
 
 #       undef  _$header
 #       undef  _$footer
@@ -633,7 +633,7 @@ contains
                                      if (present(x##2)) fam_gen%ad(2)%x(1:size(x##2)) = x##2
 #       define _$logicalarray(x,y,z) if (present(x##1)) fam_gen%ad(1)%x(1:size(x##1)) = x##1;\
                                      if (present(x##2)) fam_gen%ad(2)%x(1:size(x##2)) = x##2
-#       include 'includes/famad_t.inc'
+#       include "includes/famad_t.inc"
 
 #       undef  _$header
 #       undef  _$footer
@@ -712,7 +712,7 @@ contains
 #               define _$integerarray(x,y,z) if (present(x##2)) fam_gen%couple=.true.
 #               define _$doublearray(x,y,z)  if (present(x##2)) fam_gen%couple=.true.
 #               define _$logicalarray(x,y,z) if (present(x##2)) fam_gen%couple=.true.
-#               include 'includes/famad_t.inc'
+#               include "includes/famad_t.inc"
 
 #               undef  _$header
 #               undef  _$footer
@@ -749,7 +749,7 @@ contains
 
 #       define _$level ad
         do ad = 1, 2
-#         include 'includes/netad_t.inc'
+#         include "includes/netad_t.inc"
         end do
 #       undef _$level
 
@@ -757,7 +757,7 @@ contains
 #       define _$double(x,lab,y)  net_plus_net%_$level%x = net1%_$level%x + net2%_$level%x
 
 #       define _$level tu
-#       include 'includes/nettu_t.inc'
+#       include "includes/nettu_t.inc"
 #       undef _$level
 
 #       undef  _$header
@@ -783,7 +783,7 @@ contains
 
 #       define _$level ad
         do ad = 1, 2
-#         include 'includes/netad_t.inc'
+#         include "includes/netad_t.inc"
         end do
 #       undef _$level
 
@@ -791,7 +791,7 @@ contains
 #       define _$double(x,lab,y)  net_minus_net%_$level%x = net1%_$level%x - net2%_$level%x
 
 #       define _$level tu
-#       include 'includes/nettu_t.inc'
+#       include "includes/nettu_t.inc"
 #       undef _$level
 
 #       undef  _$header
@@ -819,7 +819,7 @@ contains
 
 #       define _$level ad
         do ad = 1, 2
-#         include 'includes/netad_t.inc'
+#         include "includes/netad_t.inc"
         end do
 #       undef _$level
 
@@ -827,7 +827,7 @@ contains
 #       define _$double(x,lab,y)  net_times_scalar%_$level%x = net%_$level%x * scalar
 
 #       define _$level tu
-#       include 'includes/nettu_t.inc'
+#       include "includes/nettu_t.inc"
 #       undef _$level
 
 #       undef  _$header
@@ -854,7 +854,7 @@ contains
 
 #       define _$level ad
         do ad = 1, 2
-#         include 'includes/netad_t.inc'
+#         include "includes/netad_t.inc"
         end do
 #       undef _$level
 
@@ -862,7 +862,7 @@ contains
 #       define _$double(x,lab,y)  scalar_times_net%_$level%x = net%_$level%x * scalar
 
 #       define _$level tu
-#       include 'includes/nettu_t.inc'
+#       include "includes/nettu_t.inc"
 #       undef _$level
 
 #       undef  _$header
@@ -890,7 +890,7 @@ contains
 
 #       define _$level ad
         do ad = 1, 2
-#         include 'includes/netad_t.inc'
+#         include "includes/netad_t.inc"
         end do
 #       undef _$level
 
@@ -898,7 +898,7 @@ contains
 #       define _$double(x,lab,y)  net_div_scalar%_$level%x = net%_$level%x / scalar
 
 #       define _$level tu
-#       include 'includes/nettu_t.inc'
+#       include "includes/nettu_t.inc"
 #       undef _$level
 
 #       undef  _$header
@@ -943,7 +943,7 @@ contains
 
 #       define _$level ad
         do ad = 1, 2
-#           include 'includes/netad_t.inc'
+#           include "includes/netad_t.inc"
         end do
 #       undef _$level
 
@@ -962,7 +962,7 @@ contains
 #       define _$logicalarray(x,lab,y,z) net%_$level%x = .false.
 
 #       define _$level tu
-#       include 'includes/nettu_t.inc'
+#       include "includes/nettu_t.inc"
 #       undef _$level
 
 #       undef  _$header
@@ -1017,7 +1017,7 @@ contains
 #       define _$double(x,y,z)  write(funit,'(A40,2X,F16.4)') y//' ('//#x//')', net%tu%x
 #       define _$logical(x,y,z) write(funit,'(A40,2X,L16)') y//' ('//#x//')', net%tu%x
 
-#       include 'includes/nettu_t.inc'
+#       include "includes/nettu_t.inc"
 
 #       undef  _$header
 #       undef  _$footer
@@ -1035,7 +1035,7 @@ contains
 #       define _$double(x,y,z)  write(funit,'(A40,2X,F16.4)') y//' ('//#x//')', net%ad(1)%x
 #       define _$logical(x,y,z) write(funit,'(A40,2X,L16)') y//' ('//#x//')', net%ad(1)%x
 
-#       include 'includes/netad_t.inc'
+#       include "includes/netad_t.inc"
 
 #       undef  _$header
 #       undef  _$footer
@@ -1053,7 +1053,7 @@ contains
 #       define _$double(x,y,z)  write(funit,'(A40,2X,F16.4)') y//' ('//#x//')', net%ad(2)%x
 #       define _$logical(x,y,z) write(funit,'(A40,2X,L16)') y//' ('//#x//')', net%ad(2)%x
 
-#       include 'includes/netad_t.inc'
+#       include "includes/netad_t.inc"
 
 #       undef  _$header
 #       undef  _$footer
@@ -1068,7 +1068,7 @@ contains
 
     !again, i include the file here as it contains a lot of
     !preprocessor directives, AS
-#   include 'includes/sys_init.inc'
+#   include "includes/sys_init.inc"
 
 
     ! sys_init
@@ -1104,7 +1104,7 @@ contains
 #       define _$doublearray(x,y,z)
 #       define _$logicalarray(x,y,z)
 
-#       include 'includes/system/syslist.inc'
+#       include "includes/system/syslist.inc"
 
 #       undef  _$header
 #       undef  _$footer
@@ -1123,7 +1123,7 @@ contains
     ! write as a file the contents of the system file which can then be
     ! directly included in the source code of the calling program
 
-#   include 'includes/sys_save.inc'
+#   include "includes/sys_save.inc"
 
     subroutine sys_saveF90(sys,fname)
 
@@ -1170,7 +1170,7 @@ contains
 #       define _$doublearray(x,y,z)
 #       define _$logicalarray(x,y,z)
 
-#       include 'includes/system/syslist.inc'
+#       include "includes/system/syslist.inc"
 
 #       undef  _$header
 #       undef  _$footer
@@ -1249,7 +1249,7 @@ contains
  do i=1,size(fam%x); write(funit,'(a)',advance="no") \
  "fam%"//#x//"("//intToStr(i)//")="; write(funit,'(a)') intToStr(fam% x(i)); end do
 
-#       include 'includes/fam_t.inc'
+#       include "includes/fam_t.inc"
 
 #       undef  _$header
 #       undef  _$footer
@@ -1277,7 +1277,7 @@ contains
 #       define _$integerarray(x,y,z) if (#z==':') write(funit,'(a)') "allocate(fam%ad(1)%"//#x//"("//intToStr(size(fam%ad(1)%x))//"))"; \
  do i=1,size(fam%ad(1)%x); write(funit,'(a)',advance="no") \
  "fam%ad(1)%"//#x//"("//intToStr(i)//")="; write(funit,'(a)') intToStr(fam%ad(1)% x(i)); end do
-#       include 'includes/famad_t.inc'
+#       include "includes/famad_t.inc"
 
 #       undef  _$header
 #       undef  _$footer
@@ -1316,7 +1316,7 @@ contains
  do i=1,size(fam%ad(2)%x); write(funit,'(a)',advance="no") \
  "fam%ad(2)%"//#x//"("//intToStr(i)//")="; write(funit,'(a)') intToStr(fam%ad(2)% x(i)); end do
 
-#           include 'includes/famad_t.inc'
+#           include "includes/famad_t.inc"
 
 #           undef  _$header
 #           undef  _$footer

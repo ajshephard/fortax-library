@@ -26,7 +26,7 @@
 write(funit,'(/1X,(A))') upper(_$quote(_$typelist)//':')
 #define _$footer
 
-#include 'includes/system/syslist.inc'
+#include "includes/system/syslist.inc"
 
 #undef _$header
 #undef _$footer 

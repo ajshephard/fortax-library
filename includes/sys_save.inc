@@ -45,7 +45,7 @@ integer, intent(in) :: funit; integer :: i; \
 write(funit,*); write(funit,'(a)') "!"//_$makestr(_$typelist)
 #define _$footer end subroutine _$append(_$typelist)_save
 
-#include 'includes/system/syslist.inc'
+#include "includes/system/syslist.inc"
 
 #undef  _$header
 #undef  _$footer

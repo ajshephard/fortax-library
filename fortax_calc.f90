@@ -2665,7 +2665,7 @@ contains
 
 #       define _$level ad
         do ad = 1, 2
-#           include 'includes/netad_t.inc'
+#           include "includes/netad_t.inc"
         end do
 #       undef _$level
 
@@ -2684,7 +2684,7 @@ contains
 #       define _$logicalarray(x,lab,y,z) net%_$level%x = .false.
 
 #       define _$level tu
-#       include 'includes/nettu_t.inc'
+#       include "includes/nettu_t.inc"
 #       undef _$level
 
 #       undef  _$header

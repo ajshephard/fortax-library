@@ -56,7 +56,7 @@ contains
         logical, parameter :: minamount = .true.
 
         !done automatically for entire system via FPP, AS
-#       include 'includes/fortax_minamt.inc'
+#       include "includes/fortax_minamt.inc"
 
     end subroutine setMinAmount
 
@@ -230,7 +230,7 @@ contains
 #       define _$header
 #       define _$footer
 #       define _$double(x,lab,y) netoutLevel(i) ='tu'; netoutName(i) = #x; netoutAmt(i) = net%tu%x; i=i+1
-#       include 'includes/nettu_t.inc'
+#       include "includes/nettu_t.inc"
 #       undef  _$header
 #       undef  _$footer
 #       undef  _$double
@@ -241,7 +241,7 @@ contains
 #       define _$header
 #       define _$footer
 #       define _$double(x,lab,y) netoutLevel(i) ='ad1'; netoutName(i) = #x; netoutAmt(i) = net%ad(1)%x; i=i+1
-#       include 'includes/netad_t.inc'
+#       include "includes/netad_t.inc"
 #       undef  _$header
 #       undef  _$footer
 #       undef  _$double
@@ -252,7 +252,7 @@ contains
 #       define _$header
 #       define _$footer
 #       define _$double(x,lab,y) netoutLevel(i) ='ad2'; netoutName(i) = #x; netoutAmt(i) = net%ad(2)%x; i=i+1
-#       include 'includes/netad_t.inc'
+#       include "includes/netad_t.inc"
 #       undef  _$header
 #       undef  _$footer
 #       undef  _$double
@@ -284,7 +284,7 @@ contains
 #       define _$header
 #       define _$footer
 #       define _$double(x,lab,y) netoutAmt(i) = net%tu%x; i=i+1
-#       include 'includes/nettu_t.inc'
+#       include "includes/nettu_t.inc"
 #       undef  _$header
 #       undef  _$footer
 #       undef  _$double
@@ -295,7 +295,7 @@ contains
 #       define _$header
 #       define _$footer
 #       define _$double(x,lab,y) netoutAmt(i) = net%ad(1)%x; i=i+1
-#       include 'includes/netad_t.inc'
+#       include "includes/netad_t.inc"
 #       undef  _$header
 #       undef  _$footer
 #       undef  _$double
@@ -306,7 +306,7 @@ contains
 #       define _$header
 #       define _$footer
 #       define _$double(x,lab,y) netoutAmt(i) = net%ad(2)%x; i=i+1
-#       include 'includes/netad_t.inc'
+#       include "includes/netad_t.inc"
 #       undef  _$header
 #       undef  _$footer
 #       undef  _$double

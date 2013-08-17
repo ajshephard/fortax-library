@@ -91,7 +91,7 @@ subroutine read_xml_integer( info, tag, endtag, attribs, noattribs, data, nodata
                              var, has_var )
    integer, intent(inout)                       :: var
 
-   include 'read_xml_scalar.inc'
+   include "read_xml_scalar.inc"
 
 end subroutine read_xml_integer
 
@@ -151,7 +151,7 @@ subroutine read_xml_real( info, tag, endtag, attribs, noattribs, data, nodata, &
                           var, has_var )
    real, intent(inout)                          :: var
 
-   include 'read_xml_scalar.inc'
+   include "read_xml_scalar.inc"
 
 end subroutine read_xml_real
 
@@ -159,7 +159,7 @@ subroutine read_xml_double( info, tag, endtag, attribs, noattribs, data, nodata,
                             var, has_var )
    real(kind=kind(1.0d00)), intent(inout)       :: var
 
-   include 'read_xml_scalar.inc'
+   include "read_xml_scalar.inc"
 
 end subroutine read_xml_double
 
@@ -167,7 +167,7 @@ subroutine read_xml_logical( info, tag, endtag, attribs, noattribs, data, nodata
                              var, has_var )
    logical, intent(inout)       :: var
 
-   include 'read_xml_scalar.inc'
+   include "read_xml_scalar.inc"
 
 end subroutine read_xml_logical
 
@@ -175,7 +175,7 @@ subroutine read_xml_word( info, tag, endtag, attribs, noattribs, data, nodata, &
                           var, has_var )
    character(len=*), intent(inout)       :: var
 
-   include 'read_xml_word.inc'
+   include "read_xml_word.inc"
 
 end subroutine read_xml_word
 
@@ -198,7 +198,7 @@ subroutine read_xml_integer_array( info, tag, endtag, attribs, noattribs, data, 
                                    nodata, var, has_var )
    integer, dimension(:), pointer                :: var
 
-   include 'read_xml_array.inc'
+   include "read_xml_array.inc"
 
 end subroutine read_xml_integer_array
 
@@ -270,7 +270,7 @@ subroutine read_xml_real_array( info, tag, endtag, attribs, noattribs, data, &
                                 nodata, var, has_var )
    real, dimension(:), pointer :: var
 
-   include 'read_xml_array.inc'
+   include "read_xml_array.inc"
 
 end subroutine read_xml_real_array
 
@@ -278,7 +278,7 @@ subroutine read_xml_double_array( info, tag, endtag, attribs, noattribs, data, &
                                   nodata, var, has_var )
    real(kind=kind(1.0d00)), dimension(:), pointer :: var
 
-   include 'read_xml_array.inc'
+   include "read_xml_array.inc"
 
 end subroutine read_xml_double_array
 
@@ -286,7 +286,7 @@ subroutine read_xml_logical_array( info, tag, endtag, attribs, noattribs, data, 
                                    nodata, var, has_var )
    logical, dimension(:), pointer :: var
 
-   include 'read_xml_array.inc'
+   include "read_xml_array.inc"
 
 end subroutine read_xml_logical_array
 
@@ -294,7 +294,7 @@ subroutine read_xml_word_array( info, tag, endtag, attribs, noattribs, data, &
                                 nodata, var, has_var )
    character(len=*), dimension(:), pointer :: var
 
-   include 'read_xml_array.inc'
+   include "read_xml_array.inc"
 
 end subroutine read_xml_word_array
 
@@ -310,7 +310,7 @@ subroutine read_from_buffer_integers( buffer, var, ierror )
    integer, dimension(:), pointer                :: var
    integer, dimension(:), pointer                :: work
 
-   include 'read_from_buffer.inc'
+   include "read_from_buffer.inc"
 
 end subroutine read_from_buffer_integers
 
@@ -321,7 +321,7 @@ subroutine read_from_buffer_reals( buffer, var, ierror )
    real, dimension(:), pointer                :: var
    real, dimension(:), pointer                :: work
 
-   include 'read_from_buffer.inc'
+   include "read_from_buffer.inc"
 
 end subroutine read_from_buffer_reals
 
@@ -329,7 +329,7 @@ subroutine read_from_buffer_doubles( buffer, var, ierror )
    real(kind=kind(1.0d00)), dimension(:), pointer :: var
    real(kind=kind(1.0d00)), dimension(:), pointer :: work
 
-   include 'read_from_buffer.inc'
+   include "read_from_buffer.inc"
 
 end subroutine read_from_buffer_doubles
 
@@ -337,7 +337,7 @@ subroutine read_from_buffer_logicals( buffer, var, ierror )
    logical, dimension(:), pointer :: var
    logical, dimension(:), pointer :: work
 
-   include 'read_from_buffer.inc'
+   include "read_from_buffer.inc"
 
 end subroutine read_from_buffer_logicals
 
@@ -345,7 +345,7 @@ subroutine read_from_buffer_words( buffer, var, ierror )
    character(len=*), dimension(:), pointer :: var
    character(len=len(var)), dimension(:), pointer :: work
 
-   include 'read_from_buffer.inc'
+   include "read_from_buffer.inc"
 
 end subroutine read_from_buffer_words
 

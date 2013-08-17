@@ -23,7 +23,7 @@
 call xml_ftag(info,'system','open',attribs)
 #define _$footer call xml_ftag(info,'system','close')
 
-#include 'includes/system/syslist.inc'
+#include "includes/system/syslist.inc"
 
 #undef _$header
 #undef _$footer
