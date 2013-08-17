@@ -1,16 +1,11 @@
 #undef _$header
 #undef _$footer
-#undef __$quote
-#undef _$quote
 #undef _$integer
 #undef _$logical
 #undef _$double
 #undef _$integerarray
 #undef _$logicalarray
 #undef _$doublearray
-
-#define __$quote(x) #x
-#define _$quote(x) __$quote(x)
 
 call xml_ftag(info,'fam','open')
 
@@ -67,8 +62,6 @@ call xml_ftag(info,'ad2','close')
 
 #undef _$header
 #undef _$footer
-#undef __$quote
-#undef _$quote
 #undef _$integer
 #undef _$logical
 #undef _$double
@@ -96,8 +89,6 @@ call xml_ftag(info,'nettu','close')
 
 #undef _$header
 #undef _$footer
-#undef __$quote
-#undef _$quote
 #undef _$integer
 #undef _$logical
 #undef _$double
@@ -120,8 +111,6 @@ call xml_ftag(info,'netad1','close')
 
 #undef _$header
 #undef _$footer
-#undef __$quote
-#undef _$quote
 #undef _$integer
 #undef _$logical
 #undef _$double
@@ -144,8 +133,6 @@ call xml_ftag(info,'netad2','close')
 
 #undef _$header
 #undef _$footer
-#undef __$quote
-#undef _$quote
 #undef _$integer
 #undef _$logical
 #undef _$double

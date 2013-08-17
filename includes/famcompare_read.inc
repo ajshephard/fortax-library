@@ -1,16 +1,11 @@
 #undef _$header
 #undef _$footer
-#undef __$quote
-#undef _$quote
 #undef _$integer
 #undef _$double
 #undef _$logical
 #undef _$integerarray
 #undef _$doublearray
 #undef _$logicalarray
-
-#define __$quote(x) #x
-#define _$quote(x) __$quote(x)
 
 #define _$integer(x,y)
 #define _$double(x,y)

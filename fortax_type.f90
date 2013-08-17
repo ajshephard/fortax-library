@@ -1095,7 +1095,7 @@ contains
 #       undef  _$integerarray
 #       undef  _$logicalarray
 
-#       define _$header call _$append(_$typelist)_init(sys%_$typelist)
+#       define _$header call concat(_$typelist,_init)(sys%_$typelist)
 #       define _$footer
 #       define _$integer(x,y)
 #       define _$double(x,y)
@@ -1161,7 +1161,7 @@ contains
 #       undef  _$integerarray
 #       undef  _$logicalarray
 
-#       define _$header call _$append(_$typelist)_save(sys%_$typelist,funit)
+#       define _$header call concat(_$typelist,_save)(sys%_$typelist,funit)
 #       define _$footer
 #       define _$integer(x,y)
 #       define _$double(x,y)
