@@ -969,9 +969,11 @@ contains
 #           ifdef __linux
                 call system( 'ls '//trim(fpathin)//'/*.bp3 | xargs -n1 basename >'//fname )
 #           endif
-            open( newunit=funit, file=fname, action='read', status='old', iostat=istat )
+            call getUnit(funit)
+            open( funit, file=fname, action='read', status='old', iostat=istat )
         else
-            open( newunit=tmpunit, status='scratch' )
+            call getUnit(tmpunit)
+            open( unit=tmpunit, status='scratch' )
             inquire(unit=tmpunit,name=tmpname)
 #           ifdef _WIN32
                 call system('dir '//trim(fpathin)//'\*.bp3 /b >'//tmpname)
@@ -979,7 +981,8 @@ contains
 #           ifdef __linux
                 call system('ls '//trim(fpathin)//'/*.bp3 | xargs -n1 basename >'//tmpname)
 #           endif
-            open(newunit=funit,file=tmpname,action='read',status='old',iostat=istat)
+            call getUnit(funit)
+            open(unit=funit,file=tmpname,action='read',status='old',iostat=istat)
         end if
 
         err = .false.
