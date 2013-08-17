@@ -35,11 +35,11 @@ module fortax_extra
 
 contains
 
-    ! setminamount
+    ! setMinAmount
     ! -----------------------------------------------------------------------
     ! sets the minimum amount for all benefits to the specified amount
 
-    subroutine setminamount(sys,minamt)
+    subroutine setMinAmount(sys,minamt)
 
         use fortax_type, only : sys_t
 
@@ -58,15 +58,15 @@ contains
         !done automatically for entire system via FPP, AS
 #       include 'includes/fortax_minamt.inc'
 
-    end subroutine setminamount
+    end subroutine setMinAmount
 
 
-    ! abolishnifee
+    ! abolishNIFee
     ! -----------------------------------------------------------------------
     ! abolish national insurance entry fee (pre-99 there NI was paid on total
     ! earnings once threshold was reached. this removes that
 
-    subroutine abolishnifee(sys)
+    subroutine abolishNIFee(sys)
 
         use fortax_type, only : sys_t
         use fortax_util, only : fortaxwarn
@@ -87,15 +87,15 @@ contains
             sys%natins%bands(1) = sys%natins%bands(1) - amt/sys%natins%rates(2)
         end if
 
-    end subroutine abolishnifee
+    end subroutine abolishNIFee
 
 
-    ! fsminappamt
+    ! fsMinAppAmt
     ! -----------------------------------------------------------------------
     ! high wage parents will lose entitlement to FSM when they come off IS
     ! smooth this by adding fsm in appamt. this works through sys%extra
 
-    subroutine fsminappamt(sys,inappamt)
+    pure subroutine fsMinAppAmt(sys,inappamt)
 
         use fortax_type, only : sys_t
 
@@ -104,18 +104,18 @@ contains
         type(sys_t), intent(inout) :: sys
         logical,     intent(in)    :: inappamt
 
-        sys%extra%fsminappamt = inappamt
+        sys%extra%fsMinAppAmt = inappamt
 
-    end subroutine fsminappamt
+    end subroutine fsMinAppAmt
 
 
-    ! tapermatgrant
+    ! taperMatGrant
     ! -----------------------------------------------------------------------
     ! high wage parents will lose entitlement maternity grant when they come
     ! off IS. smooth this by adding matgr in appamt. Also, lose when they
     ! come off FC/WFTC (in this case, taper with tax credits)
 
-    subroutine tapermatgrant(sys,taper)
+    pure subroutine taperMatGrant(sys,taper)
 
         use fortax_type, only : sys_t
 
@@ -126,14 +126,14 @@ contains
 
         sys%extra%matgrant = taper
 
-    end subroutine tapermatgrant
+    end subroutine taperMatGrant
 
 
     ! imposeUC
     !----------------------------------------------------
     ! Imposes UC onto sys, eliminating entitlement to benefits it replaces
 
-    subroutine imposeUC(sys)
+    pure subroutine imposeUC(sys)
 
         use fortax_type, only : sys_t
 
@@ -202,7 +202,6 @@ contains
         sys%hben%doHBen       = .false.
         sys%fc%dofamcred      = .false.
         sys%ntc%doNewTaxCred  = .false.
-
 
     end subroutine imposeUC
 
