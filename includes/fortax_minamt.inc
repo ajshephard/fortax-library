@@ -18,7 +18,7 @@
 #define _$header
 #define _$footer
 
-#include "includes/system/syslist.inc"
+#include "system/syslist.inc"
 
 #undef  _$header
 #undef  _$footer

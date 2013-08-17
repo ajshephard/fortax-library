@@ -24,7 +24,7 @@
 #define _$header type :: _$quote(_$typelist)_t
 #define _$footer end type _$quote(_$typelist)_t
 
-#include "includes/system/syslist.inc"
+#include "system/syslist.inc"
 
 #undef  _$header
 #undef  _$footer
@@ -47,7 +47,7 @@
 type :: sys_t
 character(len=40) :: sysname
 character(len=80) :: sysdesc
-#include "includes/system/syslist.inc"
+#include "system/syslist.inc"
 end type
 
 #undef  _$header
