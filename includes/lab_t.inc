@@ -1,5 +1,5 @@
-#undef  __$quote(x)
-#undef  _$quote(x)
+#undef  __$quote
+#undef  _$quote
 #define __$quote(x) x
 #define _$quote(x) __$quote(x)
 
