@@ -26,7 +26,7 @@ module fortax_kinks
     use fortax_realtype, only : dp
     implicit none
     private :: dp
-
+    private
 #   ifndef _maxkinks_
     integer, parameter :: maxkinks = 200
 #   else
@@ -38,6 +38,8 @@ module fortax_kinks
         integer :: kinks_num
         real(dp), dimension(maxkinks) :: kinks_hrs, kinks_earn, kinks_net, kinks_mtr
     end type bcout_t
+
+    public :: bcout_t, evalKinksHours, evalKinksEarn, kinkshours, kinksearn, kinksccexp, maxkinks
 
 !#   define _TRACE_
 !#   define _TRACECOUNT_

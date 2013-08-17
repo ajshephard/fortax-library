@@ -27,6 +27,10 @@ module fortax_extra
     use fortax_realtype, only : dp
     implicit none
     private :: dp
+    private
+    public :: setMinAmount, abolishNIFee, fsMinAppAmt, taperMatGrant, &
+              imposeUC, netoutDesc, netoutDescNoName
+
     integer,  parameter :: netoutSize = 100
 
 contains

@@ -27,6 +27,8 @@ module fortax_compare
 
     use fortax_realtype, only : dp
     private :: dp
+    private
+    public :: writeFamCompareDatabase, readFamCompareDatabase, compareFamDatabase, compareNet
 
 contains
 
