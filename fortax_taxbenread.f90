@@ -694,8 +694,8 @@ contains
 
 
                 !HB, CCB and CTB: whether child benefit counts as income in the taper calculation
-                  ! Note: the ChildBenefit component in the PrmFowler.Reb.OthInc structure only exists when child benefit counts as income
-                  ! So this code relies on sys%rebateSys%ChbenIsIncome being initialised to .false. by sys_init
+                  ! Note: the ChildBenefit component in the PrmFowler.Reb.OthInc structure only exists when child benefit counts as
+                  ! income so this code relies on sys%rebateSys%ChbenIsIncome being initialised to .false. by sys_init
                 case('PrmFowler.Reb.OthInc')
                     nfield = size(cat%field)
                     do j = 1, nfield
@@ -1134,7 +1134,8 @@ contains
                 sys%incSup%disregShared = .true.
             end if
 
-            ! From Jul 00, childcare disregard set against WFTC/WTC/CTC as well as earnings (TAXBEN says Apr 00, so this is a correction)
+            ! From Jul 00, childcare disregard set against WFTC/WTC/CTC as well as earnings (TAXBEN says Apr 00, so this is a
+            ! correction)
             if ((sysdate >= 20000401) .and. (sysdate < 20000703)) then
                 sys%rebateSys%credInDisregCC = .false.
             end if
