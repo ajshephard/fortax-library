@@ -520,13 +520,13 @@ contains
         integer,           intent(in) :: funit
         integer,           intent(in) :: myval(:)
         integer, optional, intent(in) :: mylen
-        integer                       :: i, syMyval
+        integer                       :: i, szMyval
         if (present(mylen)) then
             szMyval = min(mylen,size(myval))
         else
-            syMyval = size(myval)
+            szMyval = size(myval)
         end if
-        do i =1, syMyval
+        do i =1, szMyval
             write(funit,'(A16,2X,I16)') str//'('//inttostr(i)//')', myval(i)
         end do
     end subroutine fam_descIntegerArray
@@ -1376,21 +1376,12 @@ contains
 
 #       define _$header write(funit,*); write(funit,'(a)') '!family'
 #       define _$footer
-#       define _$integer(x,y) write(funit,'(a)',advance="no") "fam%"//#x//"="; write(funit,'(a)') intToStr(fam% x)
-#       define _$double(x,y)  write(funit,'(a)',advance="no") "fam%"//#x//"="; write(funit,'(a)') dblToStr(fam% x)//'_dp'
-#       define _$logical(x,y) write(funit,'(a)',advance="no") "fam%"//#x//"="; write(funit,'(a)') merge('.true. ','.false.',fam% x)
-
-#       define _$doublearray(x,y,z) if (#z==':') write(funit,'(a)') "allocate(fam%"//#x//"("//intToStr(size(fam%x))//"))"; \
- do i=1,size(fam%x); write(funit,'(a)',advance="no") \
- "fam%"//#x//"("//intToStr(i)//")="; write(funit,'(a)') dblToStr(fam% x(i))//'_dp'; end do
-
-#       define _$logicalarray(x,y,z) if (#z==':') write(funit,'(a)') "allocate(fam%"//#x//"("//intToStr(size(fam%x))//"))"; \
- do i=1,size(fam%x); write(funit,'(a)',advance="no") \
- "fam%"//#x//"("//intToStr(i)//")="; write(funit,'(a)') merge('.true. ','.false.',fam% x(i)); end do
-
-#       define _$integerarray(x,y,z) if (#z==':') write(funit,'(a)') "allocate(fam%"//#x//"("//intToStr(size(fam%x))//"))"; \
- do i=1,size(fam%x); write(funit,'(a)',advance="no") \
- "fam%"//#x//"("//intToStr(i)//")="; write(funit,'(a)') intToStr(fam% x(i)); end do
+#       define _$integer(x,y) call fam_saveF90Integer(#x,'',funit,fam%x)
+#       define _$double(x,y)  call fam_saveF90Double(#x,'',funit,fam%x)
+#       define _$logical(x,y) call fam_saveF90Logical(#x,'',funit,fam%x)
+#       define _$doublearray(x,y,z) call fam_saveF90DoubleArray(#x,'',funit,fam%x,#z)
+#       define _$logicalarray(x,y,z) call fam_saveF90LogicalArray(#x,'',funit,fam%x,#z)
+#       define _$integerarray(x,y,z) call fam_saveF90IntegerArray(#x,'',funit,fam%x,#z)
 
 #       include "includes/fam_t.inc"
 
@@ -1405,21 +1396,13 @@ contains
 
 #       define _$header write(funit,*); write(funit,'(a)') '!adult1'
 #       define _$footer
-#       define _$integer(x,y) write(funit,'(a)',advance="no") "fam%ad(1)%"//#x//"="; write(funit,'(a)') intToStr(fam%ad(1)% x)
-#       define _$double(x,y)  write(funit,'(a)',advance="no") "fam%ad(1)%"//#x//"="; write(funit,'(a)') dblToStr(fam%ad(1)% x)//'_dp'
-#       define _$logical(x,y) write(funit,'(a)',advance="no") "fam%ad(1)%"//#x//"="; write(funit,'(a)') merge('.true. ','.false.',fam%ad(1)% x)
+#       define _$integer(x,y) call fam_saveF90Integer(#x,'ad1',funit,fam%ad(1)%x)
+#       define _$double(x,y)  call fam_saveF90Double(#x,'ad1',funit,fam%ad(1)%x)
+#       define _$logical(x,y) call fam_saveF90Logical(#x,'ad1',funit,fam%ad(1)%x)
+#       define _$doublearray(x,y,z) call fam_saveF90DoubleArray(#x,'ad1',funit,fam%ad(1)%x,#z)
+#       define _$logicalarray(x,y,z) call fam_saveF90LogicalArray(#x,'ad1',funit,fam%ad(1)%x,#z)
+#       define _$integerarray(x,y,z) call fam_saveF90IntegerArray(#x,'ad1',funit,fam%ad(1)%x,#z)
 
-#       define _$doublearray(x,y,z) if (#z==':') write(funit,'(a)') "allocate(fam%ad(1)%"//#x//"("//intToStr(size(fam%ad(1)%x))//"))"; \
- do i=1,size(fam%ad(1)%x); write(funit,'(a)',advance="no") \
- "fam%ad(1)%"//#x//"("//intToStr(i)//")="; write(funit,'(a)') dblToStr(fam%ad(1)% x(i))//'_dp'; end do
-
-#       define _$logicalarray(x,y,z) if (#z==':') write(funit,'(a)') "allocate(fam%ad(1)%"//#x//"("//intToStr(size(fam%ad(1)%x))//"))"; \
- do i=1,size(fam%ad(1)%x); write(funit,'(a)',advance="no") \
- "fam%ad(1)%"//#x//"("//intToStr(i)//")="; write(funit,'(a)') merge('.true. ','.false.',fam%ad(1)% x(i)); end do
-
-#       define _$integerarray(x,y,z) if (#z==':') write(funit,'(a)') "allocate(fam%ad(1)%"//#x//"("//intToStr(size(fam%ad(1)%x))//"))"; \
- do i=1,size(fam%ad(1)%x); write(funit,'(a)',advance="no") \
- "fam%ad(1)%"//#x//"("//intToStr(i)//")="; write(funit,'(a)') intToStr(fam%ad(1)% x(i)); end do
 #       include "includes/famad_t.inc"
 
 #       undef  _$header
@@ -1443,21 +1426,12 @@ contains
         if (fam%couple) then
 #           define _$header write(funit,*); write(funit,'(a)') '!adult2'
 #           define _$footer
-#           define _$integer(x,y) write(funit,'(a)',advance="no") "fam%ad(2)%"//#x//"="; write(funit,'(a)') intToStr(fam%ad(2)% x)
-#           define _$double(x,y)  write(funit,'(a)',advance="no") "fam%ad(2)%"//#x//"="; write(funit,'(a)') dblToStr(fam%ad(2)% x)//'_dp'
-#           define _$logical(x,y) write(funit,'(a)',advance="no") "fam%ad(2)%"//#x//"="; write(funit,'(a)') merge('.true. ','.false.',fam%ad(2)% x)
-
-#           define _$doublearray(x,y,z) if (#z==':') write(funit,'(a)') "allocate(fam%ad(2)%"//#x//"("//intToStr(size(fam%ad(2)%x))//"))"; \
- do i=1,size(fam%ad(2)%x); write(funit,'(a)',advance="no") \
- "fam%ad(2)%"//#x//"("//intToStr(i)//")="; write(funit,'(a)') dblToStr(fam%ad(2)% x(i))//'_dp'; end do
-
-#           define _$logicalarray(x,y,z) if (#z==':') write(funit,'(a)') "allocate(fam%ad(2)%"//#x//"("//intToStr(size(fam%ad(2)%x))//"))"; \
- do i=1,size(fam%ad(2)%x); write(funit,'(a)',advance="no") \
- "fam%ad(2)%"//#x//"("//intToStr(i)//")="; write(funit,'(a)') merge('.true. ','.false.',fam%ad(2)% x(i)); end do
-
-#           define _$integerarray(x,y,z) if (#z==':') write(funit,'(a)') "allocate(fam%ad(2)%"//#x//"("//intToStr(size(fam%ad(2)%x))//"))"; \
- do i=1,size(fam%ad(2)%x); write(funit,'(a)',advance="no") \
- "fam%ad(2)%"//#x//"("//intToStr(i)//")="; write(funit,'(a)') intToStr(fam%ad(2)% x(i)); end do
+#           define _$integer(x,y) call fam_saveF90Integer(#x,'ad2',funit,fam%ad(2)%x)
+#           define _$double(x,y)  call fam_saveF90Double(#x,'ad2',funit,fam%ad(2)%x)
+#           define _$logical(x,y) call fam_saveF90Logical(#x,'ad2',funit,fam%ad(2)%x)
+#           define _$doublearray(x,y,z) call fam_saveF90DoubleArray(#x,'ad2',funit,fam%ad(2)%x,#z)
+#           define _$logicalarray(x,y,z) call fam_saveF90LogicalArray(#x,'ad2',funit,fam%ad(2)%x,#z)
+#           define _$integerarray(x,y,z) call fam_saveF90IntegerArray(#x,'ad2',funit,fam%ad(2)%x,#z)
 
 #           include "includes/famad_t.inc"
 
@@ -1478,5 +1452,161 @@ contains
         if (present(fname)) close(funit)
 
     end subroutine fam_saveF90
+
+
+    subroutine fam_saveF90Integer(str,level,funit,myval)
+        use fortax_util, only : intToStr
+        implicit none
+        character(len=*), intent(in) :: str
+        character(len=*), intent(in) :: level
+        integer, intent(in) :: funit
+        integer, intent(in) :: myval
+        select case(level)
+        case('ad1')
+            write(funit,'(a)',advance="no") "fam%ad(1)%"//str//"="
+        case('ad2')
+            write(funit,'(a)',advance="no") "fam%ad(2)%"//str//"="
+        case default
+            write(funit,'(a)',advance="no") "fam%"//str//"="
+        end select
+        write(funit,'(a)') intToStr(myval)
+    end subroutine fam_saveF90Integer
+
+    subroutine fam_saveF90Double(str,level,funit,myval)
+        use fortax_util, only : dblToStr
+        implicit none
+        character(len=*), intent(in) :: str
+        character(len=*), intent(in) :: level
+        integer,  intent(in) :: funit
+        real(dp), intent(in) :: myval
+        select case(level)
+        case('ad1')
+            write(funit,'(a)',advance="no") "fam%ad(1)%"//str//"="
+        case('ad2')
+            write(funit,'(a)',advance="no") "fam%ad(2)%"//str//"="
+        case default
+            write(funit,'(a)',advance="no") "fam%"//str//"="
+        end select
+        write(funit,'(a)') dblToStr(myval)//'_dp'
+    end subroutine fam_saveF90Double
+
+    subroutine fam_saveF90DoubleArray(str,level,funit,myval,mydim)
+        use fortax_util, only : dblToStr, intToStr
+        implicit none
+        character(len=*), intent(in) :: str
+        character(len=*), intent(in) :: level
+        integer,  intent(in) :: funit
+        real(dp), intent(in) :: myval(:)
+        character(len=*), intent(in) :: mydim
+        integer :: i
+
+        if (mydim==':') then
+            write(funit,'(a)') "allocate(fam%"//str//"("//intToStr(size(myval))//"))"
+        end if
+
+        select case(level)
+        case('ad1')
+            do i = 1, size(myval)
+                write(funit,'(a)',advance="no") "fam%ad(1)%"//str//"("//intToStr(i)//")="
+                write(funit,'(a)') dblToStr(myval(i))//'_dp'
+            end do
+        case('ad2')
+            do i = 1, size(myval)
+                write(funit,'(a)',advance="no") "fam%ad(2)%"//str//"("//intToStr(i)//")="
+                write(funit,'(a)') dblToStr(myval(i))//'_dp'
+            end do
+        case default
+            do i = 1, size(myval)
+                write(funit,'(a)',advance="no") "fam%"//str//"("//intToStr(i)//")="
+                write(funit,'(a)') dblToStr(myval(i))//'_dp'
+            end do
+        end select
+
+    end subroutine fam_saveF90DoubleArray
+
+    subroutine fam_saveF90IntegerArray(str,level,funit,myval,mydim)
+        use fortax_util, only : intToStr
+        implicit none
+        character(len=*), intent(in) :: str
+        character(len=*), intent(in) :: level
+        integer, intent(in) :: funit
+        integer, intent(in) :: myval(:)
+        character(len=*), intent(in) :: mydim
+        integer :: i
+
+        if (mydim==':') then
+            write(funit,'(a)') "allocate(fam%"//str//"("//intToStr(size(myval))//"))"
+        end if
+
+        select case(level)
+        case('ad1')
+            do i = 1, size(myval)
+                write(funit,'(a)',advance="no") "fam%ad(1)%"//str//"("//intToStr(i)//")="
+                write(funit,'(a)') intToStr(myval(i))
+            end do
+        case('ad2')
+            do i = 1, size(myval)
+                write(funit,'(a)',advance="no") "fam%ad(2)%"//str//"("//intToStr(i)//")="
+                write(funit,'(a)') intToStr(myval(i))
+            end do
+        case default
+            do i = 1, size(myval)
+                write(funit,'(a)',advance="no") "fam%"//str//"("//intToStr(i)//")="
+                write(funit,'(a)') intToStr(myval(i))
+            end do
+        end select
+
+    end subroutine fam_saveF90IntegerArray
+
+    subroutine fam_saveF90Logical(str,level,funit,myval)
+        implicit none
+        character(len=*), intent(in) :: str
+        character(len=*), intent(in) :: level
+        integer,  intent(in) :: funit
+        logical, intent(in) :: myval
+        select case(level)
+        case('ad1')
+            write(funit,'(a)',advance="no") "fam%ad(1)%"//str//"="
+        case('ad2')
+            write(funit,'(a)',advance="no") "fam%ad(2)%"//str//"="
+        case default
+            write(funit,'(a)',advance="no") "fam%"//str//"="
+        end select
+        write(funit,'(a)') merge('.true. ','.false.',myval)
+    end subroutine fam_saveF90Logical
+
+    subroutine fam_saveF90LogicalArray(str,level,funit,myval,mydim)
+        use fortax_util, only : intToStr
+        implicit none
+        character(len=*), intent(in) :: str
+        character(len=*), intent(in) :: level
+        integer, intent(in) :: funit
+        logical, intent(in) :: myval(:)
+        character(len=*), intent(in) :: mydim
+        integer :: i
+
+        if (mydim==':') then
+            write(funit,'(a)') "allocate(fam%"//str//"("//intToStr(size(myval))//"))"
+        end if
+
+        select case(level)
+        case('ad1')
+            do i = 1, size(myval)
+                write(funit,'(a)',advance="no") "fam%ad(1)%"//str//"("//intToStr(i)//")="
+                write(funit,'(a)') merge('.true. ','.false.',myval(i))
+            end do
+        case('ad2')
+            do i = 1, size(myval)
+                write(funit,'(a)',advance="no") "fam%ad(2)%"//str//"("//intToStr(i)//")="
+                write(funit,'(a)') merge('.true. ','.false.',myval(i))
+            end do
+        case default
+            do i = 1, size(myval)
+                write(funit,'(a)',advance="no") "fam%"//str//"("//intToStr(i)//")="
+                write(funit,'(a)') merge('.true. ','.false.',myval(i))
+            end do
+        end select
+
+    end subroutine fam_saveF90LogicalArray
 
 end module fortax_type
