@@ -7,28 +7,47 @@ OUTPATH = ./
 OBJECTS  = fortax_library.o fortax_realtype.o fortax_util.o fortax_type.o fortax_calc.o fortax_extra.o fortax_prices.o fortax_read.o fortax_taxbenread.o fortax_write.o fortax_kinks.o fortax_compare.o
 XMLOBJECTS = xmlparse.o read_xml_primitives.o write_xml_primitives.o xmltaxben_t.o xmlfortax_t.o xmlfamcompare_t.o
 
-# ------------------Macro-Defs---------------------
-DIAGDISABLE = -diag-disable 5268,7025
-FFLAGS = -O0 -debug -g -traceback -fpp -check bounds -check all -warn unused -stand f03 -fPIC -gen-interfaces $(DIAGDISABLE) -module $(MODPATH)
-#FFLAGS = -O1 -fpp -stand f03 -fPIC -gen-interfaces -module ../modules-dev
-# GPROF = -g -p
-FFLAGS = -O3 -fpp -stand f03 -warn all -inline speed -inline-forceinline -no-prec-div -xHost -static -fPIC -gen-interfaces $(DIAGDISABLE) $(GPROF) -module $(MODPATH)
 F90 = ifort
-
+F90 = g95
 F90 = gfortran
-FFLAGS = -O3 -ffixed-line-length-none -ffree-line-length-none -ffree-form -x f95 -I$(INCLUDESPATH)
-CFLAGS = -cpp -E -P -x c -ansi
-CPP = cpp
-FEXT = f
+F90 = pgfortran
 
-#DEFINES = -D_famcouple_=.false. -D_fammarried_=.false. -D_famkids_=.true.
-# -------------------End-macro-Defs---------------------------
+ifeq ($(F90),gfortran)
+	FFLAGS = -O3 -ffixed-line-length-none -ffree-line-length-none -ffree-form -x f95
+	CFLAGS = -cpp -E -P -x c -ansi
+	CPP = gcc
+	FEXT = f
+endif
+
+ifeq ($(F90),g95)
+	FFLAGS = -O3 -ffree-line-length-huge -std=f2003 -ffree-form
+	CFLAGS = -cpp -E -P -x c -ansi
+	CPP = gcc
+	FEXT = f
+endif
+
+ifeq ($(F90),ifort)
+	# GPROF = -g -p
+	DIAGDISABLE = -diag-disable 5268,7025
+	FFLAGS = -O3 -fpp -stand f03 -warn all -inline speed -inline-forceinline -no-prec-div -xHost -static -fPIC -gen-interfaces $(DIAGDISABLE) $(GPROF) -module $(MODPATH)
+	FEXT = f90
+endif
+
+ifeq ($(F90),pgfortran)
+	F90 = /opt/pgi/linux86-64/2013/bin/pgfortran
+	CPP = $(F90)
+	FFLAGS = -O3 -Mfree
+	CFLAGS = -O3 -Mpreprocess -Mfree -Mcpp=c89 -E
+	FEXT = f
+endif
 
 all:$(OBJECTS) $(XMLOBJECTS)
 	ar rc $(OUTPATH)/fortax.a $(OBJECTS) $(XMLOBJECTS)
 
+ifeq ($(FEXT),f)
 %.$(FEXT):%.f90
 	$(CPP) $(CFLAGS) $< > $@
+endif
 
 xmlparse.o:xmlparse.$(FEXT)
 	$(F90) $(FFLAGS) -c $<
