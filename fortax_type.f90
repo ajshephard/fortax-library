@@ -418,12 +418,12 @@ contains
 
 #       define _$header write(funit,*); write(funit,'(A16)') 'FAMILY'; write(funit,*)
 #       define _$footer
-#       define _$integer(x,y) write(funit,'(A16,2X,I16)') #x, fam%x
-#       define _$double(x,y)  write(funit,'(A16,2X,F16.4)') #x, fam%x
-#       define _$logical(x,y) write(funit,'(A16,2X,L16)') #x, fam%x
-#       define _$integerarray(x,y,z) do i =1, merge(min(fam%nkids,z),size(fam%x),#x=='kidage'); write(funit,'(A16,2X,I16)') #x//'('//inttostr(i)//')', fam%x(i); end do
-#       define _$doublearray(x,y,z)  do i =1, size(fam%x); write(funit,'(A16,2X,F16.4)') #x//'('//inttostr(i)//')', fam%x(i); end do
-#       define _$logicalarray(x,y,z) do i =1, size(fam%x); write(funit,'(A16,2X,L16)') #x//'('//inttostr(i)//')', fam%x(i); end do
+#       define _$integer(x,y) call fam_descInteger(#x,funit,fam%x)
+#       define _$double(x,y)  call fam_descDouble(#x,funit,fam%x)
+#       define _$logical(x,y) call fam_descLogical(#x,funit,fam%x)
+#       define _$integerarray(x,y,z) call fam_descIntegerArray(#x,funit,fam%x,fam%nkids)
+#       define _$doublearray(x,y,z)  call fam_descDoubleArray(#x,funit,fam%x)
+#       define _$logicalarray(x,y,z) call fam_descLogicalArray(#x,funit,fam%x)
 
 #       include "includes/fam_t.inc"
 
@@ -438,12 +438,12 @@ contains
 
 #       define _$header write(funit,*); write(funit,'(A16)') 'ADULT1'; write(funit,*)
 #       define _$footer
-#       define _$integer(x,y) write(funit,'(A16,2X,I16)') #x, fam%ad(1)%x
-#       define _$double(x,y)  write(funit,'(A16,2X,F16.4)') #x, fam%ad(1)%x
-#       define _$logical(x,y) write(funit,'(A16,2X,L16)') #x, fam%ad(1)%x
-#       define _$integerarray(x,y,z) do i =1, size(fam%ad(1)%x); write(funit,'(A16,2X,I16)') #x//'('//inttostr(i)//')', fam%ad(1)%x(i); end do
-#       define _$doublearray(x,y,z)  do i =1, size(fam%ad(1)%x); write(funit,'(A16,2X,F16.4)') #x//'('//inttostr(i)//')', fam%ad(1)%x(i); end do
-#       define _$logicalarray(x,y,z) do i =1, size(fam%ad(1)%x); write(funit,'(A16,2X,L16)') #x//'('//inttostr(i)//')', fam%ad(1)%x(i); end do
+#       define _$integer(x,y) call fam_descInteger(#x,funit,fam%ad(1)%x)
+#       define _$double(x,y)  call fam_descDouble(#x,funit,fam%ad(1)%x)
+#       define _$logical(x,y) call fam_descLogical(#x,funit,fam%ad(1)%x)
+#       define _$integerarray(x,y,z) call fam_descIntegerArray(#x,funit,fam%ad(1)%x)
+#       define _$doublearray(x,y,z)  call fam_descDoubleArray(#x,funit,fam%ad(1)%x)
+#       define _$logicalarray(x,y,z) call fam_descLogicalArray(#x,funit,fam%ad(1)%x)
 
 #       include "includes/famad_t.inc"
 
@@ -468,12 +468,12 @@ contains
         if (fam%couple) then
 #           define _$header write(funit,*); write(funit,'(A16)') 'ADULT2'; write(funit,*)
 #           define _$footer
-#           define _$integer(x,y) write(funit,'(A16,2X,I16)') #x, fam%ad(2)%x
-#           define _$double(x,y)  write(funit,'(A16,2X,F16.4)') #x, fam%ad(2)%x
-#           define _$logical(x,y) write(funit,'(A16,2X,L16)') #x, fam%ad(2)%x
-#           define _$integerarray(x,y,z) do i =1, size(fam%ad(2)%x); write(funit,'(A16,2X,I16)') #x//'('//inttostr(i)//')', fam%ad(2)%x(i); end do
-#           define _$doublearray(x,y,z)  do i =1, size(fam%ad(2)%x); write(funit,'(A16,2X,F16.4)') #x//'('//inttostr(i)//')', fam%ad(2)%x(i); end do
-#           define _$logicalarray(x,y,z) do i =1, size(fam%ad(2)%x); write(funit,'(A16,2X,L16)') #x//'('//inttostr(i)//')', fam%ad(2)%x(i); end do
+#           define _$integer(x,y) call fam_descInteger(#x,funit,fam%ad(2)%x)
+#           define _$double(x,y)  call fam_descDouble(#x,funit,fam%ad(2)%x)
+#           define _$logical(x,y) call fam_descLogical(#x,funit,fam%ad(2)%x)
+#           define _$integerarray(x,y,z) call fam_descIntegerArray(#x,funit,fam%ad(2)%x)
+#           define _$doublearray(x,y,z)  call fam_descDoubleArray(#x,funit,fam%ad(2)%x)
+#           define _$logicalarray(x,y,z) call fam_descLogicalArray(#x,funit,fam%ad(2)%x)
 
 #           include "includes/famad_t.inc"
 
@@ -489,6 +489,71 @@ contains
 
     end subroutine fam_desc
 
+    subroutine fam_descInteger(str,funit,myval)
+        implicit none
+        character(len=*), intent(in) :: str
+        integer,          intent(in) :: funit
+        integer,          intent(in) :: myval
+        write(funit,'(A16,2X,I16)') str, myval
+    end subroutine fam_descInteger
+
+    subroutine fam_descDouble(str,funit,myval)
+        implicit none
+        character(len=*), intent(in) :: str
+        integer,          intent(in) :: funit
+        real(dp),         intent(in) :: myval
+        write(funit,'(A16,2X,F16.4)') str, myval
+    end subroutine fam_descDouble
+
+    subroutine fam_descLogical(str,funit,myval)
+        implicit none
+        character(len=*), intent(in) :: str
+        integer,          intent(in) :: funit
+        logical,          intent(in) :: myval
+        write(funit,'(A16,2X,L16)') str, myval
+    end subroutine fam_descLogical
+
+    subroutine fam_descIntegerArray(str,funit,myval,mylen)
+        use fortax_util, only : intToStr
+        implicit none
+        character(len=*),  intent(in) :: str
+        integer,           intent(in) :: funit
+        integer,           intent(in) :: myval(:)
+        integer, optional, intent(in) :: mylen
+        integer                       :: i, syMyval
+        if (present(mylen)) then
+            szMyval = min(mylen,size(myval))
+        else
+            syMyval = size(myval)
+        end if
+        do i =1, syMyval
+            write(funit,'(A16,2X,I16)') str//'('//inttostr(i)//')', myval(i)
+        end do
+    end subroutine fam_descIntegerArray
+
+    subroutine fam_descLogicalArray(str,funit,myval)
+        use fortax_util, only : intToStr
+        implicit none
+        character(len=*), intent(in) :: str
+        integer,          intent(in) :: funit
+        logical,          intent(in) :: myval(:)
+        integer                      :: i
+        do i =1, size(myval)
+            write(funit,'(A16,2X,L16)') str//'('//inttostr(i)//')', myval(i)
+        end do
+    end subroutine fam_descLogicalArray
+
+    subroutine fam_descDoubleArray(str,funit,myval)
+        use fortax_util, only : intToStr
+        implicit none
+        character(len=*), intent(in) :: str
+        integer,          intent(in) :: funit
+        real(dp),         intent(in) :: myval(:)
+        integer                      :: i
+        do i =1, size(myval)
+            write(funit,'(A16,2X,F16.4)') str//'('//inttostr(i)//')', myval(i)
+        end do
+    end subroutine fam_descDoubleArray
 
     ! fam_gen
     ! -----------------------------------------------------------------------
