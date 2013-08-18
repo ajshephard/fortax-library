@@ -20,16 +20,13 @@
 #define _$integerarray(x,y,z) call sys_saveIntegerArray(_$makestr(_$typelist),#x,funit,sys%x)
 #define _$logicalarray(x,y,z) call sys_saveLogicalArray(_$makestr(_$typelist),#x,funit,sys%x)
 
-#define _$header subroutine concat(_$typelist,_save(sys,funit)); \
-use fortax_util, only : intToStr, dblToStr; \
-implicit none; \
-type(concat(_$typelist,_t)), intent(in) :: sys; \
-integer, intent(in) :: funit; integer :: i; \
-write(funit,*); write(funit,'(a)') "!"//_$makestr(_$typelist)
+#define _$header
+#define _$headerinc sys_saveheader.inc
 #define _$footer end subroutine concat(_$typelist,_save)
 
 #include "system/syslist.inc"
 
+#undef  _$headerinc
 #undef  _$header
 #undef  _$footer
 #undef  _$integer

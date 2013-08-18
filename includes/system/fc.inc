@@ -1,4 +1,5 @@
 _$header
+#include "header.inc"
 
 _$logical(dofamcred,null)
 _$integer(NumAgeRng,range)

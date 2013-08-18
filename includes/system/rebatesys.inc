@@ -1,4 +1,5 @@
 _$header
+#include "header.inc"
 
 _$logical(RulesUnderFC,null)
 _$logical(RulesUnderWFTC,null)

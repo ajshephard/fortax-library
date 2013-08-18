@@ -1,4 +1,5 @@
 _$header
+#include "header.inc"
 
 _$integer(numbands,range)
 _$double(pa,amount)

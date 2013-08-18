@@ -1,4 +1,5 @@
 _$header
+#include "header.inc"
 
 _$logical(doHBen,null)
 _$double(taper,rate)
