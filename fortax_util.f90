@@ -32,24 +32,6 @@ module fortax_util
 
 contains
 
-    ! intToStr
-    ! -----------------------------------------------------------------------
-    ! converts integer to variable length string by calling intToStrLen to
-    ! determine return length
-
-    pure function intToStr(N)
-
-        implicit none
-
-        integer, intent(in)       :: N
-        character(intToStrLen(N)) :: intToStr
-        character(len=20)         :: tempStr20
-
-        write (tempStr20,'(I20)') N
-        intToStr = adjustl(tempStr20)
-
-    end function intToStr
-
 
     ! intToStrLen
     ! -----------------------------------------------------------------------
@@ -68,6 +50,26 @@ contains
 
     end function intToStrLen
 
+
+    ! intToStr
+    ! -----------------------------------------------------------------------
+    ! converts integer to variable length string by calling intToStrLen to
+    ! determine return length
+
+    pure function intToStr(N)
+
+        implicit none
+
+        integer, intent(in)       :: N
+        character(len=intToStrLen(N)) :: intToStr
+        character(len=20)         :: tempStr20
+
+        write (tempStr20,'(I20)') N
+        intToStr = adjustl(tempStr20)
+
+    end function intToStr
+
+
     ! logicalToStr
     ! -----------------------------------------------------------------------
     ! converts logical to string (.true. = T, .false. = F)
@@ -82,25 +84,6 @@ contains
         logicalToStr = merge('T','F',N)
 
     end function logicalToStr
-
-
-    ! dblToStr
-    ! -----------------------------------------------------------------------
-    ! converts double to variable length string by calling intToStrLen to
-    ! determine return length
-
-    pure function dblToStr(N)
-
-        implicit none
-
-        real(dp), intent(in)      :: N
-        character(dblToStrLen(N)) :: dblToStr
-        character(len=40)         :: tempStr40
-
-        write (tempStr40,*) N
-        dblToStr = adjustl(tempStr40)
-
-    end function dblToStr
 
 
     ! dblToStrLen
@@ -119,6 +102,25 @@ contains
         dblToStrLen = len_trim(adjustl(tempStr40))
 
     end function dblToStrLen
+
+
+    ! dblToStr
+    ! -----------------------------------------------------------------------
+    ! converts double to variable length string by calling intToStrLen to
+    ! determine return length
+
+    pure function dblToStr(N)
+
+        implicit none
+
+        real(dp), intent(in)      :: N
+        character(len=dblToStrLen(N)) :: dblToStr
+        character(len=40)         :: tempStr40
+
+        write (tempStr40,*) N
+        dblToStr = adjustl(tempStr40)
+
+    end function dblToStr
 
 
     ! strToDouble
