@@ -22,7 +22,7 @@
 #define _$footer end do
 
 #undef  _$integer
-#define _$integer(x,y) if (system(i)%finteger(j)%name==#x) call fortax_read_assign(sys%_$typelist%x,system(i)%finteger(j)%value)
+#define _$integer(x,y) if (system(i)%finteger(j)%name==#x) call fr(sys%_$typelist%x,system(i)%finteger(j)%value)
 #undef  _$header
 #define _$header case(_$quote(_$typelist)); \
 do j = 1, size(system(i)%finteger)
@@ -31,7 +31,7 @@ do j = 1, size(system(i)%finteger)
 #define _$integer(x,y)
 
 #undef  _$double
-#define _$double(x,y) if (system(i)%fdouble(j)%name==#x) call fortax_read_assign(sys%_$typelist%x,system(i)%fdouble(j)%value)
+#define _$double(x,y) if (system(i)%fdouble(j)%name==#x) call fr(sys%_$typelist%x,system(i)%fdouble(j)%value)
 #undef  _$header
 #define _$header case(_$quote(_$typelist)); \
 do j = 1, size(system(i)%fdouble)
@@ -40,7 +40,7 @@ do j = 1, size(system(i)%fdouble)
 #define _$double(x,y)
 
 #undef  _$logical
-#define _$logical(x,y) if (system(i)%flogical(j)%name==#x) call fortax_read_assign(sys%_$typelist%x,system(i)%flogical(j)%value)
+#define _$logical(x,y) if (system(i)%flogical(j)%name==#x) call fr(sys%_$typelist%x,system(i)%flogical(j)%value)
 #undef  _$header
 #define _$header case(_$quote(_$typelist)); \
 do j = 1, size(system(i)%flogical)
@@ -49,7 +49,7 @@ do j = 1, size(system(i)%flogical)
 #define _$logical(x,y)
 
 #undef  _$integerarray
-#define _$integerarray(x,y,z) if (system(i)%fintegerarray(j)%name==#x) call fortax_read_assign(sys%_$typelist%x,system(i)%fintegerarray(j)%value)
+#define _$integerarray(x,y,z) if (system(i)%fintegerarray(j)%name==#x) call fr(sys%_$typelist%x,system(i)%fintegerarray(j)%value)
 #undef  _$header
 #define _$header case(_$quote(_$typelist)); \
 do j = 1, size(system(i)%fintegerarray)
@@ -58,7 +58,7 @@ do j = 1, size(system(i)%fintegerarray)
 #define _$integerarray(x,y,z)
 
 #undef  _$doublearray
-#define _$doublearray(x,y,z) if (system(i)%fdoublearray(j)%name==#x) call fortax_read_assign(sys%_$typelist%x,system(i)%fdoublearray(j)%value)
+#define _$doublearray(x,y,z) if (system(i)%fdoublearray(j)%name==#x) call fr(sys%_$typelist%x,system(i)%fdoublearray(j)%value)
 #undef  _$header
 #define _$header case(_$quote(_$typelist)); \
 do j = 1, size(system(i)%fdoublearray)
@@ -67,7 +67,7 @@ do j = 1, size(system(i)%fdoublearray)
 #define _$doublearray(x,y,z)
 
 #undef  _$logicalarray
-#define _$logicalarray(x,y,z) if (system(i)%flogicalarray(j)%name==#x) call fortax_read_assign(sys%_$typelist%x,system(i)%flogicalarray(j)%value)
+#define _$logicalarray(x,y,z) if (system(i)%flogicalarray(j)%name==#x) call fr(sys%_$typelist%x,system(i)%flogicalarray(j)%value)
 #undef  _$header
 #define _$header case(_$quote(_$typelist)); \
 do j = 1, size(system(i)%flogicalarray)

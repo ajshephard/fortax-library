@@ -154,7 +154,7 @@ contains
         use xml_data_xmlfamcompare_t, only : read_xml_file_xmlfamcompare_t, family
         use fortax_util,          only : getunit, strToDouble, strToInt, strToLogical, lower, fortaxError, fortaxWarn
         use fortax_type,          only : sys_t, sys_init, fam_t, fam_init, fam_desc, net_t, net_init
-        use fortax_read,          only : fortax_read_assign
+        use fortax_read,          only : fr
 
         implicit none
 
