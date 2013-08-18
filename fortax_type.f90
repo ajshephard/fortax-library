@@ -1125,6 +1125,84 @@ contains
 
 #   include "includes/sys_save.inc"
 
+    subroutine sys_saveInteger(typelist,str,funit,myval)
+        use fortax_util, only : intToStr
+        implicit none
+        character(len=*), intent(in) :: typelist
+        character(len=*), intent(in) :: str
+        integer,          intent(in) :: funit
+        integer,          intent(in) :: myval
+        write(funit,'(a)',advance="no") "sys%"//typelist//"%"//str//"="
+        write(funit,'(a)') intToStr(myval)
+    end subroutine sys_saveInteger
+
+    subroutine sys_saveIntegerArray(typelist,str,funit,myval)
+        use fortax_util, only : intToStr
+        implicit none
+        character(len=*), intent(in) :: typelist
+        character(len=*), intent(in) :: str
+        integer,          intent(in) :: funit
+        integer,          intent(in) :: myval(:)
+        integer :: i
+        write(funit,'(a)') "allocate(sys%"//typelist//"%"//str//"("//intToStr(size(myval))//"))"
+        do i = 1, size(myval)
+            write(funit,'(a)',advance="no") "sys%"//typelist//"%"//str//"("//intToStr(i)//")="
+            write(funit,'(a)') intToStr(myval(i))
+        end do
+    end subroutine sys_saveIntegerArray
+
+    subroutine sys_saveDouble(typelist,str,funit,myval)
+        use fortax_util, only : dblToStr
+        implicit none
+        character(len=*), intent(in) :: typelist
+        character(len=*), intent(in) :: str
+        integer,          intent(in) :: funit
+        real(dp),         intent(in) :: myval
+        write(funit,'(a)',advance="no") "sys%"//typelist//"%"//str//"="
+        write(funit,'(a)') dblToStr(myval)
+    end subroutine sys_saveDouble
+
+    subroutine sys_saveDoubleArray(typelist,str,funit,myval)
+        use fortax_util, only : intToStr, dblToStr
+        implicit none
+        character(len=*), intent(in) :: typelist
+        character(len=*), intent(in) :: str
+        integer,          intent(in) :: funit
+        real(dp),         intent(in) :: myval(:)
+        integer :: i
+        write(funit,'(a)') "allocate(sys%"//typelist//"%"//str//"("//intToStr(size(myval))//"))"
+        do i = 1, size(myval)
+            write(funit,'(a)',advance="no") "sys%"//typelist//"%"//str//"("//intToStr(i)//")="
+            write(funit,'(a)') dblToStr(myval(i))//'_dp'
+        end do
+    end subroutine sys_saveDoubleArray
+
+    subroutine sys_saveLogical(typelist,str,funit,myval)
+        use fortax_util, only : intToStr
+        implicit none
+        character(len=*), intent(in) :: typelist
+        character(len=*), intent(in) :: str
+        integer,          intent(in) :: funit
+        logical,          intent(in) :: myval
+        write(funit,'(a)',advance="no") "sys%"//typelist//"%"//str//"="
+        write(funit,'(a)') merge('.true. ','.false.', myval)
+    end subroutine sys_saveLogical
+
+    subroutine sys_saveLogicalArray(typelist,str,funit,myval)
+        use fortax_util, only : intToStr
+        implicit none
+        character(len=*), intent(in) :: typelist
+        character(len=*), intent(in) :: str
+        integer,          intent(in) :: funit
+        logical,          intent(in) :: myval(:)
+        integer :: i
+        write(funit,'(a)') "allocate(sys%"//typelist//"%"//str//"("//intToStr(size(myval))//"))"
+        do i = 1, size(myval)
+            write(funit,'(a)',advance="no") "sys%"//typelist//"%"//str//"("//intToStr(i)//")="
+            write(funit,'(a)') merge('.true. ','.false.', myval(i))
+        end do
+    end subroutine sys_saveLogicalArray
+
     subroutine sys_saveF90(sys,fname)
 
         !use fortax_type, only : sys_t
