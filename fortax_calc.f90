@@ -83,7 +83,8 @@ contains
 
         !Personal allowance
 
-        ! Calculate personal allowance for adult 1 (tapering it away from high income individuals from April 2010 onwards)
+        ! Calculate personal allowance for adult 1 (tapering it away from high income individuals from April 2010
+        ! onwards)
         if (sys%inctax%doPATaper) then
 
             ! Calculate earnings over threshold
@@ -108,7 +109,8 @@ contains
         net%ad(1)%taxable = max(fam%ad(1)%earn-persAllow, 0.0_dp)
 
 
-        ! Calculate personal allowance for adult 2 if present (tapering it away from high income individuals from April 2010 onwards)
+        ! Calculate personal allowance for adult 2 if present (tapering it away from high income individuals from April
+        ! 2010 onwards)
         if (_famcouple_) then
 
             if (sys%inctax%doPATaper) then
@@ -209,8 +211,8 @@ contains
             !2nd to penultimate bands
             if (sys%inctax%numbands > 2) then
                 do j = 2, sys%inctax%numbands-1
-                    net%ad(i)%inctax = net%ad(i)%inctax + max(min(net%ad(i)%taxable-sys%inctax%bands(j-1),sys%inctax%bands(j) &
-                        & -sys%inctax%bands(j-1)),0.0_dp)*sys%inctax%rates(j)
+                    net%ad(i)%inctax = net%ad(i)%inctax + max(min(net%ad(i)%taxable-sys%inctax%bands(j-1), &
+                        & sys%inctax%bands(j) - sys%inctax%bands(j-1)),0.0_dp)*sys%inctax%rates(j)
                 end do
             end if
 
@@ -265,7 +267,8 @@ contains
                 if (pe==1) then
                     !Taper away from higher-rate taxpayers (never tapered away from secondary earner)
                     if (net%ad(1)%taxable > sys%inctax%bands(sys%inctax%numbands-1)) then
-                        ctc = max(ctc - sys%inctax%ctctaper*(net%ad(1)%taxable-sys%inctax%bands(sys%inctax%numbands-1)),0.0_dp)
+                        ctc = max(ctc - &
+                            sys%inctax%ctctaper*(net%ad(1)%taxable-sys%inctax%bands(sys%inctax%numbands-1)),0.0_dp)
                     end if
 
                     !Now reduce tax due
@@ -277,7 +280,8 @@ contains
                 else
                     !Taper away from higher-rate taxpayers (never tapered away from secondary earner)
                     if (net%ad(2)%taxable > sys%inctax%bands(sys%inctax%numbands-1)) then
-                        ctc = max(ctc - sys%inctax%ctctaper*(net%ad(2)%taxable-sys%inctax%bands(sys%inctax%numbands-1)),0.0_dp)
+                        ctc = max(ctc - &
+                            sys%inctax%ctctaper*(net%ad(2)%taxable-sys%inctax%bands(sys%inctax%numbands-1)),0.0_dp)
                     end if
 
                     !Now reduce tax due
@@ -382,7 +386,8 @@ contains
                 net%ad(i)%natinsc1 = sys%natins%bands(1)*sys%natins%rates(1)
                 if (sys%natins%numrates > 1) then
                     do j = 2, sys%natins%numrates
-                        net%ad(i)%natinsc1 = net%ad(i)%natinsc1 + max(min(fam%ad(i)%earn-sys%natins%bands(j-1),sys%natins%bands(j) &
+                        net%ad(i)%natinsc1 = net%ad(i)%natinsc1 + &
+                            & max(min(fam%ad(i)%earn-sys%natins%bands(j-1),sys%natins%bands(j) &
                             & - sys%natins%bands(j-1)),0.0_dp)*sys%natins%rates(j)
                     end do
                 end if
@@ -409,11 +414,12 @@ contains
 
             ! Class 4 contributions
             net%ad(i)%natinsc4 = 0.0_dp
-            net%ad(i)%natinsc4 = net%ad(i)%natinsc4 + min(max(fam%ad(i)%earn,0.0_dp), sys%natins%c4bands(1))*sys%natins%c4rates(1)
+            net%ad(i)%natinsc4 = net%ad(i)%natinsc4 + min(max(fam%ad(i)%earn,0.0_dp), &
+                sys%natins%c4bands(1))*sys%natins%c4rates(1)
             if (sys%natins%c4nrates > 2) then
                 do j = 2, sys%natins%c4nrates-1
-                    net%ad(i)%natinsc4 = net%ad(i)%natinsc4 + max(min(fam%ad(i)%earn-sys%natins%c4bands(j-1),sys%natins%c4bands(j) &
-                        & - sys%natins%c4bands(j-1)),0.0_dp)*sys%natins%c4rates(j)
+                    net%ad(i)%natinsc4 = net%ad(i)%natinsc4 + max(min(fam%ad(i)%earn-sys%natins%c4bands(j-1), &
+                        sys%natins%c4bands(j) - sys%natins%c4bands(j-1)),0.0_dp)*sys%natins%c4rates(j)
                 end do
             end if
             if (sys%natins%c4nrates > 1) net%ad(i)%natinsc4 = net%ad(i)%natinsc4 &
@@ -1014,8 +1020,8 @@ contains
             ! From April 2013, refund only a fraction of council tax liability
             if (sys%ctaxben%doEntitlementCut) then
 
-              ! Note: in England, cut only applies to nonpensioners (we ignore this because FORTAX only works for working age individuals)
-              ! Wales is region 10, Scotland is region 11
+              ! Note: in England, cut only applies to nonpensioners (we ignore this because FORTAX only works for
+              ! working age individuals). Wales is region 10, Scotland is region 11
               if ((fam%region .ne. lab%region%wales) .and. (fam%region .ne. lab%region%scotland)) then
                 maxctb = maxctb * sys%ctaxben%entitlementShare
               end if
@@ -1078,8 +1084,9 @@ contains
 
             else
                 !CCB taper (I think disregFT and disregCC ares irrelevant here - they are only > 0 from 1995)
-!                net%tu%polltaxben = max(eligcc - max(max(max(net%tu%posttaxearn-disreg1,0.0_dp)+net%tu%fc+net%tu%wtc-disreg2, 0.0_dp) &
-!                    & + max(fam%maint-disreg3, 0.0_dp) + net%tu%chben+net%tu%ctc-appamt, 0.0_dp)*sys%ccben%taper,0.0_dp)
+!                net%tu%polltaxben = max(eligcc - max(max(max(net%tu%posttaxearn-disreg1,0.0_dp) &
+!                    & +net%tu%fc+net%tu%wtc-disreg2, 0.0_dp) + max(fam%maint-disreg3, 0.0_dp)
+!                    & + net%tu%chben+net%tu%ctc-appamt, 0.0_dp)*sys%ccben%taper,0.0_dp)
 
                 net%tu%polltaxben = max(eligcc - disregRebate*sys%ccben%taper,0.0_dp)
 
@@ -1115,7 +1122,8 @@ contains
         if (.not. _famcouple_) then
             if (_famkids_) then
                 !Lone parent
-                !sys%rebatesys%PremLP abolished Apr 98, but don't need to condition on year here because parameter should be zero for later years
+                !sys%rebatesys%PremLP abolished Apr 98, but don't need to condition on year here because parameter
+                !should be zero for later years
                 if (fam%ad(1)%age < 18) then
                     HBAppAmt = sys%rebatesys%YngLP + sys%rebatesys%PremFam + sys%rebatesys%PremLP
                 else
@@ -1146,7 +1154,8 @@ contains
 
             do i = 1, fam%nkids
                 do j = 1, sys%rebatesys%NumAgeRng
-                    if ((fam%kidage(i) >= sys%rebatesys%AgeRngl(j)) .and. (fam%kidage(i) <= sys%rebatesys%AgeRngu(j))) then
+                    if ((fam%kidage(i) >= sys%rebatesys%AgeRngl(j)) &
+                        .and. (fam%kidage(i) <= sys%rebatesys%AgeRngu(j))) then
                         HBAppAmt = HBAppAmt + sys%rebatesys%AddKid(j)
                         exit
                     end if
@@ -1205,7 +1214,8 @@ contains
         !I have changed this so it condtions on dofamcred (and others) so it does
         !not give the FT disregard under incomplete takeup, AS 16/06/10
 
-        !Additional disregard for workers (up to 2003: those eligible for FC/WFTC/WTC FT premium; from 2004: those eligible for WTC)
+        !Additional disregard for workers (up to 2003: those eligible for FC/WFTC/WTC FT premium; from 2004: those
+        !eligible for WTC)
         FTDisreg = 0.0_dp
 
         !if (sys%fc%dofamcred) then
@@ -1636,12 +1646,14 @@ contains
             if (sys%ntc%taperCTCInOneGo) then
 
                 ! Next taper CTC
-                net%tu%ctc = max(MaxCTCKid + MaxCTCFam - max(net%tu%pretaxearn - Thr1 - MaxWTC/sys%ntc%taper1, 0.0_dp)*sys%ntc%taper1, 0.0_dp)
+                net%tu%ctc = max(MaxCTCKid + MaxCTCFam - max(net%tu%pretaxearn - Thr1 - MaxWTC/sys%ntc%taper1, 0.0_dp) &
+                    *sys%ntc%taper1, 0.0_dp)
 
             else
 
                 ! Next taper child elements of CTC
-                net%tu%ctc = max(MaxCTCKid - max(net%tu%pretaxearn - Thr1 - MaxWTC/sys%ntc%taper1, 0.0_dp)*sys%ntc%taper1, 0.0_dp)
+                net%tu%ctc = max(MaxCTCKid - max(net%tu%pretaxearn - Thr1 - MaxWTC/sys%ntc%taper1, 0.0_dp) &
+                    *sys%ntc%taper1, 0.0_dp)
 
                 ! Second threshold
                 Thr2 = max((MaxWTC+MaxCTCKid)/sys%ntc%taper1 + Thr1, sys%ntc%thr2)
@@ -1925,17 +1937,21 @@ contains
                     end if
                 end if
 
-                ! the way the rounding of the child benefit charge works, it is possible that families with very high income will
-                ! not have their benefit completely withdrawn. To prevent this, the percentLost may now exceed 100%, and the
-                ! charge may not exceed the full amonunt of child benefit
+                ! the way the rounding of the child benefit charge works, it is possible that families with very high
+                ! income will not have their benefit completely withdrawn. To prevent this, the percentLost may now
+                ! exceed 100%, and the charge may not exceed the full amonunt of child benefit
 
                 if (.not. sys%chben%disableTaperRounding) then
 
-                    ! Find annual amount by which earnings of primary earner exceeds threshold (rounded down to nearest pound in annual terms)
-                    excessAnnualEarnings = max(0.0_dp, real(floor((fam%ad(pe)%earn - sys%chben%taperStart)*52.0_dp + chben_tol), dp))
+                    ! Find annual amount by which earnings of primary earner exceeds threshold (rounded down to nearest
+                    ! pound in annual terms)
+                    excessAnnualEarnings = max(0.0_dp, real(floor((fam%ad(pe)%earn - sys%chben%taperStart)*52.0_dp &
+                        + chben_tol), dp))
 
-                    ! Find percentage of child benefit award tapered away (calculated on rounded excess earnings, rounded down to nearest percent)
-!                     percentLost = min(1.0_dp, real(floor(excessAnnualEarnings * sys%chben%taperRate + tol) / 100.0_dp, dp))
+                    ! Find percentage of child benefit award tapered away (calculated on rounded excess earnings,
+                    ! rounded down to nearest percent)
+!                     percentLost = min(1.0_dp, real(floor(excessAnnualEarnings * sys%chben%taperRate + tol) &
+!                         / 100.0_dp, dp))
                     percentLost = real(floor(excessAnnualEarnings * sys%chben%taperRate + tol) / 100.0_dp, dp)
 
                     ! Find weekly high income child benefit charge (rounded down to nearest pound at annual level)
@@ -2004,7 +2020,8 @@ contains
                 if (net%tu%ctc > MaxCTCFam(sys,fam) + tol) dogrant = .true.
             end if
 
-            !From Apr-11: no maternity grant if there's another child aged under 16 in the family (except for multiple births)
+            !From Apr-11: no maternity grant if there's another child aged under 16 in the family (except for multiple
+            ! births)
             if (sys%chBen%MatGrantOnlyFirstKid) then
               do i=1,fam%nkids
                   if ((fam%kidage(i) > 0) .and. (fam%kidage(i) < 16)) dogrant = .false.
@@ -2083,9 +2100,10 @@ contains
 
         ! Entitlement conditions need implementing but are a bit complicated
           ! Need one adult below SPA
-          ! If one member of a couple aged under 18, he/she is ignored in calculating maximum UC, but earnings is taken into account
-          ! 16-17 year olds entitled if have dependent children or have no parental support
-          ! These last two points make it sound like BU is penalised if one adult is under 18 but not if both! Is this right?
+          ! If one member of a couple aged under 18, he/she is ignored in calculating maximum UC, but earnings is taken
+          ! into account ! 16-17 year olds entitled if have dependent children or have no parental support
+          ! These last two points make it sound like BU is penalised if one adult is under 18 but not if both! Is this
+          ! right?
 
         UCHousingElement = UCHousing(sys,fam)
         UCChCareElement = UCChCare(sys,fam)
@@ -2189,7 +2207,8 @@ contains
     ! -----------------------------------------------------------------------
     ! Childcare element of Universal Credit
     ! Same as childcare element of WTC
-    ! Note that it does NOT set net%tu%chcaresub. This is done in UnivCred so that UCChCare can be called later without disrupting chcaresub
+    ! Note that it does NOT set net%tu%chcaresub. This is done in UnivCred so that UCChCare can be called later without
+    ! disrupting chcaresub
 
     !DEC$ ATTRIBUTES FORCEINLINE :: UCChCare
     real(dp) pure function UCChCare(sys,fam)
