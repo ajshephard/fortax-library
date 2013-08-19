@@ -629,18 +629,12 @@ contains
 
 #       define _$header
 #       define _$footer
-#       define _$integer(x,y) integer,  optional, intent(in) :: x##1;\
-                              integer,  optional, intent(in) :: x##2
-#       define _$double(x,y)  real(dp), optional, intent(in) :: x##1;\
-                              real(dp), optional, intent(in) :: x##2
-#       define _$logical(x,y) logical,  optional, intent(in) :: x##1;\
-                              logical,  optional, intent(in) :: x##2
-#       define _$integerarray(x,y,z) integer,  optional, intent(in) :: x##1(:);\
-                                     integer,  optional, intent(in) :: x##2(:)
-#       define _$doublearray(x,y,z)  real(dp), optional, intent(in) :: x##1(:);\
-                                     real(dp), optional, intent(in) :: x##2(:)
-#       define _$logicalarray(x,y,z) logical,  optional, intent(in) :: x##1(:);\
-                                     logical,  optional, intent(in) :: x##2(:)
+#       define _$integer(x,y) integer,  optional, intent(in) :: x##1; integer,  optional, intent(in) :: x##2
+#       define _$double(x,y)  real(dp), optional, intent(in) :: x##1; real(dp), optional, intent(in) :: x##2
+#       define _$logical(x,y) logical,  optional, intent(in) :: x##1; logical,  optional, intent(in) :: x##2
+#       define _$integerarray(x,y,z) integer,  optional, intent(in) :: x##1(:); integer,  optional, intent(in) :: x##2(:)
+#       define _$doublearray(x,y,z)  real(dp), optional, intent(in) :: x##1(:); real(dp), optional, intent(in) :: x##2(:)
+#       define _$logicalarray(x,y,z) logical,  optional, intent(in) :: x##1(:); logical,  optional, intent(in) :: x##2(:)
 #       include "includes/famad_t.inc"
 #       undef  _$header
 #       undef  _$footer
@@ -692,12 +686,9 @@ contains
 #       define _$integer(x,y) if (present(x##1)) fam_gen%ad(1)%x = x##1; if (present(x##2)) fam_gen%ad(2)%x = x##2
 #       define _$double(x,y)  if (present(x##1)) fam_gen%ad(1)%x = x##1; if (present(x##2)) fam_gen%ad(2)%x = x##2
 #       define _$logical(x,y) if (present(x##1)) fam_gen%ad(1)%x = x##1; if (present(x##2)) fam_gen%ad(2)%x = x##2
-#       define _$integerarray(x,y,z) if (present(x##1)) fam_gen%ad(1)%x(1:size(x##1)) = x##1;\
-                                     if (present(x##2)) fam_gen%ad(2)%x(1:size(x##2)) = x##2
-#       define _$doublearray(x,y,z)  if (present(x##1)) fam_gen%ad(1)%x(1:size(x##1)) = x##1;\
-                                     if (present(x##2)) fam_gen%ad(2)%x(1:size(x##2)) = x##2
-#       define _$logicalarray(x,y,z) if (present(x##1)) fam_gen%ad(1)%x(1:size(x##1)) = x##1;\
-                                     if (present(x##2)) fam_gen%ad(2)%x(1:size(x##2)) = x##2
+#       define _$integerarray(x,y,z) if (present(x##1)) fam_gen%ad(1)%x(1:size(x##1)) = x##1; if (present(x##2)) fam_gen%ad(2)%x(1:size(x##2)) = x##2
+#       define _$doublearray(x,y,z)  if (present(x##1)) fam_gen%ad(1)%x(1:size(x##1)) = x##1; if (present(x##2)) fam_gen%ad(2)%x(1:size(x##2)) = x##2
+#       define _$logicalarray(x,y,z) if (present(x##1)) fam_gen%ad(1)%x(1:size(x##1)) = x##1; if (present(x##2)) fam_gen%ad(2)%x(1:size(x##2)) = x##2
 #       include "includes/famad_t.inc"
 
 #       undef  _$header

@@ -21,9 +21,7 @@
 #define concat3(x, y, z) concat3_(x, y, z)
 #define concat3_(x, y, z) x ## y ## z
 
-#define _$header subroutine concat(_$typelist,_init(syst)); \
-implicit none; \
-type(concat(_$typelist,_t)), intent(inout) :: syst
+#define _$header subroutine concat(_$typelist,_init(syst)); implicit none; type(concat(_$typelist,_t)), intent(inout) :: syst
 #define _$footer end subroutine concat(_$typelist,_init)
 
 #include "system/syslist.inc"
