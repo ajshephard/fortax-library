@@ -8,12 +8,14 @@ OBJECTS  = fortax_library.o fortax_realtype.o fortax_util.o fortax_type.o fortax
 XMLOBJECTS = xmlparse.o read_xml_primitives.o write_xml_primitives.o xmltaxben_t.o xmlfortax_t.o xmlfamcompare_t.o
 
 F90 = ifort
-F90 = g95
+# F90 = g95
 F90 = gfortran
-F90 = pgfortran
+# F90 = pgfortran
+F90 = sunf95
 
 ifeq ($(F90),gfortran)
 	FFLAGS = -O3 -ffixed-line-length-none -ffree-line-length-none -ffree-form -x f95
+	FFLAGS = -O3 -ffree-form -x f95
 	CFLAGS = -cpp -E -P -x c -ansi
 	CPP = gcc
 	FEXT = f
@@ -28,8 +30,9 @@ endif
 
 ifeq ($(F90),ifort)
 	# GPROF = -g -p
-	DIAGDISABLE = -diag-disable 5268,7025
-	FFLAGS = -O3 -fpp -stand f03 -warn all -inline speed -inline-forceinline -no-prec-div -xHost -static -fPIC -gen-interfaces $(DIAGDISABLE) $(GPROF) -module $(MODPATH)
+	#DIAGDISABLE = -diag-disable 5268,7025
+	FFLAGS = -O3 -fpp -stand f03 -warn all -inline speed -inline-forceinline -no-prec-div -xHost -static -fPIC -gen-interfaces $(DIAGDISABLE) $(GPROF) -module $(MODPATH) -I$(INCLUDESPATH) -assume source_include 
+	# -I$(INCLUDESPATH)/system -I$(INCLUDESPATH)/label
 	FEXT = f90
 endif
 
@@ -39,6 +42,12 @@ ifeq ($(F90),pgfortran)
 	FFLAGS = -O3 -Mfree
 	CFLAGS = -O3 -Mpreprocess -Mfree -Mcpp=c89 -E
 	FEXT = f
+endif
+
+ifeq ($(F90),sunf95)
+	F90 = ~/Downloads/SolarisStudio12.3-linux-x86-bin/solarisstudio12.3/bin/sunf95
+	FFLAGS = -xO3 -free -fpp
+	FEXT = f90
 endif
 
 all:$(OBJECTS) $(XMLOBJECTS)
