@@ -9,10 +9,10 @@
 #undef _$header
 
 #define concat(x, y) concat_(x, y)
-#define concat_(x, y) x ## y
+#define concat_(x, y) x##y
 
 #define concat3(x, y, z) concat3_(x, y, z)
-#define concat3_(x, y, z) x ## y ## z
+#define concat3_(x, y, z) x##y##z
 
 !define label type for all listed in lablist
 

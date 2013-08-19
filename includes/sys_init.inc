@@ -16,10 +16,10 @@
 #define _$logicalarray(x,y,z) if (allocated(syst% x )) deallocate(syst% x )
 
 #define concat(x, y) concat_(x, y)
-#define concat_(x, y) x ## y
+#define concat_(x, y) x##y
 
 #define concat3(x, y, z) concat3_(x, y, z)
-#define concat3_(x, y, z) x ## y ## z
+#define concat3_(x, y, z) x##y##z
 
 #define _$header subroutine concat(_$typelist,_init(syst)); implicit none; type(concat(_$typelist,_t)), intent(inout) :: syst
 #define _$footer end subroutine concat(_$typelist,_init)
