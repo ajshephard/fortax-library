@@ -1,7 +1,7 @@
 ! council tax band
 #undef   _$typelist
 #define  _$typelist ctax
-#include "ctax.inc"
+#include "ctaxl.inc"
 
 ! housing tenure
 #undef   _$typelist
