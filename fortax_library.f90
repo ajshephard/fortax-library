@@ -33,6 +33,7 @@ module fortax_library
 
     use fortax_extra,       only :  FORTAX_setMinAmount => setMinAmount,                        &
                                     FORTAX_abolishNIFee => abolishNIFee,                        &
+                                    FORTAX_disableTaperRounding => disableTaperRounding,        &
                                     FORTAX_fsMinAppAmt => fsMinAppAmt,                          &
                                     FORTAX_taperMatGrant => taperMatGrant,                      &
                                     FORTAX_imposeUC => imposeUC,                                &

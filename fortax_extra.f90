@@ -29,7 +29,7 @@ module fortax_extra
     private :: dp
     private
     public :: setMinAmount, abolishNIFee, fsMinAppAmt, taperMatGrant, &
-              imposeUC, netoutDesc, netoutDescNoName
+              imposeUC, disableTaperRounding, netoutDesc, netoutDescNoName
 
     integer,  parameter :: netoutSize = 100
 
@@ -89,6 +89,21 @@ contains
 
     end subroutine abolishNIFee
 
+    ! disableTaperRounding
+    ! -----------------------------------------------------------------------
+    ! disables the rounding rules when tapering to stop introducing a large
+    ! number of small discountinuities
+
+    pure subroutine disableTaperRounding(sys)
+
+        use fortax_type, only : sys_t
+        
+        type(sys_t), intent(inout) :: sys
+
+        sys%chben%disableTaperRounding = .true.
+        sys%inctax%disablePATaperRounding = .true.
+
+    end subroutine disableTaperRounding
 
     ! fsMinAppAmt
     ! -----------------------------------------------------------------------
