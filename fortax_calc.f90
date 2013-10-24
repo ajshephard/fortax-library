@@ -802,11 +802,14 @@ contains
         real(dp) :: appamt, disregStd, disregFT, disregCC, disregMnt
 
         if (net%tu%incsup <= tol) then !JS: I changed ">" to "<" (I think this is what it should be)
-            appamt       = HBAppAmt(sys,fam)
-            disregStd    = StdDisreg(sys,fam)
-            disregFT     = FTDisreg(sys,fam,net)
-            disregCC     = ChCareDisreg(sys,fam,net)
-            disregMnt    = MaintDisreg(sys,fam)
+            appamt       = HBAppAmt(sys,fam,net)
+            ! I don't think any of the rest of these disregards are relevant under UC
+            if (.not. sys%rebatesys%rulesUnderUC) then
+                disregStd    = StdDisreg(sys,fam)
+                disregFT     = FTDisreg(sys,fam,net)
+                disregCC     = ChCareDisreg(sys,fam,net)
+                disregMnt    = MaintDisreg(sys,fam)
+            end if
             disregRebate = RebateDisreg(sys,fam,net,appamt,disregStd,disregFT,disregCC,disregMnt)
         else
             disregRebate = 0.0_dp
@@ -863,7 +866,9 @@ contains
         chben = 0.0_dp
         if (sys%rebateSys%ChbenIsIncome) chben = net%tu%chben
 
-        if (sys%rebatesys%rulesUnderWFTC .or. sys%rebatesys%rulesUnderNTC) then
+        if (sys%rebatesys%rulesUnderUC) then
+            RebateDisreg = max(net%tu%posttaxearn + net%tu%uc - appamt, 0.0_dp)
+        else if (sys%rebatesys%rulesUnderWFTC .or. sys%rebatesys%rulesUnderNTC) then
             RebateDisreg = max(max(max(max(net%tu%posttaxearn-disregStd-disregCC1,0.0_dp) &
                 & + net%tu%fc+net%tu%wtc-disregFT, 0.0_dp) + disregCC2, 0.0_dp) &
                 & + max(fam%maint-disregMnt, 0.0_dp) + chben + disregCC3 - appamt, 0.0_dp)
@@ -1100,58 +1105,69 @@ contains
     ! multiple kids under 1. Depends on couple, adage, nkids, kidage
 
     !DEC$ ATTRIBUTES FORCEINLINE :: HBAppAmt
-    real(dp) pure function HBAppAmt(sys,fam)
+    real(dp) pure function HBAppAmt(sys,fam,net)
 
-        use fortax_type, only : sys_t, fam_t
+        use fortax_type, only : sys_t, fam_t, net_t
 
         implicit none
 
         type(sys_t), intent(in) :: sys
         type(fam_t), intent(in) :: fam
+        type(net_t), intent(in) :: net
 
         integer                 :: i, j
 
-        !Allowances and family/LP premiums
-        if (.not. _famcouple_) then
-            if (_famkids_) then
-                !Lone parent
-                !sys%rebatesys%PremLP abolished Apr 98, but don't need to condition on year here because parameter should be zero for later years
-                if (fam%ad(1)%age < 18) then
-                    HBAppAmt = sys%rebatesys%YngLP + sys%rebatesys%PremFam + sys%rebatesys%PremLP
-                else
-                    HBAppAmt = sys%rebatesys%MainLP + sys%rebatesys%PremFam + sys%rebatesys%PremLP
-                end if
-            else
-                !Single childless
-                if (fam%ad(1)%age < 25) then
-                    HBAppAmt = sys%rebatesys%YngSin
-                else
-                    HBAppAmt = sys%rebatesys%MainSin
-                end if
-            end if
+
+        ! Under UC, applicable amount for CTB is just the maximum (pre-taper) UC entitlement
+        if (sys%rebatesys%rulesUnderUC) then
+            HBAppAmt = net%tu%maxUC
+
+
         else
-            !Couples
-            if ((fam%ad(1)%age < 18) .and. (fam%ad(2)%age < 18)) then
-                HBAppAmt = sys%rebatesys%YngCou
-            else
-                HBAppAmt = sys%rebatesys%MainCou
-            end if
 
-            if (_famkids_) HBAppAmt = HBAppAmt + sys%rebatesys%PremFam
-
-        end if
-
-        !Child additions
-        if (_famkids_) then
-
-            do i = 1, fam%nkids
-                do j = 1, sys%rebatesys%NumAgeRng
-                    if ((fam%kidage(i) >= sys%rebatesys%AgeRngl(j)) .and. (fam%kidage(i) <= sys%rebatesys%AgeRngu(j))) then
-                        HBAppAmt = HBAppAmt + sys%rebatesys%AddKid(j)
-                        exit
+            !Allowances and family/LP premiums
+            if (.not. _famcouple_) then
+                if (_famkids_) then
+                    !Lone parent
+                    !sys%rebatesys%PremLP abolished Apr 98, but don't need to condition on year here because parameter should be zero for later years
+                    if (fam%ad(1)%age < 18) then
+                        HBAppAmt = sys%rebatesys%YngLP + sys%rebatesys%PremFam + sys%rebatesys%PremLP
+                    else
+                        HBAppAmt = sys%rebatesys%MainLP + sys%rebatesys%PremFam + sys%rebatesys%PremLP
                     end if
+                else
+                    !Single childless
+                    if (fam%ad(1)%age < 25) then
+                        HBAppAmt = sys%rebatesys%YngSin
+                    else
+                        HBAppAmt = sys%rebatesys%MainSin
+                    end if
+                end if
+            else
+                !Couples
+                if ((fam%ad(1)%age < 18) .and. (fam%ad(2)%age < 18)) then
+                    HBAppAmt = sys%rebatesys%YngCou
+                else
+                    HBAppAmt = sys%rebatesys%MainCou
+                end if
+    
+                if (_famkids_) HBAppAmt = HBAppAmt + sys%rebatesys%PremFam
+    
+            end if
+    
+            !Child additions
+            if (_famkids_) then
+    
+                do i = 1, fam%nkids
+                    do j = 1, sys%rebatesys%NumAgeRng
+                        if ((fam%kidage(i) >= sys%rebatesys%AgeRngl(j)) .and. (fam%kidage(i) <= sys%rebatesys%AgeRngu(j))) then
+                            HBAppAmt = HBAppAmt + sys%rebatesys%AddKid(j)
+                            exit
+                        end if
+                    end do
                 end do
-            end do
+    
+            end if
 
         end if
 
@@ -2079,7 +2095,7 @@ contains
         type(fam_t), intent(in)    :: fam
         type(net_t), intent(inout) :: net
 
-        real(dp)                   :: maxUC, UCChCareElement, UCHousingElement, UCDisregAmt
+        real(dp)                   :: UCChCareElement, UCHousingElement, UCDisregAmt
 
         ! Entitlement conditions need implementing but are a bit complicated
           ! Need one adult below SPA
@@ -2090,11 +2106,11 @@ contains
         UCHousingElement = UCHousing(sys,fam)
         UCChCareElement = UCChCare(sys,fam)
         net%tu%chcaresub = UCChCareElement
-        maxUC = UCStdAllow(sys,fam) + UCKid(sys,fam) + UCChCareElement + UCHousingElement
+        net%tu%maxUC = UCStdAllow(sys,fam) + UCKid(sys,fam) + UCChCareElement + UCHousingElement
         UCDisregAmt = UCDisreg(sys,fam,UCHousingElement)
 
         ! Taper award
-        net%tu%uc = max(maxUC - (max(net%tu%posttaxearn-UCDisregAmt,0.0_dp)*sys%uc%taper), 0.0_dp)
+        net%tu%uc = max(net%tu%maxUC - (max(net%tu%posttaxearn-UCDisregAmt,0.0_dp)*sys%uc%taper), 0.0_dp)
 
         ! Note: child maintenance ignored altogether but not spousal maintenance
         ! (I'm assuming fam%maint is child maintenance)
@@ -2203,6 +2219,7 @@ contains
 
         integer                    :: i, nkidscc
 
+        UCChCare = 0.0_dp
         if ((_famkids_) .and. (fam%ccexp > tol)) then
 
             ! Count number of children young enough to be eligible for childcare support
@@ -2544,7 +2561,19 @@ contains
         end if
 
 
-        !5. IS AND IB-JSA
+
+        !5. Univeral Credit
+        !!!!!!!!!!!!!!!!!!!
+        
+        if (sys%uc%doUnivCred) then
+            call UnivCred(sys,fam,net)
+        else
+            net%tu%uc = 0.0_dp
+        end if
+
+
+
+        !6. IS AND IB-JSA
         !!!!!!!!!!!!!!!!!
 
         if (sys%incsup%doIncSup) then
@@ -2558,7 +2587,7 @@ contains
         call fsm(sys,fam,net)
 
 
-        !6. HB, CTB AND CCB
+        !7. HB, CTB AND CCB
         !!!!!!!!!!!!!!!!!!!
 
         ! Preliminary calculations (disregRebate passed to subsequent routines)
@@ -2591,13 +2620,6 @@ contains
             net%tu%ctaxben = 0.0_dp
         end if
 
-
-        ! Univeral Credit
-        if (sys%uc%doUnivCred) then
-            call UnivCred(sys,fam,net)
-        else
-            net%tu%uc = 0.0_dp
-        end if
 
 
         ! Disposable income

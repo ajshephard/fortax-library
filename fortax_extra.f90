@@ -218,6 +218,13 @@ contains
         sys%fc%dofamcred      = .false.
         sys%ntc%doNewTaxCred  = .false.
 
+        ! Change CTB to operate under UC rules
+        sys%rebatesys%rulesUnderUC    = .true.
+        sys%rebatesys%rulesUnderNTC   = .false.
+        sys%rebatesys%rulesUnderWFTC  = .false.
+        sys%rebatesys%rulesUnderFC    = .false.
+
+
     end subroutine imposeUC
 
     ! netoutDesc

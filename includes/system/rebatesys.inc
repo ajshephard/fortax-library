@@ -3,6 +3,7 @@ _$header
 _$logical(RulesUnderFC,null)
 _$logical(RulesUnderWFTC,null)
 _$logical(RulesUnderNTC,null)
+_$logical(RulesUnderUC,null)
 _$integer(NumAgeRng,range)
 _$logical(Restrict,null)
 _$logical(docap,null)
