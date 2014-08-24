@@ -2157,9 +2157,9 @@ contains
 
             ! Simplified relative to IS: higher allowance if at least one adult is 25+
             if ((fam%ad(1)%age < sys%uc%MinAgeMain) .and. (fam%ad(2)%age < sys%uc%MinAgeMain)) then
-                UCStdAllow = sys%incsup%YngCou
+                UCStdAllow = sys%uc%YngCou
             else
-                UCStdAllow = sys%incsup%MainCou
+                UCStdAllow = sys%uc%MainCou
             end if
 
 
