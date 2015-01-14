@@ -50,6 +50,7 @@ module fortax_library
 
     use fortax_prices,      only :  FORTAX_loadIndex => loadIndex,                              &
                                     FORTAX_uprateSys => uprateSys,                              &
+                                    FORTAX_uprateFactor => uprateFactor,                        &
                                     FORTAX_loadSysIndex => loadSysIndex,                        &
                                     FORTAX_getSysIndex => getSysIndex
 
