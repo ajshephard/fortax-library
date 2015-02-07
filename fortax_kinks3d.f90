@@ -39,14 +39,13 @@ module fortax_kinks3d
         integer :: nearn1, nearn2
         real(dp), dimension(maxkinks) :: earnbr1,  earnbr2
         real(dp), dimension(maxkinks-1) :: dearnbr1, dearnbr2
-!         real(dp), dimension(maxkinks,maxkinks) :: net
         real(dp), dimension(maxkinks,maxkinks) :: mtr1, mtr2
         real(dp) :: tCou(maxkinks,maxkinks)
         real(dp) :: tCouL(3,maxkinks-1,maxkinks-1)
         real(dp) :: tCouU(3,maxkinks-1,maxkinks-1)
     end type bcout3d_t
 
-    public :: bcout3d_t, kinksearn3d, evalTaxCouScalar!, evalKinksHours, evalKinksEarn, kinkshours, kinksearn, kinksccexp, maxkinks
+    public :: bcout3d_t, kinksearn3d, evalTaxCouScalar
 
 contains
 
@@ -153,115 +152,7 @@ contains
 
     end function evalTaxCouScalar
 
-
-!     pure subroutine setTax(x,tax,mode)
-!         implicit none
-!         real(dp), intent(in) :: x(NTAXPARAM)
-!         type(tax_t), intent(out) :: tax
-!         integer, intent(in) :: mode
-!         integer :: ixL0, ixL1, ixParam
-!         integer :: ixL0_1, ixParam_1
-
-!         ! initialize derivatives to zero
-!         tax%tDerSin  = 0.0_dp
-!         tax%tDerSinL = 0.0_dp
-!         tax%tDerCou   = 0.0_dp
-!         tax%tDerCouL  = 0.0_dp
-!         tax%tDerCouU  = 0.0_dp
-
-!         select case(mode)
-!         case(TAXLEVEL)
-!             tax%tSin = x(1:NTAXBR) ! tax parameters for singles
-!             do ixL0 = 1, NTAXBR
-!                 tax%tDerSin(ixL0,ixL0) = 1.0_dp
-!             end do
-!             ixParam = NTAXBR
-!             do ixL1 = 1, NTAXBR
-!                 do ixL0 = ixL1, NTAXBR
-!                     ixParam = ixParam+1
-!                     tax%tCou(ixL0,ixL1) = x(ixParam)
-!                     tax%tDerCou(ixParam,ixL0,ixL1) = 1.0_dp
-! !                     print *, ixL0,ixL1,tax%tCou(ixL0,ixL1)
-!                 end do
-!             end do
-
-!             ! symmetry
-!             do ixL1 = 1, NTAXBR
-!                 do ixL0 = 1, ixL1-1
-!                     tax%tCou(ixL0,ixL1) = tax%tCou(ixL1,ixL0)
-!                     tax%tDerCou(ixParam,ixL0,ixL1) = tax%tDerCou(ixParam,ixL1,ixL0)
-!                 end do
-!             end do
-!         case(TAXRATE)
-
-!             ! reconstruct tax levels from marginal tax rates
-!             ! singles
-!             tax%tSin(1) = x(1)
-!             tax%tDerSin(1,1) = 1.0_dp
-!             do ixL0 = 2, NTAXBR
-!                 tax%tSin(ixL0) = tax%tSin(ixL0-1) + x(ixL0)*TAXDBR(ixL0-1)
-!                 do ixL0_1 = 1, ixL0-1
-!                     tax%tDerSin(ixL0_1,ixL0) = tax%tDerSin(ixL0_1,ixL0-1)
-!                 end do
-!                 tax%tDerSin(ixL0,ixL0) = TAXDBR(ixL0-1)
-!             end do
-        
-
-!             ! couples
-!             tax%tCou(1,1) = x(NTAXBR+1)
-!             tax%tDerCou(NTAXBR+1,1,1) = 1.0_dp
-!             ixParam = NTAXBR+1
-!             do ixL1 = 1, NTAXBR-1
-
-! !                 if (ixL1>1) then
-! !                     tax%tCou(ixL0,ixL1) = tax%tCou(ixL0-1,ixL1) + x(ixParam)*TAXDBR(ixL0-1)                
-! !                 end if
-
-!                 do ixL0 = ixL1+1, NTAXBR
-!                     ixParam = ixParam+1
-!                     tax%tCou(ixL0,ixL1) = tax%tCou(ixL0-1,ixL1) + x(ixParam)*TAXDBR(ixL0-1)
-!                     do ixParam_1 = 1, ixParam-1
-!                         tax%tDerCou(ixParam_1,ixL0,ixL1) = tax%tDerCou(ixParam_1,ixL0-1,ixL1)
-!                     end do
-!                     tax%tDerCou(ixParam,ixL0,ixL1) = TAXDBR(ixL0-1)
-! !                     print *, ixL0, ixL1, tax%tCou(ixL0,ixL1) ,x(ixParam)
-! !                     stop
-!                 end do
-!                 ixParam = ixParam+1
-! !                 here
-!                 tax%tCou(ixL1+1,ixL1+1) = tax%tCou(ixL1+1,ixL1) + x(ixParam)*TAXDBR(ixL1)
-!                 do ixParam_1 = 1, ixParam-1
-!                     tax%tDerCou(ixParam_1,ixL1+1,ixL1+1) = tax%tDerCou(ixParam_1,ixL1+1,ixL1)
-!                 end do
-!                 tax%tDerCou(ixParam,ixL1+1,ixL1+1) = TAXDBR(ixL1)
-
-!             end do
-!             ! symmetry
-!             do ixL1 = 1, NTAXBR
-!                 do ixL0 = 1, ixL1-1
-!                     tax%tCou(ixL0,ixL1) = tax%tCou(ixL1,ixL0)
-!                     do ixParam = NTAXBR+1,NTAXPARAM
-!                         tax%tDerCou(ixParam,ixL0,ixL1) = tax%tDerCou(ixParam,ixL1,ixL0)
-!                     end do
-!                 end do
-!             end do            
-! !             do ixL0 = 2, NTAXBR
-! !                 ixParam = ixParam+1
-! !                 tax%tCou(ixL0,1) = tax%tCou(ixL0-1,1) + x(ixParam)*TAXDBR(ixL0-1)
-! !             end do
-! !             ixParam = ixParam+1
-! !             tax%tCou(2,2) = tax%tCou(2,1) + x(ixParam)*TAXDBR(1)
-! !             do ixL0 = 3, NTAXBR
-! !                 ixParam = ixParam+1
-! !                 tax%tCou(ixL0,2) = tax%tCou(ixL0-1,1) + x(ixParam)*TAXDBR(ixL0-1)
-! !             end do
-! !             tax%tCou(3,3) = tax%tCou(2,1) + x(ixParam)*TAXDBR(1)
-!         end select
-
-!         call calcTaxCoef(tax)
-
-!     end subroutine setTax
-
+    ! for dubugging
     subroutine printTaxX(tax)
         implicit none
         type(bcout3d_t), intent(in) :: tax
