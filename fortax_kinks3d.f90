@@ -46,7 +46,7 @@ module fortax_kinks3d
         real(dp) :: tCouU(3,maxkinks-1,maxkinks-1)
     end type bcout3d_t
 
-    public :: bcout3d_t!, evalKinksHours, evalKinksEarn, kinkshours, kinksearn, kinksccexp, maxkinks
+    public :: bcout3d_t, kinksearn3d, evalTaxCouScalar!, evalKinksHours, evalKinksEarn, kinkshours, kinksearn, kinksccexp, maxkinks
 
 contains
 
@@ -1194,6 +1194,7 @@ contains
             end do !iX1
         end do !iX2
 
+        call calcTaxCoef(bcout)
 
 !         bcout%tCou = kinks_net
 
@@ -1206,13 +1207,13 @@ contains
 !         bcout%kinks_mtr1  = kinks_mtr1
 !         bcout%kinks_mtr2  = kinks_mtr2
 
-        if (present(verbose)) then
-            if (verbose) then
-                do i = 1, kinks_num
-                    write(*,'(F12.3,2X,F12.3,2X,F12.3,F12.5)') kinks_hrs(i),kinks_earn(i), kinks_net(i), kinks_mtr(i)
-                end do
-            end if
-        end if
+!         if (present(verbose)) then
+!             if (verbose) then
+!                 do i = 1, kinks_num
+!                     write(*,'(F12.3,2X,F12.3,2X,F12.3,F12.5)') kinks_hrs(i),kinks_earn(i), kinks_net(i), kinks_mtr(i)
+!                 end do
+!             end if
+!         end if
 
         do i=1,taxsize
             nullify(taxpoint(i)%p)
