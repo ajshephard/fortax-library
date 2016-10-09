@@ -1,4 +1,5 @@
 _$header
+#include "header.inc"
 
 _$logical(doCap,null)
 _$logical(doThruUC,null)

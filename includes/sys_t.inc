@@ -15,16 +15,13 @@
 #define _$integerarray(x,y,z) integer,  allocatable, dimension(z) :: x
 #define _$logicalarray(x,y,z) logical,  allocatable, dimension(z) :: x
 
-#define __$quote(x) x
-#define _$quote(x) __$quote(x)
+#define concat(x, y) concat_(x, y)
+#define concat_(x, y) x##y
 
-#define __$append(x) x
-#define _$append(x) __$append(x)
+#define _$header type :: concat(_$typelist,_t)
+#define _$footer end type concat(_$typelist,_t)
 
-#define _$header type :: _$quote(_$typelist)_t
-#define _$footer end type _$quote(_$typelist)_t
-
-#include "includes/system/syslist.inc"
+#include "system/syslist.inc"
 
 #undef  _$header
 #undef  _$footer
@@ -35,7 +32,7 @@
 #undef  _$integerarray
 #undef  _$logicalarray
 
-#define _$header type(_$append(_$typelist)_t) :: _$typelist
+#define _$header type(concat(_$typelist,_t)) :: _$typelist
 #define _$footer
 #define _$integer(x,y)
 #define _$double(x,y)
@@ -47,7 +44,7 @@
 type :: sys_t
 character(len=40) :: sysname
 character(len=80) :: sysdesc
-#include 'includes/system/syslist.inc'
+#include "system/syslist.inc"
 end type
 
 #undef  _$header

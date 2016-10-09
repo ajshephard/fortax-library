@@ -1,86 +1,86 @@
 !income tax
 #undef   _$typelist
 #define  _$typelist inctax
-#include "includes/system/inctax.inc"
+#include "inctax.inc"
 
 !national insurance
 #undef   _$typelist
 #define  _$typelist natins
-#include "includes/system/natins.inc"
+#include "natins.inc"
 
 !child benefit
 #undef   _$typelist
 #define  _$typelist chben
-#include "includes/system/chben.inc"
+#include "chben.inc"
 
 !family credit/wftc
 #undef   _$typelist
 #define  _$typelist fc
-#include "includes/system/fc.inc"
+#include "fc.inc"
 
 !child tax credit
 #undef   _$typelist
 #define  _$typelist ctc
-#include "includes/system/ctc.inc"
+#include "ctc.inc"
 
 !working tax credit
 #undef   _$typelist
 #define  _$typelist wtc
-#include "includes/system/wtc.inc"
+#include "wtc.inc"
 
 !new tax credits
 #undef   _$typelist
 #define  _$typelist ntc
-#include "includes/system/ntc.inc"
+#include "ntc.inc"
 
 !income support
 #undef   _$typelist
 #define  _$typelist incsup
-#include "includes/system/incsup.inc"
+#include "incsup.inc"
 
 !council tax
 #undef   _$typelist
 #define  _$typelist ctax
-#include "includes/system/ctax.inc"
+#include "ctax.inc"
 
 !rebate system (contains elements common to housing benefit and council tax)
 #undef   _$typelist
 #define  _$typelist rebatesys
-#include "includes/system/rebatesys.inc"
+#include "rebatesys.inc"
 
 !housing benefit
 #undef   _$typelist
 #define  _$typelist hben
-#include "includes/system/hben.inc"
+#include "hben.inc"
 
 !council tax benefit
 #undef   _$typelist
 #define  _$typelist ctaxben
-#include "includes/system/ctaxben.inc"
+#include "ctaxben.inc"
 
 !community charge benefit
 #undef   _$typelist
 #define  _$typelist ccben
-#include "includes/system/ccben.inc"
+#include "ccben.inc"
 
 !universal credit
 #undef   _$typelist
 #define  _$typelist uc
-#include "includes/system/uc.inc"
+#include "uc.inc"
 
 !state pension
 #undef   _$typelist
 #define  _$typelist statepen
-#include "includes/system/statepen.inc"
+#include "statepen.inc"
 
 !benefit cap
 #undef   _$typelist
 #define  _$typelist bencap
-#include "includes/system/bencap.inc"
+#include "bencap.inc"
 
 !additional information
 #undef   _$typelist
 #define  _$typelist extra
-#include "includes/system/extra.inc"
+#include "extra.inc"
 
 #undef   _$typelist

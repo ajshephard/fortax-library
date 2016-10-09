@@ -1,4 +1,5 @@
 _$header
+#include "header.inc"
 
 _$integer(numrates,range)
 _$integer(c4nrates,range)

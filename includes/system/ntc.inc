@@ -1,4 +1,5 @@
 _$header
+#include "header.inc"
 
 _$logical(donewtaxcred,null)
 _$double(thr1lo,amount)

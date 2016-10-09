@@ -67,7 +67,7 @@ module fortax_type
     ! include files. at the moment I am not using the string values, but they
     ! are still defined for possible future use
 
-#   include 'includes/lab_t.inc'
+#   include "includes/lab_t.inc"
 
 
 !   remove this code to implement my new style labeling...
@@ -127,7 +127,7 @@ module fortax_type
 #       define _$doublearray(x,y,z)  real(dp) :: x(z)
 #       define _$logicalarray(x,y,z) logical  :: x(z)
 
-#       include 'includes/famad_t.inc'
+#       include "includes/famad_t.inc"
 
 #       undef  _$header
 #       undef  _$footer
@@ -167,7 +167,7 @@ module fortax_type
 #       define _$doublearray(x,y,z)  real(dp) :: x(z)
 #       define _$logicalarray(x,y,z) logical  :: x(z)
 
-#       include 'includes/fam_t.inc'
+#       include "includes/fam_t.inc"
 
 #       undef  _$header
 #       undef  _$footer
@@ -208,7 +208,7 @@ module fortax_type
 #       define _$doublearray(x,lab,y,z)  real(dp) :: x(z)
 #       define _$logicalarray(x,lab,y,z) logical  :: x(z)
 
-#       include 'includes/netad_t.inc'
+#       include "includes/netad_t.inc"
 
 #       undef  _$header
 #       undef  _$footer
@@ -247,7 +247,7 @@ module fortax_type
 #       define _$doublearray(x,lab,y,z)  real(dp) :: x(z)
 #       define _$logicalarray(x,lab,y,z) logical  :: x(z)
 
-#       include 'includes/nettu_t.inc'
+#       include "includes/nettu_t.inc"
 
 #       undef  _$header
 #       undef  _$footer
@@ -305,7 +305,7 @@ module fortax_type
 
     ! I use a lot of preprocessor stuff for handling the sys_t type
     ! we just "include" it here to keep the code tidy, AS
-#   include 'includes/sys_t.inc'
+#   include "includes/sys_t.inc"
 
 contains
 
@@ -341,7 +341,7 @@ contains
 #       define _$doublearray(x,y,z)  fam%x = 0.0_dp
 #       define _$logicalarray(x,y,z) fam%x = .false.
 
-#       include 'includes/fam_t.inc'
+#       include "includes/fam_t.inc"
 
 #       undef  _$header
 #       undef  _$footer
@@ -361,7 +361,7 @@ contains
 #       define _$doublearray(x,y,z)  fam%ad(1)%x = 0.0_dp; fam%ad(2)%x = 0.0_dp
 #       define _$logicalarray(x,y,z) fam%ad(1)%x = .false.; fam%ad(2)%x = .false.
 
-#       include 'includes/famad_t.inc'
+#       include "includes/famad_t.inc"
 
 #       undef  _$header
 #       undef  _$footer
@@ -418,14 +418,14 @@ contains
 
 #       define _$header write(funit,*); write(funit,'(A16)') 'FAMILY'; write(funit,*)
 #       define _$footer
-#       define _$integer(x,y) write(funit,'(A16,2X,I16)') #x, fam%x
-#       define _$double(x,y)  write(funit,'(A16,2X,F16.4)') #x, fam%x
-#       define _$logical(x,y) write(funit,'(A16,2X,L16)') #x, fam%x
-#       define _$integerarray(x,y,z) do i =1, merge(min(fam%nkids,z),size(fam%x),#x=='kidage'); write(funit,'(A16,2X,I16)') #x//'('//inttostr(i)//')', fam%x(i); end do
-#       define _$doublearray(x,y,z)  do i =1, size(fam%x); write(funit,'(A16,2X,F16.4)') #x//'('//inttostr(i)//')', fam%x(i); end do
-#       define _$logicalarray(x,y,z) do i =1, size(fam%x); write(funit,'(A16,2X,L16)') #x//'('//inttostr(i)//')', fam%x(i); end do
+#       define _$integer(x,y) call fam_descInteger(#x,funit,fam%x)
+#       define _$double(x,y)  call fam_descDouble(#x,funit,fam%x)
+#       define _$logical(x,y) call fam_descLogical(#x,funit,fam%x)
+#       define _$integerarray(x,y,z) call fam_descIntegerArray(#x,funit,fam%x,fam%nkids)
+#       define _$doublearray(x,y,z)  call fam_descDoubleArray(#x,funit,fam%x)
+#       define _$logicalarray(x,y,z) call fam_descLogicalArray(#x,funit,fam%x)
 
-#       include 'includes/fam_t.inc'
+#       include "includes/fam_t.inc"
 
 #       undef  _$header
 #       undef  _$footer
@@ -438,14 +438,14 @@ contains
 
 #       define _$header write(funit,*); write(funit,'(A16)') 'ADULT1'; write(funit,*)
 #       define _$footer
-#       define _$integer(x,y) write(funit,'(A16,2X,I16)') #x, fam%ad(1)%x
-#       define _$double(x,y)  write(funit,'(A16,2X,F16.4)') #x, fam%ad(1)%x
-#       define _$logical(x,y) write(funit,'(A16,2X,L16)') #x, fam%ad(1)%x
-#       define _$integerarray(x,y,z) do i =1, size(fam%ad(1)%x); write(funit,'(A16,2X,I16)') #x//'('//inttostr(i)//')', fam%ad(1)%x(i); end do
-#       define _$doublearray(x,y,z)  do i =1, size(fam%ad(1)%x); write(funit,'(A16,2X,F16.4)') #x//'('//inttostr(i)//')', fam%ad(1)%x(i); end do
-#       define _$logicalarray(x,y,z) do i =1, size(fam%ad(1)%x); write(funit,'(A16,2X,L16)') #x//'('//inttostr(i)//')', fam%ad(1)%x(i); end do
+#       define _$integer(x,y) call fam_descInteger(#x,funit,fam%ad(1)%x)
+#       define _$double(x,y)  call fam_descDouble(#x,funit,fam%ad(1)%x)
+#       define _$logical(x,y) call fam_descLogical(#x,funit,fam%ad(1)%x)
+#       define _$integerarray(x,y,z) call fam_descIntegerArray(#x,funit,fam%ad(1)%x)
+#       define _$doublearray(x,y,z)  call fam_descDoubleArray(#x,funit,fam%ad(1)%x)
+#       define _$logicalarray(x,y,z) call fam_descLogicalArray(#x,funit,fam%ad(1)%x)
 
-#       include 'includes/famad_t.inc'
+#       include "includes/famad_t.inc"
 
 #       undef  _$header
 #       undef  _$footer
@@ -468,14 +468,14 @@ contains
         if (fam%couple) then
 #           define _$header write(funit,*); write(funit,'(A16)') 'ADULT2'; write(funit,*)
 #           define _$footer
-#           define _$integer(x,y) write(funit,'(A16,2X,I16)') #x, fam%ad(2)%x
-#           define _$double(x,y)  write(funit,'(A16,2X,F16.4)') #x, fam%ad(2)%x
-#           define _$logical(x,y) write(funit,'(A16,2X,L16)') #x, fam%ad(2)%x
-#           define _$integerarray(x,y,z) do i =1, size(fam%ad(2)%x); write(funit,'(A16,2X,I16)') #x//'('//inttostr(i)//')', fam%ad(2)%x(i); end do
-#           define _$doublearray(x,y,z)  do i =1, size(fam%ad(2)%x); write(funit,'(A16,2X,F16.4)') #x//'('//inttostr(i)//')', fam%ad(2)%x(i); end do
-#           define _$logicalarray(x,y,z) do i =1, size(fam%ad(2)%x); write(funit,'(A16,2X,L16)') #x//'('//inttostr(i)//')', fam%ad(2)%x(i); end do
+#           define _$integer(x,y) call fam_descInteger(#x,funit,fam%ad(2)%x)
+#           define _$double(x,y)  call fam_descDouble(#x,funit,fam%ad(2)%x)
+#           define _$logical(x,y) call fam_descLogical(#x,funit,fam%ad(2)%x)
+#           define _$integerarray(x,y,z) call fam_descIntegerArray(#x,funit,fam%ad(2)%x)
+#           define _$doublearray(x,y,z)  call fam_descDoubleArray(#x,funit,fam%ad(2)%x)
+#           define _$logicalarray(x,y,z) call fam_descLogicalArray(#x,funit,fam%ad(2)%x)
 
-#           include 'includes/famad_t.inc'
+#           include "includes/famad_t.inc"
 
 #           undef  _$header
 #           undef  _$footer
@@ -489,6 +489,71 @@ contains
 
     end subroutine fam_desc
 
+    subroutine fam_descInteger(str,funit,myval)
+        implicit none
+        character(len=*), intent(in) :: str
+        integer,          intent(in) :: funit
+        integer,          intent(in) :: myval
+        write(funit,'(A16,2X,I16)') str, myval
+    end subroutine fam_descInteger
+
+    subroutine fam_descDouble(str,funit,myval)
+        implicit none
+        character(len=*), intent(in) :: str
+        integer,          intent(in) :: funit
+        real(dp),         intent(in) :: myval
+        write(funit,'(A16,2X,F16.4)') str, myval
+    end subroutine fam_descDouble
+
+    subroutine fam_descLogical(str,funit,myval)
+        implicit none
+        character(len=*), intent(in) :: str
+        integer,          intent(in) :: funit
+        logical,          intent(in) :: myval
+        write(funit,'(A16,2X,L16)') str, myval
+    end subroutine fam_descLogical
+
+    subroutine fam_descIntegerArray(str,funit,myval,mylen)
+        use fortax_util, only : intToStr
+        implicit none
+        character(len=*),  intent(in) :: str
+        integer,           intent(in) :: funit
+        integer,           intent(in) :: myval(:)
+        integer, optional, intent(in) :: mylen
+        integer                       :: i, szMyval
+        if (present(mylen)) then
+            szMyval = min(mylen,size(myval))
+        else
+            szMyval = size(myval)
+        end if
+        do i =1, szMyval
+            write(funit,'(A16,2X,I16)') str//'('//inttostr(i)//')', myval(i)
+        end do
+    end subroutine fam_descIntegerArray
+
+    subroutine fam_descLogicalArray(str,funit,myval)
+        use fortax_util, only : intToStr
+        implicit none
+        character(len=*), intent(in) :: str
+        integer,          intent(in) :: funit
+        logical,          intent(in) :: myval(:)
+        integer                      :: i
+        do i =1, size(myval)
+            write(funit,'(A16,2X,L16)') str//'('//inttostr(i)//')', myval(i)
+        end do
+    end subroutine fam_descLogicalArray
+
+    subroutine fam_descDoubleArray(str,funit,myval)
+        use fortax_util, only : intToStr
+        implicit none
+        character(len=*), intent(in) :: str
+        integer,          intent(in) :: funit
+        real(dp),         intent(in) :: myval(:)
+        integer                      :: i
+        do i =1, size(myval)
+            write(funit,'(A16,2X,F16.4)') str//'('//inttostr(i)//')', myval(i)
+        end do
+    end subroutine fam_descDoubleArray
 
     ! fam_gen
     ! -----------------------------------------------------------------------
@@ -514,7 +579,7 @@ contains
 #       define _$integerarray(x,y,z) x, &
 #       define _$doublearray(x,y,z)  x, &
 #       define _$logicalarray(x,y,z) x, &
-#       include 'includes/fam_t.inc'
+#       include "includes/fam_t.inc"
 
 #       undef  _$header
 #       undef  _$footer
@@ -533,7 +598,7 @@ contains
 #       define _$integerarray(x,y,z) x##1, x##2, &
 #       define _$doublearray(x,y,z)  x##1, x##2, &
 #       define _$logicalarray(x,y,z) x##1, x##2, &
-#       include 'includes/famad_t.inc'
+#       include "includes/famad_t.inc"
 
 #       undef  _$header
 #       undef  _$footer
@@ -552,7 +617,7 @@ contains
 #       define _$integerarray(x,y,z) integer,  optional, intent(in) :: x(:)
 #       define _$doublearray(x,y,z)  real(dp), optional, intent(in) :: x(:)
 #       define _$logicalarray(x,y,z) logical,  optional, intent(in) :: x(:)
-#       include 'includes/fam_t.inc'
+#       include "includes/fam_t.inc"
 #       undef  _$header
 #       undef  _$footer
 #       undef  _$integer
@@ -564,19 +629,13 @@ contains
 
 #       define _$header
 #       define _$footer
-#       define _$integer(x,y) integer,  optional, intent(in) :: x##1;\
-                              integer,  optional, intent(in) :: x##2
-#       define _$double(x,y)  real(dp), optional, intent(in) :: x##1;\
-                              real(dp), optional, intent(in) :: x##2
-#       define _$logical(x,y) logical,  optional, intent(in) :: x##1;\
-                              logical,  optional, intent(in) :: x##2
-#       define _$integerarray(x,y,z) integer,  optional, intent(in) :: x##1(:);\
-                                     integer,  optional, intent(in) :: x##2(:)
-#       define _$doublearray(x,y,z)  real(dp), optional, intent(in) :: x##1(:);\
-                                     real(dp), optional, intent(in) :: x##2(:)
-#       define _$logicalarray(x,y,z) logical,  optional, intent(in) :: x##1(:);\
-                                     logical,  optional, intent(in) :: x##2(:)
-#       include 'includes/famad_t.inc'
+#       define _$integer(x,y) integer,  optional, intent(in) :: x##1; integer,  optional, intent(in) :: x##2
+#       define _$double(x,y)  real(dp), optional, intent(in) :: x##1; real(dp), optional, intent(in) :: x##2
+#       define _$logical(x,y) logical,  optional, intent(in) :: x##1; logical,  optional, intent(in) :: x##2
+#       define _$integerarray(x,y,z) integer,  optional, intent(in) :: x##1(:); integer,  optional, intent(in) :: x##2(:)
+#       define _$doublearray(x,y,z)  real(dp), optional, intent(in) :: x##1(:); real(dp), optional, intent(in) :: x##2(:)
+#       define _$logicalarray(x,y,z) logical,  optional, intent(in) :: x##1(:); logical,  optional, intent(in) :: x##2(:)
+#       include "includes/famad_t.inc"
 #       undef  _$header
 #       undef  _$footer
 #       undef  _$integer
@@ -611,7 +670,7 @@ contains
 #       define _$integerarray(x,y,z) if (present(x)) fam_gen%x(1:size(x)) = x
 #       define _$doublearray(x,y,z)  if (present(x)) fam_gen%x(1:size(x)) = x
 #       define _$logicalarray(x,y,z) if (present(x)) fam_gen%x(1:size(x)) = x
-#       include 'includes/fam_t.inc'
+#       include "includes/fam_t.inc"
 
 #       undef  _$header
 #       undef  _$footer
@@ -627,13 +686,10 @@ contains
 #       define _$integer(x,y) if (present(x##1)) fam_gen%ad(1)%x = x##1; if (present(x##2)) fam_gen%ad(2)%x = x##2
 #       define _$double(x,y)  if (present(x##1)) fam_gen%ad(1)%x = x##1; if (present(x##2)) fam_gen%ad(2)%x = x##2
 #       define _$logical(x,y) if (present(x##1)) fam_gen%ad(1)%x = x##1; if (present(x##2)) fam_gen%ad(2)%x = x##2
-#       define _$integerarray(x,y,z) if (present(x##1)) fam_gen%ad(1)%x(1:size(x##1)) = x##1;\
-                                     if (present(x##2)) fam_gen%ad(2)%x(1:size(x##2)) = x##2
-#       define _$doublearray(x,y,z)  if (present(x##1)) fam_gen%ad(1)%x(1:size(x##1)) = x##1;\
-                                     if (present(x##2)) fam_gen%ad(2)%x(1:size(x##2)) = x##2
-#       define _$logicalarray(x,y,z) if (present(x##1)) fam_gen%ad(1)%x(1:size(x##1)) = x##1;\
-                                     if (present(x##2)) fam_gen%ad(2)%x(1:size(x##2)) = x##2
-#       include 'includes/famad_t.inc'
+#       define _$integerarray(x,y,z) if (present(x##1)) fam_gen%ad(1)%x(1:size(x##1)) = x##1; if (present(x##2)) fam_gen%ad(2)%x(1:size(x##2)) = x##2
+#       define _$doublearray(x,y,z)  if (present(x##1)) fam_gen%ad(1)%x(1:size(x##1)) = x##1; if (present(x##2)) fam_gen%ad(2)%x(1:size(x##2)) = x##2
+#       define _$logicalarray(x,y,z) if (present(x##1)) fam_gen%ad(1)%x(1:size(x##1)) = x##1; if (present(x##2)) fam_gen%ad(2)%x(1:size(x##2)) = x##2
+#       include "includes/famad_t.inc"
 
 #       undef  _$header
 #       undef  _$footer
@@ -712,7 +768,7 @@ contains
 #               define _$integerarray(x,y,z) if (present(x##2)) fam_gen%couple=.true.
 #               define _$doublearray(x,y,z)  if (present(x##2)) fam_gen%couple=.true.
 #               define _$logicalarray(x,y,z) if (present(x##2)) fam_gen%couple=.true.
-#               include 'includes/famad_t.inc'
+#               include "includes/famad_t.inc"
 
 #               undef  _$header
 #               undef  _$footer
@@ -749,7 +805,7 @@ contains
 
 #       define _$level ad
         do ad = 1, 2
-#         include 'includes/netad_t.inc'
+#         include "includes/netad_t.inc"
         end do
 #       undef _$level
 
@@ -757,7 +813,7 @@ contains
 #       define _$double(x,lab,y)  net_plus_net%_$level%x = net1%_$level%x + net2%_$level%x
 
 #       define _$level tu
-#       include 'includes/nettu_t.inc'
+#       include "includes/nettu_t.inc"
 #       undef _$level
 
 #       undef  _$header
@@ -783,7 +839,7 @@ contains
 
 #       define _$level ad
         do ad = 1, 2
-#         include 'includes/netad_t.inc'
+#         include "includes/netad_t.inc"
         end do
 #       undef _$level
 
@@ -791,7 +847,7 @@ contains
 #       define _$double(x,lab,y)  net_minus_net%_$level%x = net1%_$level%x - net2%_$level%x
 
 #       define _$level tu
-#       include 'includes/nettu_t.inc'
+#       include "includes/nettu_t.inc"
 #       undef _$level
 
 #       undef  _$header
@@ -819,7 +875,7 @@ contains
 
 #       define _$level ad
         do ad = 1, 2
-#         include 'includes/netad_t.inc'
+#         include "includes/netad_t.inc"
         end do
 #       undef _$level
 
@@ -827,7 +883,7 @@ contains
 #       define _$double(x,lab,y)  net_times_scalar%_$level%x = net%_$level%x * scalar
 
 #       define _$level tu
-#       include 'includes/nettu_t.inc'
+#       include "includes/nettu_t.inc"
 #       undef _$level
 
 #       undef  _$header
@@ -854,7 +910,7 @@ contains
 
 #       define _$level ad
         do ad = 1, 2
-#         include 'includes/netad_t.inc'
+#         include "includes/netad_t.inc"
         end do
 #       undef _$level
 
@@ -862,7 +918,7 @@ contains
 #       define _$double(x,lab,y)  scalar_times_net%_$level%x = net%_$level%x * scalar
 
 #       define _$level tu
-#       include 'includes/nettu_t.inc'
+#       include "includes/nettu_t.inc"
 #       undef _$level
 
 #       undef  _$header
@@ -890,7 +946,7 @@ contains
 
 #       define _$level ad
         do ad = 1, 2
-#         include 'includes/netad_t.inc'
+#         include "includes/netad_t.inc"
         end do
 #       undef _$level
 
@@ -898,7 +954,7 @@ contains
 #       define _$double(x,lab,y)  net_div_scalar%_$level%x = net%_$level%x / scalar
 
 #       define _$level tu
-#       include 'includes/nettu_t.inc'
+#       include "includes/nettu_t.inc"
 #       undef _$level
 
 #       undef  _$header
@@ -943,7 +999,7 @@ contains
 
 #       define _$level ad
         do ad = 1, 2
-#           include 'includes/netad_t.inc'
+#           include "includes/netad_t.inc"
         end do
 #       undef _$level
 
@@ -962,7 +1018,7 @@ contains
 #       define _$logicalarray(x,lab,y,z) net%_$level%x = .false.
 
 #       define _$level tu
-#       include 'includes/nettu_t.inc'
+#       include "includes/nettu_t.inc"
 #       undef _$level
 
 #       undef  _$header
@@ -1017,7 +1073,7 @@ contains
 #       define _$double(x,y,z)  write(funit,'(A40,2X,F16.4)') y//' ('//#x//')', net%tu%x
 #       define _$logical(x,y,z) write(funit,'(A40,2X,L16)') y//' ('//#x//')', net%tu%x
 
-#       include 'includes/nettu_t.inc'
+#       include "includes/nettu_t.inc"
 
 #       undef  _$header
 #       undef  _$footer
@@ -1035,7 +1091,7 @@ contains
 #       define _$double(x,y,z)  write(funit,'(A40,2X,F16.4)') y//' ('//#x//')', net%ad(1)%x
 #       define _$logical(x,y,z) write(funit,'(A40,2X,L16)') y//' ('//#x//')', net%ad(1)%x
 
-#       include 'includes/netad_t.inc'
+#       include "includes/netad_t.inc"
 
 #       undef  _$header
 #       undef  _$footer
@@ -1053,7 +1109,7 @@ contains
 #       define _$double(x,y,z)  write(funit,'(A40,2X,F16.4)') y//' ('//#x//')', net%ad(2)%x
 #       define _$logical(x,y,z) write(funit,'(A40,2X,L16)') y//' ('//#x//')', net%ad(2)%x
 
-#       include 'includes/netad_t.inc'
+#       include "includes/netad_t.inc"
 
 #       undef  _$header
 #       undef  _$footer
@@ -1068,7 +1124,7 @@ contains
 
     !again, i include the file here as it contains a lot of
     !preprocessor directives, AS
-#   include 'includes/sys_init.inc'
+#   include "includes/sys_init.inc"
 
 
     ! sys_init
@@ -1095,7 +1151,7 @@ contains
 #       undef  _$integerarray
 #       undef  _$logicalarray
 
-#       define _$header call _$append(_$typelist)_init(sys%_$typelist)
+#       define _$header call concat(_$typelist,_init)(sys%_$typelist)
 #       define _$footer
 #       define _$integer(x,y)
 #       define _$double(x,y)
@@ -1104,7 +1160,7 @@ contains
 #       define _$doublearray(x,y,z)
 #       define _$logicalarray(x,y,z)
 
-#       include 'includes/system/syslist.inc'
+#       include "includes/system/syslist.inc"
 
 #       undef  _$header
 #       undef  _$footer
@@ -1123,7 +1179,85 @@ contains
     ! write as a file the contents of the system file which can then be
     ! directly included in the source code of the calling program
 
-#   include 'includes/sys_save.inc'
+#   include "includes/sys_save.inc"
+
+    subroutine sys_saveInteger(typelist,str,funit,myval)
+        use fortax_util, only : intToStr
+        implicit none
+        character(len=*), intent(in) :: typelist
+        character(len=*), intent(in) :: str
+        integer,          intent(in) :: funit
+        integer,          intent(in) :: myval
+        write(funit,'(a)',advance="no") "sys%"//typelist//"%"//str//"="
+        write(funit,'(a)') intToStr(myval)
+    end subroutine sys_saveInteger
+
+    subroutine sys_saveIntegerArray(typelist,str,funit,myval)
+        use fortax_util, only : intToStr
+        implicit none
+        character(len=*), intent(in) :: typelist
+        character(len=*), intent(in) :: str
+        integer,          intent(in) :: funit
+        integer,          intent(in) :: myval(:)
+        integer :: i
+        write(funit,'(a)') "allocate(sys%"//typelist//"%"//str//"("//intToStr(size(myval))//"))"
+        do i = 1, size(myval)
+            write(funit,'(a)',advance="no") "sys%"//typelist//"%"//str//"("//intToStr(i)//")="
+            write(funit,'(a)') intToStr(myval(i))
+        end do
+    end subroutine sys_saveIntegerArray
+
+    subroutine sys_saveDouble(typelist,str,funit,myval)
+        use fortax_util, only : dblToStr
+        implicit none
+        character(len=*), intent(in) :: typelist
+        character(len=*), intent(in) :: str
+        integer,          intent(in) :: funit
+        real(dp),         intent(in) :: myval
+        write(funit,'(a)',advance="no") "sys%"//typelist//"%"//str//"="
+        write(funit,'(a)') dblToStr(myval)
+    end subroutine sys_saveDouble
+
+    subroutine sys_saveDoubleArray(typelist,str,funit,myval)
+        use fortax_util, only : intToStr, dblToStr
+        implicit none
+        character(len=*), intent(in) :: typelist
+        character(len=*), intent(in) :: str
+        integer,          intent(in) :: funit
+        real(dp),         intent(in) :: myval(:)
+        integer :: i
+        write(funit,'(a)') "allocate(sys%"//typelist//"%"//str//"("//intToStr(size(myval))//"))"
+        do i = 1, size(myval)
+            write(funit,'(a)',advance="no") "sys%"//typelist//"%"//str//"("//intToStr(i)//")="
+            write(funit,'(a)') dblToStr(myval(i))//'_dp'
+        end do
+    end subroutine sys_saveDoubleArray
+
+    subroutine sys_saveLogical(typelist,str,funit,myval)
+        use fortax_util, only : intToStr
+        implicit none
+        character(len=*), intent(in) :: typelist
+        character(len=*), intent(in) :: str
+        integer,          intent(in) :: funit
+        logical,          intent(in) :: myval
+        write(funit,'(a)',advance="no") "sys%"//typelist//"%"//str//"="
+        write(funit,'(a)') merge('.true. ','.false.', myval)
+    end subroutine sys_saveLogical
+
+    subroutine sys_saveLogicalArray(typelist,str,funit,myval)
+        use fortax_util, only : intToStr
+        implicit none
+        character(len=*), intent(in) :: typelist
+        character(len=*), intent(in) :: str
+        integer,          intent(in) :: funit
+        logical,          intent(in) :: myval(:)
+        integer :: i
+        write(funit,'(a)') "allocate(sys%"//typelist//"%"//str//"("//intToStr(size(myval))//"))"
+        do i = 1, size(myval)
+            write(funit,'(a)',advance="no") "sys%"//typelist//"%"//str//"("//intToStr(i)//")="
+            write(funit,'(a)') merge('.true. ','.false.', myval(i))
+        end do
+    end subroutine sys_saveLogicalArray
 
     subroutine sys_saveF90(sys,fname)
 
@@ -1161,7 +1295,7 @@ contains
 #       undef  _$integerarray
 #       undef  _$logicalarray
 
-#       define _$header call _$append(_$typelist)_save(sys%_$typelist,funit)
+#       define _$header call concat(_$typelist,_save)(sys%_$typelist,funit)
 #       define _$footer
 #       define _$integer(x,y)
 #       define _$double(x,y)
@@ -1170,7 +1304,7 @@ contains
 #       define _$doublearray(x,y,z)
 #       define _$logicalarray(x,y,z)
 
-#       include 'includes/system/syslist.inc'
+#       include "includes/system/syslist.inc"
 
 #       undef  _$header
 #       undef  _$footer
@@ -1233,23 +1367,14 @@ contains
 
 #       define _$header write(funit,*); write(funit,'(a)') '!family'
 #       define _$footer
-#       define _$integer(x,y) write(funit,'(a)',advance="no") "fam%"//#x//"="; write(funit,'(a)') intToStr(fam% x)
-#       define _$double(x,y)  write(funit,'(a)',advance="no") "fam%"//#x//"="; write(funit,'(a)') dblToStr(fam% x)//'_dp'
-#       define _$logical(x,y) write(funit,'(a)',advance="no") "fam%"//#x//"="; write(funit,'(a)') merge('.true. ','.false.',fam% x)
+#       define _$integer(x,y) call fam_saveF90Integer(#x,'',funit,fam%x)
+#       define _$double(x,y)  call fam_saveF90Double(#x,'',funit,fam%x)
+#       define _$logical(x,y) call fam_saveF90Logical(#x,'',funit,fam%x)
+#       define _$doublearray(x,y,z) call fam_saveF90DoubleArray(#x,'',funit,fam%x,#z)
+#       define _$logicalarray(x,y,z) call fam_saveF90LogicalArray(#x,'',funit,fam%x,#z)
+#       define _$integerarray(x,y,z) call fam_saveF90IntegerArray(#x,'',funit,fam%x,#z)
 
-#       define _$doublearray(x,y,z) if (#z==':') write(funit,'(a)') "allocate(fam%"//#x//"("//intToStr(size(fam%x))//"))"; \
- do i=1,size(fam%x); write(funit,'(a)',advance="no") \
- "fam%"//#x//"("//intToStr(i)//")="; write(funit,'(a)') dblToStr(fam% x(i))//'_dp'; end do
-
-#       define _$logicalarray(x,y,z) if (#z==':') write(funit,'(a)') "allocate(fam%"//#x//"("//intToStr(size(fam%x))//"))"; \
- do i=1,size(fam%x); write(funit,'(a)',advance="no") \
- "fam%"//#x//"("//intToStr(i)//")="; write(funit,'(a)') merge('.true. ','.false.',fam% x(i)); end do
-
-#       define _$integerarray(x,y,z) if (#z==':') write(funit,'(a)') "allocate(fam%"//#x//"("//intToStr(size(fam%x))//"))"; \
- do i=1,size(fam%x); write(funit,'(a)',advance="no") \
- "fam%"//#x//"("//intToStr(i)//")="; write(funit,'(a)') intToStr(fam% x(i)); end do
-
-#       include 'includes/fam_t.inc'
+#       include "includes/fam_t.inc"
 
 #       undef  _$header
 #       undef  _$footer
@@ -1262,22 +1387,14 @@ contains
 
 #       define _$header write(funit,*); write(funit,'(a)') '!adult1'
 #       define _$footer
-#       define _$integer(x,y) write(funit,'(a)',advance="no") "fam%ad(1)%"//#x//"="; write(funit,'(a)') intToStr(fam%ad(1)% x)
-#       define _$double(x,y)  write(funit,'(a)',advance="no") "fam%ad(1)%"//#x//"="; write(funit,'(a)') dblToStr(fam%ad(1)% x)//'_dp'
-#       define _$logical(x,y) write(funit,'(a)',advance="no") "fam%ad(1)%"//#x//"="; write(funit,'(a)') merge('.true. ','.false.',fam%ad(1)% x)
+#       define _$integer(x,y) call fam_saveF90Integer(#x,'ad1',funit,fam%ad(1)%x)
+#       define _$double(x,y)  call fam_saveF90Double(#x,'ad1',funit,fam%ad(1)%x)
+#       define _$logical(x,y) call fam_saveF90Logical(#x,'ad1',funit,fam%ad(1)%x)
+#       define _$doublearray(x,y,z) call fam_saveF90DoubleArray(#x,'ad1',funit,fam%ad(1)%x,#z)
+#       define _$logicalarray(x,y,z) call fam_saveF90LogicalArray(#x,'ad1',funit,fam%ad(1)%x,#z)
+#       define _$integerarray(x,y,z) call fam_saveF90IntegerArray(#x,'ad1',funit,fam%ad(1)%x,#z)
 
-#       define _$doublearray(x,y,z) if (#z==':') write(funit,'(a)') "allocate(fam%ad(1)%"//#x//"("//intToStr(size(fam%ad(1)%x))//"))"; \
- do i=1,size(fam%ad(1)%x); write(funit,'(a)',advance="no") \
- "fam%ad(1)%"//#x//"("//intToStr(i)//")="; write(funit,'(a)') dblToStr(fam%ad(1)% x(i))//'_dp'; end do
-
-#       define _$logicalarray(x,y,z) if (#z==':') write(funit,'(a)') "allocate(fam%ad(1)%"//#x//"("//intToStr(size(fam%ad(1)%x))//"))"; \
- do i=1,size(fam%ad(1)%x); write(funit,'(a)',advance="no") \
- "fam%ad(1)%"//#x//"("//intToStr(i)//")="; write(funit,'(a)') merge('.true. ','.false.',fam%ad(1)% x(i)); end do
-
-#       define _$integerarray(x,y,z) if (#z==':') write(funit,'(a)') "allocate(fam%ad(1)%"//#x//"("//intToStr(size(fam%ad(1)%x))//"))"; \
- do i=1,size(fam%ad(1)%x); write(funit,'(a)',advance="no") \
- "fam%ad(1)%"//#x//"("//intToStr(i)//")="; write(funit,'(a)') intToStr(fam%ad(1)% x(i)); end do
-#       include 'includes/famad_t.inc'
+#       include "includes/famad_t.inc"
 
 #       undef  _$header
 #       undef  _$footer
@@ -1300,23 +1417,14 @@ contains
         if (fam%couple) then
 #           define _$header write(funit,*); write(funit,'(a)') '!adult2'
 #           define _$footer
-#           define _$integer(x,y) write(funit,'(a)',advance="no") "fam%ad(2)%"//#x//"="; write(funit,'(a)') intToStr(fam%ad(2)% x)
-#           define _$double(x,y)  write(funit,'(a)',advance="no") "fam%ad(2)%"//#x//"="; write(funit,'(a)') dblToStr(fam%ad(2)% x)//'_dp'
-#           define _$logical(x,y) write(funit,'(a)',advance="no") "fam%ad(2)%"//#x//"="; write(funit,'(a)') merge('.true. ','.false.',fam%ad(2)% x)
+#           define _$integer(x,y) call fam_saveF90Integer(#x,'ad2',funit,fam%ad(2)%x)
+#           define _$double(x,y)  call fam_saveF90Double(#x,'ad2',funit,fam%ad(2)%x)
+#           define _$logical(x,y) call fam_saveF90Logical(#x,'ad2',funit,fam%ad(2)%x)
+#           define _$doublearray(x,y,z) call fam_saveF90DoubleArray(#x,'ad2',funit,fam%ad(2)%x,#z)
+#           define _$logicalarray(x,y,z) call fam_saveF90LogicalArray(#x,'ad2',funit,fam%ad(2)%x,#z)
+#           define _$integerarray(x,y,z) call fam_saveF90IntegerArray(#x,'ad2',funit,fam%ad(2)%x,#z)
 
-#           define _$doublearray(x,y,z) if (#z==':') write(funit,'(a)') "allocate(fam%ad(2)%"//#x//"("//intToStr(size(fam%ad(2)%x))//"))"; \
- do i=1,size(fam%ad(2)%x); write(funit,'(a)',advance="no") \
- "fam%ad(2)%"//#x//"("//intToStr(i)//")="; write(funit,'(a)') dblToStr(fam%ad(2)% x(i))//'_dp'; end do
-
-#           define _$logicalarray(x,y,z) if (#z==':') write(funit,'(a)') "allocate(fam%ad(2)%"//#x//"("//intToStr(size(fam%ad(2)%x))//"))"; \
- do i=1,size(fam%ad(2)%x); write(funit,'(a)',advance="no") \
- "fam%ad(2)%"//#x//"("//intToStr(i)//")="; write(funit,'(a)') merge('.true. ','.false.',fam%ad(2)% x(i)); end do
-
-#           define _$integerarray(x,y,z) if (#z==':') write(funit,'(a)') "allocate(fam%ad(2)%"//#x//"("//intToStr(size(fam%ad(2)%x))//"))"; \
- do i=1,size(fam%ad(2)%x); write(funit,'(a)',advance="no") \
- "fam%ad(2)%"//#x//"("//intToStr(i)//")="; write(funit,'(a)') intToStr(fam%ad(2)% x(i)); end do
-
-#           include 'includes/famad_t.inc'
+#           include "includes/famad_t.inc"
 
 #           undef  _$header
 #           undef  _$footer
@@ -1335,5 +1443,161 @@ contains
         if (present(fname)) close(funit)
 
     end subroutine fam_saveF90
+
+
+    subroutine fam_saveF90Integer(str,level,funit,myval)
+        use fortax_util, only : intToStr
+        implicit none
+        character(len=*), intent(in) :: str
+        character(len=*), intent(in) :: level
+        integer, intent(in) :: funit
+        integer, intent(in) :: myval
+        select case(level)
+        case('ad1')
+            write(funit,'(a)',advance="no") "fam%ad(1)%"//str//"="
+        case('ad2')
+            write(funit,'(a)',advance="no") "fam%ad(2)%"//str//"="
+        case default
+            write(funit,'(a)',advance="no") "fam%"//str//"="
+        end select
+        write(funit,'(a)') intToStr(myval)
+    end subroutine fam_saveF90Integer
+
+    subroutine fam_saveF90Double(str,level,funit,myval)
+        use fortax_util, only : dblToStr
+        implicit none
+        character(len=*), intent(in) :: str
+        character(len=*), intent(in) :: level
+        integer,  intent(in) :: funit
+        real(dp), intent(in) :: myval
+        select case(level)
+        case('ad1')
+            write(funit,'(a)',advance="no") "fam%ad(1)%"//str//"="
+        case('ad2')
+            write(funit,'(a)',advance="no") "fam%ad(2)%"//str//"="
+        case default
+            write(funit,'(a)',advance="no") "fam%"//str//"="
+        end select
+        write(funit,'(a)') dblToStr(myval)//'_dp'
+    end subroutine fam_saveF90Double
+
+    subroutine fam_saveF90DoubleArray(str,level,funit,myval,mydim)
+        use fortax_util, only : dblToStr, intToStr
+        implicit none
+        character(len=*), intent(in) :: str
+        character(len=*), intent(in) :: level
+        integer,  intent(in) :: funit
+        real(dp), intent(in) :: myval(:)
+        character(len=*), intent(in) :: mydim
+        integer :: i
+
+        if (mydim==':') then
+            write(funit,'(a)') "allocate(fam%"//str//"("//intToStr(size(myval))//"))"
+        end if
+
+        select case(level)
+        case('ad1')
+            do i = 1, size(myval)
+                write(funit,'(a)',advance="no") "fam%ad(1)%"//str//"("//intToStr(i)//")="
+                write(funit,'(a)') dblToStr(myval(i))//'_dp'
+            end do
+        case('ad2')
+            do i = 1, size(myval)
+                write(funit,'(a)',advance="no") "fam%ad(2)%"//str//"("//intToStr(i)//")="
+                write(funit,'(a)') dblToStr(myval(i))//'_dp'
+            end do
+        case default
+            do i = 1, size(myval)
+                write(funit,'(a)',advance="no") "fam%"//str//"("//intToStr(i)//")="
+                write(funit,'(a)') dblToStr(myval(i))//'_dp'
+            end do
+        end select
+
+    end subroutine fam_saveF90DoubleArray
+
+    subroutine fam_saveF90IntegerArray(str,level,funit,myval,mydim)
+        use fortax_util, only : intToStr
+        implicit none
+        character(len=*), intent(in) :: str
+        character(len=*), intent(in) :: level
+        integer, intent(in) :: funit
+        integer, intent(in) :: myval(:)
+        character(len=*), intent(in) :: mydim
+        integer :: i
+
+        if (mydim==':') then
+            write(funit,'(a)') "allocate(fam%"//str//"("//intToStr(size(myval))//"))"
+        end if
+
+        select case(level)
+        case('ad1')
+            do i = 1, size(myval)
+                write(funit,'(a)',advance="no") "fam%ad(1)%"//str//"("//intToStr(i)//")="
+                write(funit,'(a)') intToStr(myval(i))
+            end do
+        case('ad2')
+            do i = 1, size(myval)
+                write(funit,'(a)',advance="no") "fam%ad(2)%"//str//"("//intToStr(i)//")="
+                write(funit,'(a)') intToStr(myval(i))
+            end do
+        case default
+            do i = 1, size(myval)
+                write(funit,'(a)',advance="no") "fam%"//str//"("//intToStr(i)//")="
+                write(funit,'(a)') intToStr(myval(i))
+            end do
+        end select
+
+    end subroutine fam_saveF90IntegerArray
+
+    subroutine fam_saveF90Logical(str,level,funit,myval)
+        implicit none
+        character(len=*), intent(in) :: str
+        character(len=*), intent(in) :: level
+        integer,  intent(in) :: funit
+        logical, intent(in) :: myval
+        select case(level)
+        case('ad1')
+            write(funit,'(a)',advance="no") "fam%ad(1)%"//str//"="
+        case('ad2')
+            write(funit,'(a)',advance="no") "fam%ad(2)%"//str//"="
+        case default
+            write(funit,'(a)',advance="no") "fam%"//str//"="
+        end select
+        write(funit,'(a)') merge('.true. ','.false.',myval)
+    end subroutine fam_saveF90Logical
+
+    subroutine fam_saveF90LogicalArray(str,level,funit,myval,mydim)
+        use fortax_util, only : intToStr
+        implicit none
+        character(len=*), intent(in) :: str
+        character(len=*), intent(in) :: level
+        integer, intent(in) :: funit
+        logical, intent(in) :: myval(:)
+        character(len=*), intent(in) :: mydim
+        integer :: i
+
+        if (mydim==':') then
+            write(funit,'(a)') "allocate(fam%"//str//"("//intToStr(size(myval))//"))"
+        end if
+
+        select case(level)
+        case('ad1')
+            do i = 1, size(myval)
+                write(funit,'(a)',advance="no") "fam%ad(1)%"//str//"("//intToStr(i)//")="
+                write(funit,'(a)') merge('.true. ','.false.',myval(i))
+            end do
+        case('ad2')
+            do i = 1, size(myval)
+                write(funit,'(a)',advance="no") "fam%ad(2)%"//str//"("//intToStr(i)//")="
+                write(funit,'(a)') merge('.true. ','.false.',myval(i))
+            end do
+        case default
+            do i = 1, size(myval)
+                write(funit,'(a)',advance="no") "fam%"//str//"("//intToStr(i)//")="
+                write(funit,'(a)') merge('.true. ','.false.',myval(i))
+            end do
+        end select
+
+    end subroutine fam_saveF90LogicalArray
 
 end module fortax_type

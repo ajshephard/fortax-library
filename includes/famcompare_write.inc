@@ -1,16 +1,11 @@
 #undef _$header
 #undef _$footer
-#undef __$quote
-#undef _$quote
 #undef _$integer
 #undef _$logical
 #undef _$double
 #undef _$integerarray
 #undef _$logicalarray
 #undef _$doublearray
-
-#define __$quote(x) #x
-#define _$quote(x) __$quote(x)
 
 call xml_ftag(info,'fam','open')
 
@@ -23,7 +18,7 @@ call xml_ftag(info,'fam','open')
 #define _$logicalarray(x,y,z) call ftxmlwrite(info,fam(i)% x,#x)
 #define _$doublearray(x,y,z)  call ftxmlwrite(info,fam(i)% x,#x)
 
-#include 'includes/fam_t.inc'
+#include "fam_t.inc"
 
 #undef _$integer
 #undef _$logical
@@ -41,7 +36,7 @@ call xml_ftag(info,'fam','open')
 
 call xml_ftag(info,'ad1','open')
 
-#include 'includes/famad_t.inc'
+#include "famad_t.inc"
 
 call xml_ftag(info,'ad1','close')
 
@@ -61,14 +56,12 @@ call xml_ftag(info,'ad1','close')
 
 call xml_ftag(info,'ad2','open')
 
-#include 'includes/famad_t.inc'
+#include "famad_t.inc"
 
 call xml_ftag(info,'ad2','close')
 
 #undef _$header
 #undef _$footer
-#undef __$quote
-#undef _$quote
 #undef _$integer
 #undef _$logical
 #undef _$double
@@ -90,14 +83,12 @@ call xml_ftag(info,'net','open',attribs)
 
 call xml_ftag(info,'nettu','open')
 
-#include 'includes/nettu_t.inc'
+#include "nettu_t.inc"
 
 call xml_ftag(info,'nettu','close')
 
 #undef _$header
 #undef _$footer
-#undef __$quote
-#undef _$quote
 #undef _$integer
 #undef _$logical
 #undef _$double
@@ -114,14 +105,12 @@ call xml_ftag(info,'nettu','close')
 
 call xml_ftag(info,'netad1','open')
 
-#include 'includes/netad_t.inc'
+#include "netad_t.inc"
 
 call xml_ftag(info,'netad1','close')
 
 #undef _$header
 #undef _$footer
-#undef __$quote
-#undef _$quote
 #undef _$integer
 #undef _$logical
 #undef _$double
@@ -138,14 +127,12 @@ call xml_ftag(info,'netad1','close')
 
 call xml_ftag(info,'netad2','open')
 
-#include 'includes/netad_t.inc'
+#include "netad_t.inc"
 
 call xml_ftag(info,'netad2','close')
 
 #undef _$header
 #undef _$footer
-#undef __$quote
-#undef _$quote
 #undef _$integer
 #undef _$logical
 #undef _$double

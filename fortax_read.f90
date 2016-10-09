@@ -27,9 +27,9 @@ module fortax_read
     private :: dp
 
     private
-    public  :: readFortaxParams, fortax_read_assign
+    public  :: readFortaxParams, fr
 
-    interface fortax_read_assign
+    interface fr
         module procedure assign_integer
         module procedure assign_logical
         module procedure assign_double
@@ -39,7 +39,7 @@ module fortax_read
         module procedure assign_integer_array_fixed
         module procedure assign_logical_array_fixed
         module procedure assign_double_array_fixed
-    end interface fortax_read_assign
+    end interface fr
 
 
 contains
@@ -73,7 +73,7 @@ contains
         call read_xml_file_xmlfortax_t(systemFile)
         call sys_init(sys)
         !use fpp so that the reading will fully reflect the data structure
-#       include 'includes/fortax_typeread.inc'
+#       include "includes/fortax_typeread.inc"
 
         ! internal system name
         sys%sysname = sysname

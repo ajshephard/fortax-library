@@ -14,16 +14,17 @@
 #define _$doublearray(x,y,z)  if (allocated(syst% x )) deallocate(syst% x )
 #define _$integerarray(x,y,z) if (allocated(syst% x )) deallocate(syst% x )
 #define _$logicalarray(x,y,z) if (allocated(syst% x )) deallocate(syst% x )
-     
-#define __$append(x) x
-#define _$append(x) __$append(x)
 
-#define _$header subroutine _$append(_$typelist)_init(syst); \
-implicit none; \
-type(_$append(_$typelist)_t), intent(inout) :: syst
-#define _$footer end subroutine _$append(_$typelist)_init
+#define concat(x, y) concat_(x, y)
+#define concat_(x, y) x##y
 
-#include 'includes/system/syslist.inc'
+#define concat3(x, y, z) concat3_(x, y, z)
+#define concat3_(x, y, z) x##y##z
+
+#define _$header subroutine concat(_$typelist,_init(syst)); implicit none; type(concat(_$typelist,_t)), intent(inout) :: syst
+#define _$footer end subroutine concat(_$typelist,_init)
+
+#include "system/syslist.inc"
 
 #undef  _$header
 #undef  _$footer

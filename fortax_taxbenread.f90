@@ -694,8 +694,8 @@ contains
 
 
                 !HB, CCB and CTB: whether child benefit counts as income in the taper calculation
-                  ! Note: the ChildBenefit component in the PrmFowler.Reb.OthInc structure only exists when child benefit counts as income
-                  ! So this code relies on sys%rebateSys%ChbenIsIncome being initialised to .false. by sys_init
+                  ! Note: the ChildBenefit component in the PrmFowler.Reb.OthInc structure only exists when child benefit counts as
+                  ! income so this code relies on sys%rebateSys%ChbenIsIncome being initialised to .false. by sys_init
                 case('PrmFowler.Reb.OthInc')
                     nfield = size(cat%field)
                     do j = 1, nfield
@@ -969,9 +969,11 @@ contains
 #           ifdef __linux
                 call system( 'ls '//trim(fpathin)//'/*.bp3 | xargs -n1 basename >'//fname )
 #           endif
-            open( newunit=funit, file=fname, action='read', status='old', iostat=istat )
+            call getUnit(funit)
+            open( funit, file=fname, action='read', status='old', iostat=istat )
         else
-            open( newunit=tmpunit, status='scratch' )
+            call getUnit(tmpunit)
+            open( unit=tmpunit, status='scratch' )
             inquire(unit=tmpunit,name=tmpname)
 #           ifdef _WIN32
                 call system('dir '//trim(fpathin)//'\*.bp3 /b >'//tmpname)
@@ -979,7 +981,8 @@ contains
 #           ifdef __linux
                 call system('ls '//trim(fpathin)//'/*.bp3 | xargs -n1 basename >'//tmpname)
 #           endif
-            open(newunit=funit,file=tmpname,action='read',status='old',iostat=istat)
+            call getUnit(funit)
+            open(unit=funit,file=tmpname,action='read',status='old',iostat=istat)
         end if
 
         err = .false.
@@ -1131,7 +1134,8 @@ contains
                 sys%incSup%disregShared = .true.
             end if
 
-            ! From Jul 00, childcare disregard set against WFTC/WTC/CTC as well as earnings (TAXBEN says Apr 00, so this is a correction)
+            ! From Jul 00, childcare disregard set against WFTC/WTC/CTC as well as earnings (TAXBEN says Apr 00, so this is a
+            ! correction)
             if ((sysdate >= 20000401) .and. (sysdate < 20000703)) then
                 sys%rebateSys%credInDisregCC = .false.
             end if

@@ -170,7 +170,7 @@ contains
         attribs(1,2) = 'value'
         write(attribs(2,2),*) field
 
-        call xml_put(info, 'fchar',adjustl(attribs), 2, &
+        call xml_put(info, 'fchar',attribs, 2, &
             myData, 0, 'elem')
 
         return
@@ -199,7 +199,7 @@ contains
         attribs(1,2) = 'value'
         write(attribs(2,2),*) field
 
-        call xml_put(info, 'finteger',adjustl(attribs), 2, &
+        call xml_put(info, 'finteger',attribs, 2, &
             myData, 0, 'elem')
 
         return
@@ -231,7 +231,7 @@ contains
 
         write(attribs(2,2),*) field
 
-        call xml_put(info, 'fdouble',adjustl(attribs), 2, &
+        call xml_put(info, 'fdouble',attribs, 2, &
             & mydata, 0, 'elem')
 
         return
@@ -260,7 +260,7 @@ contains
         attribs(1,2) = 'value'
         write(attribs(2,2),*) merge('T', 'F', field)
 
-        call xml_put(info, 'flogical',adjustl(attribs), 2, &
+        call xml_put(info, 'flogical',attribs, 2, &
             & mydata, 0, 'elem')
 
         return
@@ -307,7 +307,7 @@ contains
             print *, 'warning: field truncated when writing integer array'
         end if
 
-        call xml_put(info, 'fintegerarray',adjustl(attribs), 2, &
+        call xml_put(info, 'fintegerarray',attribs, 2, &
             & mydata, 0, 'openclose')
 
         return
@@ -354,7 +354,7 @@ contains
             print *, 'warning: field truncated when writing logical array'
         end if
 
-        call xml_put(info, 'fdoublearray',adjustl(attribs), 2, &
+        call xml_put(info, 'fdoublearray',attribs, 2, &
             & mydata, 0, 'openclose')
 
         return
@@ -401,7 +401,7 @@ contains
             print *, 'warning: field truncated when writing logical array'
         end if
 
-        call xml_put(info, 'flogicalarray',adjustl(attribs), 2, &
+        call xml_put(info, 'flogicalarray',attribs, 2, &
             & mydata, 0, 'openclose')
 
         return
