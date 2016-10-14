@@ -3,222 +3,223 @@
 <sysname value="April13"></sysname>
 <sysdesc value="TB system as at 01/04/2013"></sysdesc>
 <system basename="inctax">
-   <finteger name="numbands" value="4"/>
-   <fdouble name="pa" value="181.538461538462"/>
-   <flogical name="doPATaper" value="T"/>
-   <flogical name="disablePATaperRounding" value="F"/>
-   <fdouble name="paTaperThresh" value="1923.07692307692"/>
-   <fdouble name="paTaperRate" value="0.500000000000000"/>
-   <fdouble name="mma" value="0.000000000000000E+000"/>
-   <fdouble name="ctc" value="0.000000000000000E+000"/>
-   <fdouble name="ctcyng" value="0.000000000000000E+000"/>
-   <fdouble name="mmarate" value="0.100000000000000"/>
-   <fdouble name="ctctaper" value="0.000000000000000E+000"/>
-   <fdouble name="c4rebate" value="0.000000000000000E+000"/>
+   <finteger name="numbands" value="           4"/>
+   <fdouble name="pa" value="   181.538461538462"/>
+   <flogical name="doPATaper" value=" T"/>
+   <flogical name="disablePATaperRounding" value=" F"/>
+   <fdouble name="paTaperThresh" value="   1923.07692307692"/>
+   <fdouble name="paTaperRate" value="  0.500000000000000"/>
+   <fdouble name="mma" value="  0.000000000000000E+000"/>
+   <fdouble name="ctc" value="  0.000000000000000E+000"/>
+   <fdouble name="ctcyng" value="  0.000000000000000E+000"/>
+   <fdouble name="mmarate" value="  0.100000000000000"/>
+   <fdouble name="ctctaper" value="  0.000000000000000E+000"/>
+   <fdouble name="c4rebate" value="  0.000000000000000E+000"/>
    <fdoublearray name="bands" value="53.6538461538462 615.576923076923 2884.61538461538 19230.7692307692"></fdoublearray>
    <fdoublearray name="rates" value="0.200000000000000 0.200000000000000 0.400000000000000 0.450000000000000"></fdoublearray>
 </system>
 <system basename="natins">
-   <finteger name="numrates" value="5"/>
-   <finteger name="c4nrates" value="3"/>
-   <fdouble name="c2floor" value="110.100000000000"/>
-   <fdouble name="c2rate" value="2.70000000000000"/>
-   <fdouble name="ceiling" value="9.999999999999990E+099"/>
+   <finteger name="numrates" value="           5"/>
+   <finteger name="c4nrates" value="           3"/>
+   <fdouble name="c2floor" value="   110.100000000000"/>
+   <fdouble name="c2rate" value="   2.70000000000000"/>
+   <fdouble name="ceiling" value="  9.999999999999990E+099"/>
    <fdoublearray name="rates" value="0.000000000000000E+000 0.000000000000000E+000 0.120000000000000 0.120000000000000 2.000000000000000E-002"></fdoublearray>
    <fdoublearray name="bands" value="109.000000000000 149.000000000000 770.000000000000 797.000000000000 9.999999999999990E+099"></fdoublearray>
    <fdoublearray name="c4rates" value="0.000000000000000E+000 9.000000000000000E-002 2.000000000000000E-002"></fdoublearray>
    <fdoublearray name="c4bands" value="149.130000000000 797.110000000000 1000000.00000000"></fdoublearray>
 </system>
 <system basename="chben">
-   <flogical name="doChBen" value="T"/>
-   <fdouble name="basic" value="13.4000000000000"/>
-   <fdouble name="kid1xtr" value="6.90000000000000"/>
-   <fdouble name="opf" value="0.000000000000000E+000"/>
-   <fdouble name="MatGrantVal" value="500.000000000000"/>
-   <flogical name="MatGrantOnlyFirstKid" value="T"/>
-   <flogical name="doTaper" value="T"/>
-   <flogical name="disableTaperRounding" value="F"/>
-   <fdouble name="taperStart" value="961.538461538462"/>
-   <fdouble name="taperRate" value="1.000000000000023E-002"/>
-   <flogical name="taperIsIncTax" value="F"/>
+   <flogical name="doChBen" value=" T"/>
+   <fdouble name="basic" value="   13.4000000000000"/>
+   <fdouble name="kid1xtr" value="   6.90000000000000"/>
+   <fdouble name="opf" value="  0.000000000000000E+000"/>
+   <fdouble name="MatGrantVal" value="   500.000000000000"/>
+   <flogical name="MatGrantOnlyFirstKid" value=" T"/>
+   <flogical name="doTaper" value=" T"/>
+   <flogical name="disableTaperRounding" value=" F"/>
+   <fdouble name="taperStart" value="   961.538461538462"/>
+   <fdouble name="taperRate" value="  1.000000000000023E-002"/>
+   <flogical name="taperIsIncTax" value=" F"/>
 </system>
 <system basename="fc">
-   <flogical name="dofamcred" value="F"/>
-   <finteger name="NumAgeRng" value="4"/>
-   <finteger name="MaxAgeCC" value="0"/>
-   <finteger name="WFTCMaxAgeCC" value="0"/>
-   <fdouble name="adult" value="0.000000000000000E+000"/>
-   <fdouble name="ftprem" value="0.000000000000000E+000"/>
-   <fdouble name="hours1" value="16.0000000000000"/>
-   <fdouble name="hours2" value="30.0000000000000"/>
-   <fdouble name="thres" value="0.000000000000000E+000"/>
-   <fdouble name="taper" value="0.000000000000000E+000"/>
-   <fdouble name="MaintDisreg" value="9.999999999999990E+099"/>
-   <fdouble name="MaxCC1" value="0.000000000000000E+000"/>
-   <fdouble name="MaxCC2" value="0.000000000000000E+000"/>
-   <fdouble name="WFTCMaxCC1" value="0.000000000000000E+000"/>
-   <fdouble name="WFTCMaxCC2" value="0.000000000000000E+000"/>
-   <fdouble name="WFTCPropCC" value="0.000000000000000E+000"/>
-   <fdouble name="MinAmt" value="0.000000000000000E+000"/>
+   <flogical name="dofamcred" value=" F"/>
+   <finteger name="NumAgeRng" value="           4"/>
+   <finteger name="MaxAgeCC" value="           0"/>
+   <finteger name="WFTCMaxAgeCC" value="           0"/>
+   <fdouble name="adult" value="  0.000000000000000E+000"/>
+   <fdouble name="ftprem" value="  0.000000000000000E+000"/>
+   <fdouble name="hours1" value="   16.0000000000000"/>
+   <fdouble name="hours2" value="   30.0000000000000"/>
+   <fdouble name="thres" value="  0.000000000000000E+000"/>
+   <fdouble name="taper" value="  0.000000000000000E+000"/>
+   <fdouble name="MaintDisreg" value="  9.999999999999990E+099"/>
+   <fdouble name="MaxCC1" value="  0.000000000000000E+000"/>
+   <fdouble name="MaxCC2" value="  0.000000000000000E+000"/>
+   <fdouble name="WFTCMaxCC1" value="  0.000000000000000E+000"/>
+   <fdouble name="WFTCMaxCC2" value="  0.000000000000000E+000"/>
+   <fdouble name="WFTCPropCC" value="  0.000000000000000E+000"/>
+   <fdouble name="MinAmt" value="  0.000000000000000E+000"/>
    <fintegerarray name="kidagel" value="0 11 16 18"></fintegerarray>
    <fintegerarray name="kidageu" value="10 15 17 18"></fintegerarray>
    <fdoublearray name="kidcred" value="0.000000000000000E+000 0.000000000000000E+000 0.000000000000000E+000 0.000000000000000E+000"></fdoublearray>
 </system>
 <system basename="ctc">
-   <fdouble name="fam" value="10.4807692307692"/>
-   <fdouble name="baby" value="0.000000000000000E+000"/>
-   <fdouble name="kid" value="52.3076923076923"/>
+   <fdouble name="fam" value="   10.4807692307692"/>
+   <fdouble name="baby" value="  0.000000000000000E+000"/>
+   <fdouble name="kid" value="   52.3076923076923"/>
 </system>
 <system basename="wtc">
-   <fdouble name="Basic" value="36.9230769230769"/>
-   <fdouble name="CouLP" value="74.8076923076923"/>
-   <fdouble name="FT" value="15.1923076923077"/>
-   <fdouble name="MinHrsKids" value="16.0000000000000"/>
-   <fdouble name="MinHrsCouKids" value="24.0000000000000"/>
-   <fdouble name="MinHrsNoKids" value="30.0000000000000"/>
-   <fdouble name="FTHrs" value="30.0000000000000"/>
-   <finteger name="MinAgeKids" value="16"/>
-   <finteger name="MinAgeNoKids" value="25"/>
-   <fdouble name="MaxCC1" value="175.000000000000"/>
-   <fdouble name="MaxCC2" value="300.000000000000"/>
-   <fdouble name="PropCC" value="0.700000000000000"/>
-   <finteger name="MaxAgeCC" value="15"/>
-   <fdouble name="NewDisreg" value="17.1000000000000"/>
-   <flogical name="NewDisregCon" value="T"/>
+   <fdouble name="Basic" value="   36.9230769230769"/>
+   <fdouble name="CouLP" value="   74.8076923076923"/>
+   <fdouble name="FT" value="   15.1923076923077"/>
+   <fdouble name="MinHrsKids" value="   16.0000000000000"/>
+   <fdouble name="MinHrsCouKids" value="   24.0000000000000"/>
+   <fdouble name="MinHrsNoKids" value="   30.0000000000000"/>
+   <fdouble name="FTHrs" value="   30.0000000000000"/>
+   <finteger name="MinAgeKids" value="          16"/>
+   <finteger name="MinAgeNoKids" value="          25"/>
+   <fdouble name="MaxCC1" value="   175.000000000000"/>
+   <fdouble name="MaxCC2" value="   300.000000000000"/>
+   <fdouble name="PropCC" value="  0.700000000000000"/>
+   <finteger name="MaxAgeCC" value="          15"/>
+   <fdouble name="NewDisreg" value="   17.1000000000000"/>
+   <flogical name="NewDisregCon" value=" T"/>
 </system>
 <system basename="ntc">
-   <flogical name="donewtaxcred" value="T"/>
-   <fdouble name="thr1lo" value="123.461538461538"/>
-   <fdouble name="thr1hi" value="305.961538461538"/>
-   <fdouble name="thr2" value="0.000000000000000E+000"/>
-   <fdouble name="taper1" value="0.410000000000000"/>
-   <fdouble name="taper2" value="0.000000000000000E+000"/>
-   <flogical name="taperCTCInOneGo" value="T"/>
-   <fdouble name="MinAmt" value="0.500000000000000"/>
+   <flogical name="donewtaxcred" value=" T"/>
+   <fdouble name="thr1lo" value="   123.461538461538"/>
+   <fdouble name="thr1hi" value="   305.961538461538"/>
+   <fdouble name="thr2" value="  0.000000000000000E+000"/>
+   <fdouble name="taper1" value="  0.410000000000000"/>
+   <fdouble name="taper2" value="  0.000000000000000E+000"/>
+   <flogical name="taperCTCInOneGo" value=" T"/>
+   <fdouble name="MinAmt" value="  0.500000000000000"/>
 </system>
 <system basename="incsup">
-   <flogical name="doIncSup" value="T"/>
-   <flogical name="IncChben" value="F"/>
-   <finteger name="NumAgeRng" value="1"/>
-   <fdouble name="MainCou" value="112.550000000000"/>
-   <fdouble name="YngCou" value="85.8000000000000"/>
-   <fdouble name="MainLP" value="71.7000000000000"/>
-   <fdouble name="YngLP" value="56.8000000000000"/>
-   <fdouble name="MainSin" value="71.7000000000000"/>
-   <fdouble name="YngSin" value="56.8000000000000"/>
-   <fdouble name="ValFSM" value="6.14000000000000"/>
-   <fdouble name="DisregLP" value="20.0000000000000"/>
-   <fdouble name="DisregSin" value="5.00000000000000"/>
-   <fdouble name="DisregCou" value="10.0000000000000"/>
-   <flogical name="DisregShared" value="T"/>
-   <fdouble name="PremFam" value="0.000000000000000E+000"/>
-   <fdouble name="PremLP" value="0.000000000000000E+000"/>
-   <fdouble name="hours" value="16.0000000000000"/>
-   <fdouble name="MaintDisreg" value="9.999999999999990E+099"/>
+   <flogical name="doIncSup" value=" T"/>
+   <flogical name="IncChben" value=" F"/>
+   <finteger name="NumAgeRng" value="           1"/>
+   <fdouble name="MainCou" value="   112.550000000000"/>
+   <fdouble name="YngCou" value="   85.8000000000000"/>
+   <fdouble name="MainLP" value="   71.7000000000000"/>
+   <fdouble name="YngLP" value="   56.8000000000000"/>
+   <fdouble name="MainSin" value="   71.7000000000000"/>
+   <fdouble name="YngSin" value="   56.8000000000000"/>
+   <fdouble name="ValFSM" value="   7.05000000000000"/>
+   <fdouble name="DisregLP" value="   20.0000000000000"/>
+   <fdouble name="DisregSin" value="   5.00000000000000"/>
+   <fdouble name="DisregCou" value="   10.0000000000000"/>
+   <flogical name="DisregShared" value=" T"/>
+   <fdouble name="PremFam" value="  0.000000000000000E+000"/>
+   <fdouble name="PremLP" value="  0.000000000000000E+000"/>
+   <fdouble name="hours" value="   16.0000000000000"/>
+   <fdouble name="MaintDisreg" value="  9.999999999999990E+099"/>
    <fintegerarray name="AgeRngl" value="0"></fintegerarray>
    <fintegerarray name="AgeRngu" value="19"></fintegerarray>
    <fdoublearray name="AddKid" value="0.000000000000000E+000"></fdoublearray>
 </system>
 <system basename="ctax">
-   <flogical name="docounciltax" value="T"/>
-   <fdouble name="bandD" value="27.7325000000000"/>
-   <fdouble name="SinDis" value="0.250000000000000"/>
-   <fdouble name="RatioA" value="0.670000000000000"/>
-   <fdouble name="RatioB" value="0.770000000000000"/>
-   <fdouble name="RatioC" value="0.880000000000000"/>
-   <fdouble name="RatioE" value="1.22000000000000"/>
-   <fdouble name="RatioF" value="1.44000000000000"/>
-   <fdouble name="RatioG" value="1.67000000000000"/>
-   <fdouble name="RatioH" value="2.00000000000000"/>
+   <flogical name="docounciltax" value=" T"/>
+   <fdouble name="bandD" value="   27.6944230769231"/>
+   <fdouble name="SinDis" value="  0.250000000000000"/>
+   <fdouble name="RatioA" value="  0.670000000000000"/>
+   <fdouble name="RatioB" value="  0.770000000000000"/>
+   <fdouble name="RatioC" value="  0.880000000000000"/>
+   <fdouble name="RatioE" value="   1.22000000000000"/>
+   <fdouble name="RatioF" value="   1.44000000000000"/>
+   <fdouble name="RatioG" value="   1.67000000000000"/>
+   <fdouble name="RatioH" value="   2.00000000000000"/>
 </system>
 <system basename="rebatesys">
-   <flogical name="RulesUnderFC" value="F"/>
-   <flogical name="RulesUnderWFTC" value="F"/>
-   <flogical name="RulesUnderNTC" value="T"/>
-   <finteger name="NumAgeRng" value="1"/>
-   <flogical name="Restrict" value="F"/>
-   <flogical name="docap" value="F"/>
-   <fdouble name="MainCou" value="112.550000000000"/>
-   <fdouble name="YngCou" value="85.8000000000000"/>
-   <fdouble name="MainLP" value="71.7000000000000"/>
-   <fdouble name="YngLP" value="56.8000000000000"/>
-   <fdouble name="MainSin" value="71.7000000000000"/>
-   <fdouble name="YngSin" value="56.8000000000000"/>
-   <fdouble name="DisregSin" value="5.00000000000000"/>
-   <fdouble name="DisregLP" value="25.0000000000000"/>
-   <fdouble name="DisregCou" value="10.0000000000000"/>
-   <flogical name="CredInDisregCC" value="T"/>
-   <flogical name="ChbenIsIncome" value="F"/>
-   <fdouble name="PremFam" value="17.4000000000000"/>
-   <fdouble name="PremLP" value="0.000000000000000E+000"/>
-   <fdouble name="MaintDisreg" value="9.999999999999990E+099"/>
-   <fdouble name="MaxCC1" value="175.000000000000"/>
-   <fdouble name="MaxCC2" value="300.000000000000"/>
-   <finteger name="MaxAgeCC" value="15"/>
+   <flogical name="RulesUnderFC" value=" F"/>
+   <flogical name="RulesUnderWFTC" value=" F"/>
+   <flogical name="RulesUnderNTC" value=" T"/>
+   <flogical name="RulesUnderUC" value=" F"/>
+   <finteger name="NumAgeRng" value="           1"/>
+   <flogical name="Restrict" value=" F"/>
+   <flogical name="docap" value=" F"/>
+   <fdouble name="MainCou" value="   112.550000000000"/>
+   <fdouble name="YngCou" value="   85.8000000000000"/>
+   <fdouble name="MainLP" value="   71.7000000000000"/>
+   <fdouble name="YngLP" value="   56.8000000000000"/>
+   <fdouble name="MainSin" value="   71.7000000000000"/>
+   <fdouble name="YngSin" value="   56.8000000000000"/>
+   <fdouble name="DisregSin" value="   5.00000000000000"/>
+   <fdouble name="DisregLP" value="   25.0000000000000"/>
+   <fdouble name="DisregCou" value="   10.0000000000000"/>
+   <flogical name="CredInDisregCC" value=" T"/>
+   <flogical name="ChbenIsIncome" value=" F"/>
+   <fdouble name="PremFam" value="   17.4000000000000"/>
+   <fdouble name="PremLP" value="  0.000000000000000E+000"/>
+   <fdouble name="MaintDisreg" value="  9.999999999999990E+099"/>
+   <fdouble name="MaxCC1" value="   175.000000000000"/>
+   <fdouble name="MaxCC2" value="   300.000000000000"/>
+   <finteger name="MaxAgeCC" value="          15"/>
    <fintegerarray name="AgeRngl" value="0"></fintegerarray>
    <fintegerarray name="AgeRngu" value="19"></fintegerarray>
    <fdoublearray name="AddKid" value="65.6200000000000"></fdoublearray>
 </system>
 <system basename="hben">
-   <flogical name="doHBen" value="T"/>
-   <fdouble name="taper" value="0.650000000000000"/>
-   <fdouble name="MinAmt" value="0.500000000000000"/>
+   <flogical name="doHBen" value=" T"/>
+   <fdouble name="taper" value="  0.650000000000000"/>
+   <fdouble name="MinAmt" value="  0.500000000000000"/>
 </system>
 <system basename="ctaxben">
-   <flogical name="docounciltaxben" value="T"/>
-   <fdouble name="taper" value="0.200000000000000"/>
-   <flogical name="doEntitlementCut" value="T"/>
-   <fdouble name="entitlementShare" value="0.896000000000000"/>
+   <flogical name="docounciltaxben" value=" T"/>
+   <fdouble name="taper" value="  0.200000000000000"/>
+   <flogical name="doEntitlementCut" value=" T"/>
+   <fdouble name="entitlementShare" value="  0.896000000000000"/>
 </system>
 <system basename="ccben">
-   <flogical name="dopolltax" value="F"/>
-   <fdouble name="taper" value="0.150000000000000"/>
-   <fdouble name="PropElig" value="0.800000000000000"/>
-   <fdouble name="MinAmt" value="0.500000000000000"/>
-   <fdouble name="CCrate" value="0.000000000000000E+000"/>
+   <flogical name="dopolltax" value=" F"/>
+   <fdouble name="taper" value="  0.150000000000000"/>
+   <fdouble name="PropElig" value="  0.800000000000000"/>
+   <fdouble name="MinAmt" value="  0.500000000000000"/>
+   <fdouble name="CCrate" value="  0.000000000000000E+000"/>
 </system>
 <system basename="uc">
-   <flogical name="doUnivCred" value="F"/>
-   <fdouble name="MainCou" value="0.000000000000000E+000"/>
-   <fdouble name="YngCou" value="0.000000000000000E+000"/>
-   <fdouble name="MainSin" value="0.000000000000000E+000"/>
-   <fdouble name="YngSin" value="0.000000000000000E+000"/>
-   <finteger name="MinAgeMain" value="0"/>
-   <fdouble name="FirstKid" value="0.000000000000000E+000"/>
-   <fdouble name="OtherKid" value="0.000000000000000E+000"/>
-   <fdouble name="MaxCC1" value="0.000000000000000E+000"/>
-   <fdouble name="MaxCC2" value="0.000000000000000E+000"/>
-   <fdouble name="PropCC" value="0.000000000000000E+000"/>
-   <finteger name="MaxAgeCC" value="0"/>
-   <flogical name="doRentCap" value="F"/>
-   <fdouble name="DisregSinNoKidsHi" value="0.000000000000000E+000"/>
-   <fdouble name="DisregSinNoKidsLo" value="0.000000000000000E+000"/>
-   <fdouble name="DisregSinKidsHi" value="0.000000000000000E+000"/>
-   <fdouble name="DisregSinKidsLo" value="0.000000000000000E+000"/>
-   <fdouble name="DisregCouNoKidsHi" value="0.000000000000000E+000"/>
-   <fdouble name="DisregCouNoKidsLo" value="0.000000000000000E+000"/>
-   <fdouble name="DisregCouKidsHi" value="0.000000000000000E+000"/>
-   <fdouble name="DisregCouKidsLo" value="0.000000000000000E+000"/>
-   <fdouble name="taper" value="0.000000000000000E+000"/>
-   <fdouble name="MinAmt" value="0.000000000000000E+000"/>
+   <flogical name="doUnivCred" value=" F"/>
+   <fdouble name="MainCou" value="  0.000000000000000E+000"/>
+   <fdouble name="YngCou" value="  0.000000000000000E+000"/>
+   <fdouble name="MainSin" value="  0.000000000000000E+000"/>
+   <fdouble name="YngSin" value="  0.000000000000000E+000"/>
+   <finteger name="MinAgeMain" value="           0"/>
+   <fdouble name="FirstKid" value="  0.000000000000000E+000"/>
+   <fdouble name="OtherKid" value="  0.000000000000000E+000"/>
+   <fdouble name="MaxCC1" value="  0.000000000000000E+000"/>
+   <fdouble name="MaxCC2" value="  0.000000000000000E+000"/>
+   <fdouble name="PropCC" value="  0.000000000000000E+000"/>
+   <finteger name="MaxAgeCC" value="           0"/>
+   <flogical name="doRentCap" value=" F"/>
+   <fdouble name="DisregSinNoKidsHi" value="  0.000000000000000E+000"/>
+   <fdouble name="DisregSinNoKidsLo" value="  0.000000000000000E+000"/>
+   <fdouble name="DisregSinKidsHi" value="  0.000000000000000E+000"/>
+   <fdouble name="DisregSinKidsLo" value="  0.000000000000000E+000"/>
+   <fdouble name="DisregCouNoKidsHi" value="  0.000000000000000E+000"/>
+   <fdouble name="DisregCouNoKidsLo" value="  0.000000000000000E+000"/>
+   <fdouble name="DisregCouKidsHi" value="  0.000000000000000E+000"/>
+   <fdouble name="DisregCouKidsLo" value="  0.000000000000000E+000"/>
+   <fdouble name="taper" value="  0.000000000000000E+000"/>
+   <fdouble name="MinAmt" value="  0.000000000000000E+000"/>
 </system>
 <system basename="statepen">
-   <flogical name="doStatePen" value="F"/>
-   <finteger name="PenAgeMan" value="65"/>
-   <finteger name="PenAgeWoman" value="62"/>
+   <flogical name="doStatePen" value=" F"/>
+   <finteger name="PenAgeMan" value="          65"/>
+   <finteger name="PenAgeWoman" value="          62"/>
 </system>
 <system basename="bencap">
-   <flogical name="doCap" value="T"/>
-   <flogical name="doThruUC" value="F"/>
-   <fdouble name="sinNoKids" value="350.000000000000"/>
-   <fdouble name="sinKids" value="500.000000000000"/>
-   <fdouble name="couNoKids" value="500.000000000000"/>
-   <fdouble name="couKids" value="500.000000000000"/>
-   <fdouble name="UCEarnThr" value="0.000000000000000E+000"/>
+   <flogical name="doCap" value=" T"/>
+   <flogical name="doThruUC" value=" F"/>
+   <fdouble name="sinNoKids" value="   350.000000000000"/>
+   <fdouble name="sinKids" value="   500.000000000000"/>
+   <fdouble name="couNoKids" value="   500.000000000000"/>
+   <fdouble name="couKids" value="   500.000000000000"/>
+   <fdouble name="UCEarnThr" value="  0.000000000000000E+000"/>
 </system>
 <system basename="extra">
-   <flogical name="fsminappamt" value="F"/>
-   <flogical name="matgrant" value="F"/>
-   <finteger name="prices" value="20130401"/>
+   <flogical name="fsminappamt" value=" F"/>
+   <flogical name="matgrant" value=" F"/>
+   <finteger name="prices" value="    20130401"/>
 </system>
 </fortax>

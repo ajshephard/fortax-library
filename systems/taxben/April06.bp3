@@ -1,10 +1,10 @@
 <DataStream_Id3726
   VersionNo="3"
   Format="XML"
-  Application="t:\WriteParams.exe"
-  User="robert_j"
+  Application="V:\taxben\ParameterCode\Development\WriteParams.exe"
+  User="andrew_h"
   Description=""
-  DateStamp="08/04/2013 11:09:22">
+  DateStamp="16/03/2016 17:47:03">
   <Classes
     Count="1">
     <Class
@@ -255,21 +255,6 @@
           Value="Personal">
         </Field>
         <Field
-          Name="DoRRB"
-          Type="boolean"
-          Value="-1">
-        </Field>
-        <Field
-          Name="DoIIS"
-          Type="boolean"
-          Value="0">
-        </Field>
-        <Field
-          Name="Splitting"
-          Type="boolean"
-          Value="0">
-        </Field>
-        <Field
           Name="DoTransferablePersonalAllowance"
           Type="boolean"
           Value="0">
@@ -291,6 +276,21 @@
         </Field>
         <Field
           Name="TaperTPAFromHighRate"
+          Type="boolean"
+          Value="0">
+        </Field>
+        <Field
+          Name="DoRRB"
+          Type="boolean"
+          Value="-1">
+        </Field>
+        <Field
+          Name="DoIIS"
+          Type="boolean"
+          Value="0">
+        </Field>
+        <Field
+          Name="Splitting"
           Type="boolean"
           Value="0">
         </Field>
@@ -371,6 +371,11 @@
         </Field>
         <Field
           Name="TaperCB"
+          Type="boolean"
+          Value="0">
+        </Field>
+        <Field
+          Name="DoB15PersonalSavingsAllowance"
           Type="boolean"
           Value="0">
         </Field>
@@ -839,6 +844,11 @@
         </Field>
         <Field
           Name="UniversalCredit"
+          Type="shortint"
+          Value="1">
+        </Field>
+        <Field
+          Name="ChildcareSubsidy"
           Type="shortint"
           Value="1">
         </Field>
@@ -1393,6 +1403,11 @@
         </Field>
         <Field
           Name="RetPenDoTory2001"
+          Type="boolean"
+          Value="0">
+        </Field>
+        <Field
+          Name="DoSingleTierPen"
           Type="boolean"
           Value="0">
         </Field>
@@ -2160,6 +2175,11 @@
         </Field>
         <Field
           Name="GiveTo1Earners"
+          Type="boolean"
+          Value="0">
+        </Field>
+        <Field
+          Name="DifferentReceiptPropIfTaxpayer"
           Type="boolean"
           Value="0">
         </Field>
@@ -3066,6 +3086,11 @@
           Value="Independent">
         </Field>
         <Field
+          Name="MaxawardhigherinLondon"
+          Type="boolean"
+          Value="0">
+        </Field>
+        <Field
           Name="CBTaper"
           Type="boolean"
           Value="0">
@@ -3093,6 +3118,11 @@
         </Field>
         <Field
           Name="GiveTo1Earners"
+          Type="boolean"
+          Value="0">
+        </Field>
+        <Field
+          Name="DifferentReceiptPropIfTaxpayer"
           Type="boolean"
           Value="0">
         </Field>
@@ -3131,11 +3161,6 @@
           Value="1">
         </Field>
         <Field
-          Name="PropertyIncome"
-          Type="shortint"
-          Value="1">
-        </Field>
-        <Field
           Name="OddJobEarnings"
           Type="shortint"
           Value="1">
@@ -3153,7 +3178,7 @@
         <Field
           Name="Superann"
           Type="shortint"
-          Value="-2">
+          Value="-1">
         </Field>
         <Field
           Name="SelfEmpNetLosses"
@@ -3190,6 +3215,11 @@
         BaseName="PrmFowler.UniversalCredit.OthInc">
         <Field
           Name="Annuities"
+          Type="shortint"
+          Value="1">
+        </Field>
+        <Field
+          Name="PropertyIncome"
           Type="shortint"
           Value="1">
         </Field>
@@ -3275,6 +3305,14 @@
         </Field>
       </NamedFields>
       <NamedFields
+        BaseName="PrmFowler.ChildcareSubsidy">
+        <Field
+          Name="Enabled"
+          Type="boolean"
+          Value="0">
+        </Field>
+      </NamedFields>
+      <NamedFields
         BaseName="PrmFowler.NewTaxCreds">
         <Field
           Name="AssignmentUnit"
@@ -3328,6 +3366,11 @@
         </Field>
         <Field
           Name="Do100pctaperinSaezFA"
+          Type="boolean"
+          Value="0">
+        </Field>
+        <Field
+          Name="DoFrankField"
           Type="boolean"
           Value="0">
         </Field>
@@ -3596,6 +3639,11 @@
           Type="boolean"
           Value="0">
         </Field>
+        <Field
+          Name="DifferentReceiptPropIfTaxpayer"
+          Type="boolean"
+          Value="0">
+        </Field>
       </NamedFields>
       <NamedFields
         BaseName="PrmFowler.NewTaxCreds.PrmChildTaxCred.AgeLim">
@@ -3761,6 +3809,11 @@
           Value="0">
         </Field>
         <Field
+          Name="DoBenefitCapinNI"
+          Type="boolean"
+          Value="0">
+        </Field>
+        <Field
           Name="BenefitCapSinglenoKids"
           Type="double"
           Value="99999">
@@ -3779,6 +3832,11 @@
           Name="BenefitCapCoupleKids"
           Type="double"
           Value="99999">
+        </Field>
+        <Field
+          Name="BenefitCapHigherinLondon"
+          Type="boolean"
+          Value="0">
         </Field>
         <Field
           Name="RestrictCTBAmount"
@@ -3868,6 +3926,11 @@
         </Field>
         <Field
           Name="GiveTo1Earners"
+          Type="boolean"
+          Value="0">
+        </Field>
+        <Field
+          Name="DifferentReceiptPropIfTaxpayer"
           Type="boolean"
           Value="0">
         </Field>
