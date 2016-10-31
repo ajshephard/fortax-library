@@ -48,7 +48,8 @@ module fortax_library
                                     FORTAX_kinksccexp => kinksccexp,                            &
                                     FORTAX_maxkinks => maxkinks
 
-    use fortax_prices,      only :  FORTAX_loadIndex => loadIndex,                              &
+    use fortax_prices,      only :  sysindex_t,                                                 &
+                                    FORTAX_loadIndex => loadIndex,                              &
                                     FORTAX_uprateSys => uprateSys,                              &
                                     FORTAX_uprateFactor => uprateFactor,                        &
                                     FORTAX_loadSysIndex => loadSysIndex,                        &
