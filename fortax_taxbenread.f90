@@ -1168,13 +1168,9 @@ contains
         end if
 
 
-        ! Impose benefit cap through UC from October 2013
-        if (present(sysDate)) then
-            if (sysdate >= 20131001) then
-                sys%bencap%doThruUC = .true.
-            else
-                sys%bencap%doThruUC = .false.
-            end if
+        ! Impose benefit cap through UC if UC is to be calculated
+        if (sys%uc%doUnivCred == .true.) then
+            sys%bencap%doThruUC = .true.
         else
             sys%bencap%doThruUC = .false.
         end if
