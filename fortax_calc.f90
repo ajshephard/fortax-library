@@ -504,7 +504,7 @@ contains
             if (sys%extra%fsminappamt) then
                 !add fsm to applicable amount
                 do i = 1, fam%nkids
-                    if (fam%kidage(i)>4) appamt = appamt + sys%incsup%ValFSM
+                    if (fam%kidage(i) >= sys%incSup%MinAgeFSM) appamt = appamt + sys%incsup%ValFSM
                 end do
             end if
 
@@ -2076,7 +2076,7 @@ contains
         if (((net%tu%incsup > tol) .or. ((net%tu%ctc > tol) .and. (net%tu%wtc <= tol) &
             & .and. (net%tu%pretaxearn <= sys%ntc%thr1hi + tol))) .and. (.not. sys%extra%fsminappamt)) then
             do i = 1, fam%nkids
-                if (fam%kidage(i)>4) net%tu%fsm = net%tu%fsm + sys%incsup%ValFSM
+                if (fam%kidage(i) >= sys%incSup%MinAgeFSM) net%tu%fsm = net%tu%fsm + sys%incsup%ValFSM
             end do
         end if
 

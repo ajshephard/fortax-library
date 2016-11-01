@@ -1147,7 +1147,7 @@ contains
         end if
 
         ! Minimum age for FSM
-        !sys%incSup%MinAgeFSM = 5
+        sys%incSup%MinAgeFSM = 5
 
         ! Set child benefit taper to be recorded as a reduction in child benefit (rather than an increase in income tax)
         if (sys%chBen%doTaper) then

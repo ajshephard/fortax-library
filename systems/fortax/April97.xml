@@ -106,6 +106,7 @@
    <fdouble name="YngLP" value="   29.6000000000000"/>
    <fdouble name="MainSin" value="   49.1500000000000"/>
    <fdouble name="YngSin" value="   38.9000000000000"/>
+   <finteger name="MinAgeFSM" value="           5"/>
    <fdouble name="ValFSM" value="   4.10000000000000"/>
    <fdouble name="DisregLP" value="   15.0000000000000"/>
    <fdouble name="DisregSin" value="   5.00000000000000"/>
