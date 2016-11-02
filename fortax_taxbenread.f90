@@ -109,6 +109,10 @@ contains
                         select case(cat2%name)
                             case('MCARestrictedTo')
                                 sys%incTax%mmaRate = strToDouble(cat2%value)
+                            case('DoTransferablePersonalAllowance')
+                                sys%incTax%doTPA = strToLogical(cat2%value)
+                            case('MaxTrans')
+                                sys%incTax%maxTPA = strToDouble(cat2%value)
                         end select
                     end do
 

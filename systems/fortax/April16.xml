@@ -9,6 +9,8 @@
    <flogical name="disablePATaperRounding" value=" F"/>
    <fdouble name="paTaperThresh" value="   1923.07692307692"/>
    <fdouble name="paTaperRate" value="  0.500000000000000"/>
+   <flogical name="doTPA" value=" T"/>
+   <fdouble name="maxTPA" value="   21.1538461538462"/>
    <fdouble name="mma" value="  0.000000000000000E+000"/>
    <fdouble name="ctc" value="  0.000000000000000E+000"/>
    <fdouble name="ctcyng" value="  0.000000000000000E+000"/>

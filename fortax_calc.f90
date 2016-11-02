@@ -77,7 +77,9 @@ contains
         type(net_t), intent(inout) :: net
 
         real(dp)                   :: earningsOverThresh
-        real(dp)                   :: persAllow
+        real(dp)                   :: persAllow1, persAllow2
+        real(dp)                   :: persAllowUnused1, persAllowUnused2
+        logical                    :: isHRT1, isHRT2
 
         !integer                    :: pe !pe = primary earner
 
@@ -91,22 +93,22 @@ contains
             earningsOverThresh = max(fam%ad(1)%earn - sys%inctax%paTaperThresh, 0.0_dp)
             if (earningsOverThresh > tol) then
                 ! Taper personal allowance away
-                persAllow =  max(sys%inctax%pa - earningsOverThresh * sys%inctax%paTaperRate, 0.0_dp)
+                persAllow1 =  max(sys%inctax%pa - earningsOverThresh * sys%inctax%paTaperRate, 0.0_dp)
                 ! Round up to nearest pound (rounding done on annual basis)
                 if (.not. sys%inctax%disablePATaperRounding) then
-                    persAllow = real(ceiling(persAllow*52.0_dp), dp) / 52.0_dp
+                    persAllow1 = real(ceiling(persAllow1*52.0_dp), dp) / 52.0_dp
                 end if
             else
-                persAllow = sys%inctax%pa
+                persAllow1 = sys%inctax%pa
             end if
 
         else
-            persAllow = sys%inctax%pa
+            persAllow1 = sys%inctax%pa
 
         end if
 
         ! Calculate taxable income
-        net%ad(1)%taxable = max(fam%ad(1)%earn-persAllow, 0.0_dp)
+        net%ad(1)%taxable = max(fam%ad(1)%earn-persAllow1, 0.0_dp)
 
 
         ! Calculate personal allowance for adult 2 if present (tapering it away from high income individuals from April
@@ -119,22 +121,22 @@ contains
                 earningsOverThresh = max(fam%ad(2)%earn - sys%inctax%paTaperThresh, 0.0_dp)
                 if (earningsOverThresh > tol) then
                     ! Taper personal allowance away
-                    persAllow =  max(sys%inctax%pa - earningsOverThresh * sys%inctax%paTaperRate, 0.0_dp)
+                    persAllow2 =  max(sys%inctax%pa - earningsOverThresh * sys%inctax%paTaperRate, 0.0_dp)
                     ! Round up to nearest pound (rounding done on annual basis)
                     if (.not. sys%inctax%disablePATaperRounding) then
-                        persAllow = real(ceiling(persAllow*52.0_dp), dp) / 52.0_dp
+                        persAllow2 = real(ceiling(persAllow2*52.0_dp), dp) / 52.0_dp
                     end if
                 else
-                    persAllow = sys%inctax%pa
+                    persAllow2 = sys%inctax%pa
                 end if
 
             else
-                persAllow = sys%inctax%pa
+                persAllow2 = sys%inctax%pa
 
             end if
 
             ! Calculate taxable income
-            net%ad(2)%taxable = max(fam%ad(2)%earn-persAllow, 0.0_dp)
+            net%ad(2)%taxable = max(fam%ad(2)%earn-persAllow2, 0.0_dp)
 
 
         ! If no partner
@@ -142,7 +144,30 @@ contains
             net%ad(2)%taxable = 0.0_dp
         end if
 
+        ! Transferable marriage allowance (from April 2015)
+        if (sys%inctax%doTPA .and. (_famcouple_) .and. (_fammarried_)) then
+            
+            ! Calculate unused personal allowance
+            persAllowUnused1 = max(persAllow1-fam%ad(1)%earn, 0.0_dp)
+            persAllowUnused2 = max(persAllow2-fam%ad(2)%earn, 0.0_dp)
+          
+            ! Calculate whether higher-rate taxpayer
+            isHRT1 = (net%ad(1)%taxable > sys%inctax%bands(2))
+            isHRT2 = (net%ad(2)%taxable > sys%inctax%bands(2))
+            
+            ! Transfer personal allowance from adult 1 to adult 2
+            if ((persAllowUnused1 > tol) .and. (persAllowUnused2 <= tol) .and. (.not. isHRT2)) then
+                net%ad(2)%taxable = max(net%ad(2)%taxable - min(persAllowUnused1, sys%inctax%maxTPA), 0.0_dp)
+            end if
 
+            ! Transfer personal allowance from adult 2 to adult 1
+            if ((persAllowUnused2 > tol) .and. (persAllowUnused1 <= tol) .and. (.not. isHRT1)) then
+                net%ad(1)%taxable = max(net%ad(1)%taxable - min(persAllowUnused2, sys%inctax%maxTPA), 0.0_dp)
+            end if
+
+        end if
+        
+        
         ! Rebate for Class 4 NI contributions (1985/86-1995/96)
         if (sys%inctax%c4rebate > tol) then
             if ((net%ad(1)%natinsc4) > tol) net%ad(1)%taxable &
