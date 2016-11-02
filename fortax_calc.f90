@@ -2066,17 +2066,22 @@ contains
         type(sys_t), intent(in)    :: sys
         type(fam_t), intent(in)    :: fam
         type(net_t), intent(inout) :: net
+        logical                    :: passesMeansTest
 
         integer                     :: i
 
         ! Before April 2003, you get FSM if you're on IS/IB-JSA
         ! From April 2003, you also get it if you're on full CTC and zero WTC
+        ! From September 2014, FSM are given to all English and Scottish children in reception, year 1 and year2
 
         net%tu%fsm = 0.0_dp
-        if (((net%tu%incsup > tol) .or. ((net%tu%ctc > tol) .and. (net%tu%wtc <= tol) &
-            & .and. (net%tu%pretaxearn <= sys%ntc%thr1hi + tol))) .and. (.not. sys%extra%fsminappamt)) then
+        if (.not. sys%extra%fsminappamt) then
+            passesMeansTest = ((net%tu%incsup > tol) .or. ((net%tu%ctc > tol) .and. (net%tu%wtc <= tol) &
+                .and. (net%tu%pretaxearn <= sys%ntc%thr1hi + tol)))
             do i = 1, fam%nkids
-                if (fam%kidage(i) >= sys%incSup%MinAgeFSM) net%tu%fsm = net%tu%fsm + sys%incsup%ValFSM
+                if ((fam%kidage(i) >= sys%incSup%MinAgeFSM) &
+                    .and. ((fam%kidage(i) <= sys%incSup%MaxAgeUniversalFSM) .or. (passesMeansTest))) &
+                    net%tu%fsm = net%tu%fsm + sys%incsup%ValFSM
             end do
         end if
 

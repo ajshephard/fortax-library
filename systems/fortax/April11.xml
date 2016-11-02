@@ -107,6 +107,7 @@
    <fdouble name="MainSin" value="   67.5000000000000"/>
    <fdouble name="YngSin" value="   53.4500000000000"/>
    <finteger name="MinAgeFSM" value="           5"/>
+   <finteger name="MaxAgeUniversalFSM" value="           0"/>
    <fdouble name="ValFSM" value="   6.29250000000000"/>
    <fdouble name="DisregLP" value="   20.0000000000000"/>
    <fdouble name="DisregSin" value="   5.00000000000000"/>

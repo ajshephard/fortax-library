@@ -538,6 +538,8 @@ contains
                                 sys%incSup%yngSin = strToDouble(cat2%value)
                             case('ValFreeSchoolMeals')
                                 sys%incSup%valFSM = strToDouble(cat2%value)
+                            case('UniversalFSMAge')
+                                sys%incSup%MaxAgeUniversalFSM = strToInt(cat2%value)
                             case('Disregard1')
 !                                sys%incSup%Disreg1 = strToDouble(cat2%value)
                                 sys%incSup%disregLP = strToDouble(cat2%value)
