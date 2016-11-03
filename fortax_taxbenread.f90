@@ -648,6 +648,8 @@ contains
                     do j = 1, nfield
                         cat2 => cat%field(j)
                         select case(cat2%name)
+                            case('AgeYoungBenChange')
+                                sys%rebateSys%minAgeMainSin = strToInt(cat2%value)
                             case('CouOver18')
                                 sys%rebateSys%mainCou = strToDouble(cat2%value)
                             case('CouUnder18')
@@ -1167,6 +1169,8 @@ contains
           sys%chBen%taperIsIncTax = .false.
         end if
 
+        ! Minimum age for entitlement to the HB/CTB main allowance rate for all but childless singles
+        sys%rebatesys%MinAgeMain = 18
 
         ! Reduce maximum entitlement for council tax benefit (April 2013)
         if (present(sysDate)) then

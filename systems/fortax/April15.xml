@@ -145,6 +145,8 @@
    <finteger name="NumAgeRng" value="           1"/>
    <flogical name="Restrict" value=" F"/>
    <flogical name="docap" value=" F"/>
+   <finteger name="MinAgeMain" value="          18"/>
+   <finteger name="MinAgeMainSin" value="          25"/>
    <fdouble name="MainCou" value="   114.850000000000"/>
    <fdouble name="YngCou" value="   87.5000000000000"/>
    <fdouble name="MainLP" value="   73.1000000000000"/>

@@ -1162,14 +1162,14 @@ contains
                 if (_famkids_) then
                     !Lone parent
                     !sys%rebatesys%PremLP abolished Apr 98, but don't need to condition on year here because parameter should be zero for later years
-                    if (fam%ad(1)%age < 18) then
+                    if (fam%ad(1)%age < sys%rebateSys%minAgeMain) then
                         HBAppAmt = sys%rebatesys%YngLP + sys%rebatesys%PremFam + sys%rebatesys%PremLP
                     else
                         HBAppAmt = sys%rebatesys%MainLP + sys%rebatesys%PremFam + sys%rebatesys%PremLP
                     end if
                 else
                     !Single childless
-                    if (fam%ad(1)%age < 25) then
+                    if (fam%ad(1)%age < sys%rebateSys%minAgeMainSin) then
                         HBAppAmt = sys%rebatesys%YngSin
                     else
                         HBAppAmt = sys%rebatesys%MainSin
@@ -1177,7 +1177,7 @@ contains
                 end if
             else
                 !Couples
-                if ((fam%ad(1)%age < 18) .and. (fam%ad(2)%age < 18)) then
+                if ((fam%ad(1)%age < sys%rebateSys%minAgeMain) .and. (fam%ad(2)%age < sys%rebateSys%minAgeMain)) then
                     HBAppAmt = sys%rebatesys%YngCou
                 else
                     HBAppAmt = sys%rebatesys%MainCou
