@@ -102,6 +102,8 @@
    <flogical name="doIncSup" value=" T"/>
    <flogical name="IncChben" value=" F"/>
    <finteger name="NumAgeRng" value="           1"/>
+   <finteger name="MinAgeMain" value="          18"/>
+   <finteger name="MinAgeMainSin" value="          25"/>
    <fdouble name="MainCou" value="   85.7500000000000"/>
    <fdouble name="YngCou" value="   65.3000000000000"/>
    <fdouble name="MainLP" value="   54.6500000000000"/>

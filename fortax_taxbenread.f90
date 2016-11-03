@@ -527,6 +527,8 @@ contains
                     do j = 1, nfield
                         cat2 => cat%field(j)
                         select case(cat2%name)
+                            case('AgeYoungBenChange')
+                                sys%incSup%MinAgeMainSin = strToInt(cat2%value)
                             case('CouOver18')
                                 sys%incSup%mainCou = strToDouble(cat2%value)
                                 if (cat2%value .ne. '0') sys%incsup%doIncSup = .true.
@@ -1131,6 +1133,9 @@ contains
 
         !hours for IS
         sys%incSup%hours = sys%fc%hours1
+        
+        ! Minimum age for entitlement to the IS main allowance rate for all but childless singles
+        sys%incSup%MinAgeMain = 18
 
         if (present(sysDate)) then
 

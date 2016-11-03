@@ -4,6 +4,8 @@ _$header
 _$logical(doIncSup,null)
 _$logical(IncChben,null)
 _$integer(NumAgeRng,range)
+_$integer(MinAgeMain,range)
+_$integer(MinAgeMainSin,range)
 _$double(MainCou,amount)     
 _$double(YngCou,amount)      
 _$double(MainLP,amount)      

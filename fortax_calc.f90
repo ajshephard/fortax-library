@@ -608,14 +608,14 @@ contains
 
             if (_famkids_) then
                 !Lone parent
-                if (fam%ad(1)%age < 18) then
+                if (fam%ad(1)%age < sys%incSup%MinAgeMain) then
                     ISAppAmt = sys%incsup%YngLP + sys%incsup%PremFam + sys%incsup%PremLP
                 else
                     ISAppAmt = sys%incsup%MainLP + sys%incsup%PremFam + sys%incsup%PremLP
                 end if
             else
                 !Single childless
-                if (fam%ad(1)%age < 25) then
+                if (fam%ad(1)%age < sys%incSup%MinAgeMainSin) then
                     ISAppAmt = sys%incsup%YngSin
                 else
                     ISAppAmt = sys%incsup%MainSin
@@ -624,7 +624,7 @@ contains
 
         else
             !Couples (ignore cases: one over 18, one under 18)
-            if ((fam%ad(1)%age < 18) .and. (fam%ad(2)%age < 18)) then
+            if ((fam%ad(1)%age < sys%incSup%MinAgeMain) .and. (fam%ad(2)%age < sys%incSup%MinAgeMain)) then
                 ISAppAmt = sys%incsup%YngCou
             else
                 ISAppAmt = sys%incsup%MainCou
