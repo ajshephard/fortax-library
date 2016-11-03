@@ -214,6 +214,7 @@
 </system>
 <system basename="bencap">
    <flogical name="doCap" value=" F"/>
+   <flogical name="doNI" value=" F"/>
    <flogical name="doThruUC" value=" F"/>
    <fdouble name="sinNoKids" value="  9.999999999999990E+099"/>
    <fdouble name="sinKids" value="  9.999999999999990E+099"/>

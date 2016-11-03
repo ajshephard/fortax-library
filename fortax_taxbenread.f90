@@ -673,6 +673,8 @@ contains
                                 sys%rebateSys%restrict = StrToLogical(cat2%value)
                             case('DoBenefitCap')
                                 sys%bencap%doCap = StrToLogical(cat2%value)
+                            case('DoBenefitCapinNI')
+                                sys%bencap%doNI = StrToLogical(cat2%value)
                             case('BenefitCapSinglenoKids')
                                 sys%bencap%sinNoKids = strToDouble(cat2%value)
                             case('BenefitCapLoneParent')

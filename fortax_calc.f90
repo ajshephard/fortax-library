@@ -2401,7 +2401,7 @@ contains
     !DEC$ ATTRIBUTES FORCEINLINE :: ImposeBenCap
     pure subroutine ImposeBenCap(sys,fam,net)
 
-        use fortax_type, only : sys_t, fam_t, net_t
+        use fortax_type, only : sys_t, fam_t, net_t, lab
 
         implicit none
 
@@ -2415,51 +2415,55 @@ contains
         real(dp)                   :: UCChCareElement
 
 
-        ! If through UC
-        if (sys%bencap%doThruUC) then
+        if ((fam%region .ne. lab%region%northern_ireland) .or. (sys%bencap%doNI)) then
+        
+            ! If through UC
+            if (sys%bencap%doThruUC) then
 
-            ! UC benefit cap applies if:
-                ! Positive UC award
-                ! Family earnings below some limit
+                ! UC benefit cap applies if:
+                    ! Positive UC award
+                    ! Family earnings below some limit
 
-            if ((net%tu%uc > tol) .and. (net%tu%posttaxearn + tol < sys%bencap%UCEarnThr)) then
+                if ((net%tu%uc > tol) .and. (net%tu%posttaxearn + tol < sys%bencap%UCEarnThr)) then
 
-                ! Total benefits to be capped (note it excludes childcare element of UC)
-                preCapBens = max(0.0_dp, net%tu%uc - UCChCare(sys,fam)) + net%tu%chben
+                    ! Total benefits to be capped (note it excludes childcare element of UC)
+                    preCapBens = max(0.0_dp, net%tu%uc - UCChCare(sys,fam)) + net%tu%chben
 
-                ! Amount of excess
-                excess = max(0.0_dp, preCapBens - BenCapLevel(sys,fam))
+                    ! Amount of excess
+                    excess = max(0.0_dp, preCapBens - BenCapLevel(sys,fam))
 
-                ! Reduce UC by excess
-                net%tu%uc = max(0.0_dp, net%tu%uc - excess)
+                    ! Reduce UC by excess
+                    net%tu%uc = max(0.0_dp, net%tu%uc - excess)
+
+                end if
+
+
+            ! If through HB
+            else
+
+                ! HB benefit cap applies if:
+                    ! Positive HB award
+                    ! Not entitled to WTC (taken to mean a zero award)
+                    ! Neither adult has reached qualifying age for pension credit
+
+                maxage = fam%ad(1)%age
+                if (_famcouple_) maxage = max(maxage,fam%ad(2)%age)
+
+                if ((net%tu%hben > tol) .and. (net%tu%wtc <= tol) .and. (maxage < sys%statepen%penAgeWoman)) then
+
+                    ! Total benefits to be capped
+                    preCapBens = net%tu%incsup + net%tu%hben + net%tu%chben + net%tu%ctc
+
+                    ! Amount of excess
+                    excess = max(0.0_dp, preCapBens - BenCapLevel(sys,fam))
+
+                    ! Reduce HB by excess (or until HB award is minimum HB award)
+                    net%tu%hben = max(sys%hben%minAmt, net%tu%hben - excess)
+
+                end if
 
             end if
-
-
-        ! If through HB
-        else
-
-            ! HB benefit cap applies if:
-                ! Positive HB award
-                ! Not entitled to WTC (taken to mean a zero award)
-                ! Neither adult has reached qualifying age for pension credit
-
-            maxage = fam%ad(1)%age
-            if (_famcouple_) maxage = max(maxage,fam%ad(2)%age)
-
-            if ((net%tu%hben > tol) .and. (net%tu%wtc < tol) .and. (maxage < sys%statepen%penAgeWoman)) then
-
-                ! Total benefits to be capped
-                preCapBens = net%tu%incsup + net%tu%hben + net%tu%chben + net%tu%ctc
-
-                ! Amount of excess
-                excess = max(0.0_dp, preCapBens - BenCapLevel(sys,fam))
-
-                ! Reduce HB by excess (or until HB award is minimum HB award)
-                net%tu%hben = max(sys%hben%minAmt, net%tu%hben - excess)
-
-            end if
-
+        
         end if
 
     end subroutine ImposeBenCap
@@ -2668,6 +2672,13 @@ contains
         end if
 
 
+        !8. BENEFIT CAP
+        !!!!!!!!!!!!!!!
+        
+        if (sys%bencap%docap) then
+            call imposeBenCap(sys,fam,net)
+        end if
+        
 
         ! Disposable income
         !!!!!!!!!!!!!!!!!!!
