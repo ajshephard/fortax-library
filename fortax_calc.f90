@@ -2412,7 +2412,8 @@ contains
         integer                    :: maxage
         real(dp)                   :: preCapBens
         real(dp)                   :: excess
-        real(dp)                   :: UCChCareElement
+        real(dp)                   :: maxWTC
+        real(dp)                   :: chcaresub
 
 
         if ((fam%region .ne. lab%region%northern_ireland) .or. (sys%bencap%doNI)) then
@@ -2443,13 +2444,18 @@ contains
 
                 ! HB benefit cap applies if:
                     ! Positive HB award
-                    ! Not entitled to WTC (taken to mean a zero award)
+                    ! Not entitled to WTC (excludes families where award has been fully tapered away)
                     ! Neither adult has reached qualifying age for pension credit
 
                 maxage = fam%ad(1)%age
                 if (_famcouple_) maxage = max(maxage,fam%ad(2)%age)
+                
+                ! Need to find out whether would have been entitled to WTC if income had been sufficiently low
+                chcaresub = net%tu%chcaresub
+                call MaxWTCamt(sys,fam,net,maxWTC)
+                net%tu%chcaresub = chcaresub
 
-                if ((net%tu%hben > tol) .and. (net%tu%wtc <= tol) .and. (maxage < sys%statepen%penAgeWoman)) then
+                if ((net%tu%hben > tol) .and. (maxWTC <= tol) .and. (maxage < sys%statepen%penAgeWoman)) then
 
                     ! Total benefits to be capped
                     preCapBens = net%tu%incsup + net%tu%hben + net%tu%chben + net%tu%ctc
