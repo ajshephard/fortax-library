@@ -1329,11 +1329,14 @@ contains
                         end if
                     else
                         if (_famcouple_) then
-                            if ((fam%ad(1)%hrs >= sys%wtc%MinHrsNoKids-tol) .or. &
-                                & (fam%ad(2)%hrs >= sys%wtc%MinHrsNoKids-tol)) &
+                            if (((fam%ad(1)%hrs >= sys%wtc%MinHrsNoKids-tol) .and. &
+                                & (fam%ad(1)%age >= sys%wtc%MinAgeNoKids)) .or. &
+                                & ((fam%ad(2)%hrs >= sys%wtc%MinHrsNoKids-tol) .and. &
+                                & (fam%ad(2)%age >= sys%wtc%MinAgeNoKids))) &
                                 & FTDisreg = sys%wtc%NewDisreg
                         else
-                            if (fam%ad(1)%hrs >= sys%wtc%MinHrsNoKids-tol) FTDisreg = sys%wtc%NewDisreg
+                            if ((fam%ad(1)%hrs >= sys%wtc%MinHrsNoKids-tol) .and. &
+                                & (fam%ad(1)%age >= sys%wtc%MinAgeNoKids)) FTDisreg = sys%wtc%NewDisreg
                         end if
                     end if
 
