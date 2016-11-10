@@ -2084,7 +2084,7 @@ contains
     !DEC$ ATTRIBUTES FORCEINLINE :: fsm
     pure subroutine fsm(sys,fam,net)
 
-        use fortax_type, only : sys_t, fam_t, net_t
+        use fortax_type, only : sys_t, fam_t, net_t, lab
 
         implicit none
 
@@ -2092,6 +2092,7 @@ contains
         type(fam_t), intent(in)    :: fam
         type(net_t), intent(inout) :: net
         logical                    :: passesMeansTest
+        logical                    :: inEnglandOrScotland
 
         integer                     :: i
 
@@ -2103,9 +2104,11 @@ contains
         if (.not. sys%extra%fsminappamt) then
             passesMeansTest = ((net%tu%incsup > tol) .or. ((net%tu%ctc > tol) .and. (net%tu%wtc <= tol) &
                 .and. (net%tu%pretaxearn <= sys%ntc%thr1hi + tol)))
+            inEnglandOrScotland = ((fam%region .ne. lab%region%northern_ireland) .and. (fam%region .ne. lab%region%wales))
             do i = 1, fam%nkids
                 if ((fam%kidage(i) >= sys%incSup%MinAgeFSM) &
-                    .and. ((fam%kidage(i) <= sys%incSup%MaxAgeUniversalFSM) .or. (passesMeansTest))) &
+                    & .and. (((fam%kidage(i) <= sys%incSup%MaxAgeUniversalFSM) .and. inEnglandOrScotland) &
+                    & .or. (passesMeansTest))) &
                     net%tu%fsm = net%tu%fsm + sys%incsup%ValFSM
             end do
         end if
