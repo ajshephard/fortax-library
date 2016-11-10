@@ -976,7 +976,7 @@ contains
         ! first, use system call to get contents of directory
         if ( present(fname) ) then
 #           ifdef _WIN32
-                call system( 'dir '//trim(fpathin)//'\*.bp3 /b >'//fname )
+                call system( 'dir "'//trim(fpathin)//'\*.bp3" /b > "'//fname//'"' )
 #           endif
 #           ifdef __linux
                 call system( 'ls '//trim(fpathin)//'/*.bp3 | xargs -n1 basename >'//fname )
@@ -984,16 +984,16 @@ contains
             call getUnit(funit)
             open( funit, file=fname, action='read', status='old', iostat=istat )
         else
-            call getUnit(tmpunit)
-            open( unit=tmpunit, status='scratch' )
-            inquire(unit=tmpunit,name=tmpname)
+            call getUnit(funit)
+            open( unit=funit, status='scratch' )
+            inquire(unit=funit,name=tmpname)
+            close(funit)
 #           ifdef _WIN32
-                call system('dir '//trim(fpathin)//'\*.bp3 /b >'//tmpname)
+                call system( 'dir "'//trim(fpathin)//'\*.bp3" /b > "'//tmpname//'"' )
 #           endif
 #           ifdef __linux
                 call system('ls '//trim(fpathin)//'/*.bp3 | xargs -n1 basename >'//tmpname)
 #           endif
-            call getUnit(funit)
             open(unit=funit,file=tmpname,action='read',status='old',iostat=istat)
         end if
 
@@ -1009,6 +1009,7 @@ contains
             else if (istat>0) then !error
                 err = .true.
                 write(*,*)  "error reading file list"
+                exit
             else
                 ! find position of file extension in original name
                 ! this will always be present given how we constructed
@@ -1079,7 +1080,6 @@ contains
         end do
 
         close(funit)
-        if (.not. present(fname)) close(tmpunit)
 
         if (err) then
             stop
