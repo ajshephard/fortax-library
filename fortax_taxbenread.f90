@@ -979,7 +979,7 @@ contains
                 call system( 'dir "'//trim(fpathin)//'\*.bp3" /b > "'//fname//'"' )
 #           endif
 #           ifdef __linux
-                call system( 'ls '//trim(fpathin)//'/*.bp3 | xargs -n1 basename >'//fname )
+                call system('find "'//trim(fpathin)//'" -name "*.bp3" -printf "%f\n" > "'//fname//'"' )
 #           endif
             call getUnit(funit)
             open( funit, file=fname, action='read', status='old', iostat=istat )
@@ -992,7 +992,7 @@ contains
                 call system( 'dir "'//trim(fpathin)//'\*.bp3" /b > "'//tmpname//'"' )
 #           endif
 #           ifdef __linux
-                call system('ls '//trim(fpathin)//'/*.bp3 | xargs -n1 basename >'//tmpname)
+                call system('find "'//trim(fpathin)//'" -name "*.bp3" -printf "%f\n" > '//tmpname)
 #           endif
             open(unit=funit,file=tmpname,action='read',status='old',iostat=istat)
         end if
@@ -1135,7 +1135,7 @@ contains
 
         !hours for IS
         sys%incSup%hours = sys%fc%hours1
-        
+
         ! Minimum age for entitlement to the IS main allowance rate for all but childless singles
         sys%incSup%MinAgeMain = 18
 
