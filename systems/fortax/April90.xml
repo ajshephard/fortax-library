@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <fortax>
 <sysname value="April90"></sysname>
-<sysdesc value="TB system as at 01/04/1990"></sysdesc>
+<sysdesc value="TB system as at 4/1/1990"></sysdesc>
 <system basename="inctax">
    <finteger name="numbands" value="           2"/>
    <fdouble name="pa" value="   57.7884615384615"/>

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <fortax>
 <sysname value="Autumn03"></sysname>
-<sysdesc value="TB system as at 01/12/2003"></sysdesc>
+<sysdesc value="TB system as at 12/1/2003"></sysdesc>
 <system basename="inctax">
    <finteger name="numbands" value="           3"/>
    <fdouble name="pa" value="   88.7500000000000"/>
@@ -85,7 +85,7 @@
    <fdouble name="MaxCC2" value="   200.000000000000"/>
    <fdouble name="PropCC" value="  0.700000000000000"/>
    <finteger name="MaxAgeCC" value="          15"/>
-   <fdouble name="NewDisreg" value="  0.000000000000000E+000"/>
+   <fdouble name="NewDisreg" value="   11.9000000000000"/>
    <flogical name="NewDisregCon" value=" F"/>
 </system>
 <system basename="ntc">
@@ -129,13 +129,13 @@
    <flogical name="docounciltax" value=" T"/>
    <fdouble name="bandD" value="   20.9001923076923"/>
    <fdouble name="SinDis" value="  0.250000000000000"/>
-   <fdouble name="RatioA" value="  0.670000000000000"/>
-   <fdouble name="RatioB" value="  0.770000000000000"/>
-   <fdouble name="RatioC" value="  0.880000000000000"/>
-   <fdouble name="RatioE" value="   1.22000000000000"/>
-   <fdouble name="RatioF" value="   1.44000000000000"/>
-   <fdouble name="RatioG" value="   1.67000000000000"/>
-   <fdouble name="RatioH" value="   2.00000000000000"/>
+   <fdouble name="RatioA" value="  0.000000000000000E+000"/>
+   <fdouble name="RatioB" value="  0.000000000000000E+000"/>
+   <fdouble name="RatioC" value="  0.000000000000000E+000"/>
+   <fdouble name="RatioE" value="  0.000000000000000E+000"/>
+   <fdouble name="RatioF" value="  0.000000000000000E+000"/>
+   <fdouble name="RatioG" value="  0.000000000000000E+000"/>
+   <fdouble name="RatioH" value="  0.000000000000000E+000"/>
 </system>
 <system basename="rebatesys">
    <flogical name="RulesUnderFC" value=" F"/>

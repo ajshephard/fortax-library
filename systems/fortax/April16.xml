@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <fortax>
 <sysname value="April16"></sysname>
-<sysdesc value="TB system as at 01/04/2016"></sysdesc>
+<sysdesc value="TB system as at 4/1/2016"></sysdesc>
 <system basename="inctax">
    <finteger name="numbands" value="           4"/>
    <fdouble name="pa" value="   211.538461538462"/>
@@ -112,7 +112,7 @@
    <fdouble name="YngSin" value="   57.9000000000000"/>
    <finteger name="MinAgeFSM" value="           5"/>
    <finteger name="MaxAgeUniversalFSM" value="           7"/>
-   <fdouble name="ValFSM" value="   7.34000000000000"/>
+   <fdouble name="ValFSM" value="   7.41000000000000"/>
    <fdouble name="DisregLP" value="   20.0000000000000"/>
    <fdouble name="DisregSin" value="   5.00000000000000"/>
    <fdouble name="DisregCou" value="   10.0000000000000"/>
@@ -127,15 +127,15 @@
 </system>
 <system basename="ctax">
    <flogical name="docounciltax" value=" T"/>
-   <fdouble name="bandD" value="   28.8417307692308"/>
+   <fdouble name="bandD" value="   29.2200000000000"/>
    <fdouble name="SinDis" value="  0.250000000000000"/>
-   <fdouble name="RatioA" value="  0.670000000000000"/>
-   <fdouble name="RatioB" value="  0.770000000000000"/>
-   <fdouble name="RatioC" value="  0.880000000000000"/>
-   <fdouble name="RatioE" value="   1.22000000000000"/>
-   <fdouble name="RatioF" value="   1.44000000000000"/>
-   <fdouble name="RatioG" value="   1.67000000000000"/>
-   <fdouble name="RatioH" value="   2.00000000000000"/>
+   <fdouble name="RatioA" value="  0.000000000000000E+000"/>
+   <fdouble name="RatioB" value="  0.000000000000000E+000"/>
+   <fdouble name="RatioC" value="  0.000000000000000E+000"/>
+   <fdouble name="RatioE" value="  0.000000000000000E+000"/>
+   <fdouble name="RatioF" value="  0.000000000000000E+000"/>
+   <fdouble name="RatioG" value="  0.000000000000000E+000"/>
+   <fdouble name="RatioH" value="  0.000000000000000E+000"/>
 </system>
 <system basename="rebatesys">
    <flogical name="RulesUnderFC" value=" F"/>
