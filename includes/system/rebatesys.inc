@@ -30,5 +30,6 @@ _$integer(MaxAgeCC,range)
 _$integerarray(AgeRngl,range,:)
 _$integerarray(AgeRngu,range,:)
 _$doublearray(AddKid,amount,:)
+_$integer(MaxKids,range)
 
 _$footer

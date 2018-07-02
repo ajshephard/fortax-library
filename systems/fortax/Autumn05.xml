@@ -168,6 +168,7 @@
    <fintegerarray name="AgeRngl" value="0 1"></fintegerarray>
    <fintegerarray name="AgeRngu" value="0 18"></fintegerarray>
    <fdoublearray name="AddKid" value="54.3600000000000 43.8800000000000"></fdoublearray>
+   <finteger name="MaxKids" value="          98"/>
 </system>
 <system basename="hben">
    <flogical name="doHBen" value=" T"/>

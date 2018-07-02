@@ -1148,8 +1148,11 @@ contains
         type(net_t), intent(in) :: net
 
         integer                 :: i, j
+        integer                 :: kidage(fam%nkids), kidagesorted(fam%nkids)
+        integer                 :: maxageloc
+        integer                 :: prevKidAge
 
-
+        
         ! Under UC, applicable amount for CTB is just the maximum (pre-taper) UC entitlement
         if (sys%rebatesys%rulesUnderUC) then
             HBAppAmt = net%tu%maxUC
@@ -1189,15 +1192,42 @@ contains
     
             !Child additions
             if (_famkids_) then
+                if (fam%nkids <= sys%rebatesys%MaxKids) then
     
-                do i = 1, fam%nkids
-                    do j = 1, sys%rebatesys%NumAgeRng
-                        if ((fam%kidage(i) >= sys%rebatesys%AgeRngl(j)) .and. (fam%kidage(i) <= sys%rebatesys%AgeRngu(j))) then
-                            HBAppAmt = HBAppAmt + sys%rebatesys%AddKid(j)
-                            exit
-                        end if
+                    do i = 1, fam%nkids
+                        do j = 1, sys%rebatesys%NumAgeRng
+                            if ((fam%kidage(i) >= sys%rebatesys%AgeRngl(j)) .and. (fam%kidage(i) <= sys%rebatesys%AgeRngu(j))) then
+                                HBAppAmt = HBAppAmt + sys%rebatesys%AddKid(j)
+                                exit
+                            end if
+                        end do
                     end do
-                end do
+                    
+                else
+                  
+                    ! Sort the kidage array
+                    kidage = fam%kidage(1:fam%nkids)
+                    do i = 1, fam%nkids
+                        maxageloc = maxloc(kidage, dim=1)
+                        kidagesorted(i) = kidage(maxageloc)
+                        kidage(maxageloc) = -1
+                    end do
+                  
+                    ! Give child addition if (i) within first sys%rebatesys%MaxKids children, or (ii) previous child was same age (so multiple birth exemption applies)
+                    prevKidAge = -1
+                    do i = 1, fam%nkids
+                        if ((i <= sys%rebatesys%MaxKids) .or. (kidagesorted(i) == prevKidAge)) then
+                            do j = 1, sys%rebatesys%NumAgeRng
+                                if ((kidagesorted(i) >= sys%rebatesys%AgeRngl(j)) .and. (kidagesorted(i) <= sys%rebatesys%AgeRngu(j))) then
+                                    HBAppAmt = HBAppAmt + sys%rebatesys%AddKid(j)
+                                end if
+                                exit
+                            end do
+                        end if
+                        prevKidAge = kidagesorted(i)
+                    end do
+                  
+                end if
     
             end if
 

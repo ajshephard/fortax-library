@@ -675,6 +675,8 @@ contains
                                 sys%rebateSys%CredInDisregCC = StrToLogical(cat2%value)
                             case('NumAgeRanges')
                                 sys%rebateSys%numAgeRng = strToInt(cat2%value)
+                            case('BigFamMinKids')
+                                sys%rebateSys%maxKids = strToInt(cat2%value) - 1
                             case('RestrictCTB')
                                 sys%rebateSys%restrict = StrToLogical(cat2%value)
                             case('DoBenefitCap')
