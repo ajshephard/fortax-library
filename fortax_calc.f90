@@ -2298,18 +2298,42 @@ contains
 
         type(sys_t), intent(in) :: sys
         type(fam_t), intent(in) :: fam
-
+        
+        integer                 :: kidage(fam%nkids), kidagesorted(fam%nkids)
+        integer                 :: maxageloc
+        integer                 :: i
+        integer                 :: prevKidAge
+        
         select case (fam%nkids)
         case (0)
             UCKid = 0.0_dp
         case (1:)
-            UCKid = sys%uc%FirstKid + real(fam%nkids-1,dp)*sys%uc%OtherKid
+            if (fam%nkids <= sys%uc%MaxKids) then
+                UCKid = sys%uc%FirstKid + real(fam%nkids-1,dp)*sys%uc%OtherKid
+
+            else
+                ! Sort the kidage array
+                kidage = fam%kidage(1:fam%nkids)
+                do i = 1, fam%nkids
+                    maxageloc = maxloc(kidage, dim=1)
+                    kidagesorted(i) = kidage(maxageloc)
+                    kidage(maxageloc) = -1
+                end do
+            end if
+
+                ! Give child element if (i) within first sys%uc%maxKids children, or (ii) previous child was same age (so multiple birth exemption applies)
+                UCKid = sys%uc%FirstKid
+                prevKidAge = kidagesorted(1)
+                do i = 2, fam%nkids
+                    if ((i <= sys%uc%maxKids) .or. (kidagesorted(i) == prevKidAge)) then
+                        UCKid = UCKid + sys%uc%OtherKid
+                    end if
+                    prevKidAge = kidagesorted(i)
+                end do
+
         end select
 
     end function UCKid
-
-
-
 
 
 

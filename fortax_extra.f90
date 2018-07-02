@@ -169,6 +169,7 @@ contains
         ! Child element (from CTC)
         sys%uc%FirstKid = sys%ctc%fam + sys%ctc%kid
         sys%uc%OtherKid = sys%ctc%kid
+        sys%uc%MaxKids = sys%ctc%maxKids
 
         ! Childcare element (from WTC)
         sys%uc%MaxCC1 = sys%wtc%MaxCC1

@@ -197,6 +197,7 @@
    <finteger name="MinAgeMain" value="           0"/>
    <fdouble name="FirstKid" value="  0.000000000000000E+000"/>
    <fdouble name="OtherKid" value="  0.000000000000000E+000"/>
+   <finteger name="MaxKids" value="           0"/>
    <fdouble name="MaxCC1" value="  0.000000000000000E+000"/>
    <fdouble name="MaxCC2" value="  0.000000000000000E+000"/>
    <fdouble name="PropCC" value="  0.000000000000000E+000"/>
