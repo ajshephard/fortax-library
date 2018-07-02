@@ -1727,12 +1727,12 @@ contains
 !        famearn = fam%ad(1)%earn
 !        if (_famcouple_) famearn = famearn + fam%ad(2)%earn
 
-        if ((MaxCTCFam <= tol) .and. (MaxWTC <= tol)) then
+        if ((MaxCTCFam + MaxCTCKid <= tol) .and. (MaxWTC <= tol)) then
             net%tu%wtc = 0.0_dp
             net%tu%ctc = 0.0_dp
         else
             ! Higher threshold if only entitled to CTC
-            if ((MaxCTCFam > tol) .and. (MaxWTC <= tol)) then
+            if ((MaxCTCFam + MaxCTCKid > tol) .and. (MaxWTC <= tol)) then
                 Thr1 = sys%ntc%thr1hi
             else
                 ! Threshold lower in other cases
