@@ -433,6 +433,8 @@ contains
                                 sys%ctc%fam = strToDouble(cat2%value)
                             case('YoungKidPremium')
                                 sys%ctc%baby = strToDouble(cat2%value)
+                            case('BigFamilyMinKids')
+                                sys%ctc%maxKids = strToInt(cat2%value) - 1
                             case('Threshold')
                                 sys%ntc%thr1Lo = strToDouble(cat2%value)
                             case('ChildTaxCredOnlyThreshold')

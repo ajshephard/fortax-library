@@ -70,6 +70,7 @@
    <fdouble name="fam" value="   10.4807692307692"/>
    <fdouble name="baby" value="  0.000000000000000E+000"/>
    <fdouble name="kid" value="   52.8846153846154"/>
+   <finteger name="maxKids" value="          98"/>
 </system>
 <system basename="wtc">
    <fdouble name="Basic" value="   37.3076923076923"/>
