@@ -2574,28 +2574,49 @@ contains
     !DEC$ ATTRIBUTES FORCEINLINE :: BenCapLevel
     real(dp) pure function BenCapLevel(sys,fam)
 
-        use fortax_type, only : sys_t, fam_t
+        use fortax_type, only : sys_t, fam_t, lab
 
         implicit none
 
         type(sys_t), intent(in)    :: sys
         type(fam_t), intent(in)    :: fam
 
-        ! Level of cap depends only on family composition
-        if (_famcouple_) then
-            if (_famkids_) then
-                BenCapLevel = sys%bencap%couKids
+        if ((fam%region == lab%region%london) .and. (sys%bencap%higherInLondon)) then
+        
+            ! Level of cap depends only on family composition
+            if (_famcouple_) then
+                if (_famkids_) then
+                    BenCapLevel = sys%bencap%LondonCouKids
+                else
+                    BenCapLevel = sys%bencap%LondonCouNoKids
+                end if !_famkids_
             else
-                BenCapLevel = sys%bencap%couNoKids
-            end if !_famkids_
-        else
-            if (_famkids_) then
-                BenCapLevel = sys%bencap%sinKids
-            else
-                BenCapLevel = sys%bencap%sinNoKids
-            end if !_famkids_
-        end if !_famcouple_
+                if (_famkids_) then
+                    BenCapLevel = sys%bencap%LondonSinKids
+                else
+                    BenCapLevel = sys%bencap%LondonSinNoKids
+                end if !_famkids_
+            end if !_famcouple_
 
+        else
+
+            ! Level of cap depends only on family composition
+            if (_famcouple_) then
+                if (_famkids_) then
+                    BenCapLevel = sys%bencap%couKids
+                else
+                    BenCapLevel = sys%bencap%couNoKids
+                end if !_famkids_
+            else
+                if (_famkids_) then
+                    BenCapLevel = sys%bencap%sinKids
+                else
+                    BenCapLevel = sys%bencap%sinNoKids
+                end if !_famkids_
+            end if !_famcouple_
+
+          
+        end if
 
     end function BenCapLevel
 

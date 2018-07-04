@@ -227,6 +227,11 @@
    <fdouble name="sinKids" value="   500.000000000000"/>
    <fdouble name="couNoKids" value="   500.000000000000"/>
    <fdouble name="couKids" value="   500.000000000000"/>
+   <flogical name="higherInLondon" value=" F"/>
+   <fdouble name="LondonSinNoKids" value="   99999.0000000000"/>
+   <fdouble name="LondonSinKids" value="   99999.0000000000"/>
+   <fdouble name="LondonCouNoKids" value="   99999.0000000000"/>
+   <fdouble name="LondonCouKids" value="   99999.0000000000"/>
    <fdouble name="UCEarnThr" value="  0.000000000000000E+000"/>
 </system>
 <system basename="extra">

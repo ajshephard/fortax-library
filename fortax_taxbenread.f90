@@ -691,6 +691,16 @@ contains
                                 sys%bencap%couNoKids = strToDouble(cat2%value)
                             case('BenefitCapCoupleKids')
                                 sys%bencap%couKids = strToDouble(cat2%value)
+                            case('BenefitCapHigherinLondon')
+                                sys%bencap%higherInLondon = strToLogical(cat2%value)
+                            case('BenefitCapLondonSinglenoKids')
+                                sys%bencap%LondonSinNoKids = strToDouble(cat2%value)
+                            case('BenefitCapLondonLoneParent')
+                                sys%bencap%LondonSinKids = strToDouble(cat2%value)
+                            case('BenefitCapLondonCoupleNoKids')
+                                sys%bencap%LondonCouNoKids = strToDouble(cat2%value)
+                            case('BenefitCapLondonCoupleKids')
+                                sys%bencap%LondonCouKids = strToDouble(cat2%value)
                         end select
                     end do
 
