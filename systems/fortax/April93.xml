@@ -130,13 +130,30 @@
    <flogical name="docounciltax" value=" T"/>
    <fdouble name="bandD" value="   10.8048076923077"/>
    <fdouble name="SinDis" value="  0.250000000000000"/>
-   <fdouble name="RatioA" value="  0.000000000000000E+000"/>
-   <fdouble name="RatioB" value="  0.000000000000000E+000"/>
-   <fdouble name="RatioC" value="  0.000000000000000E+000"/>
-   <fdouble name="RatioE" value="  0.000000000000000E+000"/>
-   <fdouble name="RatioF" value="  0.000000000000000E+000"/>
-   <fdouble name="RatioG" value="  0.000000000000000E+000"/>
-   <fdouble name="RatioH" value="  0.000000000000000E+000"/>
+   <fdouble name="EnglandRatioA" value="  0.670000000000000"/>
+   <fdouble name="EnglandRatioB" value="  0.770000000000000"/>
+   <fdouble name="EnglandRatioC" value="  0.880000000000000"/>
+   <fdouble name="EnglandRatioE" value="   1.22000000000000"/>
+   <fdouble name="EnglandRatioF" value="   1.44000000000000"/>
+   <fdouble name="EnglandRatioG" value="   1.67000000000000"/>
+   <fdouble name="EnglandRatioH" value="   2.00000000000000"/>
+   <fdouble name="EnglandRatioI" value="   2.00000000000000"/>
+   <fdouble name="ScotlandRatioA" value="  0.670000000000000"/>
+   <fdouble name="ScotlandRatioB" value="  0.770000000000000"/>
+   <fdouble name="ScotlandRatioC" value="  0.880000000000000"/>
+   <fdouble name="ScotlandRatioE" value="   1.22000000000000"/>
+   <fdouble name="ScotlandRatioF" value="   1.44000000000000"/>
+   <fdouble name="ScotlandRatioG" value="   1.67000000000000"/>
+   <fdouble name="ScotlandRatioH" value="   2.00000000000000"/>
+   <fdouble name="ScotlandRatioI" value="   2.00000000000000"/>
+   <fdouble name="WalesRatioA" value="  0.670000000000000"/>
+   <fdouble name="WalesRatioB" value="  0.770000000000000"/>
+   <fdouble name="WalesRatioC" value="  0.880000000000000"/>
+   <fdouble name="WalesRatioE" value="   1.22000000000000"/>
+   <fdouble name="WalesRatioF" value="   1.44000000000000"/>
+   <fdouble name="WalesRatioG" value="   1.67000000000000"/>
+   <fdouble name="WalesRatioH" value="   2.00000000000000"/>
+   <fdouble name="WalesRatioI" value="   2.00000000000000"/>
 </system>
 <system basename="rebatesys">
    <flogical name="RulesUnderFC" value=" T"/>

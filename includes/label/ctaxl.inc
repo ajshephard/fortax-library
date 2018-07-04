@@ -8,6 +8,7 @@ _$lab(4,bandd,"Council Tax Band D")
 _$lab(5,bande,"Council Tax Band E")
 _$lab(6,bandf,"Council Tax Band F")
 _$lab(7,bandg,"Council Tax Band G")
-_$labn(8,bandh,"Council Tax Band H")
+_$lab(8,bandh,"Council Tax Band H")
+_$labn(9,bandi,"Council Tax Band I")
 
 _$footer

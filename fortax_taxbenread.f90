@@ -625,24 +625,87 @@ contains
                                 sys%ctax%bandD = strToDouble(cat2%value)
                             case('SinglePersonDiscount')
                                 sys%ctax%sinDis = strToDouble(cat2%value)
-                            case('BandA')
-                                sys%ctax%ratioA = strToDouble(cat2%value)
-                            case('BandB')
-                                sys%ctax%ratioB = strToDouble(cat2%value)
-                            case('BandC')
-                                sys%ctax%ratioC = strToDouble(cat2%value)
-                            case('BandE')
-                                sys%ctax%ratioE = strToDouble(cat2%value)
-                            case('BandF')
-                                sys%ctax%ratioF = strToDouble(cat2%value)
-                            case('BandG')
-                                sys%ctax%ratioG = strToDouble(cat2%value)
-                            case('BandH')
-                                sys%ctax%ratioH = strToDouble(cat2%value)
                         end select
                     end do
 
 
+                !Council Tax England
+                case('PrmLocTax.EnglandCTRatios')
+                    nfield = size(cat%field)
+                    do j = 1, nfield
+                        cat2 => cat%field(j)
+                        select case(cat2%name)
+                            case('[CTBandA]')
+                                sys%ctax%EnglandratioA = strToDouble(cat2%value)
+                            case('[CTBandB]')
+                                sys%ctax%EnglandratioB = strToDouble(cat2%value)
+                            case('[CTBandC]')
+                                sys%ctax%EnglandratioC = strToDouble(cat2%value)
+                            case('[CTBandE]')
+                                sys%ctax%EnglandratioE = strToDouble(cat2%value)
+                            case('[CTBandF]')
+                                sys%ctax%EnglandratioF = strToDouble(cat2%value)
+                            case('[CTBandG]')
+                                sys%ctax%EnglandratioG = strToDouble(cat2%value)
+                            case('[CTBandH]')
+                                sys%ctax%EnglandratioH = strToDouble(cat2%value)
+                            case('[CTBandI]')
+                                sys%ctax%EnglandratioI = strToDouble(cat2%value)
+                        end select
+                    end do
+
+                !Council Tax Scotland
+                case('PrmLocTax.ScotlandCTRatios')
+                    nfield = size(cat%field)
+                    do j = 1, nfield
+                        cat2 => cat%field(j)
+                        select case(cat2%name)
+                            case('[CTBandA]')
+                                sys%ctax%ScotlandratioA = strToDouble(cat2%value)
+                            case('[CTBandB]')
+                                sys%ctax%ScotlandratioB = strToDouble(cat2%value)
+                            case('[CTBandC]')
+                                sys%ctax%ScotlandratioC = strToDouble(cat2%value)
+                            case('[CTBandE]')
+                                sys%ctax%ScotlandratioE = strToDouble(cat2%value)
+                            case('[CTBandF]')
+                                sys%ctax%ScotlandratioF = strToDouble(cat2%value)
+                            case('[CTBandG]')
+                                sys%ctax%ScotlandratioG = strToDouble(cat2%value)
+                            case('[CTBandH]')
+                                sys%ctax%ScotlandratioH = strToDouble(cat2%value)
+                            case('[CTBandI]')
+                                sys%ctax%ScotlandratioI = strToDouble(cat2%value)
+                        end select
+                    end do
+
+
+                !Council Tax Wales
+                case('PrmLocTax.WalesCTRatios')
+                    nfield = size(cat%field)
+                    do j = 1, nfield
+                        cat2 => cat%field(j)
+                        select case(cat2%name)
+                            case('[CTBandA]')
+                                sys%ctax%WalesratioA = strToDouble(cat2%value)
+                            case('[CTBandB]')
+                                sys%ctax%WalesratioB = strToDouble(cat2%value)
+                            case('[CTBandC]')
+                                sys%ctax%WalesratioC = strToDouble(cat2%value)
+                            case('[CTBandE]')
+                                sys%ctax%WalesratioE = strToDouble(cat2%value)
+                            case('[CTBandF]')
+                                sys%ctax%WalesratioF = strToDouble(cat2%value)
+                            case('[CTBandG]')
+                                sys%ctax%WalesratioG = strToDouble(cat2%value)
+                            case('[CTBandH]')
+                                sys%ctax%WalesratioH = strToDouble(cat2%value)
+                            case('[CTBandI]')
+                                sys%ctax%WalesratioI = strToDouble(cat2%value)
+                        end select
+                    end do
+
+                    
                 !HB, CCB and CTB: allowances and disregards; benefit cap values
                 case('PrmFowler.Reb')
 
