@@ -522,6 +522,28 @@ contains
                     end do
 
 
+                ! Tax refund for childcare spending
+                case('PrmFowler.ChildcareSubsidy')
+                    nfield = size(cat%field)
+                    do j = 1, nfield
+                        cat2 => cat%field(j)
+                        select case(cat2%name)
+                            case('Enabled')
+                                sys%cctaxrefund%doCCTaxRefund = StrToLogical(cat2%value)
+                            case('MaxPerChild')
+                                sys%cctaxrefund%MaxPerChild = strToDouble(cat2%value)
+                            case('MaxAge')
+                                sys%cctaxrefund%maxAge = strToInt(cat2%value)
+                            case('ReceiptProp')
+                                sys%cctaxrefund%receiptProp = strToDouble(cat2%value)
+                            case('MinEarnings')
+                                sys%cctaxrefund%MinEarn = strToDouble(cat2%value)
+                            case('MaxInc')
+                                sys%cctaxrefund%MaxInc = strToDouble(cat2%value)
+                        end select
+                    end do
+
+                    
                 !Income Support
                 case('PrmFowler.ISys')
 

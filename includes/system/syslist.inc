@@ -33,6 +33,11 @@
 #define  _$typelist ntc
 #include "ntc.inc"
 
+!tax refund for childcare spending
+#undef   _$typelist
+#define  _$typelist cctaxrefund
+#include "cctaxrefund.inc"
+
 !income support
 #undef   _$typelist
 #define  _$typelist incsup

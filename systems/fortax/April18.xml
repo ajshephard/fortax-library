@@ -99,6 +99,14 @@
    <flogical name="taperCTCInOneGo" value=" T"/>
    <fdouble name="MinAmt" value="  0.500000000000000"/>
 </system>
+<system basename="cctaxrefund">
+   <flogical name="doCCTaxRefund" value=" T"/>
+   <fdouble name="MaxPerChild" value="   192.307692307692"/>
+   <finteger name="MaxAge" value="          11"/>
+   <fdouble name="ReceiptProp" value="  0.200000000000000"/>
+   <fdouble name="MinEarn" value="   125.280000000000"/>
+   <fdouble name="MaxInc" value="   1923.07692307692"/>
+</system>
 <system basename="incsup">
    <flogical name="doIncSup" value=" T"/>
    <flogical name="IncChben" value=" F"/>
