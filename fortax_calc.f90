@@ -2912,26 +2912,23 @@ contains
             ! You can't get this tax refund at the same time as tax credits or universal credit, so pick whichever is higher
             ! matgrant eligibility also at stake
             if (sys%fc%dofamcred) then
-                if (net%tu%cctaxrefund > net%tu%fc + net%tu%matgrant) then
+                if (net%tu%cctaxrefund > net%tu%fc) then
                     net%tu%fc = 0.0_dp
-                    net%tu%matgrant = 0.0_dp
                     net%tu%chcaresub = net%tu%cctaxrefund
                 else
                     net%tu%cctaxrefund = 0.0_dp
                 end if
             else if (sys%ntc%donewtaxcred) then
-                if (net%tu%cctaxrefund > net%tu%ctc + net%tu%wtc + net%tu%matgrant) then
+                if (net%tu%cctaxrefund > net%tu%ctc + net%tu%wtc) then
                     net%tu%ctc = 0.0_dp
                     net%tu%wtc = 0.0_dp
-                    net%tu%matgrant = 0.0_dp
                     net%tu%chcaresub = net%tu%cctaxrefund
                 else
                     net%tu%cctaxrefund = 0.0_dp
                 end if
             else if (sys%uc%doUnivCred) then
-                if (net%tu%cctaxrefund > net%tu%uc + net%tu%matgrant) then
+                if (net%tu%cctaxrefund > net%tu%uc) then
                     net%tu%uc = 0.0_dp
-                    net%tu%matgrant = 0.0_dp
                     net%tu%chcaresub = net%tu%cctaxrefund
                 else
                     net%tu%cctaxrefund = 0.0_dp
