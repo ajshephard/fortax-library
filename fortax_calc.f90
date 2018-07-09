@@ -2266,6 +2266,8 @@ contains
                 if (net%tu%fc > tol) dogrant = .true.
             else if (sys%rebatesys%rulesunderNTC) then
                 if (net%tu%ctc > MaxCTCFam(sys,fam) + tol) dogrant = .true.
+            else if (sys%rebatesys%rulesUnderUC) then
+                if (net%tu%uc > tol) dogrant = .true.
             end if
 
             !From Apr-11: no maternity grant if there's another child aged under 16 in the family (except for multiple
