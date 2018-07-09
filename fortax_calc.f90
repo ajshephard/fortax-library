@@ -2091,7 +2091,6 @@ contains
     ! credits < dispinc with CCTaxRefund
     ! This introduces discontinuities in the BC. Does Andrew want these
     ! to be dealt with somehow?
-    ! Does Andrew want the CCTaxRefund recorded in net%tu%chcaresub?
         
   !DEC$ ATTRIBUTES FORCEINLINE :: ChBen
     pure subroutine CCTaxRefund(sys,fam,net)
@@ -2898,6 +2897,7 @@ contains
             if (sys%fc%dofamcred) then
                 if (net%tu%cctaxrefund > net%tu%fc) then
                     net%tu%fc = 0.0_8
+                    net%tu%chcaresub = net%tu%cctaxrefund
                 else
                     net%tu%cctaxrefund = 0.0_8
                 end if
@@ -2905,12 +2905,14 @@ contains
                 if (net%tu%cctaxrefund > net%tu%ctc + net%tu%wtc) then
                     net%tu%ctc = 0.0_8
                     net%tu%wtc = 0.0_8
+                    net%tu%chcaresub = net%tu%cctaxrefund
                 else
                     net%tu%cctaxrefund = 0.0_8
                 end if
             else if (sys%uc%doUnivCred) then
                 if (net%tu%cctaxrefund > net%tu%uc) then
                     net%tu%uc = 0.0_8
+                    net%tu%chcaresub = net%tu%cctaxrefund
                 else
                     net%tu%cctaxrefund = 0.0_8
                 end if
