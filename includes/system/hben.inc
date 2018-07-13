@@ -4,5 +4,10 @@ _$header
 _$logical(doHBen,null)
 _$double(taper,rate)
 _$double(MinAmt,minamount)
+_$logical(doUnderOccCharge,null)
+_$logical(doUnderOccChargeInScotland,null)
+_$logical(doUnderOccChargeInNI,null)
+_$integer(numUnderOccBands,range)
+_$doublearray(underOccBands,rate,:)
 
 _$footer

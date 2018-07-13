@@ -764,6 +764,12 @@ contains
                                 sys%rebateSys%maxKids = strToInt(cat2%value) - 1
                             case('RestrictCTB')
                                 sys%rebateSys%restrict = StrToLogical(cat2%value)
+                           case('DoUnderOccCharge')
+                                sys%hben%doUnderOccCharge = StrToLogical(cat2%value)
+                           case('DoUnderOccChargeInScot')
+                                sys%hben%doUnderOccChargeInScotland = StrToLogical(cat2%value)
+                           case('DoUnderOccChargeInNI')
+                                sys%hben%doUnderOccChargeInNI = StrToLogical(cat2%value)
                             case('DoBenefitCap')
                                 sys%bencap%doCap = StrToLogical(cat2%value)
                             case('DoBenefitCapinNI')
@@ -953,6 +959,35 @@ contains
                         end select
                     end do
 
+                    
+                !HB under-occupancy charge (bedroom tax)
+                case('PrmFowler.Reb.UnderOccCharge')
+                    nfield = size(cat%field)
+                    do j = 1, nfield
+                        cat2 => cat%field(j)
+                        select case(cat2%name)
+                            case('NumBedBands')
+                                sys%hben%numUnderOccBands = strToInt(cat2%value)
+                        end select
+                    end do
+
+                case('PrmFowler.Reb.UnderOccCharge.Charge')
+
+                    if (sys%hben%numUnderOccBands > 0) then
+                        allocate(sys%hben%underOccBands(sys%hben%numUnderOccBands))
+                        sys%hben%underOccBands = 0.0_dp
+                    else
+                        if (sys%hben%doUnderOccCharge) call fortaxError('sys%hben%numUnderOccBands not set')
+                    end if
+
+                    nfield = size(cat%field)
+                    do j = 1, nfield
+                        cat2 => cat%field(j)
+                        sys%hben%underOccBands(strToInt(cat2%name)) = strToDouble(cat2%value)
+                    end do
+
+                    
+                    
 
                 ! State pension (at the moment, it's just the state pension age)
                 case('PrmNIBen')

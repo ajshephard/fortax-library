@@ -199,6 +199,11 @@
    <flogical name="doHBen" value=" T"/>
    <fdouble name="taper" value="  0.650000000000000"/>
    <fdouble name="MinAmt" value="  0.500000000000000"/>
+   <flogical name="doUnderOccCharge" value=" F"/>
+   <flogical name="doUnderOccChargeInScotland" value=" F"/>
+   <flogical name="doUnderOccChargeInNI" value=" F"/>
+   <finteger name="numUnderOccBands" value="           0"/>
+   <fdoublearray name="underOccBands"></fdoublearray>
 </system>
 <system basename="ctaxben">
    <flogical name="docounciltaxben" value=" T"/>

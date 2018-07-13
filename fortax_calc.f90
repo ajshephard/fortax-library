@@ -683,6 +683,7 @@ contains
     ! prelimcalc   - Preliminary calculations for HBen, CTBen and CCBen
     ! HBen         - Calculates housing benefit for family
     ! HBFull       - Works out whether family is entitled to full HB
+    ! HBUnderOccMaxBedrooms - Calculates maximum number of bedrooms for under-occupancy charge
     ! ctaxBen      - Calculates council tax benefit for family
     ! polltaxBen   - Calculates community charge benefit for family
     ! HBAppAmt     - Calculates applicable amount for HB/CTB/CCB (called by prelimcalc)
@@ -982,6 +983,8 @@ contains
         real(dp),    intent(in)    :: disregRebate
 
         real(dp)                   :: eligrent
+        logical                    :: underOccChargeOperational
+        integer                    :: numExtraBedrooms
 
         if (fam%rent > 0.0_dp) then
 
@@ -990,7 +993,30 @@ contains
             if ((sys%rebatesys%docap) .and. (fam%tenure == lab%tenure%private_renter)) then
                 eligrent = min(fam%rent,fam%rentcap)
             end if
+            
+            
+            ! Under-occupancy charge (bedroom tax)
+            if ((sys%hben%doUnderOccCharge) .and. (fam%tenure == lab%tenure%social_renter) .and. (fam%bedrooms > 1)) then
 
+                ! Is Under-occupancy charge operational?
+                underOccChargeOperational = .true.
+                if (fam%region == lab%region%scotland) then
+                    underOccChargeOperational = sys%hben%doUnderOccChargeInScotland
+                else if (fam%region == lab%region%northern_ireland) then
+                    underOccChargeOperational = sys%hben%doUnderOccChargeInNI
+                end if
+                
+                ! Impose under-occupancy charge if operational
+                if (underOccChargeOperational) then
+                    numExtraBedrooms = max(fam%bedrooms - HBUnderOccMaxBedrooms(sys,fam), 0)
+                    if (numExtraBedrooms > 0) then
+                        eligrent = eligrent * (1.0_dp - sys%hben%underOccBands(min(numExtraBedrooms, sys%hben%numUnderOccBands)))
+                    end if
+                end if
+                
+            end if
+            
+            
             !Passport to full entitlement if on IS or income-based JSA
             if (net%tu%incsup > tol) then
 
@@ -1048,6 +1074,88 @@ contains
 
     end function HBFull
 
+    
+    
+    ! HBUnderOccMaxBedrooms
+    ! -----------------------------------------------------------------------
+    ! Calculate maximum number of bedrooms for under-occupancy charge
+    ! Note: the rules are slightly different for LHA
+
+    !DEC$ ATTRIBUTES FORCEINLINE :: HBUnderOccMaxBedrooms
+    integer pure function HBUnderOccMaxBedrooms(sys,fam)
+
+        use fortax_type, only : sys_t, fam_t
+
+        implicit none
+
+        type(sys_t), intent(in) :: sys
+        type(fam_t), intent(in) :: fam
+        
+        integer                 :: kidage(fam%nkids), kidagesorted(fam%nkids)
+        integer                 :: kidfemale(fam%nkids)
+        logical                 :: kidfemalesorted(fam%nkids)
+        integer                 :: maxageloc
+        logical                 :: taken(fam%nkids)
+        integer                 :: i, j
+        
+        HBUnderOccMaxBedrooms = 1
+
+        if (fam%nkids > 0) then
+        
+            ! Sort kidage and kidfemale arrays
+            kidage = fam%kidage(1:fam%nkids)
+            kidfemale = fam%kidfemale(1:fam%nkids)
+            do i = 1, fam%nkids
+                maxageloc = maxloc(kidage, dim=1)
+                kidagesorted(i) = kidage(maxageloc)
+                kidfemalesorted(i) = kidfemale(maxageloc)
+                kidage(maxageloc) = -1
+            end do
+        
+            ! Work out max number of bedrooms
+            taken = .false.
+            do i = 1, fam%nkids
+ 
+                if (.not. taken(i)) then
+                    
+                    taken(i) = .true.
+                    HBUnderOccMaxBedrooms = HBUnderOccMaxBedrooms + 1                  
+                  
+                    ! Can child i be paired up with anyone?
+                    select case (kidagesorted(i))
+
+                        ! Children aged 10-15 can only be paired with other children of the same sex
+                        case (10:15)
+                            do j = i+1, fam%nkids
+                                if (.not. taken(j)) then
+                                    if (kidfemalesorted(j) == kidfemalesorted(i)) then
+                                        taken(j) = .true.
+                                        exit
+                                    end if
+                                end if
+                            end do
+                          
+                        ! Children aged 0-9 can be paired with children of different sex
+                        case (:9)
+                            do j = i+1, fam%nkids
+                                if (.not. taken(j)) then
+                                    taken(j) = .true.
+                                    exit
+                                end if
+                            end do
+                    
+                    end select
+                
+                end if
+                
+            end do
+
+        end if
+            
+    end function HBUnderOccMaxBedrooms
+
+    
+    
 
     ! ctaxBen
     ! -----------------------------------------------------------------------
