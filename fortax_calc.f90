@@ -1105,7 +1105,7 @@ contains
         
         HBUnderOccMaxBedrooms = 1
 
-        if (fam%nkids > 0) then
+        if (_famkids_) then
         
             ! Sort kidage and kidfemale arrays
             kidage = fam%kidage(1:fam%nkids)
