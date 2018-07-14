@@ -1017,6 +1017,11 @@ contains
             end if
             
             
+            ! Local Housing Allowance (private renters)
+            if ((sys%hben%doLHA) .and. (fam%tenure == lab%tenure%private_renter)) then
+                eligrent = min(eligrent, sys%hben%LHARates(LHABand(sys,fam)))
+            end if            
+            
             !Passport to full entitlement if on IS or income-based JSA
             if (net%tu%incsup > tol) then
 
@@ -1153,6 +1158,38 @@ contains
         end if
             
     end function HBUnderOccMaxBedrooms
+
+
+    ! LHABand
+    ! -----------------------------------------------------------------------
+    ! Calculate relevant LHA band for family
+
+    !DEC$ ATTRIBUTES FORCEINLINE :: LHABand
+    integer pure function LHABand(sys,fam)
+
+        use fortax_type, only : sys_t, fam_t
+
+        implicit none
+
+        type(sys_t), intent(in) :: sys
+        type(fam_t), intent(in) :: fam
+        
+        integer                 :: maxBedrooms
+        
+        ! Find maximum number of bedrooms allowed
+        ! Same as for under-occupancy charge but with a maximum of four bedrooms
+        maxBedrooms = min(HBUnderOccMaxBedrooms(sys, fam), 4)    
+        
+        
+        ! To get the shared-accommodation rate, you need to be single and under 35
+        if ((.not. _famcouple_) .and. (maxBedrooms == 1) .and. (fam%ad(1)%age < sys%hben%LHASharedAccAge)) then
+            LHABand = 1
+        else
+            LHABand = maxBedrooms + 1
+        end if
+        
+           
+    end function LHABand
 
     
     

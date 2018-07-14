@@ -204,6 +204,10 @@
    <flogical name="doUnderOccChargeInNI" value=" F"/>
    <finteger name="numUnderOccBands" value="           0"/>
    <fdoublearray name="underOccBands"></fdoublearray>
+   <flogical name="doLHA" value=" T"/>
+   <finteger name="LHASharedAccAge" value="          25"/>
+   <finteger name="numLHABands" value="           6"/>
+   <fdoublearray name="LHARates" value="65.8600000000000 107.750000000000 134.090000000000 158.730000000000 215.140000000000 276.570000000000"></fdoublearray>
 </system>
 <system basename="ctaxben">
    <flogical name="docounciltaxben" value=" T"/>

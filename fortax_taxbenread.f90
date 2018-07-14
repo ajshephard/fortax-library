@@ -764,12 +764,18 @@ contains
                                 sys%rebateSys%maxKids = strToInt(cat2%value) - 1
                             case('RestrictCTB')
                                 sys%rebateSys%restrict = StrToLogical(cat2%value)
-                           case('DoUnderOccCharge')
+                            case('DoUnderOccCharge')
                                 sys%hben%doUnderOccCharge = StrToLogical(cat2%value)
-                           case('DoUnderOccChargeInScot')
+                            case('DoUnderOccChargeInScot')
                                 sys%hben%doUnderOccChargeInScotland = StrToLogical(cat2%value)
-                           case('DoUnderOccChargeInNI')
+                            case('DoUnderOccChargeInNI')
                                 sys%hben%doUnderOccChargeInNI = StrToLogical(cat2%value)
+                            case('DoLHA')
+                                sys%hben%doLHA = StrToLogical(cat2%value)
+                            case('LHASharedRateForSinglesAge')
+                                sys%hben%LHASharedAccAge = StrToInt(cat2%value)
+                            case('NumBedBands')
+                                sys%hben%numLHABands = StrToInt(cat2%value)
                             case('DoBenefitCap')
                                 sys%bencap%doCap = StrToLogical(cat2%value)
                             case('DoBenefitCapinNI')
@@ -987,6 +993,22 @@ contains
                     end do
 
                     
+                ! Local Housing Allowance rates
+                case('PrmFowler.Reb.LHARates[BRMANotRecorded]')
+
+                    if (sys%hben%numLHABands > 0) then
+                        allocate(sys%hben%LHARates(sys%hben%numLHABands))
+                        sys%hben%LHARates = 0.0_dp
+                    else
+                        if (sys%hben%doLHA) call fortaxError('sys%hben%numLHABands not set')
+                    end if
+
+                    nfield = size(cat%field)
+                    do j = 1, nfield
+                        cat2 => cat%field(j)
+                        sys%hben%LHARates(strToInt(cat2%name)) = strToDouble(cat2%value)
+                    end do
+
                     
 
                 ! State pension (at the moment, it's just the state pension age)
