@@ -980,8 +980,8 @@ contains
                 case('PrmFowler.Reb.UnderOccCharge.Charge')
 
                     if (sys%hben%numUnderOccBands > 0) then
-                        allocate(sys%hben%underOccBands(sys%hben%numUnderOccBands))
-                        sys%hben%underOccBands = 0.0_dp
+                        allocate(sys%hben%underOccRates(sys%hben%numUnderOccBands))
+                        sys%hben%underOccRates = 0.0_dp
                     else
                         if (sys%hben%doUnderOccCharge) call fortaxError('sys%hben%numUnderOccBands not set')
                     end if
@@ -989,7 +989,7 @@ contains
                     nfield = size(cat%field)
                     do j = 1, nfield
                         cat2 => cat%field(j)
-                        sys%hben%underOccBands(strToInt(cat2%name)) = strToDouble(cat2%value)
+                        sys%hben%underOccRates(strToInt(cat2%name)) = strToDouble(cat2%value)
                     end do
 
                     

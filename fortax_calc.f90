@@ -1010,7 +1010,7 @@ contains
                 if (underOccChargeOperational) then
                     numExtraBedrooms = max(fam%bedrooms - HBUnderOccMaxBedrooms(sys,fam), 0)
                     if (numExtraBedrooms > 0) then
-                        eligrent = eligrent * (1.0_dp - sys%hben%underOccBands(min(numExtraBedrooms, sys%hben%numUnderOccBands)))
+                        eligrent = eligrent * (1.0_dp - sys%hben%underOccRates(min(numExtraBedrooms, sys%hben%numUnderOccBands)))
                     end if
                 end if
                 
