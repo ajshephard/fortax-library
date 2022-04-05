@@ -48,7 +48,8 @@ module fortax_library
                                     FORTAX_kinksccexp => kinksccexp,                            &
                                     FORTAX_maxkinks => maxkinks
 
-    use fortax_prices,      only :  FORTAX_loadIndex => loadIndex,                              &
+    use fortax_prices,      only :  sysIndex_t, &
+                                    FORTAX_loadIndex => loadIndex,                              &
                                     FORTAX_uprateSys => uprateSys,                              &
                                     FORTAX_uprateFactor => uprateFactor,                        &
                                     FORTAX_loadSysIndex => loadSysIndex,                        &
@@ -75,9 +76,9 @@ module fortax_library
     use fortax_write,       only :  FORTAX_fortaxPrint => fortaxPrint,                          &
                                     FORTAX_fortaxWrite => fortaxWrite
 
-    use fortax_realtype,    only :  FORTAX_dp=>dp,                                              &
-                                    FORTAX_sp=>sp,                                              &
-                                    FORTAX_ep=>ep,                                              &
-                                    FORTAX_qp=>qp
+    use fortax_realtype,    only :  FORTAX_dp => dp,                                            &
+                                    FORTAX_sp => sp,                                            &
+                                    FORTAX_ep => ep,                                            &
+                                    FORTAX_qp => qp
 
 end module fortax_library
