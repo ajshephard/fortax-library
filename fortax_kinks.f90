@@ -1126,9 +1126,9 @@ loopmax : do
 
         bcout%kinks_num  = kinks_num
         bcout%kinks_hrs  = kinks_hrs
-        bcout%kinks_earn = kinks_earn
-        bcout%kinks_net  = kinks_net
-        bcout%kinks_mtr  = kinks_mtr
+        bcout%kinks_earn(1:kinks_num) = kinks_earn(1:kinks_num)
+        bcout%kinks_net(1:kinks_num)  = kinks_net(1:kinks_num)
+        bcout%kinks_mtr(1:kinks_num)  = kinks_mtr(1:kinks_num)
 
         if (present(verbose)) then
             if (verbose) then
@@ -1584,9 +1584,9 @@ loopmax : do
 
         bcout%kinks_num  = kinks_num
         bcout%kinks_hrs  = kinks_hrs
-        bcout%kinks_earn = kinks_ccexp
-        bcout%kinks_net  = kinks_net
-        bcout%kinks_mtr  = kinks_mtr
+        bcout%kinks_earn(1:kinks_num) = kinks_ccexp(1:kinks_num)
+        bcout%kinks_net(1:kinks_num) = kinks_net(1:kinks_num)
+        bcout%kinks_mtr(1:kinks_num) = kinks_mtr(1:kinks_num)
 
         if (present(verbose)) then
             if (verbose) then
