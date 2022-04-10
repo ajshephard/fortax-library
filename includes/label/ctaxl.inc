@@ -1,13 +1,10 @@
-
-_$header
-
-_$lab(1,banda,"Council Tax Band A")
-_$lab(2,bandb,"Council Tax Band B")
-_$lab(3,bandc,"Council Tax Band C")
-_$lab(4,bandd,"Council Tax Band D")
-_$lab(5,bande,"Council Tax Band E")
-_$lab(6,bandf,"Council Tax Band F")
-_$lab(7,bandg,"Council Tax Band G")
-_$labn(8,bandh,"Council Tax Band H")
-
-_$footer
+@:header(ctaxl)
+@:lab(1, banda, "Council Tax Band A")
+@:lab(2, bandb, "Council Tax Band B")
+@:lab(3, bandc, "Council Tax Band C")
+@:lab(4, bandd, "Council Tax Band D")
+@:lab(5, bande, "Council Tax Band E")
+@:lab(6, bandf, "Council Tax Band F")
+@:lab(7, bandg, "Council Tax Band G")
+@:lab(8, bandh, "Council Tax Band H")
+@:footer(ctaxl)
