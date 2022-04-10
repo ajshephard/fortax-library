@@ -1,9 +1,8 @@
-_$header
-#include "header.inc"
-
-_$logical(docounciltaxben,null)
-_$double(taper,rate)
-_$logical(doEntitlementCut,null)
-_$double(entitlementShare,rate)
-
-_$footer
+@:header(ctaxben)
+#:if definitions > 0
+@:bool(docounciltaxben, null)
+@:double(taper, rate)
+@:bool(doEntitlementCut, null)
+@:double(entitlementShare, rate)
+#:endif
+@:footer(ctaxben)

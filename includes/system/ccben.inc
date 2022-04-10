@@ -1,10 +1,9 @@
-_$header
-#include "header.inc"
-
-_$logical(dopolltax,null)
-_$double(taper,rate)
-_$double(PropElig,scale)
-_$double(MinAmt,minamount)
-_$double(CCrate,rate)
-
-_$footer
+@:header(ccben)
+#:if definitions > 0
+@:bool(dopolltax, null)
+@:double(taper, rate)
+@:double(PropElig, scale)
+@:double(MinAmt, minamount)
+@:double(CCrate, rate)
+#:endif
+@:footer(ccben)

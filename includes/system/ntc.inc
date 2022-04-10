@@ -1,13 +1,12 @@
-_$header
-#include "header.inc"
-
-_$logical(donewtaxcred,null)
-_$double(thr1lo,amount)
-_$double(thr1hi,amount)
-_$double(thr2,amount)
-_$double(taper1,rate)
-_$double(taper2,rate)
-_$logical(taperCTCInOneGo,null)
-_$double(MinAmt,minamount)
-
-_$footer
+@:header(ntc)
+#:if definitions > 0
+@:bool(donewtaxcred, null)
+@:double(thr1lo, amount)
+@:double(thr1hi, amount)
+@:double(thr2, amount)
+@:double(taper1, rate)
+@:double(taper2, rate)
+@:bool(taperCTCInOneGo, null)
+@:double(MinAmt, minamount)
+#:endif
+@:footer(ntc)

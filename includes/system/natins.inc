@@ -1,14 +1,13 @@
-_$header
-#include "header.inc"
-
-_$integer(numrates,range)
-_$integer(c4nrates,range)
-_$double(c2floor,amount)
-_$double(c2rate,amount)
-_$double(ceiling,amount)
-_$doublearray(rates,rate,:)
-_$doublearray(bands,amount,:)
-_$doublearray(c4rates,rate,:)
-_$doublearray(c4bands,amount,:)
-
-_$footer
+@:header(natins)
+#:if definitions > 0
+@:integer(numrates, range)
+@:integer(c4nrates, range)
+@:double(c2floor, amount)
+@:double(c2rate, amount)
+@:double(ceiling, amount)
+@:doublearray(rates, rate, MaxNatInsBands, numrates)
+@:doublearray(bands, amount, MaxNatInsBands, numrates)
+@:doublearray(c4rates, rate, MaxNatInsC4Bands, c4nrates)
+@:doublearray(c4bands, amount, MaxNatInsC4Bands, c4nrates)
+#:endif
+@:footer(natins)

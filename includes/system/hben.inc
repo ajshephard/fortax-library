@@ -1,8 +1,7 @@
-_$header
-#include "header.inc"
-
-_$logical(doHBen,null)
-_$double(taper,rate)
-_$double(MinAmt,minamount)
-
-_$footer
+@:header(hben)
+#:if definitions > 0
+@:bool(doHBen, null)
+@:double(taper, rate)
+@:double(MinAmt, minamount)
+#:endif
+@:footer(hben)

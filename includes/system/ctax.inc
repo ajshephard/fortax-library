@@ -1,15 +1,14 @@
-_$header
-#include "header.inc"
-
-_$logical(docounciltax,null)
-_$double(bandD,amount)
-_$double(SinDis,scale)
-_$double(RatioA,scale)
-_$double(RatioB,scale)
-_$double(RatioC,scale)
-_$double(RatioE,scale)
-_$double(RatioF,scale)
-_$double(RatioG,scale)
-_$double(RatioH,scale)
-
-_$footer
+@:header(chben)
+#:if definitions > 0
+@:bool(docounciltax, null)
+@:double(bandD, amount)
+@:double(SinDis, scale)
+@:double(RatioA, scale)
+@:double(RatioB, scale)
+@:double(RatioC, scale)
+@:double(RatioE, scale)
+@:double(RatioF, scale)
+@:double(RatioG, scale)
+@:double(RatioH, scale)
+#:endif
+@:footer(chben)

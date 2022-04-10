@@ -1,8 +1,7 @@
-_$header
-#include "header.inc"
-
-_$double(fam,amount)
-_$double(baby,amount)
-_$double(kid,amount)
-
-_$footer
+@:header(ctc)
+#:if definitions > 0
+@:double(fam, amount)
+@:double(baby, amount)
+@:double(kid, amount)
+#:endif
+@:footer(fc)

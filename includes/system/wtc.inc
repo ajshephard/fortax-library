@@ -1,20 +1,19 @@
-_$header
-#include "header.inc"
-
-_$double(Basic,amount)
-_$double(CouLP,amount)
-_$double(FT,amount)
-_$double(MinHrsKids,range)
-_$double(MinHrsCouKids,range)
-_$double(MinHrsNoKids,range)
-_$double(FTHrs,range)
-_$integer(MinAgeKids,range)
-_$integer(MinAgeNoKids,range)
-_$double(MaxCC1,amount)     
-_$double(MaxCC2,amount)         
-_$double(PropCC,rate)       
-_$integer(MaxAgeCC,range)
-_$double(NewDisreg,range)
-_$logical(NewDisregCon,null)
-
-_$footer
+@:header(wtc)
+#:if definitions > 0
+@:double(Basic, amount)
+@:double(CouLP, amount)
+@:double(FT, amount)
+@:double(MinHrsKids, range)
+@:double(MinHrsCouKids, range)
+@:double(MinHrsNoKids, range)
+@:double(FTHrs, range)
+@:integer(MinAgeKids, range)
+@:integer(MinAgeNoKids, range)
+@:double(MaxCC1, amount)     
+@:double(MaxCC2, amount)         
+@:double(PropCC, rate)       
+@:integer(MaxAgeCC, range)
+@:double(NewDisreg, range)
+@:bool(NewDisregCon, null)
+#:endif
+@:footer(wtc)

@@ -1,19 +1,18 @@
-_$header
-#include "header.inc"
-
-_$integer(numbands,range)
-_$double(pa,amount)
-_$logical(doPATaper,null)
-_$logical(disablePATaperRounding,null)
-_$double(paTaperThresh,amount)
-_$double(paTaperRate,rate)
-_$double(mma,amount)
-_$double(ctc,amount)
-_$double(ctcyng,amount)
-_$double(mmarate,rate)
-_$double(ctctaper,rate)
-_$double(c4rebate,rate)
-_$doublearray(bands,amount,:)
-_$doublearray(rates,rate,:)
-
-_$footer
+@:header(inctax)
+#:if definitions > 0
+@:integer(numbands, range)
+@:double(pa, amount)
+@:bool(doPATaper, null)
+@:bool(disablePATaperRounding, null)
+@:double(paTaperThresh, amount)
+@:double(paTaperRate, rate)
+@:double(mma, amount)
+@:double(ctc, amount)
+@:double(ctcyng, amount)
+@:double(mmarate, rate)
+@:double(ctctaper, rate)
+@:double(c4rebate, rate)
+@:doublearray(bands, amount, MaxTaxIncBands, numbands)
+@:doublearray(rates, rate, MaxTaxIncBands, numbands)
+#:endif
+@:footer(inctax)

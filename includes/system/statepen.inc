@@ -1,8 +1,7 @@
-_$header
-#include "header.inc"
-
-_$logical(doStatePen,null)
-_$integer(PenAgeMan,range)
-_$integer(PenAgeWoman,range)
-
-_$footer
+@:header(statepen)
+#:if definitions > 0
+@:bool(doStatePen, null)
+@:integer(PenAgeMan, range)
+@:integer(PenAgeWoman, range)
+#:endif
+@:footer(statepen)
