@@ -1,3 +1,3 @@
-#:include "ctaxl.inc"
+#:include "ctax.inc"
 #:include "tenure.inc"
 #:include "region.inc"

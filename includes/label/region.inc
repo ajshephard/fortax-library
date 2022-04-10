@@ -1,4 +1,5 @@
 @:header(region)
+#:if definitions > 0
 @:lab(1, north_east, 'North East')
 @:lab(2, north_west, 'North West and Merseyside')
 @:lab(3, yorks, 'Yorks and Humberside')
@@ -10,5 +11,6 @@
 @:lab(9, south_west, 'South West')
 @:lab(10, wales, 'Wales')
 @:lab(11, scotland, 'Scotland')
-@:lab(12, northern_ireland, 'Northern Ireland')
+@:labn(12, northern_ireland, 'Northern Ireland')
+#:endif
 @:footer(region)
