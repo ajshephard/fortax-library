@@ -12,7 +12,7 @@
 @:double(mmarate, rate)
 @:double(ctctaper, rate)
 @:double(c4rebate, rate)
-@:doublearray(bands, amount, MaxTaxIncBands, numbands)
-@:doublearray(rates, rate, MaxTaxIncBands, numbands)
+@:doublearray(bands, amount, MaxIncTaxBands, numbands)
+@:doublearray(rates, rate, MaxIncTaxBands, numbands)
 #:endif
 @:footer(inctax)
