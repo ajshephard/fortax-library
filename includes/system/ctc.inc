@@ -4,4 +4,4 @@
 @:double(baby, amount)
 @:double(kid, amount)
 #:endif
-@:footer(fc)
+@:footer(ctc)
