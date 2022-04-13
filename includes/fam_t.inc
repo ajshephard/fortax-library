@@ -4,7 +4,6 @@
 @:fortaxdef(double,  maint,      "Maintenance income",       amount)
 @:fortaxdef(integer, nkids,      "Number of children",       null)
 @:fortaxdef(integer, kidage,     "Age of children",          null, dim = maxkids, dimvar = nkids)
-@:fortaxdef(integer, yngkid,     "Age of youngest child",    null)
 @:fortaxdef(integer, nothads,    "Number of other adults",   null)
 @:fortaxdef(integer, tenure,     "Housing tenure",           null)
 @:fortaxdef(double,  rent,       "Housing rent",             amount)
