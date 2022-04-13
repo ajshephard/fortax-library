@@ -1,7 +1,3 @@
-@:header(ctc)
-#:if definitions > 0
-@:double(fam, amount)
-@:double(baby, amount)
-@:double(kid, amount)
-#:endif
-@:footer(ctc)
+@:fortaxdef(double, fam,  "", amount)
+@:fortaxdef(double, baby, "", amount)
+@:fortaxdef(double, kid,  "", amount)

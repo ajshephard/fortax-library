@@ -1,9 +1,5 @@
-@:header(ccben)
-#:if definitions > 0
-@:bool(dopolltax, null)
-@:double(taper, rate)
-@:double(PropElig, scale)
-@:double(MinAmt, minamount)
-@:double(CCrate, rate)
-#:endif
-@:footer(ccben)
+@:fortaxdef(bool,   dopolltax, "", null)
+@:fortaxdef(double, taper,     "", rate)
+@:fortaxdef(double, PropElig,  "", scale)
+@:fortaxdef(double, MinAmt,    "", minamount)
+@:fortaxdef(double, CCrate,    "", rate)

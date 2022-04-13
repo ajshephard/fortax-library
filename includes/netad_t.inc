@@ -1,12 +1,8 @@
-_$header
- 
-_$double(taxable,"Taxable income",amount)
-_$double(inctax,"Income tax",amount)
-_$double(natins,"National Insurance",amount)
-_$double(natinsc1,"National Insurance, class 1",amount)
-_$double(natinsc2,"National Insurance, class 2",amount)
-_$double(natinsc4,"National Insurance, class 4",amount)
-_$double(pretaxearn,"Pre-tax earnings",amount)
-_$double(posttaxearn,"Post-tax earnings",amount)
-
-_$footer
+@:fortaxdef(double, taxable,     "Taxable income",              amount)
+@:fortaxdef(double, inctax,      "Income tax",                  amount)
+@:fortaxdef(double, natins,      "National Insurance",          amount)
+@:fortaxdef(double, natinsc1,    "National Insurance, class 1", amount)
+@:fortaxdef(double, natinsc2,    "National Insurance, class 2", amount)
+@:fortaxdef(double, natinsc4,    "National Insurance, class 4", amount)
+@:fortaxdef(double, pretaxearn,  "Pre-tax earnings",            amount)
+@:fortaxdef(double, posttaxearn, "Post-tax earnings",           amount)

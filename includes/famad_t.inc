@@ -1,8 +1,4 @@
-_$header
-
-_$integer(age,null)
-_$logical(selfemp,null)
-_$double(hrs,null)
-_$double(earn,amount)
-
-_$footer
+@:fortaxdef(integer, age,     "Age",           null, value = 25)
+@:fortaxdef(bool,    selfemp, "Self-employed", null)
+@:fortaxdef(double,  hrs,     "Hours-of-work", null)
+@:fortaxdef(double,  earn,    "Earnings",      amount)

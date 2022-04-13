@@ -1,7 +1,3 @@
-@:header(statepen)
-#:if definitions > 0
-@:bool(doStatePen, null)
-@:integer(PenAgeMan, range)
-@:integer(PenAgeWoman, range)
-#:endif
-@:footer(statepen)
+@:fortaxdef(bool,    doStatePen,  "", null)
+@:fortaxdef(integer, PenAgeMan,   "", range)
+@:fortaxdef(integer, PenAgeWoman, "", range)

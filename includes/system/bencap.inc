@@ -1,11 +1,7 @@
-@:header(bencap)
-#:if definitions > 0
-@:bool(doCap, null)
-@:bool(doThruUC, null)
-@:double(sinNoKids, amount)
-@:double(sinKids, amount)
-@:double(couNoKids, amount)
-@:double(couKids, amount)
-@:double(UCEarnThr, amount)
-#:endif
-@:footer(bencap)
+@:fortaxdef(bool,   doCap,     "", null)
+@:fortaxdef(bool,   doThruUC,  "", null)
+@:fortaxdef(double, sinNoKids, "", amount)
+@:fortaxdef(double, sinKids,   "", amount)
+@:fortaxdef(double, couNoKids, "", amount)
+@:fortaxdef(double, couKids,   "", amount)
+@:fortaxdef(double, UCEarnThr, "", amount)
