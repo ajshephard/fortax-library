@@ -255,7 +255,7 @@ contains
     ! specified. Adult information should be passed by adding a suffix 1 or 2
     ! for the respective adult number.
 
-    @:fam_gen()
+    @:fortax_fam_gen()
 
 
     ! net_plus_net

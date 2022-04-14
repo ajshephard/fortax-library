@@ -223,7 +223,7 @@ ${"".join([" "*4 + line+"\n" for line in txt.split("\n")])}$
 
 #! generate a family
 
-#:def fortax_fam_gen(name, dt, **defkwargs)
+#:def fam_gen(name, dt, **defkwargs)
     #:if dt == ""
         #:set parent = ""
     #:else
@@ -313,7 +313,7 @@ lab%${lab}$%${labval}$
     #:include "include_files.fypp"
 #:enddef
 
-#:def fam_gen()
+#:def fortax_fam_gen()
     #:call join_lines(joinstr = ", ", prefix="function fam_gen(", suffix=") result(fam)")
         @:fortax_type_list(fam)
         @:fortax_type_list(famad, suffix = 1)
@@ -334,9 +334,9 @@ lab%${lab}$%${labval}$
 
         call fam_init(fam)
 
-        @:fortax_fam_gen(fam, fam)
-        @:fortax_fam_gen(famad, fam%ad(1), suffix = 1)
-        @:fortax_fam_gen(famad, fam%ad(2), suffix = 2)
+        @:fam_gen(fam, fam)
+        @:fam_gen(famad, fam%ad(1), suffix = 1)
+        @:fam_gen(famad, fam%ad(2), suffix = 2)
 
         if (present(correct)) then
             correct2 = correct
