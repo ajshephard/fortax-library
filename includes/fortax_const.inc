@@ -3,4 +3,6 @@
 @:fortaxdef(integer, MaxNumAgeRng,     "Maximum age ranges",        range, value = 32)
 @:fortaxdef(integer, MaxIncTaxBands,   "Maximum income tax bands",  range, value = 32)
 @:fortaxdef(integer, MaxNatInsBands,   "Maximum natins bands",      range, value = 32)
-@:fortaxdef(integer, MaxNatInsC4Bands, "maximum natins bands (c4)", range, value = 32)
+@:fortaxdef(integer, MaxNatInsC4Bands, "Maximum natins bands (c4)", range, value = 32)
+@:fortaxdef(integer, MaxKinks,         "Maximum kinks",             range, value = 256)
+@:fortaxdef(double,  SysHuge,          "Large system value",        null,  value = 1.0e100)
