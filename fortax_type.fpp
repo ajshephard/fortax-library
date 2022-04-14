@@ -178,6 +178,8 @@ module fortax_type
     #:endfor
 
     type :: sys_t
+        character(len = 64) :: sysname
+        character(len = 512) :: sysdesc
         #:for SYS in SYSLIST
         type(${SYS}$_t) :: ${SYS}$
         #:endfor
