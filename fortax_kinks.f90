@@ -22,17 +22,6 @@
 ! module calculates piecewise linear income schedules, AS
 
 
-
-! if ((ltaxout)==lower("taxable")) taxpoint(i)%p=>net%ad(taxad)% taxable
-! if ((ltaxout)==lower("inctax")) taxpoint(i)%p=>net%ad(taxad)% inctax
-! if ((ltaxout)==lower("natins")) taxpoint(i)%p=>net%ad(taxad)% natins
-! if ((ltaxout)==lower("natinsc1")) taxpoint(i)%p=>net%ad(taxad)% natinsc1
-! if ((ltaxout)==lower("natinsc2")) taxpoint(i)%p=>net%ad(taxad)% natinsc2
-! if ((ltaxout)==lower("natinsc4")) taxpoint(i)%p=>net%ad(taxad)% natinsc4
-! if ((ltaxout)==lower("pretaxearn")) taxpoint(i)%p=>net%ad(taxad)% pretaxearn
-! if ((ltaxout)==lower("posttaxearn")) taxpoint(i)%p=>net%ad(taxad)% posttaxearn
-
-
 module fortax_kinks
 
     use fortax_realtype, only : dp
