@@ -191,6 +191,25 @@ contains
 
     end function strToLogical
 
+    ! strToLogicalInt
+    ! -----------------------------------------------------------------------
+    ! converts a string to a integer. No error checking is performed.
+    ! zero is false (0), everything else is true (1).
+
+    pure function strToLogicalInt(str)
+
+        implicit none
+
+        character(len = *), intent(in) :: str
+        integer :: strToLogicalInt
+
+        if (adjustl(str) .eq. "0") then
+            strToLogicalInt = 0
+        else
+            strToLogicalInt = 1
+        end if
+
+    end function strToLogicalInt
 
     ! lower
     ! -----------------------------------------------------------------------
