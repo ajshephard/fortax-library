@@ -101,10 +101,16 @@ ${"".join([" "*4 + line+"\n" for line in txt.split("\n")])}$
             $:check_fortax_arg(type, var, str, attr, kwargs)
         #:endmute
         #:if dt == ""
-        call json%add(${inp}$, "${var}$", ${var}$)
+            #:set tdt = ""
         #:else
-        call json%add(${inp}$, "${var}$", ${dt}$%${var}$)
+            #:set tdt = dt + "%"
         #:endif
+        #:if "dimvar" in kwargs
+            #:set dim = "(1:" + tdt + kwargs["dimvar"] + ")"
+        #:else
+            #:set dim = ""
+        #:endif
+        call json%add(${inp}$, "${var}$", ${tdt}$${var}$${dim}$)
     #:enddef
     #:include "include_files.fypp"
 #:enddef
@@ -222,7 +228,7 @@ ${"".join([" "*4 + line+"\n" for line in txt.split("\n")])}$
 
 #! Constant parameters
 
-#:def fortax_const()
+#:def fortax_const(public = False)
     #:def fortaxdef(type, var, str, attr, **kwargs)
     #:mute
     $:check_fortax_arg(type, var, str, attr, kwargs)
@@ -233,7 +239,11 @@ ${"".join([" "*4 + line+"\n" for line in txt.split("\n")])}$
     #:else
     #:set prec = ""
     #:endif
+    #:if public
+    ${FORTRAN_TYPE[type]}$, parameter, public :: ${var}$ = ${kwargs["value"]}$${prec}$
+    #:else
     ${FORTRAN_TYPE[type]}$, parameter :: ${var}$ = ${kwargs["value"]}$${prec}$
+    #:endif
     #:enddef
     #:include "fortax_const.inc"
 #:enddef
@@ -337,6 +347,8 @@ lab%${lab}$%${labval}$
         @:fortax_type_list(famad, suffix = 2)
         correct
     #:endcall
+
+        use fortax_util, only : fortaxError
 
         implicit none
 
