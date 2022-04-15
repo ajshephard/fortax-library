@@ -1,11 +1,7 @@
-@:header(tenure)
-#:if definitions > 0
-@:lab(1, own_outright, 'Own outright')
-@:lab(2, mortgage, 'Mortgage')
-@:lab(3, part_own, 'Part own,  part rent')
-@:lab(4, social_renter, 'Social renter')
-@:lab(5, private_renter, 'Private renter')
-@:lab(6, rent_free, 'Rent free')
-@:labn(7, other, 'Other')
-#:endif
-@:footer(tenure)
+@:fortaxdef(integer, own_outright, "Own outright", label, value = 1)
+@:fortaxdef(integer, mortgage, "Mortgage", label, value = 2)
+@:fortaxdef(integer, part_own, "Part own,  part rent", label, value = 3)
+@:fortaxdef(integer, social_renter, "Social renter", label, value = 4)
+@:fortaxdef(integer, private_renter, "Private renter", label, value = 5)
+@:fortaxdef(integer, rent_free, "Rent free", label, value = 6)
+@:fortaxdef(integer, other, "Other", label, value = 7)
