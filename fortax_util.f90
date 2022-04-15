@@ -81,7 +81,7 @@ contains
         logical, intent(in) :: N
         character(len=1)    :: logicalToStr
 
-        logicalToStr = merge('T','F',N)
+        logicalToStr = merge('T', 'F', N)
 
     end function logicalToStr
 
@@ -95,10 +95,10 @@ contains
         implicit none
 
         real(dp), intent(in) :: N
-        integer              :: dblToStrLen
-        character(len=40)    :: tempStr40
+        integer :: dblToStrLen
+        character(len = 40) :: tempStr40
 
-        write (tempStr40,*) N
+        write (tempStr40, *) N
         dblToStrLen = len_trim(adjustl(tempStr40))
 
     end function dblToStrLen
@@ -113,11 +113,11 @@ contains
 
         implicit none
 
-        real(dp), intent(in)      :: N
-        character(len=dblToStrLen(N)) :: dblToStr
-        character(len=40)         :: tempStr40
+        real(dp), intent(in) :: N
+        character(len = dblToStrLen(N)) :: dblToStr
+        character(len = 40) :: tempStr40
 
-        write (tempStr40,*) N
+        write (tempStr40, *) N
         dblToStr = adjustl(tempStr40)
 
     end function dblToStr
@@ -131,10 +131,10 @@ contains
 
         implicit none
 
-        character(len=*), intent(in) :: string
-        real(dp)                     :: strToDouble
+        character(len = *), intent(in) :: string
+        real(dp) :: strToDouble
 
-        read (string,*) strToDouble
+        read (string, *) strToDouble
 
     end function strToDouble
 
@@ -147,10 +147,10 @@ contains
 
         implicit none
 
-        character(len=*), intent(in) :: string
-        integer                      :: strToInt
+        character(len = *), intent(in) :: string
+        integer :: strToInt
 
-        read (string,*) strToInt
+        read (string, *) strToInt
 
     end function strToInt
 
@@ -159,15 +159,15 @@ contains
     ! -----------------------------------------------------------------------
     ! converts a string to an integer. Returns ifail.ne.0 if error
 
-    pure subroutine strToIntCheck(string,intout,istat)
+    pure subroutine strToIntCheck(string, intout, istat)
 
         implicit none
 
-        character(len=*), intent(in)  :: string
-        integer,          intent(out) :: intout
-        integer,          intent(out) :: istat
+        character(len = *), intent(in)  :: string
+        integer, intent(out) :: intout
+        integer, intent(out) :: istat
 
-        read (string,*,iostat=istat) intout
+        read (string, *, iostat = istat) intout
 
     end subroutine strToIntCheck
 
@@ -180,8 +180,8 @@ contains
 
         implicit none
 
-        character(len=*), intent(in) :: str
-        logical                      :: strToLogical
+        character(len = *), intent(in) :: str
+        logical :: strToLogical
 
         if (adjustl(str) .eq. "0") then
             strToLogical = .false.
@@ -200,16 +200,16 @@ contains
 
         implicit none
 
-        character(len=*), intent(in) :: str
-        character(len=len(str))      :: lower
+        character(len = *), intent(in) :: str
+        character(len = len(str)) :: lower
 
-        character                    :: ch
-        integer, parameter           :: offset = ichar('A') - ichar('a')
-        integer                      :: i
+        character :: ch
+        integer, parameter :: offset = ichar('A') - ichar('a')
+        integer :: i
 
         do i = 1, len(str)
             ch = str(i:i)
-            if (ch >= 'A' .and. ch <= 'Z') ch = char(ichar(ch)-offset)
+            if (ch >= 'A' .and. ch <= 'Z') ch = char(ichar(ch) - offset)
             lower(i:i) = ch
         end do
 
@@ -224,16 +224,16 @@ contains
 
         implicit none
 
-        character(len=*), intent(in) :: str
-        character(len=len(str))      :: upper
+        character(len = *), intent(in) :: str
+        character(len = len(str)) :: upper
 
-        character                :: ch
-        integer, parameter       :: offset = ichar('a') - ichar('A')
-        integer                  :: i
+        character :: ch
+        integer, parameter :: offset = ichar('a') - ichar('A')
+        integer :: i
 
         do i = 1, len(str)
             ch = str(i:i)
-            if (ch >= 'a' .and. ch <= 'z') ch = char(ichar(ch)-offset)
+            if (ch >= 'a' .and. ch <= 'z') ch = char(ichar(ch) - offset)
             upper(i:i) = ch
         end do
 
@@ -249,39 +249,39 @@ contains
 
         implicit none
 
-        character(len=*), intent(inout) :: str
-        character(len=1)                :: ch
-        character(len=len_trim(str))    :: outstr
+        character(len = *), intent(inout) :: str
+        character(len = 1) :: ch
+        character(len = len_trim(str)) :: outstr
 
-        integer                         :: i, k, isp, ich
-        integer                         :: lenstr
+        integer :: i, k, isp, ich
+        integer :: lenstr
 
-        str    = adjustl(str)
+        str = adjustl(str)
         lenstr = len_trim(str)
         outstr = ' '
-        isp    = 0
-        k      = 0
+        isp = 0
+        k = 0
 
-        do i = 1,lenstr
-            ch=str(i:i)
-            ich=iachar(ch)
+        do i = 1, lenstr
+            ch = str(i:i)
+            ich = iachar(ch)
 
             select case(ich)
-            case(9,32)     ! space or tab character
-                if(isp==0) then
-                    k=k+1
-                    outstr(k:k)=' '
+            case(9, 32)     ! space or tab character
+                if(isp == 0) then
+                    k = k + 1
+                    outstr(k:k) = ' '
                 end if
-                isp=1
+                isp = 1
             case(33:)      ! not a space, quote, or control character
-                k=k+1
-                outstr(k:k)=ch
-                isp=0
+                k = k + 1
+                outstr(k:k) = ch
+                isp = 0
             end select
 
         end do
 
-        str=adjustl(outstr)
+        str = adjustl(outstr)
 
     end subroutine compact
 
@@ -294,44 +294,42 @@ contains
 
         implicit none
 
-        character(len=*), intent(inout) :: str
-        integer, parameter              :: eeLen = 32
-        character(len=eeLen)            :: ee, eestr
-        character(len=1)                :: ch
-        integer                         :: i, lstr, ipos, eex
+        character(len = *), intent(inout) :: str
+        integer, parameter :: eeLen = 32
+        character(len = eeLen) :: ee, eestr
+        character(len = 1) :: ch
+        integer :: i, lstr, ipos, eex
 
         str = adjustl(trim(str))
-        ipos=scan(str,'eE')
+        ipos = scan(str,'eE')
 
-        if (ipos>0) then
-            ee=str(ipos:)
-!            read (ee(3:),*) eex
-            read (ee(3:eeLen),*) eex
-            if (eex==0) then
-            ee=''
+        if (ipos > 0) then
+            ee = str(ipos:)
+            read (ee(3:eeLen), *) eex
+            if (eex == 0) then
+                ee = ''
             else
-            write (eestr,'(I20)') eex
-            ee(3:eeLen) = adjustl(eestr)
-!            ee(3:) = adjustl(eestr)
+                write (eestr, '(I20)') eex
+                ee(3:eeLen) = adjustl(eestr)
             end if
-            str=str(1:ipos-1)
+            str = str(1:ipos - 1)
         end if
 
         lstr=len_trim(str)
 
-        do i=lstr,1,-1
-            ch=str(i:i)
-            if (ch=='0') cycle
-            if (ch=='.') then
-            str=str(1:i)//'0'
-            if (ipos>0) str=adjustl(trim(str)//trim(ee))
-            return
+        do i = lstr, 1, -1
+            ch = str(i:i)
+            if (ch == '0') cycle
+            if (ch == '.') then
+            str = str(1:i) // '0'
+            if (ipos > 0) str = adjustl(trim(str) // trim(ee))
+                return
             end if
-            str=str(1:i)
+            str = str(1:i)
             exit
         end do
 
-        if (ipos>0) str=adjustl(trim(str)//trim(ee))
+        if (ipos>0) str = adjustl(trim(str) // trim(ee))
 
     end subroutine trimZero
 
@@ -340,13 +338,13 @@ contains
     ! -----------------------------------------------------------------------
     ! pads a string with a character n
 
-    pure function strPad(str,n)
+    pure function strPad(str, n)
 
         implicit none
 
-        character(len=*), intent(in) :: str
-        integer,          intent(in) :: n
-        character(len=n)  :: strPad
+        character(len = *), intent(in) :: str
+        integer, intent(in) :: n
+        character(len = n) :: strPad
 
         strPad = str
 
@@ -364,14 +362,14 @@ contains
         implicit none
 
         integer, intent(out) :: funit
-        integer              :: i
-        logical              :: opend
+        integer :: i
+        logical :: opend
 
-        integer, parameter   :: stdout = output_unit
-        integer, parameter   :: maxunit = 99
+        integer, parameter :: stdout = output_unit
+        integer, parameter :: maxunit = 99
 
-        do i = stdout+1, maxunit
-            inquire(unit=i, opened=opend)
+        do i = stdout + 1, maxunit
+            inquire(unit = i, opened = opend)
             if (.not. opend) then
                 funit = i
                 exit
@@ -387,17 +385,15 @@ contains
     ! -----------------------------------------------------------------------
     ! convert a string to integer array (need to get rid of error for pure)
 
-    subroutine strToIntArray(x,str)
+    subroutine strToIntArray(x, str)
 
         implicit none
 
-        character(len=*), intent(in)    :: str
-        integer,          intent(inout) :: x(:)
+        character(len = *), intent(in) :: str
+        integer, intent(inout) :: x(:)
 
-        !character(len(string))   :: tmpstring
-
-        integer          :: n, i, i0, i1
-        integer          :: strLen, thisLen
+        integer :: n, i, i0, i1
+        integer :: strLen, thisLen
         character(len=8) :: strFor
 
         n = size(x)
@@ -407,27 +403,26 @@ contains
 
         do i = 1, n
 
-            i1 = index(str(i0:),',') + i0-1
-            !print *,i,i0,i1,string(i0:)
-            if (i0==i1) then
-                i0=i1+1
+            i1 = index(str(i0:), ',') + i0-1
+            if (i0 == i1) then
+                i0 = i1 + 1
                 cycle
-            else if (i1<i0) then
-                if (str(i0:)==' ') exit
+            else if (i1 < i0) then
+                if (str(i0:) == ' ') exit
                 thisLen = len(str(i0:))
-                strFor  = '(I'//intToStr(thisLen)//')'
-                read (str(i0:),strFor,err=999) x(i)
+                strFor  = '(I' // intToStr(thisLen) // ')'
+                read (str(i0:), strFor, err = 999) x(i)
                 exit
             else
-                if (str(i0:i1-1)==' ') then
+                if (str(i0:i1 - 1) == ' ') then
                     i0 = i1 +1
                     cycle
                 else
-                    thisLen = len(str(i0:i1-1))
-                    strFor  = '(I'//intToStr(thisLen)//')'
-                    read (str(i0:i1-1),strFor,err=999) x(i)
-                    i0 = i1+1
-                    if (i0>strLen) exit
+                    thisLen = len(str(i0:i1 - 1))
+                    strFor  = '(I' // intToStr(thisLen) // ')'
+                    read (str(i0:i1 - 1), strFor, err = 999) x(i)
+                    i0 = i1 + 1
+                    if (i0 > strLen) exit
                 end if
             end if
 
@@ -445,47 +440,44 @@ contains
     ! -----------------------------------------------------------------------
     ! convert a string to double array (need to get rid of error for pure)
 
-    subroutine strToDoubleArray(x,str)
+    subroutine strToDoubleArray(x, str)
 
         implicit none
 
-        character(len=*), intent(in)    :: str
-        real(dp),         intent(inout) :: x(:)
+        character(len = *), intent(in) :: str
+        real(dp), intent(inout) :: x(:)
 
-        !character(len(string))      :: tmpstring
+        integer :: n, i, i0, i1
+        integer :: strLen, thisLen
+        character(len = 8) :: strFor
 
-        integer          :: n, i, i0, i1
-        integer          :: strLen, thisLen
-        character(len=8) :: strFor
-
-        n      = size(x)
+        n = size(x)
         strlen = len(str)
 
         i0 = 1
 
         do i = 1, n
 
-            i1 = index(str(i0:),',') + i0-1
-            !print *,i,i0,i1,string(i0:)
-            if (i0==i1) then
-                i0=i1+1
+            i1 = index(str(i0:), ',') + i0 - 1
+            if (i0 == i1) then
+                i0 = i1 + 1
                 cycle
-            else if (i1<i0) then
-                if (str(i0:)==' ') exit
+            else if (i1 < i0) then
+                if (str(i0:) == ' ') exit
                 thisLen = len(str(i0:))
-                strFor = '(G'//intToStr(thisLen)//'.0)'
-                read (str(i0:),strFor,err=999) x(i)
+                strFor = '(G' // intToStr(thisLen) // '.0)'
+                read (str(i0:), strFor, err = 999) x(i)
                 exit
             else
-                if (str(i0:i1-1)==' ') then
+                if (str(i0:i1 - 1) == ' ') then
                     i0 = i1 +1
                     cycle
                 else
-                    thisLen = len(str(i0:i1-1))
-                    strFor = '(G'//intToStr(thisLen)//'.0)'
-                    read (str(i0:i1-1),strFor,err=999) x(i)
-                    i0 = i1+1
-                    if (i0>strLen) exit
+                    thisLen = len(str(i0:i1 - 1))
+                    strFor = '(G' // intToStr(thisLen) // '.0)'
+                    read (str(i0:i1 - 1), strFor, err = 999) x(i)
+                    i0 = i1 + 1
+                    if (i0 > strLen) exit
                 end if
             end if
 
@@ -503,18 +495,21 @@ contains
     ! -----------------------------------------------------------------------
     ! halts program on an error. Should allow for soft failures.
 
-    subroutine fortaxError(errMsg,funit)
+    subroutine fortaxError(errMsg, funit)
+
+        use, intrinsic :: iso_fortran_env
 
         implicit none
 
-        character(len=*),  intent(in) :: errMsg
+        character(len = *), intent(in) :: errMsg
         integer, optional, intent(in) :: funit
+        integer, parameter :: stdout = output_unit
 
         if (present(funit)) then
-            write (funit,*) 'Fortax error: ',errMsg
+            write (funit, *) 'Fortax error: ', errMsg
             stop 'program terminated by fortaxError'
         else
-            write (*,*) 'Fortax error: ',errMsg
+            write (stdout, *) 'Fortax error: ', errMsg
             stop 'program terminated by fortaxError'
         end if
 
@@ -527,17 +522,20 @@ contains
     ! -----------------------------------------------------------------------
     ! displays a warning message.
 
-    subroutine fortaxWarn(warnMsg,funit)
+    subroutine fortaxWarn(warnMsg, funit)
+
+        use, intrinsic :: iso_fortran_env
 
         implicit none
 
-        character(len=*),  intent(in) :: warnMsg
+        character(len = *), intent(in) :: warnMsg
         integer, optional, intent(in) :: funit
+        integer, parameter :: stdout = output_unit
 
         if (present(funit)) then
-            write (funit,*) 'Fortax warning: ', warnMsg
+            write (funit, *) 'Fortax warning: ', warnMsg
         else
-            write (*,*) 'Fortax warning: ', warnMsg
+            write (stdout, *) 'Fortax warning: ', warnMsg
         end if
 
         return
