@@ -56,6 +56,7 @@ ${"".join([" "*4 + line+"\n" for line in txt.split("\n")])}$
 #! Check that the arguments are valid
 
 #:def check_fortax_arg(type, var, str, attr, kwargs)
+    #:assert attr in ['rate', 'amount', 'minamount', 'null', 'range', 'scale', 'label']
     #:assert type in ['bool', 'integer', 'double']
     #:for kw in kwargs
         #:assert kw in ['dim', 'dimvar', 'value']
@@ -88,6 +89,22 @@ ${"".join([" "*4 + line+"\n" for line in txt.split("\n")])}$
             #:set vardim = get_fortax_vardim(kwargs, assumed).strip()
         #:endmute
         ${FORTRAN_TYPE[type]}$${attributes}$ :: ${var}$${suffix}$${vardim}$
+    #:enddef
+    #:include "include_files.fypp"
+#:enddef
+
+#! save system components using json
+
+#:def fortax_sys_write(inp, name, dt)
+    #:def fortaxdef(type, var, str, attr, **kwargs)
+        #:mute
+            $:check_fortax_arg(type, var, str, attr, kwargs)
+        #:endmute
+        #:if dt == ""
+        call json%add(${inp}$, "${var}$", ${var}$)
+        #:else
+        call json%add(${inp}$, "${var}$", ${dt}$%${var}$)
+        #:endif
     #:enddef
     #:include "include_files.fypp"
 #:enddef
@@ -362,6 +379,38 @@ lab%${lab}$%${labval}$
         end if
 
     end function fam_gen
+#:enddef
+
+#! set minamt
+
+#:def fortax_minamt(name, dt, minamt)
+    #:def fortaxdef(type, var, str, attr, **kwargs)
+        #:mute
+            $:check_fortax_arg(type, var, str, attr, kwargs)
+        #:endmute
+        #:if attr == "minamount"
+        #:if dt == ""
+            ${var}$ = minamt
+        #:else
+            ${dt}$%${var}$ = minamt
+        #:endif
+        #:endif
+    #:enddef
+    #:include "include_files.fypp"
+#:enddef
+
+#:def fortax_kinks_pointer(name, dt)
+    #:def fortaxdef(type, var, str, attr, **kwargs)
+        #:mute
+            $:check_fortax_arg(type, var, str, attr, kwargs)
+        #:endmute
+        #:if dt == ""
+        if (ltaxout == "${var.lower()}$") taxpoint(i)%p => net%ad(taxad)%${var}$
+        #:else
+        if (ltaxout == "${var.lower()}$") taxpoint(i)%p => ${dt}$%${var}$
+        #:endif
+    #:enddef
+    #:include "include_files.fypp"
 #:enddef
 
 #:endmute
