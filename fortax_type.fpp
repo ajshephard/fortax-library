@@ -24,6 +24,7 @@
 module fortax_type
 
     use fortax_realtype, only : dp
+    use iso_c_binding
 
     implicit none
 
@@ -33,14 +34,13 @@ module fortax_type
     public :: fam_init, net_init, sys_init
     public :: fam_saveF90, sys_saveF90
     public :: fam_t, net_t, sys_t, rpi_t, sysindex_t
-    public :: lab, maxkids, maxkinks, maxSysIndex, maxRPI
+    public :: lab
     public :: fam_gen, fam_desc
     public :: operator(+), operator(*), operator(/)
     public :: net_desc
-    public :: sysHuge
 
     ! constants for array bounds and internal values
-    @:fortax_const()
+    @:fortax_const(public = True)
 
     ! lab_t
     ! -----------------------------------------------------------------------
@@ -67,7 +67,7 @@ module fortax_type
     ! -----------------------------------------------------------------------
     ! defines the prices indexing for uprating
 
-    type rpi_t
+    type, bind(c) :: rpi_t
         integer  :: ndate
         integer  :: date(maxRPI)
         real(dp) :: index(maxRPI)
@@ -78,7 +78,7 @@ module fortax_type
     ! -----------------------------------------------------------------------
     ! defines sysindex
 
-    type sysindex_t
+    type :: sysindex_t
         integer :: nsys
         integer :: date0(maxSysIndex), date1(maxSysIndex)
         character(len = 256) :: fname(maxSysIndex)
@@ -89,7 +89,7 @@ module fortax_type
     ! -----------------------------------------------------------------------
     ! defines the adult level family type structure (see fam_t below)
 
-    type :: famad_t
+    type, bind(c) :: famad_t
         @:fortax_type_def(famad)
     end type famad_t
 
@@ -100,7 +100,7 @@ module fortax_type
     ! information. Anything that can affect the taxes and transfer payments
     ! of a family is defined in here.
 
-    type :: fam_t
+    type, bind(c) :: fam_t
         @:fortax_type_def(fam)
         type(famad_t) :: ad(2)
     end type fam_t
@@ -110,7 +110,7 @@ module fortax_type
     ! defines the adult level information returned following calls to the
     ! main calculation routines (see net_t below).
 
-    type :: netad_t
+    type, bind(c) :: netad_t
         @:fortax_type_def(netad)
     end type netad_t
 
@@ -119,7 +119,7 @@ module fortax_type
     ! defines the tax unit level information returned following calls to the
     ! main calculation routines (see net_t below).
 
-    type :: nettu_t
+    type, bind(c) :: nettu_t
         @:fortax_type_def(nettu)
     end type nettu_t
 
@@ -129,7 +129,7 @@ module fortax_type
     ! calculation routines within fortax_calc. It contains measures of net
     ! income, together with various tax amounts and other components of income
 
-    type :: net_t
+    type, bind(c) :: net_t
         type(netad_t) :: ad(2)
         type(nettu_t) :: tu
     end type net_t
@@ -183,15 +183,15 @@ module fortax_type
     ! module fortax_calc
 
     #:for SYS in SYSLIST
-    type :: ${SYS}$_t
+    type, bind(c) :: ${SYS}$_t
         @:fortax_type_def(${SYS}$)
     end type ${SYS}$_t
 
     #:endfor
 
-    type :: sys_t
-        character(len = 64) :: sysname
-        character(len = 512) :: sysdesc
+    type, bind(c) :: sys_t
+        character(kind = c_char) :: sysname(len_sysname)
+        character(kind = c_char) :: sysdesc(len_sysdesc)
         #:for SYS in SYSLIST
         type(${SYS}$_t) :: ${SYS}$
         #:endfor

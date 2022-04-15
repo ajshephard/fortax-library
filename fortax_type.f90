@@ -23,6 +23,7 @@
 module fortax_type
 
     use fortax_realtype, only : dp
+    use iso_c_binding
 
     implicit none
 
@@ -31,21 +32,24 @@ module fortax_type
     private
     public :: fam_init, net_init, sys_init
     public :: fam_saveF90, sys_saveF90
-    public :: fam_t, net_t, sys_t, rpi_t
-    public :: lab, maxkids
+    public :: fam_t, net_t, sys_t, rpi_t, sysindex_t
+    public :: lab
     public :: fam_gen, fam_desc
     public :: operator(+), operator(*), operator(/)
     public :: net_desc
-    public :: sysHuge
 
     ! constants for array bounds and internal values
-    integer, parameter :: maxKids = 16
-    integer, parameter :: maxRPI = 1024
-    integer, parameter :: MaxNumAgeRng = 32
-    integer, parameter :: MaxIncTaxBands = 32
-    integer, parameter :: MaxNatInsBands = 32
-    integer, parameter :: MaxNatInsC4Bands = 32
-    real(dp), parameter :: SysHuge = 1.0e100_dp
+    integer, parameter, public :: maxKids = 16
+    integer, parameter, public :: maxRPI = 1024
+    integer, parameter, public :: maxSysIndex = 128
+    integer, parameter, public :: MaxNumAgeRng = 32
+    integer, parameter, public :: MaxIncTaxBands = 32
+    integer, parameter, public :: MaxNatInsBands = 32
+    integer, parameter, public :: MaxNatInsC4Bands = 32
+    integer, parameter, public :: MaxKinks = 256
+    real(dp), parameter, public :: SysHuge = 1.0e100_dp
+    integer, parameter, public :: len_sysname = 64
+    integer, parameter, public :: len_sysdesc = 512
 
     ! lab_t
     ! -----------------------------------------------------------------------
@@ -106,17 +110,29 @@ module fortax_type
     ! -----------------------------------------------------------------------
     ! defines the prices indexing for uprating
 
-    type rpi_t
+    type, bind(c) :: rpi_t
         integer  :: ndate
         integer  :: date(maxRPI)
         real(dp) :: index(maxRPI)
     end type
 
+
+    ! sysindex_t
+    ! -----------------------------------------------------------------------
+    ! defines sysindex
+
+    type :: sysindex_t
+        integer :: nsys
+        integer :: date0(maxSysIndex), date1(maxSysIndex)
+        character(len = 256) :: fname(maxSysIndex)
+    end type
+
+
     ! famad_t
     ! -----------------------------------------------------------------------
     ! defines the adult level family type structure (see fam_t below)
 
-    type :: famad_t
+    type, bind(c) :: famad_t
         integer :: age
         integer :: selfemp
         real(dp) :: hrs
@@ -130,7 +146,7 @@ module fortax_type
     ! information. Anything that can affect the taxes and transfer payments
     ! of a family is defined in here.
 
-    type :: fam_t
+    type, bind(c) :: fam_t
         integer :: couple
         integer :: married
         real(dp) :: ccexp
@@ -153,7 +169,7 @@ module fortax_type
     ! defines the adult level information returned following calls to the
     ! main calculation routines (see net_t below).
 
-    type :: netad_t
+    type, bind(c) :: netad_t
         real(dp) :: taxable
         real(dp) :: inctax
         real(dp) :: natins
@@ -169,7 +185,7 @@ module fortax_type
     ! defines the tax unit level information returned following calls to the
     ! main calculation routines (see net_t below).
 
-    type :: nettu_t
+    type, bind(c) :: nettu_t
         real(dp) :: pretaxearn
         real(dp) :: posttaxearn
         real(dp) :: chben
@@ -200,7 +216,7 @@ module fortax_type
     ! calculation routines within fortax_calc. It contains measures of net
     ! income, together with various tax amounts and other components of income
 
-    type :: net_t
+    type, bind(c) :: net_t
         type(netad_t) :: ad(2)
         type(nettu_t) :: tu
     end type net_t
@@ -253,7 +269,7 @@ module fortax_type
     ! It describes all the parameters which are interpreted within the
     ! module fortax_calc
 
-    type :: inctax_t
+    type, bind(c) :: inctax_t
         integer :: numbands
         real(dp) :: pa
         integer :: doPATaper
@@ -270,7 +286,7 @@ module fortax_type
         real(dp) :: rates(MaxIncTaxBands)
     end type inctax_t
 
-    type :: natins_t
+    type, bind(c) :: natins_t
         integer :: numrates
         integer :: c4nrates
         real(dp) :: c2floor
@@ -282,7 +298,7 @@ module fortax_type
         real(dp) :: c4bands(MaxNatInsC4Bands)
     end type natins_t
 
-    type :: chben_t
+    type, bind(c) :: chben_t
         integer :: doChBen
         real(dp) :: basic
         real(dp) :: kid1xtr
@@ -296,7 +312,7 @@ module fortax_type
         integer :: taperIsIncTax
     end type chben_t
 
-    type :: fc_t
+    type, bind(c) :: fc_t
         integer :: dofamcred
         integer :: NumAgeRng
         integer :: MaxAgeCC
@@ -319,13 +335,13 @@ module fortax_type
         real(dp) :: kidcred(MaxNumAgeRng)
     end type fc_t
 
-    type :: ctc_t
+    type, bind(c) :: ctc_t
         real(dp) :: fam
         real(dp) :: baby
         real(dp) :: kid
     end type ctc_t
 
-    type :: wtc_t
+    type, bind(c) :: wtc_t
         real(dp) :: Basic
         real(dp) :: CouLP
         real(dp) :: FT
@@ -343,7 +359,7 @@ module fortax_type
         integer :: NewDisregCon
     end type wtc_t
 
-    type :: ntc_t
+    type, bind(c) :: ntc_t
         integer :: donewtaxcred
         real(dp) :: thr1lo
         real(dp) :: thr1hi
@@ -354,7 +370,7 @@ module fortax_type
         real(dp) :: MinAmt
     end type ntc_t
 
-    type :: incsup_t
+    type, bind(c) :: incsup_t
         integer :: doIncSup
         integer :: IncChben
         integer :: NumAgeRng
@@ -378,7 +394,7 @@ module fortax_type
         real(dp) :: AddKid(MaxNumAgeRng)
     end type incsup_t
 
-    type :: ctax_t
+    type, bind(c) :: ctax_t
         integer :: docounciltax
         real(dp) :: bandD
         real(dp) :: SinDis
@@ -391,7 +407,7 @@ module fortax_type
         real(dp) :: RatioH
     end type ctax_t
 
-    type :: rebatesys_t
+    type, bind(c) :: rebatesys_t
         integer :: RulesUnderFC
         integer :: RulesUnderWFTC
         integer :: RulesUnderNTC
@@ -421,20 +437,20 @@ module fortax_type
         real(dp) :: AddKid(MaxNumAgeRng)
     end type rebatesys_t
 
-    type :: hben_t
+    type, bind(c) :: hben_t
         integer :: doHBen
         real(dp) :: taper
         real(dp) :: MinAmt
     end type hben_t
 
-    type :: ctaxben_t
+    type, bind(c) :: ctaxben_t
         integer :: docounciltaxben
         real(dp) :: taper
         integer :: doEntitlementCut
         real(dp) :: entitlementShare
     end type ctaxben_t
 
-    type :: ccben_t
+    type, bind(c) :: ccben_t
         integer :: dopolltax
         real(dp) :: taper
         real(dp) :: PropElig
@@ -442,7 +458,7 @@ module fortax_type
         real(dp) :: CCrate
     end type ccben_t
 
-    type :: uc_t
+    type, bind(c) :: uc_t
         integer :: doUnivCred
         real(dp) :: MainCou
         real(dp) :: YngCou
@@ -468,13 +484,13 @@ module fortax_type
         real(dp) :: MinAmt
     end type uc_t
 
-    type :: statepen_t
+    type, bind(c) :: statepen_t
         integer :: doStatePen
         integer :: PenAgeMan
         integer :: PenAgeWoman
     end type statepen_t
 
-    type :: bencap_t
+    type, bind(c) :: bencap_t
         integer :: doCap
         integer :: doThruUC
         real(dp) :: sinNoKids
@@ -484,14 +500,16 @@ module fortax_type
         real(dp) :: UCEarnThr
     end type bencap_t
 
-    type :: extra_t
+    type, bind(c) :: extra_t
         integer :: fsminappamt
         integer :: matgrant
         integer :: prices
     end type extra_t
 
 
-    type :: sys_t
+    type, bind(c) :: sys_t
+        character(kind = c_char) :: sysname(len_sysname)
+        character(kind = c_char) :: sysdesc(len_sysdesc)
         type(inctax_t) :: inctax
         type(natins_t) :: natins
         type(chben_t) :: chben
@@ -621,6 +639,8 @@ contains
 
     function fam_gen(couple, married, ccexp, maint, nkids, kidage, nothads, tenure, rent, rentcap, region, ctband, banddratio,&
         & intdate, age1, selfemp1, hrs1, earn1, age2, selfemp2, hrs2, earn2, correct) result(fam)
+
+        use fortax_util, only : fortaxError
 
         implicit none
 
