@@ -27,7 +27,7 @@
 #! Remove blank lines from given character string
 
 #:def remove_blank_lines(txt)
-    ${"".join([s for s in txt.strip().splitlines(True) if s.strip()])}$
+${"".join([s for s in txt.strip().splitlines(True) if s.strip()])}$
 #:enddef
 
 #! Add Fortran line continuation character
@@ -411,6 +411,41 @@ lab%${lab}$%${labval}$
         #:endif
     #:enddef
     #:include "include_files.fypp"
+#:enddef
+
+#:def fortax_uprate(name, dt, factor, **defkwargs)
+    #:call remove_blank_lines
+    #:mute
+    #:set uprateAmount = False
+    #:set uprateMinAmount = False
+    #:if 'amount' in defkwargs
+        #:set uprateAmount = defkwargs["amount"]
+    #:endif
+    #:if 'minamount' in defkwargs
+        #:set uprateMinAmount = defkwargs["minamount"]
+    #:endif
+    #:endmute
+    #:def fortaxdef(type, var, str, attr, **kwargs)
+        #:mute
+        $:check_fortax_arg(type, var, str, attr, kwargs)
+        #:endmute
+        #:if attr == 'amount' and uprateAmount
+            #:if dt == ""
+            ${var}$ = ${var}$ * factor
+            #:else
+            ${dt}$%${var}$ = ${dt}$%${var}$ * factor
+            #:endif
+        #:endif
+        #:if attr == 'minamount' and uprateMinAmount
+            #:if dt == ""
+            ${var}$ = ${var}$ * factor
+            #:else
+            ${dt}$%${var}$ = ${dt}$%${var}$ * factor
+            #:endif
+        #:endif
+    #:enddef
+    #:include "include_files.fypp"
+    #:endcall
 #:enddef
 
 #:endmute
