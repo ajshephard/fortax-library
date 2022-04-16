@@ -115,6 +115,67 @@ ${"".join([" "*4 + line+"\n" for line in txt.split("\n")])}$
     #:include "include_files.fypp"
 #:enddef
 
+#! read json system
+#:def fortax_sys_read(name, dt)
+    #:def fortaxdef(type, var, str, attr, **kwargs)
+        #:mute
+            $:check_fortax_arg(type, var, str, attr, kwargs)
+        #:endmute
+        #:if dt == ""
+            #:set tdt = ""
+        #:else
+            #:set tdt = dt + "%"
+        #:endif
+        #:if "dim" in kwargs
+            #:set array = True
+            #:set dim = kwargs["dim"]
+            #:set dimvar = kwargs["dimvar"]
+        #:else
+            #:set array = False
+            #:set dim = ""
+            #:set dimvar = ""
+        #:endif
+        #:if type == "integer" and not array
+        call json%get("${name}$.${var}$", ${tdt}$${name}$%${var}$, found)
+        #:elif type == "integer" and array
+        call json%get("${name}$.${var}$", integer_array, found)
+        if (found) then
+            sz = size(integer_array)
+            if (sz > ${dim}$) then
+                call fortaxError("json file: length ${name}$.${var}$ > ${dim}$")
+            else
+                ${tdt}$${name}$%${var}$(1:sz) = integer_array
+            endif
+        end if
+        #:elif type == "bool" and not array
+        call json%get("${name}$.${var}$", ${tdt}$${name}$%${var}$, found)
+        #:elif type == "bool" and array
+        call json%get("${name}$.${var}$", integer_array, found)
+        if (found) then
+            sz = size(integer_array)
+            if (sz > ${dim}$) then
+                call fortaxError("json file: length ${name}$.${var}$ > ${dim}$")
+            else
+                ${tdt}$${name}$%${var}$(1:sz) = integer_array
+            endif
+        end if
+        #:elif type == "double" and not array
+        call json%get("${name}$.${var}$", ${tdt}$${name}$%${var}$, found)
+        #:elif type == "double" and array
+        call json%get("${name}$.${var}$", double_array, found)
+        if (found) then
+            sz = size(double_array)
+            if (sz > ${dim}$) then
+                call fortaxError("json file: length ${name}$.${var}$ > ${dim}$")
+            else
+                ${tdt}$${name}$%${var}$(1:sz) = double_array
+            endif
+        end if
+        #:endif
+    #:enddef
+    #:include "include_files.fypp"
+#:enddef
+
 #! List types
 
 #:def fortax_type_list(name, **defkwargs)
