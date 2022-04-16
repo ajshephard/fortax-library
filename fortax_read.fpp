@@ -55,6 +55,9 @@ contains
 
         integer, allocatable :: integer_array(:)
         real(dp), allocatable :: double_array(:)
+        character(len = :), allocatable :: string
+        character(len = len_sysname) :: sysname
+        character(len = len_sysdesc) :: sysdesc
         logical :: found
         integer :: sz
 
@@ -67,6 +70,22 @@ contains
 
         ! read the file
         call json%load(filename = systemFile)
+
+        call json%get("system.sysname", string, found)
+        if (len(string) > len_sysname) then
+            call fortaxError("json file: length system.sysname > len_sysname")
+        else
+            sysname = string
+            sys%sysname = transfer(sysname, sys%sysname)
+        end if
+
+        call json%get("system.sysdesc", string, found)
+        if (len(string) > len_sysdesc) then
+            call fortaxError("json file: length system.sysdesc > len_sysdesc")
+        else
+            sysdesc = string
+            sys%sysdesc = transfer(sysdesc, sys%sysdesc)
+        end if
 
         #:for SYS in SYSLIST
         @:fortax_sys_read(${SYS}$, sys)
