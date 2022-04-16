@@ -22,32 +22,14 @@
 ! module for saving (to native XML format) and printing of system files
 ! code will reflect any changes to the structure of the system, AS
 
+
 module fortax_write
 
     use fortax_realtype, only : dp
     private :: dp
 
     private
-    public  :: fortaxPrint, fortaxWrite, xml_ftag, ftxmlwrite
-
-    interface ftxmlwrite
-        module procedure xml_write_fchar
-        module procedure xml_write_finteger
-        module procedure xml_write_fdouble
-        module procedure xml_write_flogical
-        module procedure xml_write_fintegerarray
-        module procedure xml_write_fdoublearray
-        module procedure xml_write_flogicalarray
-    end interface
-
-    interface ftprint
-        module procedure ftprint_finteger
-        module procedure ftprint_fdouble
-        module procedure ftprint_flogical
-        module procedure ftprint_fintegerarray
-        module procedure ftprint_fdoublearray
-        module procedure ftprint_flogicalarray
-    end interface
+    public  :: fortaxPrint, fortaxWrite
 
 contains
 
@@ -57,7 +39,7 @@ contains
     ! is not specified. Otherwise, this output summary will be written to
     ! disk with file name fname. This printing code is self-maintaining
 
-    subroutine fortaxPrint(sys,fname)
+    subroutine fortaxPrint(sys, fname)
 
         use fortax_type, only : sys_t
         use fortax_util, only : upper, getUnit, fortaxError
@@ -67,8 +49,12 @@ contains
 
         type(sys_t),      intent(in)           :: sys
         character(len=*), intent(in), optional :: fname
+        character(len = 64) :: sysname
+        character(len = 512) :: sysdesc
+        integer :: funit, ios
 
-        integer            :: funit, ios
+        sysname = transfer(sys%sysname, sysname)
+        sysdesc = transfer(sys%sysdesc, sysdesc)
 
         if (present(fname)) then
             call getUnit(funit)
@@ -78,19 +64,17 @@ contains
             funit = output_unit
         end if
 
-        if ( sys%sysname .ne. "" ) then
+        if ( sysname .ne. "" ) then
             write(funit,*)
             write(funit,'(1X,(A))') 'SYSNAME:'
-            write(funit,'(1X,(A))') trim(sys%sysname)
+            write(funit,'(1X,(A))') trim(sysname)
         end if
 
-        if ( sys%sysdesc .ne. "" ) then
+        if ( sysdesc .ne. "" ) then
             write(funit,*)
             write(funit,'(1X,(A))') 'SYSDESC:'
-            write(funit,'(1X,(A))') trim(sys%sysdesc)
+            write(funit,'(1X,(A))') trim(sysdesc)
         end if
-
-#       include "includes/fortax_print.inc"
 
         if (present(fname)) close(funit)
 
@@ -104,489 +88,298 @@ contains
     ! writes the system file sys to disk with file name fname in the native
     ! FORTAX file format. This writing code is self-maintaining.
 
-    subroutine fortaxWrite(sys,fname)
+    subroutine fortaxWrite(sys, fname)
 
-        use fortax_type, only : sys_t
-        use xmlparse,    only : xml_parse, xml_open, xml_close
+        use fortax_type
+        use json_module
 
         implicit none
 
-        type(sys_t),      intent(in) :: sys
-        character(len=*), intent(in) :: fname
+        type(sys_t), intent(in) :: sys
+        character(len = *), intent(in) :: fname
 
-        character(len=255)       :: attribs(2,1)
-        logical                  :: mustRead
-        type(xml_parse)          :: info
+        type(json_core) :: json
+        type(json_value), pointer :: p, inp
 
-        mustRead = .false.
+        character(len = len_sysname) :: sysname
+        character(len = len_sysdesc) :: sysdesc
 
-        call xml_open(info,fname,mustRead)
-        call xml_ftag(info,'fortax','open')
+        sysname = transfer(sys%sysname, sysname)
+        sysdesc = transfer(sys%sysdesc, sysdesc)
 
-        if ( sys%sysname .ne. "" ) then
-            attribs(1,1) = 'value'
-            attribs(2,1) = trim(sys%sysname)
-            call xml_ftag(info,'sysname','openclose',attribs)
-        end if
+        ! initialize the class
+        call json%initialize()
 
-        if ( sys%sysdesc .ne. "" ) then
-            attribs(1,1) = 'value'
-            attribs(2,1) = trim(sys%sysdesc)
-            call xml_ftag(info,'sysdesc','openclose',attribs)
-        end if
+        ! initialize the structure:
+        call json%create_object(p, '')
 
-        attribs(1,1) = 'basename'
+        call json%add(p, 'sysname', trim(adjustl(sysname)))
+        call json%add(p, 'sysdesc', trim(adjustl(sysdesc)))
 
-#       include "includes/fortax_write.inc"
+        call json%create_object(inp, "inctax")
+        call json%add(p, inp) !add it to the root
+        call json%add(inp, "numbands", sys%inctax%numbands)
+        call json%add(inp, "pa", sys%inctax%pa)
+        call json%add(inp, "doPATaper", sys%inctax%doPATaper)
+        call json%add(inp, "disablePATaperRounding", sys%inctax%disablePATaperRounding)
+        call json%add(inp, "paTaperThresh", sys%inctax%paTaperThresh)
+        call json%add(inp, "paTaperRate", sys%inctax%paTaperRate)
+        call json%add(inp, "mma", sys%inctax%mma)
+        call json%add(inp, "ctc", sys%inctax%ctc)
+        call json%add(inp, "ctcyng", sys%inctax%ctcyng)
+        call json%add(inp, "mmarate", sys%inctax%mmarate)
+        call json%add(inp, "ctctaper", sys%inctax%ctctaper)
+        call json%add(inp, "c4rebate", sys%inctax%c4rebate)
+        call json%add(inp, "bands", sys%inctax%bands(1:sys%inctax%numbands))
+        call json%add(inp, "rates", sys%inctax%rates(1:sys%inctax%numbands))
+        nullify(inp)
 
-        call xml_ftag(info,'fortax','close')
-        call xml_close(info)
+        call json%create_object(inp, "natins")
+        call json%add(p, inp) !add it to the root
+        call json%add(inp, "numrates", sys%natins%numrates)
+        call json%add(inp, "c4nrates", sys%natins%c4nrates)
+        call json%add(inp, "c2floor", sys%natins%c2floor)
+        call json%add(inp, "c2rate", sys%natins%c2rate)
+        call json%add(inp, "ceiling", sys%natins%ceiling)
+        call json%add(inp, "rates", sys%natins%rates(1:sys%natins%numrates))
+        call json%add(inp, "bands", sys%natins%bands(1:sys%natins%numrates))
+        call json%add(inp, "c4rates", sys%natins%c4rates(1:sys%natins%c4nrates))
+        call json%add(inp, "c4bands", sys%natins%c4bands(1:sys%natins%c4nrates))
+        nullify(inp)
+
+        call json%create_object(inp, "chben")
+        call json%add(p, inp) !add it to the root
+        call json%add(inp, "doChBen", sys%chben%doChBen)
+        call json%add(inp, "basic", sys%chben%basic)
+        call json%add(inp, "kid1xtr", sys%chben%kid1xtr)
+        call json%add(inp, "opf", sys%chben%opf)
+        call json%add(inp, "MatGrantVal", sys%chben%MatGrantVal)
+        call json%add(inp, "MatGrantOnlyFirstKid", sys%chben%MatGrantOnlyFirstKid)
+        call json%add(inp, "doTaper", sys%chben%doTaper)
+        call json%add(inp, "disableTaperRounding", sys%chben%disableTaperRounding)
+        call json%add(inp, "taperStart", sys%chben%taperStart)
+        call json%add(inp, "taperRate", sys%chben%taperRate)
+        call json%add(inp, "taperIsIncTax", sys%chben%taperIsIncTax)
+        nullify(inp)
+
+        call json%create_object(inp, "fc")
+        call json%add(p, inp) !add it to the root
+        call json%add(inp, "dofamcred", sys%fc%dofamcred)
+        call json%add(inp, "NumAgeRng", sys%fc%NumAgeRng)
+        call json%add(inp, "MaxAgeCC", sys%fc%MaxAgeCC)
+        call json%add(inp, "WFTCMaxAgeCC", sys%fc%WFTCMaxAgeCC)
+        call json%add(inp, "adult", sys%fc%adult)
+        call json%add(inp, "ftprem", sys%fc%ftprem)
+        call json%add(inp, "hours1", sys%fc%hours1)
+        call json%add(inp, "hours2", sys%fc%hours2)
+        call json%add(inp, "thres", sys%fc%thres)
+        call json%add(inp, "taper", sys%fc%taper)
+        call json%add(inp, "MaintDisreg", sys%fc%MaintDisreg)
+        call json%add(inp, "MaxCC1", sys%fc%MaxCC1)
+        call json%add(inp, "MaxCC2", sys%fc%MaxCC2)
+        call json%add(inp, "WFTCMaxCC1", sys%fc%WFTCMaxCC1)
+        call json%add(inp, "WFTCMaxCC2", sys%fc%WFTCMaxCC2)
+        call json%add(inp, "WFTCPropCC", sys%fc%WFTCPropCC)
+        call json%add(inp, "MinAmt", sys%fc%MinAmt)
+        call json%add(inp, "kidagel", sys%fc%kidagel(1:sys%fc%NumAgeRng))
+        call json%add(inp, "kidageu", sys%fc%kidageu(1:sys%fc%NumAgeRng))
+        call json%add(inp, "kidcred", sys%fc%kidcred(1:sys%fc%NumAgeRng))
+        nullify(inp)
+
+        call json%create_object(inp, "ctc")
+        call json%add(p, inp) !add it to the root
+        call json%add(inp, "fam", sys%ctc%fam)
+        call json%add(inp, "baby", sys%ctc%baby)
+        call json%add(inp, "kid", sys%ctc%kid)
+        nullify(inp)
+
+        call json%create_object(inp, "wtc")
+        call json%add(p, inp) !add it to the root
+        call json%add(inp, "Basic", sys%wtc%Basic)
+        call json%add(inp, "CouLP", sys%wtc%CouLP)
+        call json%add(inp, "FT", sys%wtc%FT)
+        call json%add(inp, "MinHrsKids", sys%wtc%MinHrsKids)
+        call json%add(inp, "MinHrsCouKids", sys%wtc%MinHrsCouKids)
+        call json%add(inp, "MinHrsNoKids", sys%wtc%MinHrsNoKids)
+        call json%add(inp, "FTHrs", sys%wtc%FTHrs)
+        call json%add(inp, "MinAgeKids", sys%wtc%MinAgeKids)
+        call json%add(inp, "MinAgeNoKids", sys%wtc%MinAgeNoKids)
+        call json%add(inp, "MaxCC1", sys%wtc%MaxCC1)
+        call json%add(inp, "MaxCC2", sys%wtc%MaxCC2)
+        call json%add(inp, "PropCC", sys%wtc%PropCC)
+        call json%add(inp, "MaxAgeCC", sys%wtc%MaxAgeCC)
+        call json%add(inp, "NewDisreg", sys%wtc%NewDisreg)
+        call json%add(inp, "NewDisregCon", sys%wtc%NewDisregCon)
+        nullify(inp)
+
+        call json%create_object(inp, "ntc")
+        call json%add(p, inp) !add it to the root
+        call json%add(inp, "donewtaxcred", sys%ntc%donewtaxcred)
+        call json%add(inp, "thr1lo", sys%ntc%thr1lo)
+        call json%add(inp, "thr1hi", sys%ntc%thr1hi)
+        call json%add(inp, "thr2", sys%ntc%thr2)
+        call json%add(inp, "taper1", sys%ntc%taper1)
+        call json%add(inp, "taper2", sys%ntc%taper2)
+        call json%add(inp, "taperCTCInOneGo", sys%ntc%taperCTCInOneGo)
+        call json%add(inp, "MinAmt", sys%ntc%MinAmt)
+        nullify(inp)
+
+        call json%create_object(inp, "incsup")
+        call json%add(p, inp) !add it to the root
+        call json%add(inp, "doIncSup", sys%incsup%doIncSup)
+        call json%add(inp, "IncChben", sys%incsup%IncChben)
+        call json%add(inp, "NumAgeRng", sys%incsup%NumAgeRng)
+        call json%add(inp, "MainCou", sys%incsup%MainCou)
+        call json%add(inp, "YngCou", sys%incsup%YngCou)
+        call json%add(inp, "MainLP", sys%incsup%MainLP)
+        call json%add(inp, "YngLP", sys%incsup%YngLP)
+        call json%add(inp, "MainSin", sys%incsup%MainSin)
+        call json%add(inp, "YngSin", sys%incsup%YngSin)
+        call json%add(inp, "ValFSM", sys%incsup%ValFSM)
+        call json%add(inp, "DisregLP", sys%incsup%DisregLP)
+        call json%add(inp, "DisregSin", sys%incsup%DisregSin)
+        call json%add(inp, "DisregCou", sys%incsup%DisregCou)
+        call json%add(inp, "DisregShared", sys%incsup%DisregShared)
+        call json%add(inp, "PremFam", sys%incsup%PremFam)
+        call json%add(inp, "PremLP", sys%incsup%PremLP)
+        call json%add(inp, "hours", sys%incsup%hours)
+        call json%add(inp, "MaintDisreg", sys%incsup%MaintDisreg)
+        call json%add(inp, "AgeRngl", sys%incsup%AgeRngl(1:sys%incsup%NumAgeRng))
+        call json%add(inp, "AgeRngu", sys%incsup%AgeRngu(1:sys%incsup%NumAgeRng))
+        call json%add(inp, "AddKid", sys%incsup%AddKid(1:sys%incsup%NumAgeRng))
+        nullify(inp)
+
+        call json%create_object(inp, "ctax")
+        call json%add(p, inp) !add it to the root
+        call json%add(inp, "docounciltax", sys%ctax%docounciltax)
+        call json%add(inp, "bandD", sys%ctax%bandD)
+        call json%add(inp, "SinDis", sys%ctax%SinDis)
+        call json%add(inp, "RatioA", sys%ctax%RatioA)
+        call json%add(inp, "RatioB", sys%ctax%RatioB)
+        call json%add(inp, "RatioC", sys%ctax%RatioC)
+        call json%add(inp, "RatioE", sys%ctax%RatioE)
+        call json%add(inp, "RatioF", sys%ctax%RatioF)
+        call json%add(inp, "RatioG", sys%ctax%RatioG)
+        call json%add(inp, "RatioH", sys%ctax%RatioH)
+        nullify(inp)
+
+        call json%create_object(inp, "rebatesys")
+        call json%add(p, inp) !add it to the root
+        call json%add(inp, "RulesUnderFC", sys%rebatesys%RulesUnderFC)
+        call json%add(inp, "RulesUnderWFTC", sys%rebatesys%RulesUnderWFTC)
+        call json%add(inp, "RulesUnderNTC", sys%rebatesys%RulesUnderNTC)
+        call json%add(inp, "RulesUnderUC", sys%rebatesys%RulesUnderUC)
+        call json%add(inp, "NumAgeRng", sys%rebatesys%NumAgeRng)
+        call json%add(inp, "Restrict", sys%rebatesys%Restrict)
+        call json%add(inp, "docap", sys%rebatesys%docap)
+        call json%add(inp, "MainCou", sys%rebatesys%MainCou)
+        call json%add(inp, "YngCou", sys%rebatesys%YngCou)
+        call json%add(inp, "MainLP", sys%rebatesys%MainLP)
+        call json%add(inp, "YngLP", sys%rebatesys%YngLP)
+        call json%add(inp, "MainSin", sys%rebatesys%MainSin)
+        call json%add(inp, "YngSin", sys%rebatesys%YngSin)
+        call json%add(inp, "DisregSin", sys%rebatesys%DisregSin)
+        call json%add(inp, "DisregLP", sys%rebatesys%DisregLP)
+        call json%add(inp, "DisregCou", sys%rebatesys%DisregCou)
+        call json%add(inp, "CredInDisregCC", sys%rebatesys%CredInDisregCC)
+        call json%add(inp, "ChbenIsIncome", sys%rebatesys%ChbenIsIncome)
+        call json%add(inp, "PremFam", sys%rebatesys%PremFam)
+        call json%add(inp, "PremLP", sys%rebatesys%PremLP)
+        call json%add(inp, "MaintDisreg", sys%rebatesys%MaintDisreg)
+        call json%add(inp, "MaxCC1", sys%rebatesys%MaxCC1)
+        call json%add(inp, "MaxCC2", sys%rebatesys%MaxCC2)
+        call json%add(inp, "MaxAgeCC", sys%rebatesys%MaxAgeCC)
+        call json%add(inp, "AgeRngl", sys%rebatesys%AgeRngl(1:sys%rebatesys%NumAgeRng))
+        call json%add(inp, "AgeRngu", sys%rebatesys%AgeRngu(1:sys%rebatesys%NumAgeRng))
+        call json%add(inp, "AddKid", sys%rebatesys%AddKid(1:sys%rebatesys%NumAgeRng))
+        nullify(inp)
+
+        call json%create_object(inp, "hben")
+        call json%add(p, inp) !add it to the root
+        call json%add(inp, "doHBen", sys%hben%doHBen)
+        call json%add(inp, "taper", sys%hben%taper)
+        call json%add(inp, "MinAmt", sys%hben%MinAmt)
+        nullify(inp)
+
+        call json%create_object(inp, "ctaxben")
+        call json%add(p, inp) !add it to the root
+        call json%add(inp, "docounciltaxben", sys%ctaxben%docounciltaxben)
+        call json%add(inp, "taper", sys%ctaxben%taper)
+        call json%add(inp, "doEntitlementCut", sys%ctaxben%doEntitlementCut)
+        call json%add(inp, "entitlementShare", sys%ctaxben%entitlementShare)
+        nullify(inp)
+
+        call json%create_object(inp, "ccben")
+        call json%add(p, inp) !add it to the root
+        call json%add(inp, "dopolltax", sys%ccben%dopolltax)
+        call json%add(inp, "taper", sys%ccben%taper)
+        call json%add(inp, "PropElig", sys%ccben%PropElig)
+        call json%add(inp, "MinAmt", sys%ccben%MinAmt)
+        call json%add(inp, "CCrate", sys%ccben%CCrate)
+        nullify(inp)
+
+        call json%create_object(inp, "uc")
+        call json%add(p, inp) !add it to the root
+        call json%add(inp, "doUnivCred", sys%uc%doUnivCred)
+        call json%add(inp, "MainCou", sys%uc%MainCou)
+        call json%add(inp, "YngCou", sys%uc%YngCou)
+        call json%add(inp, "MainSin", sys%uc%MainSin)
+        call json%add(inp, "YngSin", sys%uc%YngSin)
+        call json%add(inp, "MinAgeMain", sys%uc%MinAgeMain)
+        call json%add(inp, "FirstKid", sys%uc%FirstKid)
+        call json%add(inp, "OtherKid", sys%uc%OtherKid)
+        call json%add(inp, "MaxCC1", sys%uc%MaxCC1)
+        call json%add(inp, "MaxCC2", sys%uc%MaxCC2)
+        call json%add(inp, "PropCC", sys%uc%PropCC)
+        call json%add(inp, "MaxAgeCC", sys%uc%MaxAgeCC)
+        call json%add(inp, "doRentCap", sys%uc%doRentCap)
+        call json%add(inp, "DisregSinNoKidsHi", sys%uc%DisregSinNoKidsHi)
+        call json%add(inp, "DisregSinNoKidsLo", sys%uc%DisregSinNoKidsLo)
+        call json%add(inp, "DisregSinKidsHi", sys%uc%DisregSinKidsHi)
+        call json%add(inp, "DisregSinKidsLo", sys%uc%DisregSinKidsLo)
+        call json%add(inp, "DisregCouNoKidsHi", sys%uc%DisregCouNoKidsHi)
+        call json%add(inp, "DisregCouNoKidsLo", sys%uc%DisregCouNoKidsLo)
+        call json%add(inp, "DisregCouKidsHi", sys%uc%DisregCouKidsHi)
+        call json%add(inp, "DisregCouKidsLo", sys%uc%DisregCouKidsLo)
+        call json%add(inp, "taper", sys%uc%taper)
+        call json%add(inp, "MinAmt", sys%uc%MinAmt)
+        nullify(inp)
+
+        call json%create_object(inp, "statepen")
+        call json%add(p, inp) !add it to the root
+        call json%add(inp, "doStatePen", sys%statepen%doStatePen)
+        call json%add(inp, "PenAgeMan", sys%statepen%PenAgeMan)
+        call json%add(inp, "PenAgeWoman", sys%statepen%PenAgeWoman)
+        nullify(inp)
+
+        call json%create_object(inp, "bencap")
+        call json%add(p, inp) !add it to the root
+        call json%add(inp, "doCap", sys%bencap%doCap)
+        call json%add(inp, "doThruUC", sys%bencap%doThruUC)
+        call json%add(inp, "sinNoKids", sys%bencap%sinNoKids)
+        call json%add(inp, "sinKids", sys%bencap%sinKids)
+        call json%add(inp, "couNoKids", sys%bencap%couNoKids)
+        call json%add(inp, "couKids", sys%bencap%couKids)
+        call json%add(inp, "UCEarnThr", sys%bencap%UCEarnThr)
+        nullify(inp)
+
+        call json%create_object(inp, "extra")
+        call json%add(p, inp) !add it to the root
+        call json%add(inp, "fsminappamt", sys%extra%fsminappamt)
+        call json%add(inp, "matgrant", sys%extra%matgrant)
+        call json%add(inp, "prices", sys%extra%prices)
+        nullify(inp)
+
+
+        ! write the file:
+        call json%print(p, fname)
+
+        !cleanup:
+        call json%destroy(p)
+        if (json%failed()) stop 1
 
         return
 
     end subroutine fortaxWrite
-
-
-
-    ! xml_write_fchar
-    ! -----------------------------------------------------------------------
-    ! xml writing of string when saving system file (called by fortaxWrite)
-
-    subroutine xml_write_fchar(info,field,fieldname)
-
-        use xmlparse, only : xml_parse, xml_put
-
-        implicit none
-
-        type(xml_parse),  intent(inout) :: info
-        character(len=*), intent(in)    :: field
-        character(len=*), intent(in)    :: fieldName
-
-        character(len=255) :: myData(1)
-        character(len=255) :: attribs(2,2)
-
-        attribs(1,1) = 'name'
-        attribs(2,1) = fieldName
-        attribs(1,2) = 'value'
-        write(attribs(2,2),*) field
-
-        call xml_put(info, 'fchar',attribs, 2, &
-            myData, 0, 'elem')
-
-        return
-
-    end subroutine xml_write_fchar
-
-    ! xml_write_finteger
-    ! -----------------------------------------------------------------------
-    ! xml writing of integer when saving system file (called by fortaxWrite)
-
-    subroutine xml_write_finteger(info,field,fieldname)
-
-        use xmlparse, only : xml_parse, xml_put
-
-        implicit none
-
-        type(xml_parse),  intent(inout) :: info
-        integer,          intent(in)    :: field
-        character(len=*), intent(in)    :: fieldName
-
-        character(len=255) :: myData(1)
-        character(len=255) :: attribs(2,2)
-
-        attribs(1,1) = 'name'
-        attribs(2,1) = fieldName
-        attribs(1,2) = 'value'
-        write(attribs(2,2),*) field
-
-        call xml_put(info, 'finteger',attribs, 2, &
-            myData, 0, 'elem')
-
-        return
-
-    end subroutine xml_write_finteger
-
-
-    ! xml_write_fdouble
-    ! -----------------------------------------------------------------------
-    ! xml writing of double when saving system file (called by fortaxWrite)
-
-    subroutine xml_write_fdouble(info,field,fieldname)
-
-        use xmlparse,    only : xml_parse, xml_put
-        use fortax_util, only : compact
-
-        implicit none
-
-        type(xml_parse),  intent(inout) :: info
-        real(dp),         intent(in)    :: field
-        character(len=*), intent(in)    :: fieldName
-
-        character(len=255)                 :: myData(1)
-        character(len=255)                 :: attribs(2,2)
-
-        attribs(1,1) = 'name'
-        attribs(2,1) = fieldName
-        attribs(1,2) = 'value'
-
-        write(attribs(2,2),*) field
-
-        call xml_put(info, 'fdouble',attribs, 2, &
-            & mydata, 0, 'elem')
-
-        return
-
-    end subroutine xml_write_fdouble
-
-
-    ! xml_write_flogical
-    ! -----------------------------------------------------------------------
-    ! xml writing of logical when saving system file (called by fortaxWrite)
-
-    subroutine xml_write_flogical(info,field,fieldname)
-
-        use xmlparse, only : xml_parse, xml_put
-
-        implicit none
-
-        type(xml_parse),  intent(inout) :: info
-        logical,          intent(in)    :: field
-        character(len=*), intent(in)    :: fieldName
-        character(len=255)                  :: myData(1)
-        character(len=255)                  :: attribs(2,2)
-
-        attribs(1,1) = 'name'
-        attribs(2,1) = fieldName
-        attribs(1,2) = 'value'
-        write(attribs(2,2),*) merge('T', 'F', field)
-
-        call xml_put(info, 'flogical',attribs, 2, &
-            & mydata, 0, 'elem')
-
-        return
-
-    end subroutine xml_write_flogical
-
-
-    ! xml_write_fintegerarray
-    ! -----------------------------------------------------------------------
-    ! xml writing of integer array when saving system file (called by
-    ! fortaxWrite)
-
-    subroutine xml_write_fintegerarray(info,field,fieldname)
-
-        use xmlparse,    only : xml_parse, xml_put
-        use fortax_util, only : compact
-
-        implicit none
-
-        type(xml_parse),  intent(inout) :: info
-        integer,          intent(in)    :: field(:)
-        character(len=*), intent(in)    :: fieldName
-
-        character(len=1)                   :: myData(1)
-        character(len=255)                 :: attribs(2,2)
-        character(len=64)                  :: tempStr(size(field))
-        character(len=64*size(field)+1)    :: tempStr2
-
-        integer                        :: i
-
-        attribs(1,1) = 'name'
-        attribs(2,1) = fieldName
-        attribs(1,2) = 'value'
-
-        do i = 1, size(field)
-            write (tempStr(i),*) field(i)
-        end do
-
-        write(tempStr2,*) (tempStr(i), i=1,size(field))
-        call compact(tempStr2)
-        attribs(2,2) = adjustl(trim(tempStr2))
-
-        if (len_trim(adjustl(trim(tempStr2)))>len(attribs)) then
-            print *, 'warning: field truncated when writing integer array'
-        end if
-
-        call xml_put(info, 'fintegerarray',attribs, 2, &
-            & mydata, 0, 'openclose')
-
-        return
-
-    end subroutine xml_write_fintegerarray
-
-
-    ! xml_write_fdoublearray
-    ! -----------------------------------------------------------------------
-    ! xml writing of double array when saving system file (called by
-    ! fortaxWrite)
-
-    subroutine xml_write_fdoublearray(info,field,fieldName)
-
-        use xmlparse,    only : xml_parse, xml_put
-        use fortax_util, only : compact
-
-        implicit none
-
-        type(xml_parse),  intent(inout) :: info
-        real(dp),         intent(in)    :: field(:)
-        character(len=*), intent(in)    :: fieldName
-
-        character(len=1)                   :: mydata(1)
-        character(len=255)                 :: attribs(2,2)
-        character(len=64)                  :: tempStr(size(field))
-        character(len=64*size(field)+1)    :: tempStr2
-
-        integer                        :: i
-
-        attribs(1,1) = 'name'
-        attribs(2,1) = fieldname
-        attribs(1,2) = 'value'
-
-        do i = 1, size(field)
-            write (tempstr(i),*) field(i)
-        end do
-
-        write(tempStr2,*) (tempStr(i), i=1,size(field))
-        call compact(tempStr2)
-        attribs(2,2) = adjustl(trim(tempStr2))
-
-        if (len_trim(adjustl(trim(tempStr2)))>len(attribs)) then
-            print *, 'warning: field truncated when writing logical array'
-        end if
-
-        call xml_put(info, 'fdoublearray',attribs, 2, &
-            & mydata, 0, 'openclose')
-
-        return
-
-    end subroutine xml_write_fdoublearray
-
-
-    ! xml_write_fdoublearray
-    ! -----------------------------------------------------------------------
-    ! xml writing of double array when saving system file (called by
-    ! fortaxWrite)
-
-    subroutine xml_write_flogicalarray(info,field,fieldName)
-
-        use xmlparse,    only : xml_parse, xml_put
-        use fortax_util, only : compact
-
-        implicit none
-
-        type(xml_parse),  intent(inout) :: info
-        logical,          intent(in)    :: field(:)
-        character(len=*), intent(in)    :: fieldName
-
-        character(len=1)                   :: myData(1)
-        character(len=255)                 :: attribs(2,2)
-        character(len=1)                   :: tempStr(size(field))
-        character(len=1*size(field)+1)     :: tempStr2
-
-        integer                        :: i
-
-        attribs(1,1) = 'name'
-        attribs(2,1) = fieldname
-        attribs(1,2) = 'value'
-
-        do i = 1, size(field)
-            write (tempStr(i),*) merge('T', 'F', field(i))
-        end do
-
-        write(tempStr2,*) (tempStr(i), i=1,size(field))
-        call compact(tempStr2)
-        attribs(2,2) = adjustl(trim(tempStr2))
-
-        if (len_trim(adjustl(trim(tempStr2)))>len(attribs)) then
-            print *, 'warning: field truncated when writing logical array'
-        end if
-
-        call xml_put(info, 'flogicalarray',attribs, 2, &
-            & mydata, 0, 'openclose')
-
-        return
-
-    end subroutine xml_write_flogicalarray
-
-
-    ! xml_write_fintegerarray
-    ! -----------------------------------------------------------------------
-    ! xml writing of tags when saving system file (called by fortaxWrite)
-
-    subroutine xml_ftag(info,tag,openClose,attribs)
-
-        use xmlparse, only : xml_parse, xml_put
-
-        implicit none
-
-        type(xml_parse),            intent(inout) :: info
-        character(len=*),           intent(in)    :: tag
-        character(len=*),           intent(in)    :: openClose
-        character(len=*), optional, intent(in)    :: attribs(:,:)
-
-        character(len=255)                        :: myData(1)
-
-        if (present(attribs)) then
-            call xml_put(info, tag, attribs, size(attribs,2), myData, 0, openClose)
-        else
-            call xml_put(info, tag, reshape((/'',''/),(/2,1/)), 0, myData, 0, openClose)
-        end if
-
-        return
-
-    end subroutine xml_ftag
-
-
-    ! ftprint_finteger
-    ! -----------------------------------------------------------------------
-    ! fortax printing of integer when printing system file (called by
-    ! fortaxPrint)
-
-    subroutine ftprint_finteger(funit,finteger,fname)
-
-        use fortax_util, only: intToStr, strPad
-
-        implicit none
-
-        integer,          intent(in) :: funit
-        integer,          intent(in) :: finteger
-        character(len=*), intent(in) :: fname
-
-        write(funit,*) strPad(fname,16)//intToStr(finteger)
-
-        return
-
-    end subroutine ftprint_finteger
-
-
-    ! ftprint_fdouble
-    ! -----------------------------------------------------------------------
-    ! fortax printing of double when printing system file (called by
-    ! fortaxPrint)
-
-    subroutine ftprint_fdouble(funit,fdouble,fname)
-
-        use fortax_util, only : trimZero, strPad
-
-        implicit none
-
-        integer,          intent(in) :: funit
-        real(dp),         intent(in) :: fdouble
-        character(len=*), intent(in) :: fname
-
-        character(len=32) :: str
-
-        write(str,*) fdouble
-        call trimZero(str)
-
-        write(funit,*) strPad(fname,16)//str
-
-        return
-
-    end subroutine ftprint_fdouble
-
-
-    ! ftprint_flogical
-    ! -----------------------------------------------------------------------
-    ! fortax printing of logical when printing system file (called by
-    ! fortaxPrint)
-
-    subroutine ftprint_flogical(funit,flogical,fname)
-
-        use fortax_util, only : strPad
-
-        implicit none
-
-        integer,          intent(in) :: funit
-        logical,          intent(in) :: flogical
-        character(len=*), intent(in) :: fname
-
-        write(funit,*) strpad(fname,16)//merge('yes','no ',flogical)
-
-        return
-
-    end subroutine ftprint_flogical
-
-
-    ! ftprint_fintegerarray
-    ! -----------------------------------------------------------------------
-    ! fortax printing of integer array when printing system file (called by
-    ! fortaxPrint)
-
-    subroutine ftprint_fintegerarray(funit,fintegerarray,fname)
-
-        use fortax_util, only : intToStr, strPad
-
-        implicit none
-
-        integer,          intent(in) :: funit
-        integer,          intent(in) :: fintegerarray(:)
-        character(len=*), intent(in) :: fname
-
-        integer :: i
-
-        do i = 1, size(fintegerarray)
-            write(funit,*) strPad(fname//'('//IntToStr(i)//')',16)//inttostr(fintegerarray(i))
-        end do
-
-        return
-
-    end subroutine ftprint_fintegerarray
-
-
-    ! ftprint_fdoublearray
-    ! -----------------------------------------------------------------------
-    ! fortax printing of double array when printing system file (called by
-    ! fortaxPrint)
-
-    subroutine ftprint_fdoublearray(funit,fdoublearray,fname)
-
-        use fortax_util, only : intToStr, strPad, trimZero
-
-        implicit none
-
-        integer,          intent(in) :: funit
-        real(dp),         intent(in) :: fdoublearray(:)
-        character(len=*), intent(in) :: fname
-
-        integer           :: i
-        character(len=32) :: str
-
-        do i = 1, size(fdoublearray)
-            write(str,*) fdoublearray(i)
-            call trimZero(str)
-            write(funit,*) strpad(fname//'('//IntToStr(i)//')',16)//str
-        end do
-
-        return
-
-    end subroutine ftprint_fdoublearray
-
-
-    ! ftprint_flogicalarray
-    ! -----------------------------------------------------------------------
-    ! fortax printing of logical array when printing system file (called by
-    ! fortaxPrint)
-
-    subroutine ftprint_flogicalarray(funit,flogicalarray,fname)
-
-        use fortax_util, only : intToStr, strPad
-
-        implicit none
-
-        integer,          intent(in) :: funit
-        logical,          intent(in) :: flogicalarray(:)
-        character(len=*), intent(in) :: fname
-
-        integer :: i
-
-        do i = 1, size(flogicalarray)
-            write(funit,*) strPad(fname//'('//intToStr(i)//')',16)//merge('yes','no ',flogicalarray(i))
-        end do
-
-        return
-
-    end subroutine ftprint_flogicalarray
-
 
 end module fortax_write

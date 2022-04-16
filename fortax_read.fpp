@@ -71,17 +71,17 @@ contains
         ! read the file
         call json%load(filename = systemFile)
 
-        call json%get("system.sysname", string, found)
+        call json%get("sysname", string, found)
         if (len(string) > len_sysname) then
-            call fortaxError("json file: length system.sysname > len_sysname")
+            call fortaxError("json file: length sysname > len_sysname")
         else
             sysname = string
             sys%sysname = transfer(sysname, sys%sysname)
         end if
 
-        call json%get("system.sysdesc", string, found)
+        call json%get("sysdesc", string, found)
         if (len(string) > len_sysdesc) then
-            call fortaxError("json file: length system.sysdesc > len_sysdesc")
+            call fortaxError("json file: length sysdesc > len_sysdesc")
         else
             sysdesc = string
             sys%sysdesc = transfer(sysdesc, sys%sysdesc)

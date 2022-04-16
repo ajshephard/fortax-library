@@ -114,13 +114,8 @@ contains
         ! initialize the structure:
         call json%create_object(p, '')
 
-        call json%create_object(inp, 'system')
-        call json%add(p, inp) !add it to the root
-
-        ! add some data to inputs
-        call json%add(inp, 'sysname', trim(adjustl(sysname)))
-        call json%add(inp, 'sysdesc', trim(adjustl(sysdesc)))
-        nullify(inp)
+        call json%add(p, 'sysname', trim(adjustl(sysname)))
+        call json%add(p, 'sysdesc', trim(adjustl(sysdesc)))
 
         #:for SYS in SYSLIST
         call json%create_object(inp, "${SYS}$")
