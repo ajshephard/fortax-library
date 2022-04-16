@@ -1141,6 +1141,8 @@ contains
 
         type(sys_t), intent(out) :: sys
 
+        sys%sysname = ''
+        sys%sysdesc = ''
 
         sys%inctax%numbands = 0
         sys%inctax%pa = 0.0_dp

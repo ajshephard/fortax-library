@@ -441,6 +441,8 @@ contains
 
         type(sys_t), intent(out) :: sys
 
+        sys%sysname = ''
+        sys%sysdesc = ''
         #:for SYS in SYSLIST
 
         @:fortax_type_init(${SYS}$, sys%${SYS}$)
