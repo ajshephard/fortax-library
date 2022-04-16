@@ -78,10 +78,10 @@ module fortax_type
     ! -----------------------------------------------------------------------
     ! defines sysindex
 
-    type :: sysindex_t
+    type, bind(c) :: sysindex_t
         integer :: nsys
         integer :: date0(maxSysIndex), date1(maxSysIndex)
-        character(len = 256) :: fname(maxSysIndex)
+        character(kind = c_char) :: fname(len_sysindex, maxSysIndex)
     end type
 
 

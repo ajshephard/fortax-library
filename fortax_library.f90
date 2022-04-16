@@ -67,6 +67,7 @@ module fortax_library
                                     FORTAX_lab => lab,                                          &
                                     FORTAX_maxkids => maxkids,                                  &
                                     FORTAX_maxkinks => maxkinks,                                &
+                                    FORTAX_len_sysindex => len_sysindex,                        &
                                     FORTAX_fam_gen => fam_gen,                                  &
                                     FORTAX_fam_desc => fam_desc,                                &
                                     FORTAX_net_desc => net_desc,                                &

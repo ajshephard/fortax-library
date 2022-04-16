@@ -361,7 +361,7 @@ sys%bencap%sinNoKids = sys%bencap%sinNoKids * factor
     subroutine loadsysindex(sysindex, sysindexfile)
 
         use fortax_util, only : fortaxerror, inttostr
-        use fortax_type, only : sysindex_t
+        use fortax_type, only : sysindex_t, len_sysindex, maxSysIndex
 
         implicit none
 
@@ -373,7 +373,7 @@ sys%bencap%sinNoKids = sys%bencap%sinNoKids * factor
 
         logical :: isfile
         integer :: tempdate0, tempdate1, ndate
-        character(len = 256) :: tempfname
+        character(len = len_sysindex) :: tempfname
 
         if (present(sysindexfile)) then
             inquire(file = sysindexfile, exist = isfile)
@@ -413,12 +413,16 @@ sys%bencap%sinNoKids = sys%bencap%sinNoKids * factor
                 call fortaxerror('error reading record after ' // inttostr(nrec))
             else
                 nrec = nrec + 1
+                if (nrec > maxSysIndex) then
+                    call fortaxerror('nrec > maxSysIndex')
+                end if
                 sysindex%date0(nrec) = tempdate0
                 sysindex%date1(nrec) = tempdate1
-                sysindex%fname(nrec) = tempfname
+                sysindex%fname(:, nrec) = transfer(tempfname, sysindex%fname(:, nrec))
             end if
 
         end do
+
 
         close(funit)
 
@@ -437,7 +441,7 @@ sys%bencap%sinNoKids = sys%bencap%sinNoKids * factor
     subroutine getsysindex(sysindex, date, systemformat, sysfilepath, sysnum)
 
         use fortax_util, only : lower, fortaxerror
-        use fortax_type, only : sysindex_t
+        use fortax_type, only : sysindex_t, len_sysindex
 
         implicit none
 
@@ -450,6 +454,7 @@ sys%bencap%sinNoKids = sys%bencap%sinNoKids * factor
         integer :: i
         character(len = 4) :: fext !extension
         character(len = 7) :: fsub !subdirectory
+        character(len = len_sysindex):: sysname
 
         if (sysindex%nsys == 0) then
             call fortaxerror('system index file is not in memory')
@@ -470,7 +475,8 @@ sys%bencap%sinNoKids = sys%bencap%sinNoKids * factor
             sysnum = 0
             do i = 1, sysindex%nsys
                 if (date >= sysindex%date0(i) .and. date <= sysindex%date1(i)) then
-                    sysfilepath = adjustl('systems/' // trim(fsub) // trim(sysindex%fname(i)) // trim(fext))
+                    sysname = transfer(sysindex%fname(:, i), sysname)
+                    sysfilepath = adjustl('systems/' // trim(fsub) // trim(sysname) // trim(fext))
                     sysnum = i
                     exit
                 end if

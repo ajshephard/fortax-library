@@ -9,3 +9,4 @@
 @:fortaxdef(double,  SysHuge,          "Large system value",        null,  value = 1.0e100)
 @:fortaxdef(integer, len_sysname,      "Length for sysname",        range, value = 64)
 @:fortaxdef(integer, len_sysdesc,      "Length for sysdesc",        range, value = 512)
+@:fortaxdef(integer, len_sysindex,     "Length for sysindex fname", range, value = 256)

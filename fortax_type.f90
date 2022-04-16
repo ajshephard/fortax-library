@@ -50,6 +50,7 @@ module fortax_type
     real(dp), parameter, public :: SysHuge = 1.0e100_dp
     integer, parameter, public :: len_sysname = 64
     integer, parameter, public :: len_sysdesc = 512
+    integer, parameter, public :: len_sysindex = 256
 
     ! lab_t
     ! -----------------------------------------------------------------------
@@ -121,10 +122,10 @@ module fortax_type
     ! -----------------------------------------------------------------------
     ! defines sysindex
 
-    type :: sysindex_t
+    type, bind(c) :: sysindex_t
         integer :: nsys
         integer :: date0(maxSysIndex), date1(maxSysIndex)
-        character(len = 256) :: fname(maxSysIndex)
+        character(kind = c_char) :: fname(len_sysindex, maxSysIndex)
     end type
 
 
