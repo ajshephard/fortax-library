@@ -26,30 +26,28 @@ module fortax_library
 
     use fortax_calc,        only :  FORTAX_calcNetInc => calcNetInc
 
-    use fortax_compare,     only :  FORTAX_writeFamCompareDatabase => writeFamCompareDatabase,  &
-                                    FORTAX_readFamCompareDatabase => readFamCompareDatabase,    &
-                                    FORTAX_compareFamDatabase => compareFamDatabase,            &
-                                    FORTAX_compareNet => compareNet
+    use fortax_compare
+    ! ,     only :  FORTAX_writeFamCompareDatabase => writeFamCompareDatabase,  &
+    !                                 FORTAX_readFamCompareDatabase => readFamCompareDatabase,    &
+    !                                 FORTAX_compareFamDatabase => compareFamDatabase,            &
+    !                                 FORTAX_compareNet => compareNet
 
     use fortax_extra,       only :  FORTAX_setMinAmount => setMinAmount,                        &
                                     FORTAX_abolishNIFee => abolishNIFee,                        &
                                     FORTAX_disableTaperRounding => disableTaperRounding,        &
                                     FORTAX_fsMinAppAmt => fsMinAppAmt,                          &
                                     FORTAX_taperMatGrant => taperMatGrant,                      &
-                                    FORTAX_imposeUC => imposeUC,                                &
-                                    FORTAX_netoutDesc => netoutDesc,                            &
-                                    FORTAX_netoutDescNoName => netoutDescNoName
+                                    FORTAX_imposeUC => imposeUC !,                                &
+                                    ! FORTAX_netoutDesc => netoutDesc,                            &
+                                    ! FORTAX_netoutDescNoName => netoutDescNoName
 
-    use fortax_kinks,       only :  bcout_t,                                                    &
-                                    FORTAX_evalKinksHours => evalKinksHours,                    &
+    use fortax_kinks,       only :  FORTAX_evalKinksHours => evalKinksHours,                    &
                                     FORTAX_evalKinksEarn => evalKinksEarn,                      &
                                     FORTAX_kinkshours => kinkshours,                            &
                                     FORTAX_kinksearn => kinksearn,                              &
-                                    FORTAX_kinksccexp => kinksccexp,                            &
-                                    FORTAX_maxkinks => maxkinks
+                                    FORTAX_kinksccexp => kinksccexp
 
-    use fortax_prices,      only :  sysIndex_t, &
-                                    FORTAX_loadIndex => loadIndex,                              &
+    use fortax_prices,      only :  FORTAX_loadIndex => loadIndex,                              &
                                     FORTAX_uprateSys => uprateSys,                              &
                                     FORTAX_uprateFactor => uprateFactor,                        &
                                     FORTAX_loadSysIndex => loadSysIndex,                        &
@@ -57,10 +55,10 @@ module fortax_library
 
     use fortax_read,        only :  FORTAX_readFortaxParams => readFortaxParams
 
-    use fortax_taxbenread,  only :  FORTAX_readTaxbenParams => readTaxbenParams,                &
-                                    FORTAX_batchConvertTaxben => batchConvertTaxben
+    ! use fortax_taxbenread,  only :  FORTAX_readTaxbenParams => readTaxbenParams,                &
+    !                                 FORTAX_batchConvertTaxben => batchConvertTaxben
 
-    use fortax_type,        only :  fam_t, net_t, sys_t, rpi_t,                                 &
+    use fortax_type,        only :  fam_t, net_t, sys_t, rpi_t, sysIndex_t, bcout_t,            &
                                     FORTAX_fam_init => fam_init,                                &
                                     FORTAX_net_init => net_init,                                &
                                     FORTAX_sys_init => sys_init,                                &
@@ -68,6 +66,7 @@ module fortax_library
                                     FORTAX_sys_saveF90 => sys_saveF90,                          &
                                     FORTAX_lab => lab,                                          &
                                     FORTAX_maxkids => maxkids,                                  &
+                                    FORTAX_maxkinks => maxkinks,                                &
                                     FORTAX_fam_gen => fam_gen,                                  &
                                     FORTAX_fam_desc => fam_desc,                                &
                                     FORTAX_net_desc => net_desc,                                &

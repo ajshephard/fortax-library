@@ -33,7 +33,7 @@ module fortax_type
     private
     public :: fam_init, net_init, sys_init
     public :: fam_saveF90, sys_saveF90
-    public :: fam_t, net_t, sys_t, rpi_t, sysindex_t
+    public :: fam_t, net_t, sys_t, rpi_t, sysindex_t, bcout_t
     public :: lab
     public :: fam_gen, fam_desc
     public :: operator(+), operator(*), operator(/)
@@ -196,6 +196,14 @@ module fortax_type
         type(${SYS}$_t) :: ${SYS}$
         #:endfor
     end type sys_t
+
+    type, bind(c) :: bcout_t
+        integer :: kinks_num
+        real(dp), dimension(maxkinks) :: kinks_hrs
+        real(dp), dimension(maxkinks) :: kinks_earn
+        real(dp), dimension(maxkinks) :: kinks_net
+        real(dp), dimension(maxkinks) :: kinks_mtr
+    end type bcout_t
 
 contains
 

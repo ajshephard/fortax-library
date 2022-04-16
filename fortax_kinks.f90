@@ -25,20 +25,12 @@
 module fortax_kinks
 
     use fortax_realtype, only : dp
-    use fortax_type, only : maxkinks
+    use fortax_type, only : maxkinks, bcout_t
     implicit none
     private :: dp
     private
 
-    type :: bcout_t
-        integer :: kinks_num
-        real(dp), dimension(maxkinks) :: kinks_hrs
-        real(dp), dimension(maxkinks) :: kinks_earn
-        real(dp), dimension(maxkinks) :: kinks_net
-        real(dp), dimension(maxkinks) :: kinks_mtr
-    end type bcout_t
-
-    public :: bcout_t, evalKinksHours, evalKinksEarn, kinkshours, kinksearn, kinksccexp
+    public :: evalKinksHours, evalKinksEarn, kinkshours, kinksearn, kinksccexp
 
     logical, parameter, private :: zeroWage = .true.
 
