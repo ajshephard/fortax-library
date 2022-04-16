@@ -77,7 +77,6 @@ module fortax_library
 
     use fortax_realtype,    only :  FORTAX_dp => dp,                                            &
                                     FORTAX_sp => sp,                                            &
-                                    FORTAX_ep => ep,                                            &
                                     FORTAX_qp => qp
 
 end module fortax_library

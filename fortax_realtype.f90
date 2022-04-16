@@ -23,13 +23,14 @@
 
 module fortax_realtype
 
+    use iso_fortran_env
+
     implicit none
 
     public
 
-    integer, parameter :: sp = selected_real_kind(6,37)
-    integer, parameter :: dp = selected_real_kind(15,307)
-    integer, parameter :: ep = selected_real_kind(18,4931)
-    integer, parameter :: qp = selected_real_kind(33,4931)
+    integer, parameter :: sp = real32
+    integer, parameter :: dp = real64
+    integer, parameter :: qp = real128
 
 end module fortax_realtype
