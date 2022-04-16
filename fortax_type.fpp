@@ -235,7 +235,7 @@ contains
 
     subroutine fam_desc(fam, fname)
 
-        use fortax_util, only : getUnit, intToStr, fortaxError
+        use fortax_util, only : intToStr, fortaxError
 
         use, intrinsic :: iso_fortran_env
 
@@ -245,8 +245,7 @@ contains
         integer :: funit, i, ios
 
         if (present(fname)) then
-            call getUnit(funit)
-            open(funit, file = fname, action = 'write', status = 'replace', iostat = ios)
+            open(newunit = funit, file = fname, action = 'write', status = 'replace', iostat = ios)
             if (ios .ne. 0) call fortaxError('error opening file for writing')
         else
             funit = output_unit
@@ -402,7 +401,7 @@ contains
 
     subroutine net_desc(net, fname)
 
-        use fortax_util, only :  getUnit, intToStr, fortaxError
+        use fortax_util, only : intToStr, fortaxError
 
         use, intrinsic :: iso_fortran_env
 
@@ -412,8 +411,7 @@ contains
         integer :: funit, i, ios
 
         if (present(fname)) then
-            call getUnit(funit)
-            open(funit, file = fname, action = 'write', status = 'replace', iostat = ios)
+            open(newunit = funit, file = fname, action = 'write', status = 'replace', iostat = ios)
             if (ios .ne. 0) call fortaxError('error opening file for writing')
         else
             funit = output_unit
@@ -466,7 +464,7 @@ contains
 
     subroutine sys_saveF90(sys, fname)
 
-        use fortax_util, only : getUnit, fortaxError
+        use fortax_util, only : fortaxError
         use, intrinsic :: iso_fortran_env
 
         implicit none
@@ -477,8 +475,7 @@ contains
         integer :: funit, ios
 
         if (present(fname)) then
-            call getUnit(funit)
-            open(funit, file = fname, action = 'write', status = 'replace', iostat = ios)
+            open(newunit = funit, file = fname, action = 'write', status = 'replace', iostat = ios)
             if (ios .ne. 0) call fortaxError('error opening file for writing')
         else
             funit = output_unit
@@ -512,7 +509,7 @@ contains
 
     subroutine fam_saveF90(fam, fname)
 
-        use fortax_util, only : getUnit, fortaxError
+        use fortax_util, only : fortaxError
         use, intrinsic :: iso_fortran_env
 
         implicit none
@@ -523,8 +520,7 @@ contains
         integer :: funit, ios
 
         if (present(fname)) then
-            call getUnit(funit)
-            open(funit, file = fname, action = 'write', status = 'replace', iostat = ios)
+            open(newunit = funit, file = fname, action = 'write', status = 'replace', iostat = ios)
             if (ios .ne. 0) call fortaxError('error opening file for writing')
         else
             funit = output_unit

@@ -40,7 +40,7 @@ contains
 
     subroutine readFortaxParams(sys, systemFile, prices)
 
-        use fortax_util, only : getunit, strToDouble, strToInt, strToLogical, lower, fortaxError, fortaxWarn
+        use fortax_util, only : strToDouble, strToInt, strToLogical, lower, fortaxError, fortaxWarn
         use fortax_type
         use json_module
 

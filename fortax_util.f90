@@ -374,30 +374,30 @@ contains
     ! -----------------------------------------------------------------------
     ! returns a free file unit
 
-    subroutine getUnit(funit)
+    ! subroutine getUnit(funit)
 
-        use, intrinsic :: iso_fortran_env
+    !     use, intrinsic :: iso_fortran_env
 
-        implicit none
+    !     implicit none
 
-        integer, intent(out) :: funit
-        integer :: i
-        logical :: opend
+    !     integer, intent(out) :: funit
+    !     integer :: i
+    !     logical :: opend
 
-        integer, parameter :: stdout = output_unit
-        integer, parameter :: maxunit = 99
+    !     integer, parameter :: stdout = output_unit
+    !     integer, parameter :: maxunit = 99
 
-        do i = stdout + 1, maxunit
-            inquire(unit = i, opened = opend)
-            if (.not. opend) then
-                funit = i
-                exit
-            endif
-        end do
+    !     do i = stdout + 1, maxunit
+    !         inquire(unit = i, opened = opend)
+    !         if (.not. opend) then
+    !             funit = i
+    !             exit
+    !         endif
+    !     end do
 
-        return
+    !     return
 
-    end subroutine getUnit
+    ! end subroutine getUnit
 
 
     ! strToIntArray

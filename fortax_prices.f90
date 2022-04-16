@@ -75,7 +75,7 @@ contains
 
     subroutine loadindex(rpi, fname)
 
-        use fortax_util, only : getunit, fortaxerror, fortaxwarn, inttostr
+        use fortax_util, only : fortaxerror, fortaxwarn, inttostr
         use fortax_type, only : rpi_t, maxRPI
 
         implicit none
@@ -91,19 +91,17 @@ contains
         integer :: tempdate, ndate
         real(dp) :: tempindex
 
-        call getunit(funit)
-
         if (present(fname)) then
             inquire(file = fname, exist = isfile)
             if (isfile) then
-                open(funit, file = fname, status = 'old')
+                open(newunit = funit, file = fname, status = 'old')
             else
                 call fortaxerror('price index file does not exist (' // trim(adjustl(fname)) // ')')
             end if
         else
             inquire(file = 'prices/rpi.csv', exist = isfile)
             if (isfile) then
-                open (funit, file = 'prices/rpi.csv', status = 'old')
+                open(newunit = funit, file = 'prices/rpi.csv', status = 'old')
             else
                 call fortaxerror('default price index file does not exist')
             end if
@@ -362,7 +360,7 @@ sys%bencap%sinNoKids = sys%bencap%sinNoKids * factor
 
     subroutine loadsysindex(sysindex, sysindexfile)
 
-        use fortax_util, only : getunit, fortaxerror, inttostr
+        use fortax_util, only : fortaxerror, inttostr
         use fortax_type, only : sysindex_t
 
         implicit none
@@ -377,19 +375,17 @@ sys%bencap%sinNoKids = sys%bencap%sinNoKids * factor
         integer :: tempdate0, tempdate1, ndate
         character(len = 256) :: tempfname
 
-        call getunit(funit)
-
         if (present(sysindexfile)) then
             inquire(file = sysindexfile, exist = isfile)
             if (isfile) then
-                open (funit, file = sysindexfile, status = 'old')
+                open(newunit = funit, file = sysindexfile, status = 'old')
             else
                 call fortaxerror('system index file does not exist (' // sysindexfile // ')')
             end if
         else
             inquire(file = 'systems/sysindex.csv', exist = isfile)
             if (isfile) then
-                open (funit, file = 'systems/sysindex.csv', status = 'old')
+                open(newunit = funit, file = 'systems/sysindex.csv', status = 'old')
             else
                 call fortaxerror('default system index file does not exist')
             end if
@@ -511,7 +507,7 @@ sys%bencap%sinNoKids = sys%bencap%sinNoKids * factor
 
     subroutine rpi_saveF90(rpi,fname)
 
-        use fortax_util, only : getUnit, fortaxError, intToStr, dblToStr
+        use fortax_util, only : fortaxError, intToStr, dblToStr
         use fortax_type, only : rpi_t
 
         use, intrinsic :: iso_fortran_env
@@ -528,8 +524,7 @@ sys%bencap%sinNoKids = sys%bencap%sinNoKids * factor
         end if
 
         if (present(fname)) then
-            call getUnit(funit)
-            open(funit, file = fname, action = 'write', status = 'replace', iostat = ios)
+            open(newunit = funit, file = fname, action = 'write', status = 'replace', iostat = ios)
             if (ios .ne. 0) call fortaxError('error opening file for writing')
         else
             funit = output_unit

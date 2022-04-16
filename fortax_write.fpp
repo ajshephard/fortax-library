@@ -43,7 +43,7 @@ contains
     subroutine fortaxPrint(sys, fname)
 
         use fortax_type, only : sys_t
-        use fortax_util, only : upper, getUnit, fortaxError
+        use fortax_util, only : upper, fortaxError
         use, intrinsic :: iso_fortran_env
 
         implicit none
@@ -58,8 +58,7 @@ contains
         sysdesc = transfer(sys%sysdesc, sysdesc)
 
         if (present(fname)) then
-            call getUnit(funit)
-            open(funit,file=fname,action='write',status='replace',iostat=ios)
+            open(newunit = funit, file = fname, action = 'write', status = 'replace', iostat = ios)
             if (ios .ne. 0) call fortaxError('error opening file for writing')
         else
             funit = output_unit
