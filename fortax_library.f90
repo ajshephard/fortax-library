@@ -45,7 +45,8 @@ module fortax_library
                                     FORTAX_evalKinksEarn => evalKinksEarn,                      &
                                     FORTAX_kinkshours => kinkshours,                            &
                                     FORTAX_kinksearn => kinksearn,                              &
-                                    FORTAX_kinksccexp => kinksccexp
+                                    FORTAX_kinksccexp => kinksccexp,                            &
+                                    FORTAX_kinks_desc => kinks_desc
 
     use fortax_prices,      only :  FORTAX_loadIndex => loadIndex,                              &
                                     FORTAX_uprateSys => uprateSys,                              &

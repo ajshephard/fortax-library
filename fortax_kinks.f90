@@ -30,7 +30,7 @@ module fortax_kinks
     private :: dp
     private
 
-    public :: evalKinksHours, evalKinksEarn, kinkshours, kinksearn, kinksccexp
+    public :: evalKinksHours, evalKinksEarn, kinkshours, kinksearn, kinksccexp, kinks_desc
 
     logical, parameter, private :: zeroWage = .true.
 
@@ -171,13 +171,28 @@ contains
     end subroutine evalKinksEarn
 
 
+    ! kinks_desc
+    ! -----------------------------------------------------------------------
+    ! prints the budget constraitn in bcout
+
+    subroutine kinks_desc(bcout)
+        implicit none
+        type(bcout_t), intent(in) :: bcout
+        integer :: i
+        do i = 1, bcout%kinks_num
+            write(*,'(F12.3, 2X, F12.3, 2X, F12.3, F12.5)') &
+                bcout%kinks_hrs(i), bcout%kinks_earn(i), bcout%kinks_net(i), bcout%kinks_mtr(i)
+        end do
+    end subroutine kinks_desc
+
+
     ! kinkshours
     ! -----------------------------------------------------------------------
     ! calculates a piecewise linear schedule under the a given tax system
     ! for a family by varying hours of work with a fixed hourly wage. can be
     ! performed for any income component (or linear combination of)
 
-    subroutine kinkshours(sys, fam, ad, wage, hours1, hours2, bcout, taxlevel, taxout, correct, verbose)
+    subroutine kinkshours(sys, fam, ad, wage, hours1, hours2, bcout, taxlevel, taxout, correct)
 
         use fortax_type, only : fam_t, sys_t, net_t
         use fortax_util, only : lower, inttostr, fortaxerror, fortaxwarn
@@ -195,7 +210,6 @@ contains
         character(len = *), intent(in), optional :: taxlevel
         character(len = *), intent(in), optional :: taxout(:)
         logical, intent(in), optional :: correct
-        logical, intent(in), optional :: verbose
 
         character(len = 32) :: ltaxout, ltaxlevel
         character(len = 64) :: str
@@ -540,9 +554,7 @@ loopmax : do
             kinks_mtr(kinkidx) = kinks_mtr(kinkidx - 1)
 
         else
-            if (present(verbose)) then
-                if (verbose) call fortaxwarn('maxkinks is exceeded')
-            end if
+            call fortaxwarn('maxkinks is exceeded')
         end if
 
         kinks_num = min(kinkidx, maxkinks)
@@ -584,15 +596,6 @@ loopmax : do
         bcout%kinks_net  = kinks_net
         bcout%kinks_mtr  = kinks_mtr
 
-        if (present(verbose)) then
-            if (verbose) then
-                do i = 1, kinks_num
-                    write(*,'(F12.3, 2X, F12.3, 2X, F12.3, F12.5)') &
-                        kinks_hrs(i), kinks_earn(i), kinks_net(i), kinks_mtr(i)
-                end do
-            end if
-        end if
-
         do i = 1, taxsize
             nullify(taxpoint(i)%p)
         end do
@@ -608,7 +611,7 @@ loopmax : do
     ! for a family by varying earnings of with fixed weekly hours of work.
     ! can be performed for any income component (or linear combination of)
 
-    subroutine kinksearn(sys, fam, ad, hours, earn1, earn2, bcout, taxlevel, taxout, correct, verbose)
+    subroutine kinksearn(sys, fam, ad, hours, earn1, earn2, bcout, taxlevel, taxout, correct)
 
         use fortax_type, only : fam_t, sys_t, net_t
         use fortax_util, only : lower, inttostr, fortaxerror, fortaxwarn
@@ -626,7 +629,6 @@ loopmax : do
         character(len = *), intent(in), optional :: taxlevel
         character(len = *), intent(in), optional :: taxout(:)
         logical, intent(in), optional :: correct
-        logical, intent(in), optional :: verbose
 
         !character(len(taxout))             :: ltaxout
         !character(len(taxlevel))           :: ltaxlevel
@@ -952,9 +954,7 @@ loopmax : do
             kinks_net(kinkidx) = taxcomp1
             kinks_mtr(kinkidx) = kinks_mtr(kinkidx - 1)
         else
-            if (present(verbose)) then
-                if (verbose) call fortaxwarn('maxkinks is exceeded')
-            end if
+            call fortaxwarn('maxkinks is exceeded')
         end if
 
         kinks_num = min(kinkidx, maxkinks)
@@ -996,15 +996,6 @@ loopmax : do
         bcout%kinks_net(1:kinks_num) = kinks_net(1:kinks_num)
         bcout%kinks_mtr(1:kinks_num) = kinks_mtr(1:kinks_num)
 
-        if (present(verbose)) then
-            if (verbose) then
-                do i = 1, kinks_num
-                    write(*,'(F12.3, 2X, F12.3, 2X, F12.3, F12.5)') &
-                        kinks_hrs(i), kinks_earn(i), kinks_net(i), kinks_mtr(i)
-                end do
-            end if
-        end if
-
         do i = 1, taxsize
             nullify(taxpoint(i)%p)
         end do
@@ -1020,7 +1011,7 @@ loopmax : do
     ! hours of work and earnings. can be performed for any income component
     ! (or linear combination of)
 
-    subroutine kinksccexp(sys, fam, ad, hours, earn, ccexp1, ccexp2, bcout, taxlevel, taxout, correct, verbose)
+    subroutine kinksccexp(sys, fam, ad, hours, earn, ccexp1, ccexp2, bcout, taxlevel, taxout, correct)
 
         use fortax_type, only : fam_t, sys_t, net_t
         use fortax_util, only : lower, inttostr, fortaxerror, fortaxwarn
@@ -1039,7 +1030,6 @@ loopmax : do
         character(len = *), intent(in), optional :: taxlevel
         character(len = *), intent(in), optional :: taxout(:)
         logical, intent(in), optional :: correct
-        logical, intent(in), optional :: verbose
 
         !character(len(taxout))             :: ltaxout
         !character(len(taxlevel))           :: ltaxlevel
@@ -1366,9 +1356,7 @@ loopmax : do
             kinks_net(kinkidx) = taxcomp1
             kinks_mtr(kinkidx) = kinks_mtr(kinkidx - 1)
         else
-            if (present(verbose)) then
-                if (verbose) call fortaxwarn('maxkinks is exceeded')
-            end if
+            call fortaxwarn('maxkinks is exceeded')
         end if
 
         kinks_num = min(kinkidx, maxkinks)
@@ -1402,15 +1390,6 @@ loopmax : do
         bcout%kinks_earn(1:kinks_num) = kinks_ccexp(1:kinks_num)
         bcout%kinks_net(1:kinks_num) = kinks_net(1:kinks_num)
         bcout%kinks_mtr(1:kinks_num) = kinks_mtr(1:kinks_num)
-
-        if (present(verbose)) then
-            if (verbose) then
-                do i = 1, kinks_num
-                    write(*,'(F12.3, 2X, F12.3, 2X, F12.3, F12.5)') &
-                        kinks_hrs(i),kinks_ccexp(i), kinks_net(i), kinks_mtr(i)
-                end do
-            end if
-        end if
 
         do i = 1, taxsize
             nullify(taxpoint(i)%p)
