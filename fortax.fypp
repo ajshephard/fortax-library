@@ -271,17 +271,15 @@ ${"".join([" "*4 + line+"\n" for line in txt.split("\n")])}$
         #:mute
             $:check_fortax_arg(type, var, str, attr, kwargs)
         #:endmute
+        #:if dt == ""
+        #:set dt1 = ""
+        #:else
+        #:set dt1 = dt + "%"
+        #:endif        
         #:if 'dimvar' in kwargs
-        #:if dt == ""
-        call desc_f90(funit, ${str}$, "${var}$", ${var}$, ${kwargs["dimvar"]}$)
+        call desc_f90(funit, ${str}$, "${var}$", ${dt1}$${var}$, ${dt1}$${kwargs["dimvar"]}$)
         #:else
-        call desc_f90(funit, ${str}$, "${var}$", ${dt}$%${var}$, ${dt}$%${kwargs["dimvar"]}$)
-        #:endif
-        #:endif
-        #:if dt == ""
-        call desc_f90(funit, ${str}$, "${var}$", ${var}$)
-        #:else
-        call desc_f90(funit, ${str}$, "${var}$", ${dt}$%${var}$)
+        call desc_f90(funit, ${str}$, "${var}$", ${dt1}$${var}$)
         #:endif
     #:enddef
     #:include "include_files.fypp"

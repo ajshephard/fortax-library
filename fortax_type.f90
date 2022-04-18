@@ -600,7 +600,7 @@ contains
             funit = output_unit
         end if
 
-        write(funit, '(A16)') 'FAMILY'
+        write(funit, '(A)') 'FAMILY:'
         write(funit, *)
         call desc_f90(funit, "Married/cohabiting", "couple", fam%couple)
         call desc_f90(funit, "Married", "married", fam%married)
@@ -608,7 +608,6 @@ contains
         call desc_f90(funit, "Maintenance income", "maint", fam%maint)
         call desc_f90(funit, "Number of children", "nkids", fam%nkids)
         call desc_f90(funit, "Age of children", "kidage", fam%kidage, fam%nkids)
-        call desc_f90(funit, "Age of children", "kidage", fam%kidage)
         call desc_f90(funit, "Number of other adults", "nothads", fam%nothads)
         call desc_f90(funit, "Housing tenure", "tenure", fam%tenure)
         call desc_f90(funit, "Housing rent", "rent", fam%rent)
@@ -617,22 +616,25 @@ contains
         call desc_f90(funit, "Council tax band", "ctband", fam%ctband)
         call desc_f90(funit, "Council tax band-D ratio", "banddratio", fam%banddratio)
         call desc_f90(funit, "Interview date", "intdate", fam%intdate)
+        write(funit, *)
 
-        write(funit, '(A16)') 'ADULT1'
+        write(funit, '(A)') 'ADULT 1:'
         write(funit, *)
         call desc_f90(funit, "Age", "age", fam%ad(1)%age)
         call desc_f90(funit, "Self-employed", "selfemp", fam%ad(1)%selfemp)
         call desc_f90(funit, "Hours-of-work", "hrs", fam%ad(1)%hrs)
         call desc_f90(funit, "Earnings", "earn", fam%ad(1)%earn)
+        write(funit, *)
 
         if (fam%couple == 1) then
-        write(funit, '(A16)') 'ADULT2'
+        write(funit, '(A)') 'ADULT 2:'
         write(funit, *)
         call desc_f90(funit, "Age", "age", fam%ad(2)%age)
         call desc_f90(funit, "Self-employed", "selfemp", fam%ad(2)%selfemp)
         call desc_f90(funit, "Hours-of-work", "hrs", fam%ad(2)%hrs)
         call desc_f90(funit, "Earnings", "earn", fam%ad(2)%earn)
         end if
+        write(funit, *)
 
         close(funit)
 
@@ -1784,7 +1786,7 @@ contains
         character(len = *), intent(in) :: shortstr
         integer, intent(in) :: val
         if (longstr .ne. "") then
-            write(funit, '(A40, 2X, I16)') longstr // ' (' // shortstr // ') ', val
+            write(funit, '(A40, 2X, I16)') longstr // ' (' // shortstr // ')', val
         else
             write(funit, '(A40, 2X, I16)') shortstr, val
         end if
@@ -1836,7 +1838,7 @@ contains
         character(len = *), intent(in) :: shortstr
         real(dp), intent(in) :: val
         if (longstr .ne. "") then
-            write(funit, '(A40, 2X, F16.4)') longstr // ' (' // shortstr // ') ', val
+            write(funit, '(A40, 2X, F16.4)') longstr // ' (' // shortstr // ')', val
         else
             write(funit, '(A40, 2X, F16.4)') shortstr, val
         end if
