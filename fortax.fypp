@@ -8,7 +8,7 @@
 
 #! list for value labels
 
-#:set LABLIST = ['ctax', 'tenure', 'region']
+#:set LABLIST = ['bool', 'ctax', 'tenure', 'region']
 
 #! prevision type mapping
 
@@ -59,7 +59,7 @@ ${"".join([" "*4 + line+"\n" for line in txt.split("\n")])}$
     #:assert attr in ['rate', 'amount', 'minamount', 'null', 'range', 'scale', 'label']
     #:assert type in ['bool', 'integer', 'double']
     #:for kw in kwargs
-        #:assert kw in ['dim', 'dimvar', 'value']
+        #:assert kw in ['dim', 'dimvar', 'value', 'label']
     #:endfor
 #:enddef
 
@@ -275,11 +275,19 @@ ${"".join([" "*4 + line+"\n" for line in txt.split("\n")])}$
         #:set dt1 = ""
         #:else
         #:set dt1 = dt + "%"
-        #:endif        
+        #:endif
+        #:if 'label' in kwargs
+        #:if 'dimvar' in kwargs
+        call desc_f90(funit, ${str}$, "${var}$", ${dt1}$${var}$, ${dt1}$${kwargs["dimvar"]}$, label_${kwargs["label"]}$(${dt1}$${var}$))
+        #:else
+        call desc_f90(funit, ${str}$, "${var}$", ${dt1}$${var}$, label_${kwargs["label"]}$(${dt1}$${var}$))
+        #:endif
+        #:else
         #:if 'dimvar' in kwargs
         call desc_f90(funit, ${str}$, "${var}$", ${dt1}$${var}$, ${dt1}$${kwargs["dimvar"]}$)
         #:else
         call desc_f90(funit, ${str}$, "${var}$", ${dt1}$${var}$)
+        #:endif
         #:endif
     #:enddef
     #:include "include_files.fypp"
@@ -517,6 +525,97 @@ lab%${lab}$%${labval}$
     #:enddef
     #:include "include_files.fypp"
     #:endcall
+#:enddef
+
+#:def fortax_uprate_op(name, dtout, dt, factor, **defkwargs)
+    #:call remove_blank_lines
+    #:if dt == ""
+    #:set dt1 = ""
+    #:else
+    #:set dt1 = dt + "%"
+    #:endif
+    #:if dtout == ""
+    #:set dt2 = ""
+    #:else
+    #:set dt2 = dtout + "%"
+    #:endif
+    #:mute
+    #:set uprateAmount = False
+    #:set uprateMinAmount = False
+    #:if 'amount' in defkwargs
+        #:set uprateAmount = defkwargs["amount"]
+    #:endif
+    #:if 'minamount' in defkwargs
+        #:set uprateMinAmount = defkwargs["minamount"]
+    #:endif
+    #:endmute
+    #:def fortaxdef(type, var, str, attr, **kwargs)
+        #:mute
+        $:check_fortax_arg(type, var, str, attr, kwargs)
+        #:endmute
+        #:if (attr == 'amount' and uprateAmount) or (attr == 'minamount' and uprateMinAmount)
+        ${dt2}$${var}$ = ${dt1}$${var}$ * factor
+        #:else
+        ${dt2}$${var}$ = ${dt1}$${var}$
+        #:endif
+    #:enddef
+    #:include "include_files.fypp"
+    #:endcall
+#:enddef
+
+#:def fortax_get_label()
+#:global len_label
+#:set len_label = 0
+#:global len_labstring
+#:set len_labstring = 0
+#:def fortaxdef(type, var, str, attr, **kwargs)
+    $:check_fortax_arg(type, var, str, attr, kwargs)
+    #:if var == "len_labstring"
+        #:global len_labstring
+        #:set len_labstring = kwargs["value"]
+    #:elif var == "len_label"
+        #:global len_label
+        #:set len_label = kwargs["value"]
+    #:endif
+#:enddef
+#:include "fortax_const.inc"
+
+#:for LAB in LABLIST
+elemental function label_${LAB}$(val) result(str)
+    implicit none
+    integer, intent(in) :: val
+    character(len = len_label) :: str
+    #:set name = "lab_" + LAB
+    select case(val)
+    #:def fortaxdef(type, var, str, attr, **kwargs)
+        #:assert len("${var}$") <= int(len_label)
+        case(lab%${LAB}$%${var}$)
+            str = "${var}$"
+    #:enddef
+    #:include "include_files.fypp"
+        case default
+            str = "INVALID VALUE"
+    end select
+end function label_${LAB}$
+
+elemental function labstring_${LAB}$(val) result(str)
+    implicit none
+    integer, intent(in) :: val
+    character(len = len_labstring) :: str
+    #:set name = "lab_" + LAB
+    select case(val)
+    #:def fortaxdef(type, var, str, attr, **kwargs)
+        #:assert len(str) <= int(len_labstring)
+        case(lab%${LAB}$%${var}$)
+            str = ${str}$
+    #:enddef
+    #:include "include_files.fypp"
+        case default
+            str = "INVALID VALUE"
+    end select
+end function labstring_${LAB}$
+
+#:endfor
 #:enddef
 
 #:endmute
