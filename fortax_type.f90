@@ -51,12 +51,19 @@ module fortax_type
     integer, parameter, public :: len_sysname = 64
     integer, parameter, public :: len_sysdesc = 512
     integer, parameter, public :: len_sysindex = 256
+    integer, parameter, public :: len_label = 16
+    integer, parameter, public :: len_labstring = 64
 
     ! lab_t
     ! -----------------------------------------------------------------------
     ! defines various labels as specified in lablist and the associated
     ! include files. at the moment I am not using the string values, but they
     ! are still defined for possible future use
+
+    type :: lab_bool_t
+        integer :: no
+        integer :: yes
+    end type lab_bool_t
 
     type :: lab_ctax_t
         integer :: banda
@@ -96,12 +103,14 @@ module fortax_type
 
 
     type :: lab_t
+        type(lab_bool_t) :: bool
         type(lab_ctax_t) :: ctax
         type(lab_tenure_t) :: tenure
         type(lab_region_t) :: region
     end type lab_t
 
     type(lab_t), parameter :: lab = lab_t( &
+        lab_bool_t(0, 1), &
         lab_ctax_t(1, 2, 3, 4, 5, 6, 7, 8), &
         lab_tenure_t(1, 2, 3, 4, 5, 6, 7), &
         lab_region_t(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12))
@@ -256,8 +265,11 @@ module fortax_type
 
     interface desc_f90
         module procedure desc_f90integer
+        module procedure desc_f90integer_label
         module procedure desc_f90integerarray
+        module procedure desc_f90integerarray_label
         module procedure desc_f90integerarray2
+        module procedure desc_f90integerarray2_label
         module procedure desc_f90double
         module procedure desc_f90doublearray
         module procedure desc_f90doublearray2
@@ -602,18 +614,18 @@ contains
 
         write(funit, '(A)') 'FAMILY:'
         write(funit, *)
-        call desc_f90(funit, "Married/cohabiting", "couple", fam%couple)
-        call desc_f90(funit, "Married", "married", fam%married)
+        call desc_f90(funit, "Married/cohabiting", "couple", fam%couple, label_bool(fam%couple))
+        call desc_f90(funit, "Married", "married", fam%married, label_bool(fam%married))
         call desc_f90(funit, "Childcare expenditure", "ccexp", fam%ccexp)
         call desc_f90(funit, "Maintenance income", "maint", fam%maint)
         call desc_f90(funit, "Number of children", "nkids", fam%nkids)
         call desc_f90(funit, "Age of children", "kidage", fam%kidage, fam%nkids)
         call desc_f90(funit, "Number of other adults", "nothads", fam%nothads)
-        call desc_f90(funit, "Housing tenure", "tenure", fam%tenure)
+        call desc_f90(funit, "Housing tenure", "tenure", fam%tenure, label_tenure(fam%tenure))
         call desc_f90(funit, "Housing rent", "rent", fam%rent)
         call desc_f90(funit, "Housing rent cap", "rentcap", fam%rentcap)
-        call desc_f90(funit, "Region", "region", fam%region)
-        call desc_f90(funit, "Council tax band", "ctband", fam%ctband)
+        call desc_f90(funit, "Region", "region", fam%region, label_region(fam%region))
+        call desc_f90(funit, "Council tax band", "ctband", fam%ctband, label_ctax(fam%ctband))
         call desc_f90(funit, "Council tax band-D ratio", "banddratio", fam%banddratio)
         call desc_f90(funit, "Interview date", "intdate", fam%intdate)
         write(funit, *)
@@ -621,7 +633,7 @@ contains
         write(funit, '(A)') 'ADULT 1:'
         write(funit, *)
         call desc_f90(funit, "Age", "age", fam%ad(1)%age)
-        call desc_f90(funit, "Self-employed", "selfemp", fam%ad(1)%selfemp)
+        call desc_f90(funit, "Self-employed", "selfemp", fam%ad(1)%selfemp, label_bool(fam%ad(1)%selfemp))
         call desc_f90(funit, "Hours-of-work", "hrs", fam%ad(1)%hrs)
         call desc_f90(funit, "Earnings", "earn", fam%ad(1)%earn)
         write(funit, *)
@@ -630,7 +642,7 @@ contains
         write(funit, '(A)') 'ADULT 2:'
         write(funit, *)
         call desc_f90(funit, "Age", "age", fam%ad(2)%age)
-        call desc_f90(funit, "Self-employed", "selfemp", fam%ad(2)%selfemp)
+        call desc_f90(funit, "Self-employed", "selfemp", fam%ad(2)%selfemp, label_bool(fam%ad(2)%selfemp))
         call desc_f90(funit, "Hours-of-work", "hrs", fam%ad(2)%hrs)
         call desc_f90(funit, "Earnings", "earn", fam%ad(2)%earn)
         end if
@@ -639,6 +651,218 @@ contains
         close(funit)
 
     end subroutine fam_desc
+
+    ! obtain string labels for the variable value labels
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+elemental function label_bool(val) result(str)
+    implicit none
+    integer, intent(in) :: val
+    character(len = len_label) :: str
+    select case(val)
+        case(lab%bool%no)
+            str = "no"
+        case(lab%bool%yes)
+            str = "yes"
+        case default
+            str = "INVALID VALUE"
+    end select
+end function label_bool
+
+elemental function labstring_bool(val) result(str)
+    implicit none
+    integer, intent(in) :: val
+    character(len = len_labstring) :: str
+    select case(val)
+        case(lab%bool%no)
+            str = "No"
+        case(lab%bool%yes)
+            str = "Yes"
+        case default
+            str = "INVALID VALUE"
+    end select
+end function labstring_bool
+
+elemental function label_ctax(val) result(str)
+    implicit none
+    integer, intent(in) :: val
+    character(len = len_label) :: str
+    select case(val)
+        case(lab%ctax%banda)
+            str = "banda"
+        case(lab%ctax%bandb)
+            str = "bandb"
+        case(lab%ctax%bandc)
+            str = "bandc"
+        case(lab%ctax%bandd)
+            str = "bandd"
+        case(lab%ctax%bande)
+            str = "bande"
+        case(lab%ctax%bandf)
+            str = "bandf"
+        case(lab%ctax%bandg)
+            str = "bandg"
+        case(lab%ctax%bandh)
+            str = "bandh"
+        case default
+            str = "INVALID VALUE"
+    end select
+end function label_ctax
+
+elemental function labstring_ctax(val) result(str)
+    implicit none
+    integer, intent(in) :: val
+    character(len = len_labstring) :: str
+    select case(val)
+        case(lab%ctax%banda)
+            str = "Council Tax Band A"
+        case(lab%ctax%bandb)
+            str = "Council Tax Band B"
+        case(lab%ctax%bandc)
+            str = "Council Tax Band C"
+        case(lab%ctax%bandd)
+            str = "Council Tax Band D"
+        case(lab%ctax%bande)
+            str = "Council Tax Band E"
+        case(lab%ctax%bandf)
+            str = "Council Tax Band F"
+        case(lab%ctax%bandg)
+            str = "Council Tax Band G"
+        case(lab%ctax%bandh)
+            str = "Council Tax Band H"
+        case default
+            str = "INVALID VALUE"
+    end select
+end function labstring_ctax
+
+elemental function label_tenure(val) result(str)
+    implicit none
+    integer, intent(in) :: val
+    character(len = len_label) :: str
+    select case(val)
+        case(lab%tenure%own_outright)
+            str = "own_outright"
+        case(lab%tenure%mortgage)
+            str = "mortgage"
+        case(lab%tenure%part_own)
+            str = "part_own"
+        case(lab%tenure%social_renter)
+            str = "social_renter"
+        case(lab%tenure%private_renter)
+            str = "private_renter"
+        case(lab%tenure%rent_free)
+            str = "rent_free"
+        case(lab%tenure%other)
+            str = "other"
+        case default
+            str = "INVALID VALUE"
+    end select
+end function label_tenure
+
+elemental function labstring_tenure(val) result(str)
+    implicit none
+    integer, intent(in) :: val
+    character(len = len_labstring) :: str
+    select case(val)
+        case(lab%tenure%own_outright)
+            str = "Own outright"
+        case(lab%tenure%mortgage)
+            str = "Mortgage"
+        case(lab%tenure%part_own)
+            str = "Part own,  part rent"
+        case(lab%tenure%social_renter)
+            str = "Social renter"
+        case(lab%tenure%private_renter)
+            str = "Private renter"
+        case(lab%tenure%rent_free)
+            str = "Rent free"
+        case(lab%tenure%other)
+            str = "Other"
+        case default
+            str = "INVALID VALUE"
+    end select
+end function labstring_tenure
+
+elemental function label_region(val) result(str)
+    implicit none
+    integer, intent(in) :: val
+    character(len = len_label) :: str
+    select case(val)
+        case(lab%region%north_east)
+            str = "north_east"
+        case(lab%region%north_west)
+            str = "north_west"
+        case(lab%region%yorks)
+            str = "yorks"
+        case(lab%region%east_midlands)
+            str = "east_midlands"
+        case(lab%region%west_midlands)
+            str = "west_midlands"
+        case(lab%region%eastern)
+            str = "eastern"
+        case(lab%region%london)
+            str = "london"
+        case(lab%region%south_east)
+            str = "south_east"
+        case(lab%region%south_west)
+            str = "south_west"
+        case(lab%region%wales)
+            str = "wales"
+        case(lab%region%scotland)
+            str = "scotland"
+        case(lab%region%northern_ireland)
+            str = "northern_ireland"
+        case default
+            str = "INVALID VALUE"
+    end select
+end function label_region
+
+elemental function labstring_region(val) result(str)
+    implicit none
+    integer, intent(in) :: val
+    character(len = len_labstring) :: str
+    select case(val)
+        case(lab%region%north_east)
+            str = "North East"
+        case(lab%region%north_west)
+            str = "North West and Merseyside"
+        case(lab%region%yorks)
+            str = "Yorks and Humberside"
+        case(lab%region%east_midlands)
+            str = "East Midlands"
+        case(lab%region%west_midlands)
+            str = "West Midlands"
+        case(lab%region%eastern)
+            str = "Eastern"
+        case(lab%region%london)
+            str = "London"
+        case(lab%region%south_east)
+            str = "South East"
+        case(lab%region%south_west)
+            str = "South West"
+        case(lab%region%wales)
+            str = "Wales"
+        case(lab%region%scotland)
+            str = "Scotland"
+        case(lab%region%northern_ireland)
+            str = "Northern Ireland"
+        case default
+            str = "INVALID VALUE"
+    end select
+end function labstring_region
 
 
     ! fam_gen
@@ -1786,11 +2010,27 @@ contains
         character(len = *), intent(in) :: shortstr
         integer, intent(in) :: val
         if (longstr .ne. "") then
-            write(funit, '(A40, 2X, I16)') longstr // ' (' // shortstr // ')', val
+            write(funit, '(A40, 2X, I20)') longstr // ' (' // shortstr // ')', val
         else
-            write(funit, '(A40, 2X, I16)') shortstr, val
+            write(funit, '(A40, 2X, I20)') shortstr, val
         end if
     end subroutine desc_f90integer
+
+    subroutine desc_f90integer_label(funit, longstr, shortstr, val, label)
+        use fortax_util, only : intToStr
+        implicit none
+        integer, intent(in) :: funit
+        character(len = *), intent(in) :: longstr
+        character(len = *), intent(in) :: shortstr
+        integer, intent(in) :: val
+        character(len = len_label), intent(in) :: label
+        if (longstr .ne. "") then
+            write(funit, '(A40, 2X, A20)') longstr // ' (' // shortstr // ')', &
+                trim(adjustl(label)) // ' (' // intToStr(val) // ')'
+        else
+            write(funit, '(A40, 2X, A20)') shortstr, label
+        end if
+    end subroutine desc_f90integer_label
 
     subroutine desc_f90integerarray(funit, longstr, shortstr, val)
         use fortax_util, only : intToStr        
@@ -1802,14 +2042,34 @@ contains
         integer :: ix
         if (longstr .ne. "") then
             do ix = 1, size(val)
-                write(funit, '(A40, 2X, I16)') longstr // ' (' // shortstr // '[' // intToStr(ix) // '])', val(ix)
+                write(funit, '(A40, 2X, I20)') longstr // ' (' // shortstr // '[' // intToStr(ix) // '])', val(ix)
             end do
         else
             do ix = 1, size(val)
-                write(funit, '(A40, 2X, I16)') shortstr // '[' // intToStr(ix) // ']', val(ix)
+                write(funit, '(A40, 2X, I20)') shortstr // '[' // intToStr(ix) // ']', val(ix)
             end do
         end if
     end subroutine desc_f90integerarray
+
+    subroutine desc_f90integerarray_label(funit, longstr, shortstr, val, label)
+        use fortax_util, only : intToStr        
+        implicit none
+        integer, intent(in) :: funit
+        character(len = *), intent(in) :: longstr
+        character(len = *), intent(in) :: shortstr
+        integer, intent(in) :: val(:)
+        character(len = len_label), intent(in) :: label(:)
+        integer :: ix
+        if (longstr .ne. "") then
+            do ix = 1, size(val)
+                write(funit, '(A40, 2X, I20)') longstr // ' (' // shortstr // '[' // intToStr(ix) // '])', label(ix)
+            end do
+        else
+            do ix = 1, size(val)
+                write(funit, '(A40, 2X, I20)') shortstr // '[' // intToStr(ix) // ']', label(ix)
+            end do
+        end if
+    end subroutine desc_f90integerarray_label
 
     subroutine desc_f90integerarray2(funit, longstr, shortstr, val, nval)
         use fortax_util, only : intToStr        
@@ -1822,14 +2082,35 @@ contains
         integer :: ix
         if (longstr .ne. "") then
             do ix = 1, nval
-                write(funit, '(A40, 2X, I16)') longstr // ' (' // shortstr // '[' // intToStr(ix) // '])', val(ix)
+                write(funit, '(A40, 2X, I20)') longstr // ' (' // shortstr // '[' // intToStr(ix) // '])', val(ix)
             end do
         else
             do ix = 1, nval
-                write(funit, '(A40, 2X, I16)') shortstr // '[' // intToStr(ix) // ']', val(ix)
+                write(funit, '(A40, 2X, I20)') shortstr // '[' // intToStr(ix) // ']', val(ix)
             end do
         end if
     end subroutine desc_f90integerarray2
+
+    subroutine desc_f90integerarray2_label(funit, longstr, shortstr, val, nval, label)
+        use fortax_util, only : intToStr        
+        implicit none
+        integer, intent(in) :: funit
+        character(len = *), intent(in) :: longstr
+        character(len = *), intent(in) :: shortstr
+        integer, intent(in) :: val(:)
+        integer, intent(in) :: nval
+        character(len = len_label), intent(in) :: label(:)
+        integer :: ix
+        if (longstr .ne. "") then
+            do ix = 1, nval
+                write(funit, '(A40, 2X, I20)') longstr // ' (' // shortstr // '[' // intToStr(ix) // '])', label(ix)
+            end do
+        else
+            do ix = 1, nval
+                write(funit, '(A40, 2X, I20)') shortstr // '[' // intToStr(ix) // ']', label(ix)
+            end do
+        end if
+    end subroutine desc_f90integerarray2_label
 
     subroutine desc_f90double(funit, longstr, shortstr, val)
         implicit none
@@ -1838,9 +2119,9 @@ contains
         character(len = *), intent(in) :: shortstr
         real(dp), intent(in) :: val
         if (longstr .ne. "") then
-            write(funit, '(A40, 2X, F16.4)') longstr // ' (' // shortstr // ')', val
+            write(funit, '(A40, 2X, F20.4)') longstr // ' (' // shortstr // ')', val
         else
-            write(funit, '(A40, 2X, F16.4)') shortstr, val
+            write(funit, '(A40, 2X, F20.4)') shortstr, val
         end if
     end subroutine desc_f90double
 
@@ -1854,11 +2135,11 @@ contains
         integer :: ix
         if (longstr .ne. "") then
             do ix = 1, size(val)
-                write(funit, '(A40, 2X, F16.4)') longstr // ' (' // shortstr // '[' // intToStr(ix) // '])', val(ix)
+                write(funit, '(A40, 2X, F20.4)') longstr // ' (' // shortstr // '[' // intToStr(ix) // '])', val(ix)
             end do
         else
             do ix = 1, size(val)
-                write(funit, '(A40, 2X, F16.4)') shortstr // '[' // intToStr(ix) // ']', val(ix)
+                write(funit, '(A40, 2X, F20.4)') shortstr // '[' // intToStr(ix) // ']', val(ix)
             end do
         end if
     end subroutine desc_f90doublearray
@@ -1874,11 +2155,11 @@ contains
         integer :: ix
         if (longstr .ne. "") then
             do ix = 1, nval
-                write(funit, '(A40, 2X, F16.4)') longstr // ' (' // shortstr // '[' // intToStr(ix) // '])', val(ix)
+                write(funit, '(A40, 2X, F20.4)') longstr // ' (' // shortstr // '[' // intToStr(ix) // '])', val(ix)
             end do
         else
             do ix = 1, nval
-                write(funit, '(A40, 2X, F16.4)') shortstr // '[' // intToStr(ix) // ']', val(ix)
+                write(funit, '(A40, 2X, F20.4)') shortstr // '[' // intToStr(ix) // ']', val(ix)
             end do
         end if
     end subroutine desc_f90doublearray2

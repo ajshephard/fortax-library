@@ -168,8 +168,11 @@ module fortax_type
 
     interface desc_f90
         module procedure desc_f90integer
+        module procedure desc_f90integer_label
         module procedure desc_f90integerarray
+        module procedure desc_f90integerarray_label
         module procedure desc_f90integerarray2
+        module procedure desc_f90integerarray2_label
         module procedure desc_f90double
         module procedure desc_f90doublearray
         module procedure desc_f90doublearray2
@@ -272,6 +275,8 @@ contains
 
     end subroutine fam_desc
 
+    ! obtain string labels for the variable value labels
+    @:fortax_get_label()
 
     ! fam_gen
     ! -----------------------------------------------------------------------
@@ -621,11 +626,27 @@ contains
         character(len = *), intent(in) :: shortstr
         integer, intent(in) :: val
         if (longstr .ne. "") then
-            write(funit, '(A40, 2X, I16)') longstr // ' (' // shortstr // ')', val
+            write(funit, '(A40, 2X, I20)') longstr // ' (' // shortstr // ')', val
         else
-            write(funit, '(A40, 2X, I16)') shortstr, val
+            write(funit, '(A40, 2X, I20)') shortstr, val
         end if
     end subroutine desc_f90integer
+
+    subroutine desc_f90integer_label(funit, longstr, shortstr, val, label)
+        use fortax_util, only : intToStr
+        implicit none
+        integer, intent(in) :: funit
+        character(len = *), intent(in) :: longstr
+        character(len = *), intent(in) :: shortstr
+        integer, intent(in) :: val
+        character(len = len_label), intent(in) :: label
+        if (longstr .ne. "") then
+            write(funit, '(A40, 2X, A20)') longstr // ' (' // shortstr // ')', &
+                trim(adjustl(label)) // ' (' // intToStr(val) // ')'
+        else
+            write(funit, '(A40, 2X, A20)') shortstr, label
+        end if
+    end subroutine desc_f90integer_label
 
     subroutine desc_f90integerarray(funit, longstr, shortstr, val)
         use fortax_util, only : intToStr        
@@ -637,14 +658,34 @@ contains
         integer :: ix
         if (longstr .ne. "") then
             do ix = 1, size(val)
-                write(funit, '(A40, 2X, I16)') longstr // ' (' // shortstr // '[' // intToStr(ix) // '])', val(ix)
+                write(funit, '(A40, 2X, I20)') longstr // ' (' // shortstr // '[' // intToStr(ix) // '])', val(ix)
             end do
         else
             do ix = 1, size(val)
-                write(funit, '(A40, 2X, I16)') shortstr // '[' // intToStr(ix) // ']', val(ix)
+                write(funit, '(A40, 2X, I20)') shortstr // '[' // intToStr(ix) // ']', val(ix)
             end do
         end if
     end subroutine desc_f90integerarray
+
+    subroutine desc_f90integerarray_label(funit, longstr, shortstr, val, label)
+        use fortax_util, only : intToStr        
+        implicit none
+        integer, intent(in) :: funit
+        character(len = *), intent(in) :: longstr
+        character(len = *), intent(in) :: shortstr
+        integer, intent(in) :: val(:)
+        character(len = len_label), intent(in) :: label(:)
+        integer :: ix
+        if (longstr .ne. "") then
+            do ix = 1, size(val)
+                write(funit, '(A40, 2X, I20)') longstr // ' (' // shortstr // '[' // intToStr(ix) // '])', label(ix)
+            end do
+        else
+            do ix = 1, size(val)
+                write(funit, '(A40, 2X, I20)') shortstr // '[' // intToStr(ix) // ']', label(ix)
+            end do
+        end if
+    end subroutine desc_f90integerarray_label
 
     subroutine desc_f90integerarray2(funit, longstr, shortstr, val, nval)
         use fortax_util, only : intToStr        
@@ -657,14 +698,35 @@ contains
         integer :: ix
         if (longstr .ne. "") then
             do ix = 1, nval
-                write(funit, '(A40, 2X, I16)') longstr // ' (' // shortstr // '[' // intToStr(ix) // '])', val(ix)
+                write(funit, '(A40, 2X, I20)') longstr // ' (' // shortstr // '[' // intToStr(ix) // '])', val(ix)
             end do
         else
             do ix = 1, nval
-                write(funit, '(A40, 2X, I16)') shortstr // '[' // intToStr(ix) // ']', val(ix)
+                write(funit, '(A40, 2X, I20)') shortstr // '[' // intToStr(ix) // ']', val(ix)
             end do
         end if
     end subroutine desc_f90integerarray2
+
+    subroutine desc_f90integerarray2_label(funit, longstr, shortstr, val, nval, label)
+        use fortax_util, only : intToStr        
+        implicit none
+        integer, intent(in) :: funit
+        character(len = *), intent(in) :: longstr
+        character(len = *), intent(in) :: shortstr
+        integer, intent(in) :: val(:)
+        integer, intent(in) :: nval
+        character(len = len_label), intent(in) :: label(:)
+        integer :: ix
+        if (longstr .ne. "") then
+            do ix = 1, nval
+                write(funit, '(A40, 2X, I20)') longstr // ' (' // shortstr // '[' // intToStr(ix) // '])', label(ix)
+            end do
+        else
+            do ix = 1, nval
+                write(funit, '(A40, 2X, I20)') shortstr // '[' // intToStr(ix) // ']', label(ix)
+            end do
+        end if
+    end subroutine desc_f90integerarray2_label
 
     subroutine desc_f90double(funit, longstr, shortstr, val)
         implicit none
@@ -673,9 +735,9 @@ contains
         character(len = *), intent(in) :: shortstr
         real(dp), intent(in) :: val
         if (longstr .ne. "") then
-            write(funit, '(A40, 2X, F16.4)') longstr // ' (' // shortstr // ')', val
+            write(funit, '(A40, 2X, F20.4)') longstr // ' (' // shortstr // ')', val
         else
-            write(funit, '(A40, 2X, F16.4)') shortstr, val
+            write(funit, '(A40, 2X, F20.4)') shortstr, val
         end if
     end subroutine desc_f90double
 
@@ -689,11 +751,11 @@ contains
         integer :: ix
         if (longstr .ne. "") then
             do ix = 1, size(val)
-                write(funit, '(A40, 2X, F16.4)') longstr // ' (' // shortstr // '[' // intToStr(ix) // '])', val(ix)
+                write(funit, '(A40, 2X, F20.4)') longstr // ' (' // shortstr // '[' // intToStr(ix) // '])', val(ix)
             end do
         else
             do ix = 1, size(val)
-                write(funit, '(A40, 2X, F16.4)') shortstr // '[' // intToStr(ix) // ']', val(ix)
+                write(funit, '(A40, 2X, F20.4)') shortstr // '[' // intToStr(ix) // ']', val(ix)
             end do
         end if
     end subroutine desc_f90doublearray
@@ -709,11 +771,11 @@ contains
         integer :: ix
         if (longstr .ne. "") then
             do ix = 1, nval
-                write(funit, '(A40, 2X, F16.4)') longstr // ' (' // shortstr // '[' // intToStr(ix) // '])', val(ix)
+                write(funit, '(A40, 2X, F20.4)') longstr // ' (' // shortstr // '[' // intToStr(ix) // '])', val(ix)
             end do
         else
             do ix = 1, nval
-                write(funit, '(A40, 2X, F16.4)') shortstr // '[' // intToStr(ix) // ']', val(ix)
+                write(funit, '(A40, 2X, F20.4)') shortstr // '[' // intToStr(ix) // ']', val(ix)
             end do
         end if
     end subroutine desc_f90doublearray2
