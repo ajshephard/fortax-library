@@ -42,6 +42,8 @@
 #:include "includes/nettu_t.inc"
 #:elif name == "const"
 #:include "includes/fortax_const.inc"
+#:elif name == "lab_bool"
+#:include "includes/label/bool.inc"
 #:elif name == "lab_ctax"
 #:include "includes/label/ctax.inc"
 #:elif name == "lab_tenure"
