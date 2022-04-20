@@ -26,20 +26,12 @@ module fortax_library
 
     use fortax_calc,        only :  FORTAX_calcNetInc => calcNetInc
 
-    use fortax_compare
-    ! ,     only :  FORTAX_writeFamCompareDatabase => writeFamCompareDatabase,  &
-    !                                 FORTAX_readFamCompareDatabase => readFamCompareDatabase,    &
-    !                                 FORTAX_compareFamDatabase => compareFamDatabase,            &
-    !                                 FORTAX_compareNet => compareNet
-
     use fortax_extra,       only :  FORTAX_setMinAmount => setMinAmount,                        &
                                     FORTAX_abolishNIFee => abolishNIFee,                        &
                                     FORTAX_disableTaperRounding => disableTaperRounding,        &
                                     FORTAX_fsMinAppAmt => fsMinAppAmt,                          &
                                     FORTAX_taperMatGrant => taperMatGrant,                      &
-                                    FORTAX_imposeUC => imposeUC !,                                &
-                                    ! FORTAX_netoutDesc => netoutDesc,                            &
-                                    ! FORTAX_netoutDescNoName => netoutDescNoName
+                                    FORTAX_imposeUC => imposeUC
 
     use fortax_kinks,       only :  FORTAX_evalKinksHours => evalKinksHours,                    &
                                     FORTAX_evalKinksEarn => evalKinksEarn,                      &
@@ -52,12 +44,10 @@ module fortax_library
                                     FORTAX_uprateSys => uprateSys,                              &
                                     FORTAX_uprateFactor => uprateFactor,                        &
                                     FORTAX_loadSysIndex => loadSysIndex,                        &
-                                    FORTAX_getSysIndex => getSysIndex
+                                    FORTAX_getSysIndex => getSysIndex,                          &
+                                    operator(*)
 
     use fortax_read,        only :  FORTAX_readFortaxParams => readFortaxParams
-
-    ! use fortax_taxbenread,  only :  FORTAX_readTaxbenParams => readTaxbenParams,                &
-    !                                 FORTAX_batchConvertTaxben => batchConvertTaxben
 
     use fortax_type,        only :  fam_t, net_t, sys_t, rpi_t, sysIndex_t, bcout_t,            &
                                     FORTAX_fam_init => fam_init,                                &
