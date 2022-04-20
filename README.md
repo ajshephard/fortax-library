@@ -10,7 +10,7 @@ User routines are available through the `fortax_library` module. So a typical us
 ```
 use fortax_library, dp => FORTAX_dp
 ```
-To use FORTAX, we will typically need three derived types. First, the derived type `sys_t` describes the tax system, and a number of different system files are provided with FORTAX in the `systems` directory. Second, `fam_t describes the family (tax unit). Third `net_t` contains all the calculated incomes for this family. So, `sys_t` and `fam_t` are inputs to FORTAX, while `net_t` is the output.
+To use FORTAX, we will typically need three derived types. First, the derived type `sys_t` describes the tax system, and a number of different system files are provided with FORTAX in the `systems` directory. Second, `fam_t` describes the family (tax unit). Third `net_t` contains all the calculated incomes for this family. So, `sys_t` and `fam_t` are inputs to FORTAX, while `net_t` is the output.
 ```
 type(sys_t) :: sys
 type(fam_t) :: fam
