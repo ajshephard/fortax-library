@@ -177,7 +177,7 @@ In this example, this would return
         50.000         300.000         430.296        0.30000
 ==============================================================
 ```
-This describes the piecewise linear representation of the budget constraint (family net income) so the rate here is the slope of the budget constraint. FORTRAX correctly identifies the location of the hours-of-work discontinuities (due to rules in the UK tax credit system), and encodes positive / negative instances a rate of (+/-)9.999.
+This describes the piecewise linear representation of the budget constraint (family net income) so the rate here is the slope of the budget constraint. FORTAX correctly identifies the location of the hours-of-work discontinuities (due to rules in the UK tax credit system), and encodes positive / negative instances a rate of (+/-)9.999. (`FORTAX_kinks_desc` also visually indicates discontinuities using an asterisk next to the rate.)
 
 Once the budget constraint has been calculated with `FORTAX_kinksHours` it is very simple to obtain the incomes at an arbitray value of hours over the interval that it was calculated (so 0 and 50 in our example here) using `FORTAX_evalKinksHours`. If we wish to calculate net income at 40 hours we would do
 ```
@@ -212,5 +212,8 @@ The output of `FORTAX_kinks_desc` is
 ```
 Here `Income` is the combined income and National Insurance liability, while `rate` is the combined marginal tax rate.
 
-Internally, `FORTAX_kinksHours` is calling `FORTAX_calcNetInc` to construct the budget constraint. Whether it is more appropriate for a user to call `FORTAX_calcNetInc` directly, or to first summarise the entire budget constraint using `FORTAX_evalKinksHours` is application specific.
+In some settings we may wish to vary earnings at fixed hours. For this purpose, the user can use the `FORTAX_kinksEarn` and `FORTAX_evalKinksEarn` subroutines. Internally, both `FORTAX_kinksHours` and `FORTAX_kinksEarn` are repeatedly calling `FORTAX_calcNetInc` to construct the budget constraint. Whether it is more appropriate for a user to call `FORTAX_calcNetInc` directly, or to first summarise the entire budget constraint using `FORTAX_kinksHours` or `FORTAX_kinksEarn` is application specific.
+
+## Price uprating
+
 
