@@ -245,3 +245,6 @@ If we wish to save a modified tax system we can simply use the `FORTAX_writeFort
 ```
 call FORTAX_writeFortaxParams(sys, fname)
 ```
+# Interfaces
+
+The FORTAX library can be called by other programming languages and software packages. The Fortran C bindings are defined in `fortax_library_c.f90`.
