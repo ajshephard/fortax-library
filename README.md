@@ -216,4 +216,32 @@ In some settings we may wish to vary earnings at fixed hours. For this purpose, 
 
 ## Price uprating
 
+The FORTAX library provides a number of user routines to manipulate tax and benefit systems (type `sys_t`). Suppose we start our program with an existing system file that is provided with FORTAX.
+```
+use fortax_library, dp => FORTAX_dp
 
+type(sys_t) :: sys
+
+! Load the tax system
+call FORTAX_readFortaxParams(sys, "systems/fortax/April06.json")
+```
+We now may wish to uprate the system. Suppose we wish to uprate all monetary amounts by 10%. In this case we can use `FORTAX_upratesys`.
+```
+call FORTAX_upratesys(sys, factor = 1.1_dp)
+```
+An alternative way to perform uprating is to just multiply `sys` by a given factor. That is, we can do
+```
+sys = sys * 1.1_dp
+```
+Rather than specifying an uprating factor directly, FORTAX can also work with a database of price indices. The default database is stored in `prices/rpi.csv` which specifies a date and a price index. Price indices use the derived type `rpi_t`.
+```
+call FORTAX_loadindex(rpi)
+```
+would store the default price index data in `rpi` (type `rpi_t`). Alternative databases can be specified by passing an optional file path. Then to obtain the uprating factor from some date `date0` to date `date1` we can use the function `FORTAX_uprateFactor`. Both `date0` and `date1` are integers and represent dates in the `YYYYMMDD` format.
+```
+factor = upratefactor(rpi, date0, date1)
+```
+If we wish to save a modified tax system we can simply use the `FORTAX_writeFortaxParams` subroutine.
+```
+call FORTAX_writeFortaxParams(sys, fname)
+```
