@@ -263,7 +263,7 @@ contains
 
         ! write(funit, *)
         ! write(funit, '(A)') repeat("=", 62)
-        write(funit, '(A)') strCentre('fam_desc (ADULT 1:)', 62)
+        write(funit, '(A)') strCentre('fam_desc (ADULT 1):', 62)
         write(funit, '(A)') repeat("=", 62)
         @:fortax_type_desc(famad, fam%ad(1))
         write(funit, '(A)') repeat("=", 62)
@@ -271,7 +271,7 @@ contains
         if (fam%couple == 1) then
         ! write(funit, *)
         ! write(funit, '(A)') repeat("=", 62)
-        write(funit, '(A)') strCentre('fam_desc (ADULT 2:)', 62)
+        write(funit, '(A)') strCentre('fam_desc (ADULT 2):', 62)
         write(funit, '(A)') repeat("=", 62)
         @:fortax_type_desc(famad, fam%ad(2))
         write(funit, '(A)') repeat("=", 62)

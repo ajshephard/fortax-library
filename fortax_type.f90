@@ -634,7 +634,7 @@ contains
 
         ! write(funit, *)
         ! write(funit, '(A)') repeat("=", 62)
-        write(funit, '(A)') strCentre('fam_desc (ADULT 1:)', 62)
+        write(funit, '(A)') strCentre('fam_desc (ADULT 1):', 62)
         write(funit, '(A)') repeat("=", 62)
         call desc_f90(funit, "Age", "age", fam%ad(1)%age)
         call desc_f90(funit, "Self-employed", "selfemp", fam%ad(1)%selfemp, label_bool(fam%ad(1)%selfemp))
@@ -645,7 +645,7 @@ contains
         if (fam%couple == 1) then
         ! write(funit, *)
         ! write(funit, '(A)') repeat("=", 62)
-        write(funit, '(A)') strCentre('fam_desc (ADULT 2:)', 62)
+        write(funit, '(A)') strCentre('fam_desc (ADULT 2):', 62)
         write(funit, '(A)') repeat("=", 62)
         call desc_f90(funit, "Age", "age", fam%ad(2)%age)
         call desc_f90(funit, "Self-employed", "selfemp", fam%ad(2)%selfemp, label_bool(fam%ad(2)%selfemp))
@@ -878,13 +878,14 @@ end function labstring_region
     ! specified. Adult information should be passed by adding a suffix 1 or 2
     ! for the respective adult number.
 
-    function fam_gen(couple, married, ccexp, maint, nkids, kidage, nothads, tenure, rent, rentcap, region, ctband, banddratio,&
-        & intdate, age1, selfemp1, hrs1, earn1, age2, selfemp2, hrs2, earn2, correct) result(fam)
+    subroutine fam_gen(fam, couple, married, ccexp, maint, nkids, kidage, nothads, tenure, rent, rentcap, region, ctband,&
+        & banddratio, intdate, age1, selfemp1, hrs1, earn1, age2, selfemp2, hrs2, earn2, correct)
 
         use fortax_util, only : fortaxError
 
         implicit none
 
+        type(fam_t), intent(out) :: fam
         integer, intent(in), optional :: couple
         integer, intent(in), optional :: married
         real(dp), intent(in), optional :: ccexp
@@ -908,7 +909,6 @@ end function labstring_region
         real(dp), intent(in), optional :: hrs2
         real(dp), intent(in), optional :: earn2
         logical, intent(in), optional :: correct
-        type(fam_t) :: fam
         logical :: correct2
         integer :: kidSize
         logical :: ad2
@@ -970,7 +970,7 @@ end function labstring_region
 
         end if
 
-    end function fam_gen
+    end subroutine fam_gen
 
 
     ! net_plus_net
