@@ -178,3 +178,39 @@ In this example, this would return
 ==============================================================
 ```
 This describes the piecewise linear representation of the budget constraint (family net income) so the rate here is the slope of the budget constraint. FORTRAX correctly identifies the location of the hours-of-work discontinuities (due to rules in the UK tax credit system), and encodes positive / negative instances a rate of (+/-)9.999.
+
+Once the budget constraint has been calculated with `FORTAX_kinksHours` it is very simple to obtain the incomes at an arbitray value of hours over the interval that it was calculated (so 0 and 50 in our example here) using `FORTAX_evalKinksHours`. If we wish to calculate net income at 40 hours we would do
+```
+call FORTAX_evalKinksHours(bc, 40.0_dp, earnings, netincome, rate)
+```
+where `earnings`, `netincome`, and `rate` are `real(dp)` variables. This would return `earnings = 240.00`, `netincome = 412.30`, and rate = `0.30`. The value of `netincome` is the same as the value of `net%tu%dispinc` if we had alternatively done
+```
+call FORTAX_fam_gen(fam, ccexp = 100.0_dp, kidage = [0, 4], earn1 = 240.0_dp, hrs1 = 40.0_dp)
+call FORTAX_calcNetInc(sys, fam , net)
+```
+The budget constraint routines in FORTAX are not limited to evaluating the overall net income measure (`net%tu%dispinc`). It can work with any component of `net_t` and also calculate arbitrary combinations of income measures. For example, to calculate the total amount of income tax and national insurance
+of adult 1 (`ad = 1`) when labour supply is varied, we can specify a vector `taxout`.
+```
+call FORTAX_kinksHours(sys, fam, ad = 1, wage = 6.0_dp, hours1 = 0.0_dp, hours2 = 50.0_dp, bcout = bc, &
+		                   taxlevel = 'ad1', taxout = ['inctax', 'natins'])
+
+call FORTAX_kinks_desc(bc)
+```
+The output of `FORTAX_kinks_desc` is
+```
+==============================================================
+                         kinks_desc:                          
+==============================================================
+         Hours        Earnings          Income           Rate
+==============================================================
+         0.000           0.000           0.000        0.00000
+        16.138          96.827           0.000        0.10000
+        16.167          97.000           0.017        0.21000
+        23.029         138.173           8.664        0.33000
+        50.000         300.000          62.067        0.33000
+==============================================================
+```
+Here `Income` is the combined income and National Insurance liability, while `rate` is the combined marginal tax rate.
+
+Internally, `FORTAX_kinksHours` is calling `FORTAX_calcNetInc` to construct the budget constraint. Whether it is more appropriate for a user to call `FORTAX_calcNetInc` directly, or to first summarise the entire budget constraint using `FORTAX_evalKinksHours` is application specific.
+
