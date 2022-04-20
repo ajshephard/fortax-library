@@ -91,6 +91,7 @@ contains
     subroutine fortaxWrite(sys, fname)
 
         use fortax_type
+        use fortax_util, only : fortaxError
         use json_module
 
         implicit none
@@ -135,7 +136,7 @@ contains
             call json%destroy(p)
             call fortaxError(trim(adjustl(error_msg)))
         end if
-        
+
         !cleanup:
         call json%destroy(p)
         if (json%failed()) stop 1
