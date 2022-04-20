@@ -126,3 +126,55 @@ Note that amounts in FORTAX are at the weekly level. If we wish to get the annua
 net = net * 52
 ```
 
+## Piecewise linear budget sets
+
+FORTAX can also calculate exact piecewise linear representations of the budget constraint as hours or earnings (and select other measures) are varied continuously over some interval. This requires the derived type `bcout_t`. Thus, we may begin our program in this case with
+```
+use fortax_library, dp => FORTAX_dp
+
+type(sys_t) :: sys
+type(fam_t) :: fam
+type(bcout_t) :: bc
+
+! Load the tax system. These are saved as JSON files
+call FORTAX_readFortaxParams(sys, "systems/fortax/April06.json")
+
+! Generate a family
+call FORTAX_fam_gen(fam, ccexp = 100.0_dp, kidage = [0, 4])
+```
+Note that I have not specified any earnings or labour supply in `fam` as these are going to be varied in the budget constraint routine and so will have no impact in this particular example.
+
+Suppose we wish to calculate the piecewise linear representation of the budget constraint as we vary hours over some interval. We can do this using the `FORTAX_kinksHours` subroutine. If say, we wish to vary hours from 0 to 50 (with a constant hourly wage of 6 pounds) we would do the following
+```
+call FORTAX_kinksHours(sys, fam, ad = 1, wage = 6.0_dp, hours1 = 0.0_dp, hours2 = 50.0_dp, bcout = bc)
+```
+The `ad` keyword specifies the adult whose labour supply we are varying. As we only have a single adult in our example, this can only take a value of 1. If we had a couple, this could take the value of either 1 or 2. When varying the labour supply of an adult in a couple, the individual whose labour supply is not being varied will take the values specified in `fam`.
+
+The budget constraint information is stored in `bc` (type `bcout_t`). We can conveniently summarise this information using `FORTAX_kinks_desc`.
+```
+call FORTAX_kinks_desc(bc)
+```
+In this example, this would return
+```
+==============================================================
+                         kinks_desc:                          
+==============================================================
+         Hours        Earnings          Income           Rate
+==============================================================
+         0.000           0.000         185.062        1.00000
+         3.333          20.000         205.062        0.00000
+        12.908          77.450         205.062        1.00000
+        13.727          82.364         209.975        0.80000
+        16.000          96.000         220.884        9.99900*
+        16.000          96.000         358.710        0.80000
+        16.138          96.827         359.372        0.72000
+        16.167          97.000         359.497        0.63200
+        16.731         100.385         361.636        0.33600
+        23.029         138.173         374.333        0.24000
+        30.000         180.000         384.371        9.99900*
+        30.000         180.000         394.833        0.24000
+        31.491         188.947         396.980        0.30000
+        50.000         300.000         430.296        0.30000
+==============================================================
+```
+This describes the piecewise linear representation of the budget constraint (family net income) so the rate here is the slope of the budget constraint. FORTRAX correctly identifies the location of the hours-of-work discontinuities (due to rules in the UK tax credit system), and encodes positive / negative instances a rate of (+/-)9.999.
