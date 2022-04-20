@@ -64,8 +64,8 @@ module fortax_library
                                     FORTAX_net_desc => net_desc,                                &
                                     operator(+), operator(*), operator(/)
 
-    use fortax_write,       only :  FORTAX_fortaxPrint => fortaxPrint,                          &
-                                    FORTAX_fortaxWrite => fortaxWrite
+    use fortax_write,       only :  FORTAX_printFortaxParams => printFortaxParams,              &
+                                    FORTAX_writeFortaxParams => writeFortaxParams
 
     use fortax_realtype,    only :  FORTAX_dp => dp,                                            &
                                     FORTAX_sp => sp,                                            &

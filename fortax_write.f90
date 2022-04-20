@@ -29,17 +29,17 @@ module fortax_write
     private :: dp
 
     private
-    public  :: fortaxPrint, fortaxWrite
+    public  :: printFortaxParams, writeFortaxParams
 
 contains
 
-    ! fortaxPrint
+    ! printFortaxParams
     ! -----------------------------------------------------------------------
     ! outputs a summary of the tax system to the default output unit if fname
     ! is not specified. Otherwise, this output summary will be written to
     ! disk with file name fname. This printing code is self-maintaining
 
-    subroutine fortaxPrint(sys, fname)
+    subroutine printFortaxParams(sys, fname)
 
         use fortax_type, only : sys_t
         use fortax_util, only : upper, fortaxError
@@ -79,7 +79,7 @@ contains
 
         return
 
-    end subroutine fortaxPrint
+    end subroutine printFortaxParams
 
 
     ! writeFortaxParams
