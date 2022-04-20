@@ -103,6 +103,8 @@ contains
 
         character(len = len_sysname) :: sysname
         character(len = len_sysdesc) :: sysdesc
+        logical :: status_ok
+        character(len = :), allocatable :: error_msg
 
         sysname = transfer(sys%sysname, sysname)
         sysdesc = transfer(sys%sysdesc, sysdesc)
@@ -127,6 +129,13 @@ contains
         ! write the file:
         call json%print(p, fname)
 
+        if (json%failed()) then
+            call json%check_for_errors(status_ok, error_msg)
+            call json%clear_exceptions()
+            call json%destroy(p)
+            call fortaxError(trim(adjustl(error_msg)))
+        end if
+        
         !cleanup:
         call json%destroy(p)
         if (json%failed()) stop 1

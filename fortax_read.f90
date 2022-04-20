@@ -59,6 +59,8 @@ contains
         character(len = len_sysdesc) :: sysdesc
         logical :: found
         integer :: sz
+        logical :: status_ok
+        character(len = :), allocatable :: error_msg
 
         ! initialise the system
         ! (and value not in json file will retain default)
@@ -69,6 +71,11 @@ contains
 
         ! read the file
         call json%load(filename = systemFile)
+        if (json%failed()) then
+            call json%check_for_errors(status_ok, error_msg)
+            call json%clear_exceptions()
+            call fortaxError(trim(adjustl(error_msg)))
+        end if
 
         call json%get("sysname", string, found)
         if (len(string) > len_sysname) then
