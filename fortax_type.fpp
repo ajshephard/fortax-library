@@ -148,12 +148,15 @@ module fortax_type
     ! Associate "net_times_scalar" and "scalar_times_net" routines with "*" operator
     interface operator(*)
       module procedure net_times_scalar
+      module procedure net_times_scalar_integer
       module procedure scalar_times_net
+      module procedure scalar_times_net_integer
     end interface
 
     ! Associate "net_div_scalar" routine with "/" operator
     interface operator(/)
       module procedure net_div_scalar
+      module procedure net_div_scalar_integer
     end interface
 
 
@@ -350,6 +353,19 @@ contains
     end function net_times_scalar
 
 
+    ! net_times_scalar_integer
+    ! ------------------------------------
+    ! Multiply net_t type variable by an integer scalar
+
+    function net_times_scalar_integer(net1, int_scalar) result(net)
+        implicit none
+        type(net_t), intent(in) :: net1
+        integer, intent(in) :: int_scalar
+        type(net_t) :: net
+        net = net_times_scalar(net1, real(int_scalar, dp))
+    end function net_times_scalar_integer
+
+
     ! scalar_times_net
     ! ------------------------------------
     ! Multiply net_t type variable by scalar
@@ -369,6 +385,18 @@ contains
     end function scalar_times_net
 
 
+    ! scalar_times_net_integer
+    ! ------------------------------------
+    ! Multiply net_t type variable by scalar
+
+    function scalar_times_net_integer(int_scalar, net2) result(net)
+        implicit none
+        integer, intent(in) :: int_scalar
+        type(net_t), intent(in) :: net2
+        type(net_t) :: net
+        net = scalar_times_net(real(int_scalar, dp), net2)
+    end function scalar_times_net_integer
+
 
     ! net_div_scalar
     ! ------------------------------------
@@ -387,6 +415,19 @@ contains
         @:fortax_net_operator(net, nettu, net1, net2, tu, /, scalar2 = scalar)
 
     end function net_div_scalar
+
+
+    ! net_div_scalar_integer
+    ! ------------------------------------
+    ! Divide net_t type variable by scalar
+
+    function net_div_scalar_integer(net1, int_scalar) result(net)
+        implicit none
+        type(net_t), intent(in) :: net1
+        integer, intent(in) :: int_scalar
+        type(net_t) :: net
+        net = net_div_scalar(net1, real(int_scalar, dp))
+    end function net_div_scalar_integer
 
 
     ! net_init
