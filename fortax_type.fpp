@@ -238,7 +238,7 @@ contains
 
     subroutine fam_desc(fam, fname)
 
-        use fortax_util, only : intToStr, fortaxError
+        use fortax_util, only : intToStr, strCentre, fortaxError
 
         use, intrinsic :: iso_fortran_env
 
@@ -254,20 +254,27 @@ contains
             funit = output_unit
         end if
 
-        write(funit, '(A)') 'FAMILY:'
         write(funit, *)
+        write(funit, '(A)') repeat("=", 62)
+        write(funit, '(A)') strCentre('fam_desc (FAMILY):', 62)
+        write(funit, '(A)') repeat("=", 62)
         @:fortax_type_desc(fam, fam)
-        write(funit, *)
+        write(funit, '(A)') repeat("=", 62)
 
-        write(funit, '(A)') 'ADULT 1:'
-        write(funit, *)
+        ! write(funit, *)
+        ! write(funit, '(A)') repeat("=", 62)
+        write(funit, '(A)') strCentre('fam_desc (ADULT 1:)', 62)
+        write(funit, '(A)') repeat("=", 62)
         @:fortax_type_desc(famad, fam%ad(1))
-        write(funit, *)
+        write(funit, '(A)') repeat("=", 62)
 
         if (fam%couple == 1) then
-        write(funit, '(A)') 'ADULT 2:'
-        write(funit, *)
+        ! write(funit, *)
+        ! write(funit, '(A)') repeat("=", 62)
+        write(funit, '(A)') strCentre('fam_desc (ADULT 2:)', 62)
+        write(funit, '(A)') repeat("=", 62)
         @:fortax_type_desc(famad, fam%ad(2))
+        write(funit, '(A)') repeat("=", 62)
         end if
         write(funit, *)
 
@@ -409,7 +416,7 @@ contains
 
     subroutine net_desc(net, fname)
 
-        use fortax_util, only : intToStr, fortaxError
+        use fortax_util, only : intToStr, strCentre, fortaxError
 
         use, intrinsic :: iso_fortran_env
 
@@ -425,19 +432,26 @@ contains
             funit = output_unit
         end if
 
-        write(funit, '(A16)') 'TAX UNIT'
         write(funit, *)
+        write(funit, '(A)') repeat("=", 62) 
+        write(funit, '(A)') strCentre('net_desc (TAX UNIT):', 62)
+        write(funit, '(A)') repeat("=", 62) 
         @:fortax_type_desc(nettu, net%tu)
+        write(funit, '(A)') repeat("=", 62) 
 
-        write(funit, *)
-        write(funit, '(A16)') 'ADULT1'
-        write(funit, *)
+        ! write(funit, *)
+        ! write(funit, '(A)') repeat("=", 62) 
+        write(funit, '(A)') strCentre('net_desc (ADULT 1):', 62)
+        write(funit, '(A)') repeat("=", 62) 
         @:fortax_type_desc(netad, net%ad(1))
+        write(funit, '(A)') repeat("=", 62) 
 
-        write(funit, *)
-        write(funit, '(A16)') 'ADULT2'
-        write(funit, *)
+        ! write(funit, *)
+        ! write(funit, '(A)') repeat("=", 62) 
+        write(funit, '(A)') strCentre('net_desc (ADULT 2):', 62)
+        write(funit, '(A)') repeat("=", 62) 
         @:fortax_type_desc(netad, net%ad(2))
+        write(funit, '(A)') repeat("=", 62) 
         close(funit)
 
     end subroutine net_desc

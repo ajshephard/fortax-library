@@ -596,7 +596,7 @@ contains
 
     subroutine fam_desc(fam, fname)
 
-        use fortax_util, only : intToStr, fortaxError
+        use fortax_util, only : intToStr, strCentre, fortaxError
 
         use, intrinsic :: iso_fortran_env
 
@@ -612,8 +612,10 @@ contains
             funit = output_unit
         end if
 
-        write(funit, '(A)') 'FAMILY:'
         write(funit, *)
+        write(funit, '(A)') repeat("=", 62)
+        write(funit, '(A)') strCentre('fam_desc (FAMILY):', 62)
+        write(funit, '(A)') repeat("=", 62)
         call desc_f90(funit, "Married/cohabiting", "couple", fam%couple, label_bool(fam%couple))
         call desc_f90(funit, "Married", "married", fam%married, label_bool(fam%married))
         call desc_f90(funit, "Childcare expenditure", "ccexp", fam%ccexp)
@@ -628,23 +630,28 @@ contains
         call desc_f90(funit, "Council tax band", "ctband", fam%ctband, label_ctax(fam%ctband))
         call desc_f90(funit, "Council tax band-D ratio", "banddratio", fam%banddratio)
         call desc_f90(funit, "Interview date", "intdate", fam%intdate)
-        write(funit, *)
+        write(funit, '(A)') repeat("=", 62)
 
-        write(funit, '(A)') 'ADULT 1:'
-        write(funit, *)
+        ! write(funit, *)
+        ! write(funit, '(A)') repeat("=", 62)
+        write(funit, '(A)') strCentre('fam_desc (ADULT 1:)', 62)
+        write(funit, '(A)') repeat("=", 62)
         call desc_f90(funit, "Age", "age", fam%ad(1)%age)
         call desc_f90(funit, "Self-employed", "selfemp", fam%ad(1)%selfemp, label_bool(fam%ad(1)%selfemp))
         call desc_f90(funit, "Hours-of-work", "hrs", fam%ad(1)%hrs)
         call desc_f90(funit, "Earnings", "earn", fam%ad(1)%earn)
-        write(funit, *)
+        write(funit, '(A)') repeat("=", 62)
 
         if (fam%couple == 1) then
-        write(funit, '(A)') 'ADULT 2:'
-        write(funit, *)
+        ! write(funit, *)
+        ! write(funit, '(A)') repeat("=", 62)
+        write(funit, '(A)') strCentre('fam_desc (ADULT 2:)', 62)
+        write(funit, '(A)') repeat("=", 62)
         call desc_f90(funit, "Age", "age", fam%ad(2)%age)
         call desc_f90(funit, "Self-employed", "selfemp", fam%ad(2)%selfemp, label_bool(fam%ad(2)%selfemp))
         call desc_f90(funit, "Hours-of-work", "hrs", fam%ad(2)%hrs)
         call desc_f90(funit, "Earnings", "earn", fam%ad(2)%earn)
+        write(funit, '(A)') repeat("=", 62)
         end if
         write(funit, *)
 
@@ -1293,7 +1300,7 @@ end function labstring_region
 
     subroutine net_desc(net, fname)
 
-        use fortax_util, only : intToStr, fortaxError
+        use fortax_util, only : intToStr, strCentre, fortaxError
 
         use, intrinsic :: iso_fortran_env
 
@@ -1309,8 +1316,10 @@ end function labstring_region
             funit = output_unit
         end if
 
-        write(funit, '(A16)') 'TAX UNIT'
         write(funit, *)
+        write(funit, '(A)') repeat("=", 62) 
+        write(funit, '(A)') strCentre('net_desc (TAX UNIT):', 62)
+        write(funit, '(A)') repeat("=", 62) 
         call desc_f90(funit, "Pre-tax earnings", "pretaxearn", net%tu%pretaxearn)
         call desc_f90(funit, "Post-tax earnings", "posttaxearn", net%tu%posttaxearn)
         call desc_f90(funit, "Child benefit", "chben", net%tu%chben)
@@ -1333,10 +1342,12 @@ end function labstring_region
         call desc_f90(funit, "Childcare subsidy", "chcaresub", net%tu%chcaresub)
         call desc_f90(funit, "Free school meals value", "fsm", net%tu%fsm)
         call desc_f90(funit, "Total benefits and Tax Credits", "totben", net%tu%totben)
+        write(funit, '(A)') repeat("=", 62) 
 
-        write(funit, *)
-        write(funit, '(A16)') 'ADULT1'
-        write(funit, *)
+        ! write(funit, *)
+        ! write(funit, '(A)') repeat("=", 62) 
+        write(funit, '(A)') strCentre('net_desc (ADULT 1):', 62)
+        write(funit, '(A)') repeat("=", 62) 
         call desc_f90(funit, "Taxable income", "taxable", net%ad(1)%taxable)
         call desc_f90(funit, "Income tax", "inctax", net%ad(1)%inctax)
         call desc_f90(funit, "National Insurance", "natins", net%ad(1)%natins)
@@ -1345,10 +1356,12 @@ end function labstring_region
         call desc_f90(funit, "National Insurance, class 4", "natinsc4", net%ad(1)%natinsc4)
         call desc_f90(funit, "Pre-tax earnings", "pretaxearn", net%ad(1)%pretaxearn)
         call desc_f90(funit, "Post-tax earnings", "posttaxearn", net%ad(1)%posttaxearn)
+        write(funit, '(A)') repeat("=", 62) 
 
-        write(funit, *)
-        write(funit, '(A16)') 'ADULT2'
-        write(funit, *)
+        ! write(funit, *)
+        ! write(funit, '(A)') repeat("=", 62) 
+        write(funit, '(A)') strCentre('net_desc (ADULT 2):', 62)
+        write(funit, '(A)') repeat("=", 62) 
         call desc_f90(funit, "Taxable income", "taxable", net%ad(2)%taxable)
         call desc_f90(funit, "Income tax", "inctax", net%ad(2)%inctax)
         call desc_f90(funit, "National Insurance", "natins", net%ad(2)%natins)
@@ -1357,6 +1370,7 @@ end function labstring_region
         call desc_f90(funit, "National Insurance, class 4", "natinsc4", net%ad(2)%natinsc4)
         call desc_f90(funit, "Pre-tax earnings", "pretaxearn", net%ad(2)%pretaxearn)
         call desc_f90(funit, "Post-tax earnings", "posttaxearn", net%ad(2)%posttaxearn)
+        write(funit, '(A)') repeat("=", 62) 
         close(funit)
 
     end subroutine net_desc

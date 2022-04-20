@@ -370,6 +370,30 @@ contains
     end function strPad
 
 
+    ! strCentre
+    ! -----------------------------------------------------------------------
+    ! centre a string str with total width (which must accommodate str)
+    ! assumes that str is already trimmed
+
+    function strCentre(str, width) result(strout)
+        implicit none
+        character(len = *), intent(in) :: str
+        integer, intent(in) :: width
+        character(len = width) :: strout
+        integer :: lenstr
+        lenstr = len(str)
+        if (width <= lenstr) then
+            strout = str(1:width)
+        else
+            if (mod(width - lenstr, 2) == 0) then
+                strout = repeat(" ", (width - len(str)) / 2) // str // repeat(" ", (width - len(str)) / 2)
+            else
+                strout = repeat(" ", (width - len(str) - 1) / 2) // str // repeat(" ", (width - len(str) + 1) / 2)
+            end if
+        end if
+
+    end function strCentre
+
     ! getUnit
     ! -----------------------------------------------------------------------
     ! returns a free file unit
