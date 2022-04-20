@@ -175,14 +175,43 @@ contains
     ! -----------------------------------------------------------------------
     ! prints the budget constraitn in bcout
 
-    subroutine kinks_desc(bcout)
+    subroutine kinks_desc(bcout, fname)
+        use, intrinsic :: iso_fortran_env
+        use fortax_util, only : strCentre, fortaxerror
         implicit none
         type(bcout_t), intent(in) :: bcout
-        integer :: i
+        character(len = *), optional :: fname
+
+        integer :: funit, i, ios
+
+        if (present(fname)) then
+            open(newunit = funit, file = fname, action = 'write', status = 'replace', iostat = ios)
+            if (ios .ne. 0) call fortaxError('error opening file for writing in kinks_desc')
+        else
+            funit = output_unit
+        end if
+
+        write(funit, *)
+        write(funit, '(A)') repeat("=", 62)
+        write(funit, '(A)') strCentre('kinks_desc:', 62)
+        write(funit, '(A)') repeat("=", 62)
+        write(funit, '(A14, 2X, A14, 2X, A14, 2X, A13)') "Hours", "Earnings", "Income", "Rate"
+        write(funit, '(A)') repeat("=", 62)
         do i = 1, bcout%kinks_num
-            write(*,'(F12.3, 2X, F12.3, 2X, F12.3, F12.5)') &
-                bcout%kinks_hrs(i), bcout%kinks_earn(i), bcout%kinks_net(i), bcout%kinks_mtr(i)
+            if (abs(bcout%kinks_mtr(i)) >= 9.998_dp) then
+                write(*,'(F14.3, 2X, F14.3, 2X, F14.3, 2X, F13.5,"*")') &
+                    bcout%kinks_hrs(i), bcout%kinks_earn(i), bcout%kinks_net(i), bcout%kinks_mtr(i)
+            else
+                write(*,'(F14.3, 2X, F14.3, 2X, F14.3, 2X, F13.5)') &
+                    bcout%kinks_hrs(i), bcout%kinks_earn(i), bcout%kinks_net(i), bcout%kinks_mtr(i)
+            end if
         end do
+        write(funit, '(A)') repeat("=", 62)
+
+        if (present(fname)) then
+            close(funit)
+        end if
+
     end subroutine kinks_desc
 
 
