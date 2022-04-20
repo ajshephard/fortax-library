@@ -19,7 +19,7 @@
 
 ! fortax_write
 ! -----------------------------------------------------------------------
-! module for saving (to native XML format) and printing of system files
+! module for saving (in json format) and printing of system files
 ! code will reflect any changes to the structure of the system, AS
 
 #:include "fortax.fypp"
@@ -83,12 +83,12 @@ contains
     end subroutine fortaxPrint
 
 
-    ! fortaxWrite
+    ! writeFortaxParams
     ! -----------------------------------------------------------------------
     ! writes the system file sys to disk with file name fname in the native
     ! FORTAX file format. This writing code is self-maintaining.
 
-    subroutine fortaxWrite(sys, fname)
+    subroutine writeFortaxParams(sys, fname)
 
         use fortax_type
         use fortax_util, only : fortaxError
@@ -143,6 +143,6 @@ contains
 
         return
 
-    end subroutine fortaxWrite
+    end subroutine writeFortaxParams
 
 end module fortax_write

@@ -35,6 +35,11 @@ module fortax_prices
     public :: loadindex, setindex, getindex, upratefactor, upratesys
     public :: checkdate, loadsysindex, getsysindex, rpi_saveF90
 
+    interface operator(*)
+        module procedure sys_times_factor
+        module procedure factor_times_sys
+    end interface
+
 contains
 
     ! setindex
@@ -313,6 +318,393 @@ sys%bencap%sinNoKids = sys%bencap%sinNoKids * factor
 
     end subroutine upratesys
 
+    function sys_times_factor(sys, factor) result(sys2)
+        use fortax_type, only : sys_t
+        implicit none
+        type(sys_t), intent(in) :: sys
+        real(dp), intent(in) :: factor
+        type(sys_t) :: sys2
+sys2%inctax%numbands = sys%inctax%numbands
+        sys2%inctax%pa = sys%inctax%pa * factor
+        sys2%inctax%doPATaper = sys%inctax%doPATaper
+        sys2%inctax%disablePATaperRounding = sys%inctax%disablePATaperRounding
+        sys2%inctax%paTaperThresh = sys%inctax%paTaperThresh * factor
+        sys2%inctax%paTaperRate = sys%inctax%paTaperRate
+        sys2%inctax%mma = sys%inctax%mma * factor
+        sys2%inctax%ctc = sys%inctax%ctc * factor
+        sys2%inctax%ctcyng = sys%inctax%ctcyng * factor
+        sys2%inctax%mmarate = sys%inctax%mmarate
+        sys2%inctax%ctctaper = sys%inctax%ctctaper
+        sys2%inctax%c4rebate = sys%inctax%c4rebate
+        sys2%inctax%bands = sys%inctax%bands * factor
+        sys2%inctax%rates = sys%inctax%rates
+sys2%natins%numrates = sys%natins%numrates
+        sys2%natins%c4nrates = sys%natins%c4nrates
+        sys2%natins%c2floor = sys%natins%c2floor * factor
+        sys2%natins%c2rate = sys%natins%c2rate * factor
+        sys2%natins%ceiling = sys%natins%ceiling * factor
+        sys2%natins%rates = sys%natins%rates
+        sys2%natins%bands = sys%natins%bands * factor
+        sys2%natins%c4rates = sys%natins%c4rates
+        sys2%natins%c4bands = sys%natins%c4bands * factor
+sys2%chben%doChBen = sys%chben%doChBen
+        sys2%chben%basic = sys%chben%basic * factor
+        sys2%chben%kid1xtr = sys%chben%kid1xtr * factor
+        sys2%chben%opf = sys%chben%opf * factor
+        sys2%chben%MatGrantVal = sys%chben%MatGrantVal * factor
+        sys2%chben%MatGrantOnlyFirstKid = sys%chben%MatGrantOnlyFirstKid
+        sys2%chben%doTaper = sys%chben%doTaper
+        sys2%chben%disableTaperRounding = sys%chben%disableTaperRounding
+        sys2%chben%taperStart = sys%chben%taperStart * factor
+        sys2%chben%taperRate = sys%chben%taperRate
+        sys2%chben%taperIsIncTax = sys%chben%taperIsIncTax
+sys2%fc%dofamcred = sys%fc%dofamcred
+        sys2%fc%NumAgeRng = sys%fc%NumAgeRng
+        sys2%fc%MaxAgeCC = sys%fc%MaxAgeCC
+        sys2%fc%WFTCMaxAgeCC = sys%fc%WFTCMaxAgeCC
+        sys2%fc%adult = sys%fc%adult * factor
+        sys2%fc%ftprem = sys%fc%ftprem * factor
+        sys2%fc%hours1 = sys%fc%hours1
+        sys2%fc%hours2 = sys%fc%hours2
+        sys2%fc%thres = sys%fc%thres * factor
+        sys2%fc%taper = sys%fc%taper
+        sys2%fc%MaintDisreg = sys%fc%MaintDisreg * factor
+        sys2%fc%MaxCC1 = sys%fc%MaxCC1 * factor
+        sys2%fc%MaxCC2 = sys%fc%MaxCC2 * factor
+        sys2%fc%WFTCMaxCC1 = sys%fc%WFTCMaxCC1 * factor
+        sys2%fc%WFTCMaxCC2 = sys%fc%WFTCMaxCC2 * factor
+        sys2%fc%WFTCPropCC = sys%fc%WFTCPropCC
+        sys2%fc%MinAmt = sys%fc%MinAmt
+        sys2%fc%kidagel = sys%fc%kidagel
+        sys2%fc%kidageu = sys%fc%kidageu
+        sys2%fc%kidcred = sys%fc%kidcred * factor
+sys2%ctc%fam = sys%ctc%fam * factor
+        sys2%ctc%baby = sys%ctc%baby * factor
+        sys2%ctc%kid = sys%ctc%kid * factor
+sys2%wtc%Basic = sys%wtc%Basic * factor
+        sys2%wtc%CouLP = sys%wtc%CouLP * factor
+        sys2%wtc%FT = sys%wtc%FT * factor
+        sys2%wtc%MinHrsKids = sys%wtc%MinHrsKids
+        sys2%wtc%MinHrsCouKids = sys%wtc%MinHrsCouKids
+        sys2%wtc%MinHrsNoKids = sys%wtc%MinHrsNoKids
+        sys2%wtc%FTHrs = sys%wtc%FTHrs
+        sys2%wtc%MinAgeKids = sys%wtc%MinAgeKids
+        sys2%wtc%MinAgeNoKids = sys%wtc%MinAgeNoKids
+        sys2%wtc%MaxCC1 = sys%wtc%MaxCC1 * factor
+        sys2%wtc%MaxCC2 = sys%wtc%MaxCC2 * factor
+        sys2%wtc%PropCC = sys%wtc%PropCC
+        sys2%wtc%MaxAgeCC = sys%wtc%MaxAgeCC
+        sys2%wtc%NewDisreg = sys%wtc%NewDisreg
+        sys2%wtc%NewDisregCon = sys%wtc%NewDisregCon
+sys2%ntc%donewtaxcred = sys%ntc%donewtaxcred
+        sys2%ntc%thr1lo = sys%ntc%thr1lo * factor
+        sys2%ntc%thr1hi = sys%ntc%thr1hi * factor
+        sys2%ntc%thr2 = sys%ntc%thr2 * factor
+        sys2%ntc%taper1 = sys%ntc%taper1
+        sys2%ntc%taper2 = sys%ntc%taper2
+        sys2%ntc%taperCTCInOneGo = sys%ntc%taperCTCInOneGo
+        sys2%ntc%MinAmt = sys%ntc%MinAmt
+sys2%incsup%doIncSup = sys%incsup%doIncSup
+        sys2%incsup%IncChben = sys%incsup%IncChben
+        sys2%incsup%NumAgeRng = sys%incsup%NumAgeRng
+        sys2%incsup%MainCou = sys%incsup%MainCou * factor
+        sys2%incsup%YngCou = sys%incsup%YngCou * factor
+        sys2%incsup%MainLP = sys%incsup%MainLP * factor
+        sys2%incsup%YngLP = sys%incsup%YngLP * factor
+        sys2%incsup%MainSin = sys%incsup%MainSin * factor
+        sys2%incsup%YngSin = sys%incsup%YngSin * factor
+        sys2%incsup%ValFSM = sys%incsup%ValFSM * factor
+        sys2%incsup%DisregLP = sys%incsup%DisregLP * factor
+        sys2%incsup%DisregSin = sys%incsup%DisregSin * factor
+        sys2%incsup%DisregCou = sys%incsup%DisregCou * factor
+        sys2%incsup%DisregShared = sys%incsup%DisregShared
+        sys2%incsup%PremFam = sys%incsup%PremFam * factor
+        sys2%incsup%PremLP = sys%incsup%PremLP * factor
+        sys2%incsup%hours = sys%incsup%hours
+        sys2%incsup%MaintDisreg = sys%incsup%MaintDisreg * factor
+        sys2%incsup%AgeRngl = sys%incsup%AgeRngl
+        sys2%incsup%AgeRngu = sys%incsup%AgeRngu
+        sys2%incsup%AddKid = sys%incsup%AddKid * factor
+sys2%ctax%docounciltax = sys%ctax%docounciltax
+        sys2%ctax%bandD = sys%ctax%bandD * factor
+        sys2%ctax%SinDis = sys%ctax%SinDis
+        sys2%ctax%RatioA = sys%ctax%RatioA
+        sys2%ctax%RatioB = sys%ctax%RatioB
+        sys2%ctax%RatioC = sys%ctax%RatioC
+        sys2%ctax%RatioE = sys%ctax%RatioE
+        sys2%ctax%RatioF = sys%ctax%RatioF
+        sys2%ctax%RatioG = sys%ctax%RatioG
+        sys2%ctax%RatioH = sys%ctax%RatioH
+sys2%rebatesys%RulesUnderFC = sys%rebatesys%RulesUnderFC
+        sys2%rebatesys%RulesUnderWFTC = sys%rebatesys%RulesUnderWFTC
+        sys2%rebatesys%RulesUnderNTC = sys%rebatesys%RulesUnderNTC
+        sys2%rebatesys%RulesUnderUC = sys%rebatesys%RulesUnderUC
+        sys2%rebatesys%NumAgeRng = sys%rebatesys%NumAgeRng
+        sys2%rebatesys%Restrict = sys%rebatesys%Restrict
+        sys2%rebatesys%docap = sys%rebatesys%docap
+        sys2%rebatesys%MainCou = sys%rebatesys%MainCou * factor
+        sys2%rebatesys%YngCou = sys%rebatesys%YngCou * factor
+        sys2%rebatesys%MainLP = sys%rebatesys%MainLP * factor
+        sys2%rebatesys%YngLP = sys%rebatesys%YngLP * factor
+        sys2%rebatesys%MainSin = sys%rebatesys%MainSin * factor
+        sys2%rebatesys%YngSin = sys%rebatesys%YngSin * factor
+        sys2%rebatesys%DisregSin = sys%rebatesys%DisregSin * factor
+        sys2%rebatesys%DisregLP = sys%rebatesys%DisregLP * factor
+        sys2%rebatesys%DisregCou = sys%rebatesys%DisregCou * factor
+        sys2%rebatesys%CredInDisregCC = sys%rebatesys%CredInDisregCC
+        sys2%rebatesys%ChbenIsIncome = sys%rebatesys%ChbenIsIncome
+        sys2%rebatesys%PremFam = sys%rebatesys%PremFam * factor
+        sys2%rebatesys%PremLP = sys%rebatesys%PremLP * factor
+        sys2%rebatesys%MaintDisreg = sys%rebatesys%MaintDisreg * factor
+        sys2%rebatesys%MaxCC1 = sys%rebatesys%MaxCC1 * factor
+        sys2%rebatesys%MaxCC2 = sys%rebatesys%MaxCC2 * factor
+        sys2%rebatesys%MaxAgeCC = sys%rebatesys%MaxAgeCC
+        sys2%rebatesys%AgeRngl = sys%rebatesys%AgeRngl
+        sys2%rebatesys%AgeRngu = sys%rebatesys%AgeRngu
+        sys2%rebatesys%AddKid = sys%rebatesys%AddKid * factor
+sys2%hben%doHBen = sys%hben%doHBen
+        sys2%hben%taper = sys%hben%taper
+        sys2%hben%MinAmt = sys%hben%MinAmt
+sys2%ctaxben%docounciltaxben = sys%ctaxben%docounciltaxben
+        sys2%ctaxben%taper = sys%ctaxben%taper
+        sys2%ctaxben%doEntitlementCut = sys%ctaxben%doEntitlementCut
+        sys2%ctaxben%entitlementShare = sys%ctaxben%entitlementShare
+sys2%ccben%dopolltax = sys%ccben%dopolltax
+        sys2%ccben%taper = sys%ccben%taper
+        sys2%ccben%PropElig = sys%ccben%PropElig
+        sys2%ccben%MinAmt = sys%ccben%MinAmt
+        sys2%ccben%CCrate = sys%ccben%CCrate
+sys2%uc%doUnivCred = sys%uc%doUnivCred
+        sys2%uc%MainCou = sys%uc%MainCou * factor
+        sys2%uc%YngCou = sys%uc%YngCou * factor
+        sys2%uc%MainSin = sys%uc%MainSin * factor
+        sys2%uc%YngSin = sys%uc%YngSin * factor
+        sys2%uc%MinAgeMain = sys%uc%MinAgeMain
+        sys2%uc%FirstKid = sys%uc%FirstKid * factor
+        sys2%uc%OtherKid = sys%uc%OtherKid * factor
+        sys2%uc%MaxCC1 = sys%uc%MaxCC1 * factor
+        sys2%uc%MaxCC2 = sys%uc%MaxCC2 * factor
+        sys2%uc%PropCC = sys%uc%PropCC
+        sys2%uc%MaxAgeCC = sys%uc%MaxAgeCC
+        sys2%uc%doRentCap = sys%uc%doRentCap
+        sys2%uc%DisregSinNoKidsHi = sys%uc%DisregSinNoKidsHi * factor
+        sys2%uc%DisregSinNoKidsLo = sys%uc%DisregSinNoKidsLo * factor
+        sys2%uc%DisregSinKidsHi = sys%uc%DisregSinKidsHi * factor
+        sys2%uc%DisregSinKidsLo = sys%uc%DisregSinKidsLo * factor
+        sys2%uc%DisregCouNoKidsHi = sys%uc%DisregCouNoKidsHi * factor
+        sys2%uc%DisregCouNoKidsLo = sys%uc%DisregCouNoKidsLo * factor
+        sys2%uc%DisregCouKidsHi = sys%uc%DisregCouKidsHi * factor
+        sys2%uc%DisregCouKidsLo = sys%uc%DisregCouKidsLo * factor
+        sys2%uc%taper = sys%uc%taper
+        sys2%uc%MinAmt = sys%uc%MinAmt
+sys2%statepen%doStatePen = sys%statepen%doStatePen
+        sys2%statepen%PenAgeMan = sys%statepen%PenAgeMan
+        sys2%statepen%PenAgeWoman = sys%statepen%PenAgeWoman
+sys2%bencap%doCap = sys%bencap%doCap
+        sys2%bencap%doThruUC = sys%bencap%doThruUC
+        sys2%bencap%sinNoKids = sys%bencap%sinNoKids * factor
+        sys2%bencap%sinKids = sys%bencap%sinKids * factor
+        sys2%bencap%couNoKids = sys%bencap%couNoKids * factor
+        sys2%bencap%couKids = sys%bencap%couKids * factor
+        sys2%bencap%UCEarnThr = sys%bencap%UCEarnThr * factor
+sys2%extra%fsminappamt = sys%extra%fsminappamt
+        sys2%extra%matgrant = sys%extra%matgrant
+        sys2%extra%prices = sys%extra%prices
+    end function sys_times_factor
+
+    function factor_times_sys(factor, sys) result(sys2)
+        use fortax_type, only : sys_t
+        implicit none
+        real(dp), intent(in) :: factor
+        type(sys_t), intent(in) :: sys
+        type(sys_t) :: sys2
+sys2%inctax%numbands = sys%inctax%numbands
+        sys2%inctax%pa = sys%inctax%pa * factor
+        sys2%inctax%doPATaper = sys%inctax%doPATaper
+        sys2%inctax%disablePATaperRounding = sys%inctax%disablePATaperRounding
+        sys2%inctax%paTaperThresh = sys%inctax%paTaperThresh * factor
+        sys2%inctax%paTaperRate = sys%inctax%paTaperRate
+        sys2%inctax%mma = sys%inctax%mma * factor
+        sys2%inctax%ctc = sys%inctax%ctc * factor
+        sys2%inctax%ctcyng = sys%inctax%ctcyng * factor
+        sys2%inctax%mmarate = sys%inctax%mmarate
+        sys2%inctax%ctctaper = sys%inctax%ctctaper
+        sys2%inctax%c4rebate = sys%inctax%c4rebate
+        sys2%inctax%bands = sys%inctax%bands * factor
+        sys2%inctax%rates = sys%inctax%rates
+sys2%natins%numrates = sys%natins%numrates
+        sys2%natins%c4nrates = sys%natins%c4nrates
+        sys2%natins%c2floor = sys%natins%c2floor * factor
+        sys2%natins%c2rate = sys%natins%c2rate * factor
+        sys2%natins%ceiling = sys%natins%ceiling * factor
+        sys2%natins%rates = sys%natins%rates
+        sys2%natins%bands = sys%natins%bands * factor
+        sys2%natins%c4rates = sys%natins%c4rates
+        sys2%natins%c4bands = sys%natins%c4bands * factor
+sys2%chben%doChBen = sys%chben%doChBen
+        sys2%chben%basic = sys%chben%basic * factor
+        sys2%chben%kid1xtr = sys%chben%kid1xtr * factor
+        sys2%chben%opf = sys%chben%opf * factor
+        sys2%chben%MatGrantVal = sys%chben%MatGrantVal * factor
+        sys2%chben%MatGrantOnlyFirstKid = sys%chben%MatGrantOnlyFirstKid
+        sys2%chben%doTaper = sys%chben%doTaper
+        sys2%chben%disableTaperRounding = sys%chben%disableTaperRounding
+        sys2%chben%taperStart = sys%chben%taperStart * factor
+        sys2%chben%taperRate = sys%chben%taperRate
+        sys2%chben%taperIsIncTax = sys%chben%taperIsIncTax
+sys2%fc%dofamcred = sys%fc%dofamcred
+        sys2%fc%NumAgeRng = sys%fc%NumAgeRng
+        sys2%fc%MaxAgeCC = sys%fc%MaxAgeCC
+        sys2%fc%WFTCMaxAgeCC = sys%fc%WFTCMaxAgeCC
+        sys2%fc%adult = sys%fc%adult * factor
+        sys2%fc%ftprem = sys%fc%ftprem * factor
+        sys2%fc%hours1 = sys%fc%hours1
+        sys2%fc%hours2 = sys%fc%hours2
+        sys2%fc%thres = sys%fc%thres * factor
+        sys2%fc%taper = sys%fc%taper
+        sys2%fc%MaintDisreg = sys%fc%MaintDisreg * factor
+        sys2%fc%MaxCC1 = sys%fc%MaxCC1 * factor
+        sys2%fc%MaxCC2 = sys%fc%MaxCC2 * factor
+        sys2%fc%WFTCMaxCC1 = sys%fc%WFTCMaxCC1 * factor
+        sys2%fc%WFTCMaxCC2 = sys%fc%WFTCMaxCC2 * factor
+        sys2%fc%WFTCPropCC = sys%fc%WFTCPropCC
+        sys2%fc%MinAmt = sys%fc%MinAmt
+        sys2%fc%kidagel = sys%fc%kidagel
+        sys2%fc%kidageu = sys%fc%kidageu
+        sys2%fc%kidcred = sys%fc%kidcred * factor
+sys2%ctc%fam = sys%ctc%fam * factor
+        sys2%ctc%baby = sys%ctc%baby * factor
+        sys2%ctc%kid = sys%ctc%kid * factor
+sys2%wtc%Basic = sys%wtc%Basic * factor
+        sys2%wtc%CouLP = sys%wtc%CouLP * factor
+        sys2%wtc%FT = sys%wtc%FT * factor
+        sys2%wtc%MinHrsKids = sys%wtc%MinHrsKids
+        sys2%wtc%MinHrsCouKids = sys%wtc%MinHrsCouKids
+        sys2%wtc%MinHrsNoKids = sys%wtc%MinHrsNoKids
+        sys2%wtc%FTHrs = sys%wtc%FTHrs
+        sys2%wtc%MinAgeKids = sys%wtc%MinAgeKids
+        sys2%wtc%MinAgeNoKids = sys%wtc%MinAgeNoKids
+        sys2%wtc%MaxCC1 = sys%wtc%MaxCC1 * factor
+        sys2%wtc%MaxCC2 = sys%wtc%MaxCC2 * factor
+        sys2%wtc%PropCC = sys%wtc%PropCC
+        sys2%wtc%MaxAgeCC = sys%wtc%MaxAgeCC
+        sys2%wtc%NewDisreg = sys%wtc%NewDisreg
+        sys2%wtc%NewDisregCon = sys%wtc%NewDisregCon
+sys2%ntc%donewtaxcred = sys%ntc%donewtaxcred
+        sys2%ntc%thr1lo = sys%ntc%thr1lo * factor
+        sys2%ntc%thr1hi = sys%ntc%thr1hi * factor
+        sys2%ntc%thr2 = sys%ntc%thr2 * factor
+        sys2%ntc%taper1 = sys%ntc%taper1
+        sys2%ntc%taper2 = sys%ntc%taper2
+        sys2%ntc%taperCTCInOneGo = sys%ntc%taperCTCInOneGo
+        sys2%ntc%MinAmt = sys%ntc%MinAmt
+sys2%incsup%doIncSup = sys%incsup%doIncSup
+        sys2%incsup%IncChben = sys%incsup%IncChben
+        sys2%incsup%NumAgeRng = sys%incsup%NumAgeRng
+        sys2%incsup%MainCou = sys%incsup%MainCou * factor
+        sys2%incsup%YngCou = sys%incsup%YngCou * factor
+        sys2%incsup%MainLP = sys%incsup%MainLP * factor
+        sys2%incsup%YngLP = sys%incsup%YngLP * factor
+        sys2%incsup%MainSin = sys%incsup%MainSin * factor
+        sys2%incsup%YngSin = sys%incsup%YngSin * factor
+        sys2%incsup%ValFSM = sys%incsup%ValFSM * factor
+        sys2%incsup%DisregLP = sys%incsup%DisregLP * factor
+        sys2%incsup%DisregSin = sys%incsup%DisregSin * factor
+        sys2%incsup%DisregCou = sys%incsup%DisregCou * factor
+        sys2%incsup%DisregShared = sys%incsup%DisregShared
+        sys2%incsup%PremFam = sys%incsup%PremFam * factor
+        sys2%incsup%PremLP = sys%incsup%PremLP * factor
+        sys2%incsup%hours = sys%incsup%hours
+        sys2%incsup%MaintDisreg = sys%incsup%MaintDisreg * factor
+        sys2%incsup%AgeRngl = sys%incsup%AgeRngl
+        sys2%incsup%AgeRngu = sys%incsup%AgeRngu
+        sys2%incsup%AddKid = sys%incsup%AddKid * factor
+sys2%ctax%docounciltax = sys%ctax%docounciltax
+        sys2%ctax%bandD = sys%ctax%bandD * factor
+        sys2%ctax%SinDis = sys%ctax%SinDis
+        sys2%ctax%RatioA = sys%ctax%RatioA
+        sys2%ctax%RatioB = sys%ctax%RatioB
+        sys2%ctax%RatioC = sys%ctax%RatioC
+        sys2%ctax%RatioE = sys%ctax%RatioE
+        sys2%ctax%RatioF = sys%ctax%RatioF
+        sys2%ctax%RatioG = sys%ctax%RatioG
+        sys2%ctax%RatioH = sys%ctax%RatioH
+sys2%rebatesys%RulesUnderFC = sys%rebatesys%RulesUnderFC
+        sys2%rebatesys%RulesUnderWFTC = sys%rebatesys%RulesUnderWFTC
+        sys2%rebatesys%RulesUnderNTC = sys%rebatesys%RulesUnderNTC
+        sys2%rebatesys%RulesUnderUC = sys%rebatesys%RulesUnderUC
+        sys2%rebatesys%NumAgeRng = sys%rebatesys%NumAgeRng
+        sys2%rebatesys%Restrict = sys%rebatesys%Restrict
+        sys2%rebatesys%docap = sys%rebatesys%docap
+        sys2%rebatesys%MainCou = sys%rebatesys%MainCou * factor
+        sys2%rebatesys%YngCou = sys%rebatesys%YngCou * factor
+        sys2%rebatesys%MainLP = sys%rebatesys%MainLP * factor
+        sys2%rebatesys%YngLP = sys%rebatesys%YngLP * factor
+        sys2%rebatesys%MainSin = sys%rebatesys%MainSin * factor
+        sys2%rebatesys%YngSin = sys%rebatesys%YngSin * factor
+        sys2%rebatesys%DisregSin = sys%rebatesys%DisregSin * factor
+        sys2%rebatesys%DisregLP = sys%rebatesys%DisregLP * factor
+        sys2%rebatesys%DisregCou = sys%rebatesys%DisregCou * factor
+        sys2%rebatesys%CredInDisregCC = sys%rebatesys%CredInDisregCC
+        sys2%rebatesys%ChbenIsIncome = sys%rebatesys%ChbenIsIncome
+        sys2%rebatesys%PremFam = sys%rebatesys%PremFam * factor
+        sys2%rebatesys%PremLP = sys%rebatesys%PremLP * factor
+        sys2%rebatesys%MaintDisreg = sys%rebatesys%MaintDisreg * factor
+        sys2%rebatesys%MaxCC1 = sys%rebatesys%MaxCC1 * factor
+        sys2%rebatesys%MaxCC2 = sys%rebatesys%MaxCC2 * factor
+        sys2%rebatesys%MaxAgeCC = sys%rebatesys%MaxAgeCC
+        sys2%rebatesys%AgeRngl = sys%rebatesys%AgeRngl
+        sys2%rebatesys%AgeRngu = sys%rebatesys%AgeRngu
+        sys2%rebatesys%AddKid = sys%rebatesys%AddKid * factor
+sys2%hben%doHBen = sys%hben%doHBen
+        sys2%hben%taper = sys%hben%taper
+        sys2%hben%MinAmt = sys%hben%MinAmt
+sys2%ctaxben%docounciltaxben = sys%ctaxben%docounciltaxben
+        sys2%ctaxben%taper = sys%ctaxben%taper
+        sys2%ctaxben%doEntitlementCut = sys%ctaxben%doEntitlementCut
+        sys2%ctaxben%entitlementShare = sys%ctaxben%entitlementShare
+sys2%ccben%dopolltax = sys%ccben%dopolltax
+        sys2%ccben%taper = sys%ccben%taper
+        sys2%ccben%PropElig = sys%ccben%PropElig
+        sys2%ccben%MinAmt = sys%ccben%MinAmt
+        sys2%ccben%CCrate = sys%ccben%CCrate
+sys2%uc%doUnivCred = sys%uc%doUnivCred
+        sys2%uc%MainCou = sys%uc%MainCou * factor
+        sys2%uc%YngCou = sys%uc%YngCou * factor
+        sys2%uc%MainSin = sys%uc%MainSin * factor
+        sys2%uc%YngSin = sys%uc%YngSin * factor
+        sys2%uc%MinAgeMain = sys%uc%MinAgeMain
+        sys2%uc%FirstKid = sys%uc%FirstKid * factor
+        sys2%uc%OtherKid = sys%uc%OtherKid * factor
+        sys2%uc%MaxCC1 = sys%uc%MaxCC1 * factor
+        sys2%uc%MaxCC2 = sys%uc%MaxCC2 * factor
+        sys2%uc%PropCC = sys%uc%PropCC
+        sys2%uc%MaxAgeCC = sys%uc%MaxAgeCC
+        sys2%uc%doRentCap = sys%uc%doRentCap
+        sys2%uc%DisregSinNoKidsHi = sys%uc%DisregSinNoKidsHi * factor
+        sys2%uc%DisregSinNoKidsLo = sys%uc%DisregSinNoKidsLo * factor
+        sys2%uc%DisregSinKidsHi = sys%uc%DisregSinKidsHi * factor
+        sys2%uc%DisregSinKidsLo = sys%uc%DisregSinKidsLo * factor
+        sys2%uc%DisregCouNoKidsHi = sys%uc%DisregCouNoKidsHi * factor
+        sys2%uc%DisregCouNoKidsLo = sys%uc%DisregCouNoKidsLo * factor
+        sys2%uc%DisregCouKidsHi = sys%uc%DisregCouKidsHi * factor
+        sys2%uc%DisregCouKidsLo = sys%uc%DisregCouKidsLo * factor
+        sys2%uc%taper = sys%uc%taper
+        sys2%uc%MinAmt = sys%uc%MinAmt
+sys2%statepen%doStatePen = sys%statepen%doStatePen
+        sys2%statepen%PenAgeMan = sys%statepen%PenAgeMan
+        sys2%statepen%PenAgeWoman = sys%statepen%PenAgeWoman
+sys2%bencap%doCap = sys%bencap%doCap
+        sys2%bencap%doThruUC = sys%bencap%doThruUC
+        sys2%bencap%sinNoKids = sys%bencap%sinNoKids * factor
+        sys2%bencap%sinKids = sys%bencap%sinKids * factor
+        sys2%bencap%couNoKids = sys%bencap%couNoKids * factor
+        sys2%bencap%couKids = sys%bencap%couKids * factor
+        sys2%bencap%UCEarnThr = sys%bencap%UCEarnThr * factor
+sys2%extra%fsminappamt = sys%extra%fsminappamt
+        sys2%extra%matgrant = sys%extra%matgrant
+        sys2%extra%prices = sys%extra%prices
+    end function factor_times_sys
 
     ! checkDate
     ! -----------------------------------------------------------------------
@@ -438,7 +830,7 @@ sys%bencap%sinNoKids = sys%bencap%sinNoKids * factor
     ! returns information which allows the user to easily identify which
     ! tax system operated at any given YYYYMMDD date as specified in sysindex
 
-    subroutine getsysindex(sysindex, date, systemformat, sysfilepath, sysnum)
+    subroutine getsysindex(sysindex, date, sysfilepath, sysnum)
 
         use fortax_util, only : lower, fortaxerror
         use fortax_type, only : sysindex_t, len_sysindex
@@ -447,36 +839,22 @@ sys%bencap%sinNoKids = sys%bencap%sinNoKids * factor
 
         type(sysindex_t), intent(in)  :: sysindex
         integer, intent(in) :: date
-        character(len = *), intent(in)  :: systemformat
         character(len = 256), intent(out) :: sysfilepath
         integer, intent(out) :: sysnum
 
         integer :: i
-        character(len = 4) :: fext !extension
-        character(len = 7) :: fsub !subdirectory
         character(len = len_sysindex):: sysname
 
         if (sysindex%nsys == 0) then
             call fortaxerror('system index file is not in memory')
         end if
 
-        select case(lower(systemformat))
-            case('taxben')
-                fsub = 'taxben/'
-                fext = '.bp3'
-            case('fortax')
-                fsub = 'fortax/'
-                fext = '.xml'
-            case default
-                call fortaxerror('Unknown system format specified (' // systemformat // ') in getsysindex')
-        end select
-
         if (checkdate(date)) then
             sysnum = 0
             do i = 1, sysindex%nsys
                 if (date >= sysindex%date0(i) .and. date <= sysindex%date1(i)) then
                     sysname = transfer(sysindex%fname(:, i), sysname)
-                    sysfilepath = adjustl('systems/' // trim(fsub) // trim(sysname) // trim(fext))
+                    sysfilepath = 'systems/fortax/' // trim(adjustl(sysname)) // '.json'
                     sysnum = i
                     exit
                 end if

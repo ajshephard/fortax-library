@@ -36,6 +36,11 @@ module fortax_prices
     public :: loadindex, setindex, getindex, upratefactor, upratesys
     public :: checkdate, loadsysindex, getsysindex, rpi_saveF90
 
+    interface operator(*)
+        module procedure sys_times_factor
+        module procedure factor_times_sys
+    end interface
+
 contains
 
     ! setindex
@@ -225,6 +230,27 @@ contains
 
     end subroutine upratesys
 
+    function sys_times_factor(sys, factor) result(sys2)
+        use fortax_type, only : sys_t
+        implicit none
+        type(sys_t), intent(in) :: sys
+        real(dp), intent(in) :: factor
+        type(sys_t) :: sys2
+        #:for SYS in SYSLIST
+        @:fortax_uprate_op(${SYS}$, sys2%${SYS}$, sys%${SYS}$, factor, amount = True. minamount = True)
+        #:endfor
+    end function sys_times_factor
+
+    function factor_times_sys(factor, sys) result(sys2)
+        use fortax_type, only : sys_t
+        implicit none
+        real(dp), intent(in) :: factor
+        type(sys_t), intent(in) :: sys
+        type(sys_t) :: sys2
+        #:for SYS in SYSLIST
+        @:fortax_uprate_op(${SYS}$, sys2%${SYS}$, sys%${SYS}$, factor, amount = True. minamount = True)
+        #:endfor
+    end function factor_times_sys
 
     ! checkDate
     ! -----------------------------------------------------------------------
@@ -350,7 +376,7 @@ contains
     ! returns information which allows the user to easily identify which
     ! tax system operated at any given YYYYMMDD date as specified in sysindex
 
-    subroutine getsysindex(sysindex, date, systemformat, sysfilepath, sysnum)
+    subroutine getsysindex(sysindex, date, sysfilepath, sysnum)
 
         use fortax_util, only : lower, fortaxerror
         use fortax_type, only : sysindex_t, len_sysindex
@@ -359,36 +385,22 @@ contains
 
         type(sysindex_t), intent(in)  :: sysindex
         integer, intent(in) :: date
-        character(len = *), intent(in)  :: systemformat
         character(len = 256), intent(out) :: sysfilepath
         integer, intent(out) :: sysnum
 
         integer :: i
-        character(len = 4) :: fext !extension
-        character(len = 7) :: fsub !subdirectory
         character(len = len_sysindex):: sysname
 
         if (sysindex%nsys == 0) then
             call fortaxerror('system index file is not in memory')
         end if
 
-        select case(lower(systemformat))
-            case('taxben')
-                fsub = 'taxben/'
-                fext = '.bp3'
-            case('fortax')
-                fsub = 'fortax/'
-                fext = '.xml'
-            case default
-                call fortaxerror('Unknown system format specified (' // systemformat // ') in getsysindex')
-        end select
-
         if (checkdate(date)) then
             sysnum = 0
             do i = 1, sysindex%nsys
                 if (date >= sysindex%date0(i) .and. date <= sysindex%date1(i)) then
                     sysname = transfer(sysindex%fname(:, i), sysname)
-                    sysfilepath = adjustl('systems/' // trim(fsub) // trim(sysname) // trim(fext))
+                    sysfilepath = 'systems/fortax/' // trim(adjustl(sysname)) // '.json'
                     sysnum = i
                     exit
                 end if
