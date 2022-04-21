@@ -179,10 +179,11 @@ contains
     subroutine kinks_desc(bcout, fname)
         use, intrinsic :: iso_fortran_env
         use fortax_util, only : strCentre, fortaxerror
+        use fortax_type, only : len_bcdesc
         implicit none
         type(bcout_t), intent(in) :: bcout
         character(len = *), optional :: fname
-
+        character(len = len_bcdesc) :: bc_desc
         integer :: funit, i, ios
 
         if (present(fname)) then
@@ -192,9 +193,11 @@ contains
             funit = output_unit
         end if
 
+        bc_desc = transfer(bcout%bc_desc, bc_desc)
+
         write(funit, *)
         write(funit, '(A)') repeat("=", 62)
-        write(funit, '(A)') strCentre('kinks_desc:', 62)
+        write(funit, '(A)') strCentre('kinks_desc (' // trim(adjustl(bc_desc)) // '):', 62)
         write(funit, '(A)') repeat("=", 62)
         write(funit, '(A14, 2X, A14, 2X, A14, 2X, A13)') "Hours", "Earnings", "Income", "Rate"
         write(funit, '(A)') repeat("=", 62)
@@ -224,7 +227,7 @@ contains
 
     subroutine kinkshours(sys, fam, ad, wage, hours1, hours2, bcout, taxlevel, taxout, correct)
 
-        use fortax_type, only : fam_t, sys_t, net_t
+        use fortax_type, only : fam_t, sys_t, net_t, len_bcdesc
         use fortax_util, only : lower, inttostr, fortaxerror, fortaxwarn
         use fortax_calc, only : calcnetinc
 
@@ -241,7 +244,8 @@ contains
         character(len = *), intent(in), optional :: taxout(:)
         logical, intent(in), optional :: correct
 
-        character(len = 32) :: ltaxout, ltaxlevel
+        character(len = :), allocatable :: ltaxout, ltaxlevel, bc_desc
+        character(len = len_bcdesc) :: temp_bcstr
         character(len = 64) :: str
         type(fam_t)  :: fam0
         type(net_t), target :: net
@@ -286,6 +290,7 @@ contains
             taxadd = .true.
             taxsize = 1
             taxpoint(1)%p => net%tu%dispinc
+            bc_desc = "tu%dispinc"
         else if (((.not. present(taxout)) .and. (present(taxlevel))) &
             .or. ((present(taxout)) .and. (.not. present(taxlevel)))) then
             call fortaxerror('if taxout or taxlevel is specified, both must be specified')
@@ -295,30 +300,58 @@ contains
             allocate(taxadd(taxsize))
             taxadd    = .true.
             ltaxlevel = lower(adjustl(taxlevel))
-            if (adjustl(trim(ltaxlevel)) == 'tu') then
+            if (trim(adjustl(ltaxlevel)) == 'tu') then
                 leveltu = .true.
                 levelad = .false.
-            else if (adjustl(trim(ltaxlevel)) == 'ad1') then
+                bc_desc = "tu%"
+            else if (trim(adjustl(ltaxlevel)) == 'ad1') then
                 leveltu = .false.
                 levelad = .true.
                 taxad   = 1
-            else if (adjustl(trim(ltaxlevel)) == 'ad2') then
+                bc_desc = "ad(1)%"
+            else if (trim(adjustl(ltaxlevel)) == 'ad2') then
                 leveltu = .false.
                 levelad = .true.
                 taxad   = 2
+                bc_desc = "ad(2)%"
             else
-                call fortaxerror('taxlevel ' // adjustl(trim(ltaxlevel)) // ' is unrecognized')
+                call fortaxerror('taxlevel ' // trim(adjustl(ltaxlevel)) // ' is unrecognized')
+            end if
+
+            if (taxsize > 1) then
+                bc_desc = bc_desc // "("
             end if
 
             do i = 1, taxsize
-
-                ltaxout = lower(adjustl(taxout(i)))
+                ltaxout = lower(trim(adjustl(taxout(i))))
 
                 if (ltaxout(1:1) == '+') then
                     ltaxout = adjustl(ltaxout(2:))
                 elseif (ltaxout(1:1) == '-') then
                     ltaxout = adjustl(ltaxout(2:))
                     taxadd(i) = .false.
+                end if
+
+                if (taxadd(i)) then
+                    if (i == 1) then
+                        bc_desc = bc_desc // ltaxout
+                    else
+                        bc_desc = bc_desc // " + " // ltaxout
+                    end if
+                else
+                    if (i == 1) then
+                        if (taxsize == 1) then
+                            bc_desc = "-" // bc_desc // ltaxout
+                        else
+                        bc_desc = bc_desc // "-" // ltaxout
+                        end if
+                    else
+                        bc_desc = bc_desc // " - " // ltaxout
+                    end if
+                end if
+
+                if (i == taxsize) then
+                    bc_desc = bc_desc // ")"
                 end if
 
                 if (levelad) then
@@ -328,7 +361,7 @@ contains
                 end if
 
                 if (.not. associated(taxpoint(i)%p)) then
-                    call fortaxerror(trim(ltaxout) // ' does not exist')
+                    call fortaxerror(ltaxout // ' does not exist')
                 end if
 
             end do
@@ -592,11 +625,13 @@ loopmax : do
             end if
         end if
 
+        temp_bcstr = bc_desc
         bcout%kinks_num  = kinks_num
         bcout%kinks_hrs  = kinks_hrs
         bcout%kinks_earn = kinks_earn
         bcout%kinks_net  = kinks_net
         bcout%kinks_mtr  = kinks_mtr
+        bcout%bc_desc = transfer(temp_bcstr, bcout%bc_desc)
 
         do i = 1, taxsize
             nullify(taxpoint(i)%p)
@@ -615,7 +650,7 @@ loopmax : do
 
     subroutine kinksearn(sys, fam, ad, hours, earn1, earn2, bcout, taxlevel, taxout, correct)
 
-        use fortax_type, only : fam_t, sys_t, net_t
+        use fortax_type, only : fam_t, sys_t, net_t, len_bcdesc
         use fortax_util, only : lower, inttostr, fortaxerror, fortaxwarn
         use fortax_calc, only : calcnetinc
 
@@ -634,7 +669,8 @@ loopmax : do
 
         !character(len(taxout))             :: ltaxout
         !character(len(taxlevel))           :: ltaxlevel
-        character(len = 32) :: ltaxout, ltaxlevel
+        character(len = :), allocatable :: ltaxout, ltaxlevel, bc_desc
+        character(len = len_bcdesc) :: temp_bcstr
         character(len = 64) :: str
 
         type(fam_t) :: fam0
@@ -689,6 +725,7 @@ loopmax : do
             allocate(taxadd(1))
             taxadd = .true.
             taxpoint(1)%p => net%tu%dispinc
+            bc_desc = "tu%dispinc"
         else if (((.not. present(taxout)) .and. (present(taxlevel))) &
             .or. ((present(taxout)) .and. (.not. present(taxlevel)))) then
             call fortaxerror('if taxout or taxlevel is specified, both must be specified')
@@ -698,30 +735,59 @@ loopmax : do
             allocate(taxadd(taxsize))
             taxadd = .true.
             ltaxlevel = lower(taxlevel)
-            if (adjustl(trim(ltaxlevel))=='tu') then
+            if (trim(adjustl(ltaxlevel))=='tu') then
                 leveltu = .true.
                 levelad = .false.
-            else if (adjustl(trim(ltaxlevel))=='ad1') then
+                bc_desc = "tu%"
+            else if (trim(adjustl(ltaxlevel))=='ad1') then
                 leveltu = .false.
                 levelad = .true.
                 taxad   = 1
-            else if (adjustl(trim(ltaxlevel))=='ad2') then
+                bc_desc = "ad(1)%"
+            else if (trim(adjustl(ltaxlevel))=='ad2') then
                 leveltu = .false.
                 levelad = .true.
                 taxad   = 2
+                bc_desc = "ad(2)%"
             else
-                call fortaxerror('taxlevel '//adjustl(trim(ltaxlevel))//' is unrecognized')
+                call fortaxerror('taxlevel '//trim(adjustl(ltaxlevel))//' is unrecognized')
+            end if
+
+            if (taxsize > 1) then
+                bc_desc = bc_desc // "("
             end if
 
             do i = 1, taxsize
 
-                ltaxout = lower(adjustl(taxout(i)))
+                ltaxout = lower(trim(adjustl(taxout(i))))
 
                 if (ltaxout(1:1) == '+') then
                     ltaxout = adjustl(ltaxout(2:))
                 elseif (ltaxout(1:1) == '-') then
                     ltaxout = adjustl(ltaxout(2:))
                     taxadd(i) = .false.
+                end if
+
+                if (taxadd(i)) then
+                    if (i == 1) then
+                        bc_desc = bc_desc // ltaxout
+                    else
+                        bc_desc = bc_desc // " + " // ltaxout
+                    end if
+                else
+                    if (i == 1) then
+                        if (taxsize == 1) then
+                            bc_desc = "-" // bc_desc // ltaxout
+                        else
+                        bc_desc = bc_desc // "-" // ltaxout
+                        end if
+                    else
+                        bc_desc = bc_desc // " - " // ltaxout
+                    end if
+                end if
+
+                if (i == taxsize) then
+                    bc_desc = bc_desc // ")"
                 end if
 
                 if (levelad) then
@@ -964,11 +1030,13 @@ loopmax : do
             end if
         end if
 
+        temp_bcstr = bc_desc
         bcout%kinks_num = kinks_num
         bcout%kinks_hrs = kinks_hrs
         bcout%kinks_earn(1:kinks_num) = kinks_earn(1:kinks_num)
         bcout%kinks_net(1:kinks_num) = kinks_net(1:kinks_num)
         bcout%kinks_mtr(1:kinks_num) = kinks_mtr(1:kinks_num)
+        bcout%bc_desc = transfer(temp_bcstr, bcout%bc_desc)
 
         do i = 1, taxsize
             nullify(taxpoint(i)%p)
@@ -987,7 +1055,7 @@ loopmax : do
 
     subroutine kinksccexp(sys, fam, ad, hours, earn, ccexp1, ccexp2, bcout, taxlevel, taxout, correct)
 
-        use fortax_type, only : fam_t, sys_t, net_t
+        use fortax_type, only : fam_t, sys_t, net_t, len_bcdesc
         use fortax_util, only : lower, inttostr, fortaxerror, fortaxwarn
         use fortax_calc, only : calcnetinc
 
@@ -1007,7 +1075,8 @@ loopmax : do
 
         !character(len(taxout))             :: ltaxout
         !character(len(taxlevel))           :: ltaxlevel
-        character(len=32) :: ltaxout, ltaxlevel
+        character(len = :), allocatable :: ltaxout, ltaxlevel, bc_desc
+        character(len = len_bcdesc) :: temp_bcstr
         type(fam_t) :: fam0
         type(net_t), target :: net
         real(dp) :: taxcomp0, taxcomp1
@@ -1058,6 +1127,7 @@ loopmax : do
             allocate(taxadd(1))
             taxadd = .true.
             taxpoint(1)%p => net%tu%dispinc
+            bc_desc = "tu%dispinc"            
         else if (((.not. present(taxout)) .and. (present(taxlevel))) &
             .or. ((present(taxout)) .and. (.not. present(taxlevel)))) then
             call fortaxerror('if taxout or taxlevel is specified, both must be specified')
@@ -1067,30 +1137,59 @@ loopmax : do
             allocate(taxadd(taxsize))
             taxadd = .true.
             ltaxlevel = lower(taxlevel)
-            if (adjustl(trim(ltaxlevel)) == 'tu') then
+            if (trim(adjustl(ltaxlevel)) == 'tu') then
                 leveltu = .true.
                 levelad = .false.
-            else if (adjustl(trim(ltaxlevel)) == 'ad1') then
+                bc_desc = "tu%"                
+            else if (trim(adjustl(ltaxlevel)) == 'ad1') then
                 leveltu = .false.
                 levelad = .true.
                 taxad = 1
-            else if (adjustl(trim(ltaxlevel)) == 'ad2') then
+                bc_desc = "ad(1)%"                
+            else if (trim(adjustl(ltaxlevel)) == 'ad2') then
                 leveltu = .false.
                 levelad = .true.
                 taxad = 2
+                bc_desc = "ad(2)%"                
             else
-                call fortaxerror('taxlevel ' // adjustl(trim(ltaxlevel)) // ' is unrecognized')
+                call fortaxerror('taxlevel ' // trim(adjustl(ltaxlevel)) // ' is unrecognized')
+            end if
+
+            if (taxsize > 1) then
+                bc_desc = bc_desc // "("
             end if
 
             do i = 1, taxsize
 
-                ltaxout = lower(adjustl(taxout(i)))
+                ltaxout = lower(trim(adjustl(taxout(i))))
 
                 if (ltaxout(1:1) == '+') then
                     ltaxout = adjustl(ltaxout(2:))
                 elseif (ltaxout(1:1) == '-') then
                     ltaxout = adjustl(ltaxout(2:))
                     taxadd(i) = .false.
+                end if
+
+                if (taxadd(i)) then
+                    if (i == 1) then
+                        bc_desc = bc_desc // ltaxout
+                    else
+                        bc_desc = bc_desc // " + " // ltaxout
+                    end if
+                else
+                    if (i == 1) then
+                        if (taxsize == 1) then
+                            bc_desc = "-" // bc_desc // ltaxout
+                        else
+                        bc_desc = bc_desc // "-" // ltaxout
+                        end if
+                    else
+                        bc_desc = bc_desc // " - " // ltaxout
+                    end if
+                end if
+
+                if (i == taxsize) then
+                    bc_desc = bc_desc // ")"
                 end if
 
                 if (levelad) then
@@ -1331,11 +1430,13 @@ loopmax : do
             end if
         end if
 
+        temp_bcstr = bc_desc
         bcout%kinks_num = kinks_num
         bcout%kinks_hrs = kinks_hrs
         bcout%kinks_earn(1:kinks_num) = kinks_ccexp(1:kinks_num)
         bcout%kinks_net(1:kinks_num) = kinks_net(1:kinks_num)
         bcout%kinks_mtr(1:kinks_num) = kinks_mtr(1:kinks_num)
+        bcout%bc_desc = transfer(temp_bcstr, bcout%bc_desc)
 
         do i = 1, taxsize
             nullify(taxpoint(i)%p)
