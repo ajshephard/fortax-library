@@ -62,7 +62,7 @@ module fortax_library
                                     FORTAX_fam_gen => fam_gen,                                  &
                                     FORTAX_fam_desc => fam_desc,                                &
                                     FORTAX_net_desc => net_desc,                                &
-                                    operator(+), operator(*), operator(/)
+                                    operator(-), operator(+), operator(*), operator(/)
 
     use fortax_write,       only :  FORTAX_printFortaxParams => printFortaxParams,              &
                                     FORTAX_writeFortaxParams => writeFortaxParams

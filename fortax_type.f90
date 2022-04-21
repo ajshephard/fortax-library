@@ -35,7 +35,7 @@ module fortax_type
     public :: fam_t, net_t, sys_t, rpi_t, sysindex_t, bcout_t
     public :: lab
     public :: fam_gen, fam_desc
-    public :: operator(+), operator(*), operator(/)
+    public :: operator(+), operator(*), operator(/), operator(-)
     public :: net_desc
 
     ! constants for array bounds and internal values
