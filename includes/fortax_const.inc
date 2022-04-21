@@ -12,3 +12,4 @@
 @:fortaxdef(integer, len_sysindex,     "Length for sysindex fname", range, value = 256)
 @:fortaxdef(integer, len_label,        "Length for short label",    range, value = 16)
 @:fortaxdef(integer, len_labstring,    "Length for long label",     range, value = 64)
+@:fortaxdef(integer, len_bcdesc,       "Length for bc desc",        range, value = 256)
