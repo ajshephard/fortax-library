@@ -66,7 +66,7 @@ The main calculation routine to calculate tax and benefit amounts is `FORTAX_cal
 ```
 call FORTAX_calcNetInc(sys, fam, net)
 ```
-The components of `net` would then typically be used with some user-supplied routine (for example, to calculate the utility associated with different labour supply alternatives). If we wish to summarise all the components in `net` we can use `FORTAX_net_desc`.
+The components of `net` would then typically be used with some user-supplied routine (for example, to calculate the utility associated with different labour supply alternatives). For example, net (disposable) income is `net%tu%dispinc` If we wish to summarise all the components in `net` (which will also list all variable names) we can use `FORTAX_net_desc`.
 ```
 call FORTAX_net_desc(net)
 ```
@@ -124,6 +124,28 @@ This would return
 Note that amounts in FORTAX are at the weekly level. If we wish to get the annual equivalent (for example) we can just multiply by 52.
 ```
 net = net * 52
+```
+If we wish to calulate marginal tax rates holding hours-of-work fixed, we could do the following
+```
+type(net_t) :: net1, net2, dnet
+real(dp) :: mtr, dearn
+
+! incomes at (fam%ad(1)earn = 300, fam%ad(1)earn = 20)
+call FORTAX_fam_gen(fam, earn1 = 300.0_dp, hrs1 = 20.0_dp, ccexp = 100.0_dp, kidage = [0, 4])
+call FORTAX_calcNetInc(sys, fam, net1)
+
+! incomes at (fam%ad(1)earn = 300+dearn, fam%ad(1)earn = 20)
+dearn = 1e-4_dp
+fam%ad(1)%earn = fam%ad(1)%earn + dearn
+call FORTAX_calcNetInc(sys, fam, net2)
+```
+With the information in `net2` and `net1` we could calculate the total marginal effective tax rate as
+```
+mtr = (net2%tu%nettax - net2%tu%nettax) / dearn
+```
+Alternatively, we could calculate the marginal tax rates for all income income components as
+```
+dnet = (net2 - net1) / dearn
 ```
 
 ## Piecewise linear budget sets
