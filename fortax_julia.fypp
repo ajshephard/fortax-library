@@ -1,0 +1,199 @@
+#:mute
+
+#! list for system components
+
+#:set SYSLIST = ['inctax', 'natins', 'chben', 'fc', 'ctc', 'wtc', &
+                 'ntc', 'incsup', 'ctax', 'rebatesys', 'hben', 'ctaxben', &
+                 'ccben', 'uc', 'statepen', 'bencap', 'extra']
+
+#! list for value labels
+
+#:set LABLIST = ['bool', 'ctax', 'tenure', 'region']
+
+#! prevision type mapping
+
+#:set JULIA_TYPE = {"integer": "Cint", "bool": "Cint", "double": "Cdouble"}
+
+#! default values by type
+
+#:set JULIA_TYPE_DEFAULT = {"integer": "0", "bool": "0", "double": "0.0"}
+
+#! Joins stripped lines with given character string
+
+#:def join_lines(txt, joinstr, prefix="", suffix="")
+    ${prefix + joinstr.join([line.strip() for line in txt.split("\n")]) + suffix}$
+#:enddef
+
+#! Remove blank lines from given character string
+
+#:def remove_blank_lines(txt)
+${"".join([s for s in txt.strip().splitlines(True) if s.strip()])}$
+#:enddef
+
+#! Add Fortran line continuation character
+
+#:def line_continutation(txt)
+${"".join([line+", &\n" for line in txt.split("\n")])}$
+#:enddef
+
+#! Adjust indentation
+
+#:def indent(txt)
+${"".join([" "*4 + line+"\n" for line in txt.split("\n")])}$
+#:enddef
+
+#! Check that the arguments are valid
+
+#:def check_fortax_arg(type, var, str, attr, kwargs)
+    #:assert attr in ['rate', 'amount', 'minamount', 'null', 'range', 'scale', 'label']
+    #:assert type in ['bool', 'integer', 'double']
+    #:for kw in kwargs
+        #:assert kw in ['dim', 'dimvar', 'value', 'label']
+    #:endfor
+#:enddef
+
+#! Defining types
+
+#:def fortax_type_def(name, **defkwargs)
+    #:for kw in defkwargs
+        #:assert kw in ['attributes', 'suffix', 'assumed']
+    #:endfor
+    #:if "attributes" in defkwargs
+        #:set attributes = ", " + defkwargs["attributes"].strip('"')
+    #:else
+        #:set attributes = ""
+    #:endif
+    #:if "suffix" in defkwargs
+        #:set suffix = defkwargs["suffix"].strip('"')
+    #:else
+        #:set suffix = ""
+    #:endif
+    #:def fortaxdef(type, var, str, attr, **kwargs)
+        #:mute
+            $:check_fortax_arg(type, var, str, attr, kwargs)
+            #:if "value" in kwargs
+                #:set default = kwargs["value"]
+            #:else
+                #:set default = JULIA_TYPE_DEFAULT[type]
+            #:endif
+            #:if "dim" in kwargs
+                #:set array = True
+            #:else
+                #:set array = False
+            #:endif
+        #:endmute
+        #:if array
+        ${var}$::SVector{${kwargs["dim"]}$, ${JULIA_TYPE[type]}$} = @SVector [${default}$ for _ = 1:${kwargs["dim"]}$]
+        #:else
+        ${var}$::${JULIA_TYPE[type]}$ = ${default}$
+        #:endif
+    #:enddef
+    #:include "include_files.fypp"
+#:enddef
+
+#! Type values
+
+#:def fortax_type_val(name, **defkwargs)
+    #:def fortaxdef(type, var, str, attr, **kwargs)
+    #:mute
+        $:check_fortax_arg(type, var, str, attr, kwargs)
+    #:endmute
+    #:if 'value' in kwargs
+    ${var}$ = ${kwargs["value"]}$
+    #:else
+    ${var}$ = ${JULIA_TYPE_DEFAULT[type]}$
+    #:endif
+    #:enddef
+    #:include "include_files.fypp"
+#:enddef
+
+#! Constant parameters
+
+#:def fortax_const()
+    #:def fortaxdef(type, var, str, attr, **kwargs)
+    #:mute
+    $:check_fortax_arg(type, var, str, attr, kwargs)
+    #:assert 'value' in kwargs
+    #:endmute
+    const ${var}$ = ${kwargs["value"]}$
+    #:enddef
+    #:include "fortax_const.inc"
+#:enddef
+
+#! parameterised labels
+
+#:def fortax_label_param()
+    #:for LAB in LABLIST
+        #:call join_lines(joinstr = ", ", prefix="const lab_" + LAB + " = (", suffix=")")    
+        @:fortax_type_val(lab_${LAB}$)
+        #:endcall
+    #:endfor
+#:enddef
+
+#! value labels
+#:def fortax_value_lab(lab, labval)
+lab_${lab}$.${labval}$
+#:enddef
+
+#:endmute
+
+@:fortax_const()
+@:fortax_label_param()
+
+@with_kw struct famad_t
+@:fortax_type_def(famad)
+end
+
+@with_kw struct fam_t
+    @:fortax_type_def(fam)
+    ad::SVector{2, famad_t} = @SVector [famad_t() for _ = 1:2]
+end
+
+@with_kw struct netad_t
+    @:fortax_type_def(netad)
+end
+
+@with_kw struct nettu_t
+    @:fortax_type_def(nettu)
+end
+
+@with_kw struct net_t
+    ad::SVector{2, netad_t} = @SVector [netad_t() for _ = 1:2]
+    tu::nettu_t = nettu_t()
+end
+
+@with_kw struct rpi_t
+    ndate::Cint = 0
+    date::SVector{maxRPI, Cint} = zeros(maxRPI)
+    index::SVector{maxRPI, Cdouble} = ones(maxRPI)
+end
+
+@with_kw struct sysindex_t
+    nsys::Cint = 0
+    date0::SVector{maxSysIndex, Cint} = zeros(maxRPI)
+    date1::SVector{maxSysIndex, Cint} = zeros(maxRPI)
+    index::SMatrix{len_sysindex, maxSysIndex, Cchar} = ' '
+end
+
+#:for SYS in SYSLIST
+@with_kw struct ${SYS}$_t
+    @:fortax_type_def(${SYS}$)
+end
+#:endfor
+
+@with_kw struct sys_t
+    sysname::SVector{len_sysname, Cchar} = ' '
+    sysdesc::SVector{len_sysdesc, Cchar} = ' '
+    #:for SYS in SYSLIST
+        ${SYS}$::${SYS}$_t = ${SYS}$_t()
+    #:endfor
+end
+
+@with_kw struct bcout_t
+    kinks_num::Cint = 0
+    kinks_hrs::SVector{maxkinks, Cdouble} = 0.0
+    kinks_earn::SVector{maxkinks, Cdouble} = 0.0
+    kinks_net::SVector{maxkinks, Cdouble} = 0.0
+    kinks_mtr::SVector{maxkinks, Cdouble} = 0.0
+    bc_desc::SVector{len_bcdesc, Cchar} = ' '
+end
