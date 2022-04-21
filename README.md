@@ -270,3 +270,15 @@ call FORTAX_writeFortaxParams(sys, fname)
 # Interfaces
 
 The FORTAX library can be called by other programming languages and software packages. The Fortran C bindings are defined in `fortax_library_c.f90`. A [Julia](https://julialang.org/) interface is provided in `fortax_julia.jl`. A [Stata](https://www.stata.com/) plugin is also available.
+
+### Julia
+
+The Julia version can be used much like the Fortran version. Almost all the functions in the `fortax_library.f90` module are accessible through Julia.
+Consider the following example where we load a system and calculate incomes for a specified family type.
+```
+sys = readFortaxParams("systems/fortax/April06.json")
+fam = fam_gen(earn1 = 300.0, hrs1 = 20.0, ccexp = 100.0, kidage = [0, 4]))
+net = calcNetInc(sys, fam)
+net_desc(net)
+```
+The output from `net_desc` is identical to that which we saw before.
