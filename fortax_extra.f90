@@ -51,7 +51,7 @@ contains
         real(dp),    intent(in)    :: minamt
 
         !done automatically for entire system, AS
-    sys%fc%MinAmt = minamt
+sys%fc%MinAmt = minamt
             sys%ntc%MinAmt = minamt
             sys%hben%MinAmt = minamt
             sys%ccben%MinAmt = minamt
@@ -334,5 +334,4 @@ contains
 
 !     end subroutine netoutDescNoName
 
-
-end module
+end module fortax_extra

@@ -354,37 +354,37 @@ contains
                 end if
 
                 if (levelad) then
-        if (trim(adjustl(ltaxout)) == "taxable") taxpoint(i)%p => net%ad(taxad)%taxable
-        if (trim(adjustl(ltaxout)) == "inctax") taxpoint(i)%p => net%ad(taxad)%inctax
-        if (trim(adjustl(ltaxout)) == "natins") taxpoint(i)%p => net%ad(taxad)%natins
-        if (trim(adjustl(ltaxout)) == "natinsc1") taxpoint(i)%p => net%ad(taxad)%natinsc1
-        if (trim(adjustl(ltaxout)) == "natinsc2") taxpoint(i)%p => net%ad(taxad)%natinsc2
-        if (trim(adjustl(ltaxout)) == "natinsc4") taxpoint(i)%p => net%ad(taxad)%natinsc4
-        if (trim(adjustl(ltaxout)) == "pretaxearn") taxpoint(i)%p => net%ad(taxad)%pretaxearn
-        if (trim(adjustl(ltaxout)) == "posttaxearn") taxpoint(i)%p => net%ad(taxad)%posttaxearn
+        if (ltaxout == "taxable") taxpoint(i)%p => net%ad(taxad)%taxable
+        if (ltaxout == "inctax") taxpoint(i)%p => net%ad(taxad)%inctax
+        if (ltaxout == "natins") taxpoint(i)%p => net%ad(taxad)%natins
+        if (ltaxout == "natinsc1") taxpoint(i)%p => net%ad(taxad)%natinsc1
+        if (ltaxout == "natinsc2") taxpoint(i)%p => net%ad(taxad)%natinsc2
+        if (ltaxout == "natinsc4") taxpoint(i)%p => net%ad(taxad)%natinsc4
+        if (ltaxout == "pretaxearn") taxpoint(i)%p => net%ad(taxad)%pretaxearn
+        if (ltaxout == "posttaxearn") taxpoint(i)%p => net%ad(taxad)%posttaxearn
                 else
-        if (trim(adjustl(ltaxout)) == "pretaxearn") taxpoint(i)%p => net%tu%pretaxearn
-        if (trim(adjustl(ltaxout)) == "posttaxearn") taxpoint(i)%p => net%tu%posttaxearn
-        if (trim(adjustl(ltaxout)) == "chben") taxpoint(i)%p => net%tu%chben
-        if (trim(adjustl(ltaxout)) == "matgrant") taxpoint(i)%p => net%tu%matgrant
-        if (trim(adjustl(ltaxout)) == "fc") taxpoint(i)%p => net%tu%fc
-        if (trim(adjustl(ltaxout)) == "wtc") taxpoint(i)%p => net%tu%wtc
-        if (trim(adjustl(ltaxout)) == "ctc") taxpoint(i)%p => net%tu%ctc
-        if (trim(adjustl(ltaxout)) == "ccexp") taxpoint(i)%p => net%tu%ccexp
-        if (trim(adjustl(ltaxout)) == "incsup") taxpoint(i)%p => net%tu%incsup
-        if (trim(adjustl(ltaxout)) == "hben") taxpoint(i)%p => net%tu%hben
-        if (trim(adjustl(ltaxout)) == "polltax") taxpoint(i)%p => net%tu%polltax
-        if (trim(adjustl(ltaxout)) == "polltaxben") taxpoint(i)%p => net%tu%polltaxben
-        if (trim(adjustl(ltaxout)) == "ctax") taxpoint(i)%p => net%tu%ctax
-        if (trim(adjustl(ltaxout)) == "ctaxben") taxpoint(i)%p => net%tu%ctaxben
-        if (trim(adjustl(ltaxout)) == "maxuc") taxpoint(i)%p => net%tu%maxuc
-        if (trim(adjustl(ltaxout)) == "uc") taxpoint(i)%p => net%tu%uc
-        if (trim(adjustl(ltaxout)) == "dispinc") taxpoint(i)%p => net%tu%dispinc
-        if (trim(adjustl(ltaxout)) == "pretax") taxpoint(i)%p => net%tu%pretax
-        if (trim(adjustl(ltaxout)) == "nettax") taxpoint(i)%p => net%tu%nettax
-        if (trim(adjustl(ltaxout)) == "chcaresub") taxpoint(i)%p => net%tu%chcaresub
-        if (trim(adjustl(ltaxout)) == "fsm") taxpoint(i)%p => net%tu%fsm
-        if (trim(adjustl(ltaxout)) == "totben") taxpoint(i)%p => net%tu%totben
+        if (ltaxout == "pretaxearn") taxpoint(i)%p => net%tu%pretaxearn
+        if (ltaxout == "posttaxearn") taxpoint(i)%p => net%tu%posttaxearn
+        if (ltaxout == "chben") taxpoint(i)%p => net%tu%chben
+        if (ltaxout == "matgrant") taxpoint(i)%p => net%tu%matgrant
+        if (ltaxout == "fc") taxpoint(i)%p => net%tu%fc
+        if (ltaxout == "wtc") taxpoint(i)%p => net%tu%wtc
+        if (ltaxout == "ctc") taxpoint(i)%p => net%tu%ctc
+        if (ltaxout == "ccexp") taxpoint(i)%p => net%tu%ccexp
+        if (ltaxout == "incsup") taxpoint(i)%p => net%tu%incsup
+        if (ltaxout == "hben") taxpoint(i)%p => net%tu%hben
+        if (ltaxout == "polltax") taxpoint(i)%p => net%tu%polltax
+        if (ltaxout == "polltaxben") taxpoint(i)%p => net%tu%polltaxben
+        if (ltaxout == "ctax") taxpoint(i)%p => net%tu%ctax
+        if (ltaxout == "ctaxben") taxpoint(i)%p => net%tu%ctaxben
+        if (ltaxout == "maxuc") taxpoint(i)%p => net%tu%maxuc
+        if (ltaxout == "uc") taxpoint(i)%p => net%tu%uc
+        if (ltaxout == "dispinc") taxpoint(i)%p => net%tu%dispinc
+        if (ltaxout == "pretax") taxpoint(i)%p => net%tu%pretax
+        if (ltaxout == "nettax") taxpoint(i)%p => net%tu%nettax
+        if (ltaxout == "chcaresub") taxpoint(i)%p => net%tu%chcaresub
+        if (ltaxout == "fsm") taxpoint(i)%p => net%tu%fsm
+        if (ltaxout == "totben") taxpoint(i)%p => net%tu%totben
                 end if
 
                 if (.not. associated(taxpoint(i)%p)) then
@@ -818,37 +818,37 @@ loopmax : do
                 end if
 
                 if (levelad) then
-        if (trim(adjustl(ltaxout)) == "taxable") taxpoint(i)%p => net%ad(taxad)%taxable
-        if (trim(adjustl(ltaxout)) == "inctax") taxpoint(i)%p => net%ad(taxad)%inctax
-        if (trim(adjustl(ltaxout)) == "natins") taxpoint(i)%p => net%ad(taxad)%natins
-        if (trim(adjustl(ltaxout)) == "natinsc1") taxpoint(i)%p => net%ad(taxad)%natinsc1
-        if (trim(adjustl(ltaxout)) == "natinsc2") taxpoint(i)%p => net%ad(taxad)%natinsc2
-        if (trim(adjustl(ltaxout)) == "natinsc4") taxpoint(i)%p => net%ad(taxad)%natinsc4
-        if (trim(adjustl(ltaxout)) == "pretaxearn") taxpoint(i)%p => net%ad(taxad)%pretaxearn
-        if (trim(adjustl(ltaxout)) == "posttaxearn") taxpoint(i)%p => net%ad(taxad)%posttaxearn
+        if (ltaxout == "taxable") taxpoint(i)%p => net%ad(taxad)%taxable
+        if (ltaxout == "inctax") taxpoint(i)%p => net%ad(taxad)%inctax
+        if (ltaxout == "natins") taxpoint(i)%p => net%ad(taxad)%natins
+        if (ltaxout == "natinsc1") taxpoint(i)%p => net%ad(taxad)%natinsc1
+        if (ltaxout == "natinsc2") taxpoint(i)%p => net%ad(taxad)%natinsc2
+        if (ltaxout == "natinsc4") taxpoint(i)%p => net%ad(taxad)%natinsc4
+        if (ltaxout == "pretaxearn") taxpoint(i)%p => net%ad(taxad)%pretaxearn
+        if (ltaxout == "posttaxearn") taxpoint(i)%p => net%ad(taxad)%posttaxearn
                 else
-        if (trim(adjustl(ltaxout)) == "pretaxearn") taxpoint(i)%p => net%tu%pretaxearn
-        if (trim(adjustl(ltaxout)) == "posttaxearn") taxpoint(i)%p => net%tu%posttaxearn
-        if (trim(adjustl(ltaxout)) == "chben") taxpoint(i)%p => net%tu%chben
-        if (trim(adjustl(ltaxout)) == "matgrant") taxpoint(i)%p => net%tu%matgrant
-        if (trim(adjustl(ltaxout)) == "fc") taxpoint(i)%p => net%tu%fc
-        if (trim(adjustl(ltaxout)) == "wtc") taxpoint(i)%p => net%tu%wtc
-        if (trim(adjustl(ltaxout)) == "ctc") taxpoint(i)%p => net%tu%ctc
-        if (trim(adjustl(ltaxout)) == "ccexp") taxpoint(i)%p => net%tu%ccexp
-        if (trim(adjustl(ltaxout)) == "incsup") taxpoint(i)%p => net%tu%incsup
-        if (trim(adjustl(ltaxout)) == "hben") taxpoint(i)%p => net%tu%hben
-        if (trim(adjustl(ltaxout)) == "polltax") taxpoint(i)%p => net%tu%polltax
-        if (trim(adjustl(ltaxout)) == "polltaxben") taxpoint(i)%p => net%tu%polltaxben
-        if (trim(adjustl(ltaxout)) == "ctax") taxpoint(i)%p => net%tu%ctax
-        if (trim(adjustl(ltaxout)) == "ctaxben") taxpoint(i)%p => net%tu%ctaxben
-        if (trim(adjustl(ltaxout)) == "maxuc") taxpoint(i)%p => net%tu%maxuc
-        if (trim(adjustl(ltaxout)) == "uc") taxpoint(i)%p => net%tu%uc
-        if (trim(adjustl(ltaxout)) == "dispinc") taxpoint(i)%p => net%tu%dispinc
-        if (trim(adjustl(ltaxout)) == "pretax") taxpoint(i)%p => net%tu%pretax
-        if (trim(adjustl(ltaxout)) == "nettax") taxpoint(i)%p => net%tu%nettax
-        if (trim(adjustl(ltaxout)) == "chcaresub") taxpoint(i)%p => net%tu%chcaresub
-        if (trim(adjustl(ltaxout)) == "fsm") taxpoint(i)%p => net%tu%fsm
-        if (trim(adjustl(ltaxout)) == "totben") taxpoint(i)%p => net%tu%totben
+        if (ltaxout == "pretaxearn") taxpoint(i)%p => net%tu%pretaxearn
+        if (ltaxout == "posttaxearn") taxpoint(i)%p => net%tu%posttaxearn
+        if (ltaxout == "chben") taxpoint(i)%p => net%tu%chben
+        if (ltaxout == "matgrant") taxpoint(i)%p => net%tu%matgrant
+        if (ltaxout == "fc") taxpoint(i)%p => net%tu%fc
+        if (ltaxout == "wtc") taxpoint(i)%p => net%tu%wtc
+        if (ltaxout == "ctc") taxpoint(i)%p => net%tu%ctc
+        if (ltaxout == "ccexp") taxpoint(i)%p => net%tu%ccexp
+        if (ltaxout == "incsup") taxpoint(i)%p => net%tu%incsup
+        if (ltaxout == "hben") taxpoint(i)%p => net%tu%hben
+        if (ltaxout == "polltax") taxpoint(i)%p => net%tu%polltax
+        if (ltaxout == "polltaxben") taxpoint(i)%p => net%tu%polltaxben
+        if (ltaxout == "ctax") taxpoint(i)%p => net%tu%ctax
+        if (ltaxout == "ctaxben") taxpoint(i)%p => net%tu%ctaxben
+        if (ltaxout == "maxuc") taxpoint(i)%p => net%tu%maxuc
+        if (ltaxout == "uc") taxpoint(i)%p => net%tu%uc
+        if (ltaxout == "dispinc") taxpoint(i)%p => net%tu%dispinc
+        if (ltaxout == "pretax") taxpoint(i)%p => net%tu%pretax
+        if (ltaxout == "nettax") taxpoint(i)%p => net%tu%nettax
+        if (ltaxout == "chcaresub") taxpoint(i)%p => net%tu%chcaresub
+        if (ltaxout == "fsm") taxpoint(i)%p => net%tu%fsm
+        if (ltaxout == "totben") taxpoint(i)%p => net%tu%totben
                 end if
 
                 if (.not. associated(taxpoint(i)%p)) then
@@ -1248,37 +1248,37 @@ loopmax : do
                 end if
 
                 if (levelad) then
-        if (trim(adjustl(ltaxout)) == "taxable") taxpoint(i)%p => net%ad(taxad)%taxable
-        if (trim(adjustl(ltaxout)) == "inctax") taxpoint(i)%p => net%ad(taxad)%inctax
-        if (trim(adjustl(ltaxout)) == "natins") taxpoint(i)%p => net%ad(taxad)%natins
-        if (trim(adjustl(ltaxout)) == "natinsc1") taxpoint(i)%p => net%ad(taxad)%natinsc1
-        if (trim(adjustl(ltaxout)) == "natinsc2") taxpoint(i)%p => net%ad(taxad)%natinsc2
-        if (trim(adjustl(ltaxout)) == "natinsc4") taxpoint(i)%p => net%ad(taxad)%natinsc4
-        if (trim(adjustl(ltaxout)) == "pretaxearn") taxpoint(i)%p => net%ad(taxad)%pretaxearn
-        if (trim(adjustl(ltaxout)) == "posttaxearn") taxpoint(i)%p => net%ad(taxad)%posttaxearn
+        if (ltaxout == "taxable") taxpoint(i)%p => net%ad(taxad)%taxable
+        if (ltaxout == "inctax") taxpoint(i)%p => net%ad(taxad)%inctax
+        if (ltaxout == "natins") taxpoint(i)%p => net%ad(taxad)%natins
+        if (ltaxout == "natinsc1") taxpoint(i)%p => net%ad(taxad)%natinsc1
+        if (ltaxout == "natinsc2") taxpoint(i)%p => net%ad(taxad)%natinsc2
+        if (ltaxout == "natinsc4") taxpoint(i)%p => net%ad(taxad)%natinsc4
+        if (ltaxout == "pretaxearn") taxpoint(i)%p => net%ad(taxad)%pretaxearn
+        if (ltaxout == "posttaxearn") taxpoint(i)%p => net%ad(taxad)%posttaxearn
                 else
-        if (trim(adjustl(ltaxout)) == "pretaxearn") taxpoint(i)%p => net%tu%pretaxearn
-        if (trim(adjustl(ltaxout)) == "posttaxearn") taxpoint(i)%p => net%tu%posttaxearn
-        if (trim(adjustl(ltaxout)) == "chben") taxpoint(i)%p => net%tu%chben
-        if (trim(adjustl(ltaxout)) == "matgrant") taxpoint(i)%p => net%tu%matgrant
-        if (trim(adjustl(ltaxout)) == "fc") taxpoint(i)%p => net%tu%fc
-        if (trim(adjustl(ltaxout)) == "wtc") taxpoint(i)%p => net%tu%wtc
-        if (trim(adjustl(ltaxout)) == "ctc") taxpoint(i)%p => net%tu%ctc
-        if (trim(adjustl(ltaxout)) == "ccexp") taxpoint(i)%p => net%tu%ccexp
-        if (trim(adjustl(ltaxout)) == "incsup") taxpoint(i)%p => net%tu%incsup
-        if (trim(adjustl(ltaxout)) == "hben") taxpoint(i)%p => net%tu%hben
-        if (trim(adjustl(ltaxout)) == "polltax") taxpoint(i)%p => net%tu%polltax
-        if (trim(adjustl(ltaxout)) == "polltaxben") taxpoint(i)%p => net%tu%polltaxben
-        if (trim(adjustl(ltaxout)) == "ctax") taxpoint(i)%p => net%tu%ctax
-        if (trim(adjustl(ltaxout)) == "ctaxben") taxpoint(i)%p => net%tu%ctaxben
-        if (trim(adjustl(ltaxout)) == "maxuc") taxpoint(i)%p => net%tu%maxuc
-        if (trim(adjustl(ltaxout)) == "uc") taxpoint(i)%p => net%tu%uc
-        if (trim(adjustl(ltaxout)) == "dispinc") taxpoint(i)%p => net%tu%dispinc
-        if (trim(adjustl(ltaxout)) == "pretax") taxpoint(i)%p => net%tu%pretax
-        if (trim(adjustl(ltaxout)) == "nettax") taxpoint(i)%p => net%tu%nettax
-        if (trim(adjustl(ltaxout)) == "chcaresub") taxpoint(i)%p => net%tu%chcaresub
-        if (trim(adjustl(ltaxout)) == "fsm") taxpoint(i)%p => net%tu%fsm
-        if (trim(adjustl(ltaxout)) == "totben") taxpoint(i)%p => net%tu%totben
+        if (ltaxout == "pretaxearn") taxpoint(i)%p => net%tu%pretaxearn
+        if (ltaxout == "posttaxearn") taxpoint(i)%p => net%tu%posttaxearn
+        if (ltaxout == "chben") taxpoint(i)%p => net%tu%chben
+        if (ltaxout == "matgrant") taxpoint(i)%p => net%tu%matgrant
+        if (ltaxout == "fc") taxpoint(i)%p => net%tu%fc
+        if (ltaxout == "wtc") taxpoint(i)%p => net%tu%wtc
+        if (ltaxout == "ctc") taxpoint(i)%p => net%tu%ctc
+        if (ltaxout == "ccexp") taxpoint(i)%p => net%tu%ccexp
+        if (ltaxout == "incsup") taxpoint(i)%p => net%tu%incsup
+        if (ltaxout == "hben") taxpoint(i)%p => net%tu%hben
+        if (ltaxout == "polltax") taxpoint(i)%p => net%tu%polltax
+        if (ltaxout == "polltaxben") taxpoint(i)%p => net%tu%polltaxben
+        if (ltaxout == "ctax") taxpoint(i)%p => net%tu%ctax
+        if (ltaxout == "ctaxben") taxpoint(i)%p => net%tu%ctaxben
+        if (ltaxout == "maxuc") taxpoint(i)%p => net%tu%maxuc
+        if (ltaxout == "uc") taxpoint(i)%p => net%tu%uc
+        if (ltaxout == "dispinc") taxpoint(i)%p => net%tu%dispinc
+        if (ltaxout == "pretax") taxpoint(i)%p => net%tu%pretax
+        if (ltaxout == "nettax") taxpoint(i)%p => net%tu%nettax
+        if (ltaxout == "chcaresub") taxpoint(i)%p => net%tu%chcaresub
+        if (ltaxout == "fsm") taxpoint(i)%p => net%tu%fsm
+        if (ltaxout == "totben") taxpoint(i)%p => net%tu%totben
                 end if
 
                 if (.not. associated(taxpoint(i)%p)) then

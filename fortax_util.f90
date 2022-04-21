@@ -319,7 +319,7 @@ contains
         character(len = 1) :: ch
         integer :: i, lstr, ipos, eex
 
-        str = adjustl(trim(str))
+        str = trim(adjustl(str))
         ipos = scan(str,'eE')
 
         if (ipos > 0) then
@@ -341,14 +341,14 @@ contains
             if (ch == '0') cycle
             if (ch == '.') then
             str = str(1:i) // '0'
-            if (ipos > 0) str = adjustl(trim(str) // trim(ee))
+            if (ipos > 0) str = trim(adjustl(str) // trim(ee))
                 return
             end if
             str = str(1:i)
             exit
         end do
 
-        if (ipos>0) str = adjustl(trim(str) // trim(ee))
+        if (ipos>0) str = trim(adjustl(str) // trim(ee))
 
     end subroutine trimZero
 
