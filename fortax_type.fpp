@@ -209,6 +209,7 @@ module fortax_type
         real(dp), dimension(maxkinks) :: kinks_earn
         real(dp), dimension(maxkinks) :: kinks_net
         real(dp), dimension(maxkinks) :: kinks_mtr
+        character(kind = c_char) :: bc_desc(len_bcdesc)
     end type bcout_t
 
 contains
@@ -474,25 +475,25 @@ contains
         end if
 
         write(funit, *)
-        write(funit, '(A)') repeat("=", 62) 
+        write(funit, '(A)') repeat("=", 62)
         write(funit, '(A)') strCentre('net_desc (TAX UNIT):', 62)
-        write(funit, '(A)') repeat("=", 62) 
+        write(funit, '(A)') repeat("=", 62)
         @:fortax_type_desc(nettu, net%tu)
-        write(funit, '(A)') repeat("=", 62) 
+        write(funit, '(A)') repeat("=", 62)
 
         ! write(funit, *)
-        ! write(funit, '(A)') repeat("=", 62) 
+        ! write(funit, '(A)') repeat("=", 62)
         write(funit, '(A)') strCentre('net_desc (ADULT 1):', 62)
-        write(funit, '(A)') repeat("=", 62) 
+        write(funit, '(A)') repeat("=", 62)
         @:fortax_type_desc(netad, net%ad(1))
-        write(funit, '(A)') repeat("=", 62) 
+        write(funit, '(A)') repeat("=", 62)
 
         ! write(funit, *)
-        ! write(funit, '(A)') repeat("=", 62) 
+        ! write(funit, '(A)') repeat("=", 62)
         write(funit, '(A)') strCentre('net_desc (ADULT 2):', 62)
-        write(funit, '(A)') repeat("=", 62) 
+        write(funit, '(A)') repeat("=", 62)
         @:fortax_type_desc(netad, net%ad(2))
-        write(funit, '(A)') repeat("=", 62) 
+        write(funit, '(A)') repeat("=", 62)
         close(funit)
 
     end subroutine net_desc
@@ -650,7 +651,7 @@ contains
     end subroutine write_f90double
 
     subroutine write_f90doublearray(funit, str, val)
-        use fortax_util, only : intToStr        
+        use fortax_util, only : intToStr
         implicit none
         integer, intent(in) :: funit
         character(len = *), intent(in) :: str
@@ -662,7 +663,7 @@ contains
     end subroutine write_f90doublearray
 
     subroutine write_f90doublearray2(funit, str, val, nval)
-        use fortax_util, only : intToStr        
+        use fortax_util, only : intToStr
         implicit none
         integer, intent(in) :: funit
         character(len = *), intent(in) :: str
@@ -704,7 +705,7 @@ contains
     end subroutine desc_f90integer_label
 
     subroutine desc_f90integerarray(funit, longstr, shortstr, val)
-        use fortax_util, only : intToStr        
+        use fortax_util, only : intToStr
         implicit none
         integer, intent(in) :: funit
         character(len = *), intent(in) :: longstr
@@ -723,7 +724,7 @@ contains
     end subroutine desc_f90integerarray
 
     subroutine desc_f90integerarray_label(funit, longstr, shortstr, val, label)
-        use fortax_util, only : intToStr        
+        use fortax_util, only : intToStr
         implicit none
         integer, intent(in) :: funit
         character(len = *), intent(in) :: longstr
@@ -743,7 +744,7 @@ contains
     end subroutine desc_f90integerarray_label
 
     subroutine desc_f90integerarray2(funit, longstr, shortstr, val, nval)
-        use fortax_util, only : intToStr        
+        use fortax_util, only : intToStr
         implicit none
         integer, intent(in) :: funit
         character(len = *), intent(in) :: longstr
@@ -763,7 +764,7 @@ contains
     end subroutine desc_f90integerarray2
 
     subroutine desc_f90integerarray2_label(funit, longstr, shortstr, val, nval, label)
-        use fortax_util, only : intToStr        
+        use fortax_util, only : intToStr
         implicit none
         integer, intent(in) :: funit
         character(len = *), intent(in) :: longstr
@@ -797,7 +798,7 @@ contains
     end subroutine desc_f90double
 
     subroutine desc_f90doublearray(funit, longstr, shortstr, val)
-        use fortax_util, only : intToStr        
+        use fortax_util, only : intToStr
         implicit none
         integer, intent(in) :: funit
         character(len = *), intent(in) :: longstr
@@ -816,7 +817,7 @@ contains
     end subroutine desc_f90doublearray
 
     subroutine desc_f90doublearray2(funit, longstr, shortstr, val, nval)
-        use fortax_util, only : intToStr        
+        use fortax_util, only : intToStr
         implicit none
         integer, intent(in) :: funit
         character(len = *), intent(in) :: longstr

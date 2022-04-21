@@ -53,6 +53,7 @@ module fortax_type
     integer, parameter, public :: len_sysindex = 256
     integer, parameter, public :: len_label = 16
     integer, parameter, public :: len_labstring = 64
+    integer, parameter, public :: len_bcdesc = 256
 
     ! lab_t
     ! -----------------------------------------------------------------------
@@ -551,6 +552,7 @@ module fortax_type
         real(dp), dimension(maxkinks) :: kinks_earn
         real(dp), dimension(maxkinks) :: kinks_net
         real(dp), dimension(maxkinks) :: kinks_mtr
+        character(kind = c_char) :: bc_desc(len_bcdesc)
     end type bcout_t
 
 contains
@@ -663,6 +665,7 @@ contains
     end subroutine fam_desc
 
     ! obtain string labels for the variable value labels
+
 
 
 
@@ -1358,9 +1361,9 @@ end function labstring_region
         end if
 
         write(funit, *)
-        write(funit, '(A)') repeat("=", 62) 
+        write(funit, '(A)') repeat("=", 62)
         write(funit, '(A)') strCentre('net_desc (TAX UNIT):', 62)
-        write(funit, '(A)') repeat("=", 62) 
+        write(funit, '(A)') repeat("=", 62)
         call desc_f90(funit, "Pre-tax earnings", "pretaxearn", net%tu%pretaxearn)
         call desc_f90(funit, "Post-tax earnings", "posttaxearn", net%tu%posttaxearn)
         call desc_f90(funit, "Child benefit", "chben", net%tu%chben)
@@ -1383,12 +1386,12 @@ end function labstring_region
         call desc_f90(funit, "Childcare subsidy", "chcaresub", net%tu%chcaresub)
         call desc_f90(funit, "Free school meals value", "fsm", net%tu%fsm)
         call desc_f90(funit, "Total benefits and Tax Credits", "totben", net%tu%totben)
-        write(funit, '(A)') repeat("=", 62) 
+        write(funit, '(A)') repeat("=", 62)
 
         ! write(funit, *)
-        ! write(funit, '(A)') repeat("=", 62) 
+        ! write(funit, '(A)') repeat("=", 62)
         write(funit, '(A)') strCentre('net_desc (ADULT 1):', 62)
-        write(funit, '(A)') repeat("=", 62) 
+        write(funit, '(A)') repeat("=", 62)
         call desc_f90(funit, "Taxable income", "taxable", net%ad(1)%taxable)
         call desc_f90(funit, "Income tax", "inctax", net%ad(1)%inctax)
         call desc_f90(funit, "National Insurance", "natins", net%ad(1)%natins)
@@ -1397,12 +1400,12 @@ end function labstring_region
         call desc_f90(funit, "National Insurance, class 4", "natinsc4", net%ad(1)%natinsc4)
         call desc_f90(funit, "Pre-tax earnings", "pretaxearn", net%ad(1)%pretaxearn)
         call desc_f90(funit, "Post-tax earnings", "posttaxearn", net%ad(1)%posttaxearn)
-        write(funit, '(A)') repeat("=", 62) 
+        write(funit, '(A)') repeat("=", 62)
 
         ! write(funit, *)
-        ! write(funit, '(A)') repeat("=", 62) 
+        ! write(funit, '(A)') repeat("=", 62)
         write(funit, '(A)') strCentre('net_desc (ADULT 2):', 62)
-        write(funit, '(A)') repeat("=", 62) 
+        write(funit, '(A)') repeat("=", 62)
         call desc_f90(funit, "Taxable income", "taxable", net%ad(2)%taxable)
         call desc_f90(funit, "Income tax", "inctax", net%ad(2)%inctax)
         call desc_f90(funit, "National Insurance", "natins", net%ad(2)%natins)
@@ -1411,7 +1414,7 @@ end function labstring_region
         call desc_f90(funit, "National Insurance, class 4", "natinsc4", net%ad(2)%natinsc4)
         call desc_f90(funit, "Pre-tax earnings", "pretaxearn", net%ad(2)%pretaxearn)
         call desc_f90(funit, "Post-tax earnings", "posttaxearn", net%ad(2)%posttaxearn)
-        write(funit, '(A)') repeat("=", 62) 
+        write(funit, '(A)') repeat("=", 62)
         close(funit)
 
     end subroutine net_desc
@@ -2034,7 +2037,7 @@ end function labstring_region
     end subroutine write_f90double
 
     subroutine write_f90doublearray(funit, str, val)
-        use fortax_util, only : intToStr        
+        use fortax_util, only : intToStr
         implicit none
         integer, intent(in) :: funit
         character(len = *), intent(in) :: str
@@ -2046,7 +2049,7 @@ end function labstring_region
     end subroutine write_f90doublearray
 
     subroutine write_f90doublearray2(funit, str, val, nval)
-        use fortax_util, only : intToStr        
+        use fortax_util, only : intToStr
         implicit none
         integer, intent(in) :: funit
         character(len = *), intent(in) :: str
@@ -2088,7 +2091,7 @@ end function labstring_region
     end subroutine desc_f90integer_label
 
     subroutine desc_f90integerarray(funit, longstr, shortstr, val)
-        use fortax_util, only : intToStr        
+        use fortax_util, only : intToStr
         implicit none
         integer, intent(in) :: funit
         character(len = *), intent(in) :: longstr
@@ -2107,7 +2110,7 @@ end function labstring_region
     end subroutine desc_f90integerarray
 
     subroutine desc_f90integerarray_label(funit, longstr, shortstr, val, label)
-        use fortax_util, only : intToStr        
+        use fortax_util, only : intToStr
         implicit none
         integer, intent(in) :: funit
         character(len = *), intent(in) :: longstr
@@ -2127,7 +2130,7 @@ end function labstring_region
     end subroutine desc_f90integerarray_label
 
     subroutine desc_f90integerarray2(funit, longstr, shortstr, val, nval)
-        use fortax_util, only : intToStr        
+        use fortax_util, only : intToStr
         implicit none
         integer, intent(in) :: funit
         character(len = *), intent(in) :: longstr
@@ -2147,7 +2150,7 @@ end function labstring_region
     end subroutine desc_f90integerarray2
 
     subroutine desc_f90integerarray2_label(funit, longstr, shortstr, val, nval, label)
-        use fortax_util, only : intToStr        
+        use fortax_util, only : intToStr
         implicit none
         integer, intent(in) :: funit
         character(len = *), intent(in) :: longstr
@@ -2181,7 +2184,7 @@ end function labstring_region
     end subroutine desc_f90double
 
     subroutine desc_f90doublearray(funit, longstr, shortstr, val)
-        use fortax_util, only : intToStr        
+        use fortax_util, only : intToStr
         implicit none
         integer, intent(in) :: funit
         character(len = *), intent(in) :: longstr
@@ -2200,7 +2203,7 @@ end function labstring_region
     end subroutine desc_f90doublearray
 
     subroutine desc_f90doublearray2(funit, longstr, shortstr, val, nval)
-        use fortax_util, only : intToStr        
+        use fortax_util, only : intToStr
         implicit none
         integer, intent(in) :: funit
         character(len = *), intent(in) :: longstr
