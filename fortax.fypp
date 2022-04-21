@@ -408,7 +408,7 @@ lab%${lab}$%${labval}$
 #:enddef
 
 #:def fortax_fam_gen()
-    #:call join_lines(joinstr = ", ", prefix="function fam_gen(", suffix=") result(fam)")
+    #:call join_lines(joinstr = ", ", prefix="subroutine fam_gen(fam, ", suffix=")")
         @:fortax_type_list(fam)
         @:fortax_type_list(famad, suffix = 1)
         @:fortax_type_list(famad, suffix = 2)
@@ -419,11 +419,11 @@ lab%${lab}$%${labval}$
 
         implicit none
 
+        type(fam_t), intent(out) :: fam
         @:fortax_type_def(fam, attributes = "intent(in), optional", assumed = True)
         @:fortax_type_def(famad, attributes = "intent(in), optional", suffix = 1, assumed = True)
         @:fortax_type_def(famad, attributes = "intent(in), optional", suffix = 2, assumed = True)
         logical, intent(in), optional :: correct
-        type(fam_t) :: fam
         logical :: correct2
         integer :: kidSize
         logical :: ad2
@@ -457,7 +457,7 @@ lab%${lab}$%${labval}$
 
         end if
 
-    end function fam_gen
+    end subroutine fam_gen
 #:enddef
 
 #! set minamt
