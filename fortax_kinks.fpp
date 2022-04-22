@@ -197,7 +197,8 @@ contains
 
         write(funit, *)
         write(funit, '(A)') repeat("=", 62)
-        write(funit, '(A)') strCentre('kinks_desc (' // trim(adjustl(bc_desc)) // '):', 62)
+        ! write(funit, '(A)') strCentre('kinks_desc (' // trim(adjustl(bc_desc)) // '):', 62)
+        write(funit, '(A)') strCentre(trim(adjustl(bc_desc)), 62)
         write(funit, '(A)') repeat("=", 62)
         write(funit, '(A14, 2X, A14, 2X, A14, 2X, A13)') "Hours", "Earnings", "Income", "Rate"
         write(funit, '(A)') repeat("=", 62)
