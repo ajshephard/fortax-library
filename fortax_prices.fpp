@@ -35,11 +35,13 @@ module fortax_prices
 
     public :: loadindex, setindex, getindex, upratefactor, upratesys
     public :: checkdate, loadsysindex, getsysindex, rpi_saveF90
+    public :: operator(*)
 
     interface operator(*)
         module procedure sys_times_factor
         module procedure factor_times_sys
     end interface
+
 
 contains
 
