@@ -125,21 +125,19 @@ Note that amounts in FORTAX are at the weekly level. If we wish to get the annua
 ```
 net = net * 52
 ```
-If we wish to calulate marginal tax rates holding hours-of-work fixed, we could do the following
+If we wish to calculate marginal tax rates holding hours-of-work fixed, we could compute a forward difference
 ```
 type(net_t) :: net1, net2, dnet
 real(dp) :: mtr, dearn
 
-! incomes at (fam%ad(1)earn = 300, fam%ad(1)earn = 20)
 call FORTAX_fam_gen(fam, earn1 = 300.0_dp, hrs1 = 20.0_dp, ccexp = 100.0_dp, kidage = [0, 4])
 call FORTAX_calcNetInc(sys, fam, net1)
 
-! incomes at (fam%ad(1)earn = 300+dearn, fam%ad(1)earn = 20)
 dearn = 1e-4_dp
 fam%ad(1)%earn = fam%ad(1)%earn + dearn
 call FORTAX_calcNetInc(sys, fam, net2)
 ```
-With the information in `net2` and `net1` we could calculate the total marginal effective tax rate as
+With the information in `net2` and `net1` we can calculate the total marginal effective tax rate as
 ```
 mtr = (net2%tu%nettax - net2%tu%nettax) / dearn
 ```
@@ -147,6 +145,7 @@ Alternatively, we could calculate the marginal tax rates for all income income c
 ```
 dnet = (net2 - net1) / dearn
 ```
+which would then allow us to understand how all the different components of income are changing as earnings increase.
 
 ## Piecewise linear budget sets
 
@@ -179,7 +178,7 @@ call FORTAX_kinks_desc(bc)
 In this example, this would return
 ```
 ==============================================================
-                         kinks_desc:                          
+                          tu%dispinc                          
 ==============================================================
          Hours        Earnings          Income           Rate
 ==============================================================
@@ -199,7 +198,7 @@ In this example, this would return
         50.000         300.000         430.296        0.30000
 ==============================================================
 ```
-This describes the piecewise linear representation of the budget constraint (family net income) so the rate here is the slope of the budget constraint. FORTAX correctly identifies the location of the hours-of-work discontinuities (due to rules in the UK tax credit system), and encodes positive / negative instances a rate of (+/-)9.999. (`FORTAX_kinks_desc` also visually indicates discontinuities using an asterisk next to the rate.)
+This describes the piecewise linear representation of the budget constraint (family net income, `net%tu%dispinc`) so the rate here is the slope of the budget constraint. FORTAX correctly identifies the location of the hours-of-work discontinuities (due to rules in the UK tax credit system), and encodes positive / negative instances a rate of (+/-)9.999. (`FORTAX_kinks_desc` also visually indicates discontinuities using an asterisk next to the rate.)
 
 Once the budget constraint has been calculated with `FORTAX_kinksHours` it is very simple to obtain the incomes at an arbitray value of hours over the interval that it was calculated (so 0 and 50 in our example here) using `FORTAX_evalKinksHours`. If we wish to calculate net income at 40 hours we would do
 ```
@@ -221,7 +220,7 @@ call FORTAX_kinks_desc(bc)
 The output of `FORTAX_kinks_desc` is
 ```
 ==============================================================
-                         kinks_desc:                          
+                   ad(1)%(inctax + natins)                    
 ==============================================================
          Hours        Earnings          Income           Rate
 ==============================================================
@@ -270,3 +269,15 @@ call FORTAX_writeFortaxParams(sys, fname)
 # Interfaces
 
 The FORTAX library can be called by other programming languages and software packages. The Fortran C bindings are defined in `fortax_library_c.f90`. A [Julia](https://julialang.org/) interface is provided in `fortax_julia.jl`. A [Stata](https://www.stata.com/) plugin is also available.
+
+### Julia
+
+The Julia version can be used much like the Fortran version. Almost all the functions in the `fortax_library.f90` module are accessible through Julia.
+Consider the following example where we load a system and calculate incomes for a specified family type.
+```
+sys = readFortaxParams("systems/fortax/April06.json")
+fam = fam_gen(earn1 = 300.0, hrs1 = 20.0, ccexp = 100.0, kidage = [0, 4])
+net = calcNetInc(sys, fam)
+net_desc(net)
+```
+The output from `net_desc` is identical to that which we saw before. The Julia structs defining `fam_t`, `sys_t`, etc. are immutable. If you wish to manually change any of the fields the user can use [Setfield.jl](https://github.com/jw3126/Setfield.jl), for example.
