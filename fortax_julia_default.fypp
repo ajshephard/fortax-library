@@ -71,6 +71,11 @@ ${"".join([" "*4 + line+"\n" for line in txt.split("\n")])}$
     #:def fortaxdef(type, var, str, attr, **kwargs)
         #:mute
             $:check_fortax_arg(type, var, str, attr, kwargs)
+            #:if "value" in kwargs
+                #:set default = kwargs["value"]
+            #:else
+                #:set default = JULIA_TYPE_DEFAULT[type]
+            #:endif
             #:if "dim" in kwargs
                 #:set array = True
             #:else
@@ -78,9 +83,9 @@ ${"".join([" "*4 + line+"\n" for line in txt.split("\n")])}$
             #:endif
         #:endmute
         #:if array
-        ${var}$::SVector{${kwargs["dim"]}$, ${JULIA_TYPE[type]}$}
+        ${var}$::SVector{${kwargs["dim"]}$, ${JULIA_TYPE[type]}$} = @SVector [${default}$ for _ = 1:${kwargs["dim"]}$]
         #:else
-        ${var}$::${JULIA_TYPE[type]}$
+        ${var}$::${JULIA_TYPE[type]}$ = ${default}$
         #:endif
     #:enddef
     #:include "include_files.fypp"
@@ -140,63 +145,63 @@ lab_${lab}$.${labval}$
 @:fortax_const()
 @:fortax_label_param()
 
-struct famad_t
+@with_kw struct famad_t
 @:fortax_type_def(famad)
 end
 
-struct fam_t
+@with_kw struct fam_t
     @:fortax_type_def(fam)
-    ad::SVector{2, famad_t}
+    ad::SVector{2, famad_t} = @SVector [famad_t() for _ = 1:2]
 end
 
-struct netad_t
+@with_kw struct netad_t
     @:fortax_type_def(netad)
 end
 
-struct nettu_t
+@with_kw struct nettu_t
     @:fortax_type_def(nettu)
 end
 
-struct net_t
-    ad::SVector{2, netad_t}
-    tu::nettu_t
+@with_kw struct net_t
+    ad::SVector{2, netad_t} = @SVector [netad_t() for _ = 1:2]
+    tu::nettu_t = nettu_t()
 end
 
-struct rpi_t
-    ndate::Cint
-    date::SVector{maxRpi, Cint}
-    index::SVector{maxRpi, Cdouble}
+@with_kw struct rpi_t
+    ndate::Cint = 0
+    date::SVector{maxRpi, Cint} = zeros(maxRpi)
+    index::SVector{maxRpi, Cdouble} = ones(maxRpi)
 end
 
-struct sysindex_t
-    nsys::Cint
-    date0::SVector{maxSysIndex, Cint}
-    date1::SVector{maxSysIndex, Cint}
-    index::SMatrix{len_sysindex, maxSysIndex, Cchar}
+@with_kw struct sysindex_t
+    nsys::Cint = 0
+    date0::SVector{maxSysIndex, Cint} = zeros(maxRpi)
+    date1::SVector{maxSysIndex, Cint} = zeros(maxRpi)
+    index::SMatrix{len_sysindex, maxSysIndex, Cchar} = ' '
 end
 
 #:for SYS in SYSLIST
-struct ${SYS}$_t
+@with_kw struct ${SYS}$_t
     @:fortax_type_def(${SYS}$)
 end
 
 #:endfor
 
-struct sys_t
-    sysname::SVector{len_sysname, Cchar}
-    sysdesc::SVector{len_sysdesc, Cchar}
+@with_kw struct sys_t
+    sysname::SVector{len_sysname, Cchar} = ' '
+    sysdesc::SVector{len_sysdesc, Cchar} = ' '
     #:for SYS in SYSLIST
-        ${SYS}$::${SYS}$_t
+        ${SYS}$::${SYS}$_t = ${SYS}$_t()
     #:endfor
 end
 
-struct bcout_t
-    kinks_num::Cint
-    kinks_hrs::SVector{maxKinks, Cdouble}
-    kinks_earn::SVector{maxKinks, Cdouble}
-    kinks_net::SVector{maxKinks, Cdouble}
-    kinks_mtr::SVector{maxKinks, Cdouble}
-    bc_desc::SVector{len_bcdesc, Cchar}
+@with_kw struct bcout_t
+    kinks_num::Cint = 0
+    kinks_hrs::SVector{maxKinks, Cdouble} = 0.0
+    kinks_earn::SVector{maxKinks, Cdouble} = 0.0
+    kinks_net::SVector{maxKinks, Cdouble} = 0.0
+    kinks_mtr::SVector{maxKinks, Cdouble} = 0.0
+    bc_desc::SVector{len_bcdesc, Cchar} = ' '
 end
 
 
