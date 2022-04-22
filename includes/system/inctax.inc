@@ -10,5 +10,5 @@
 @:fortaxdef(double,  mmarate, "", rate)
 @:fortaxdef(double,  ctctaper, "", rate)
 @:fortaxdef(double,  c4rebate, "", rate)
-@:fortaxdef(double,  bands, "Income tax bands", amount, dim = MaxIncTaxBands, dimvar = numbands)
-@:fortaxdef(double,  rates, "Income tax rates", rate, dim = MaxIncTaxBands, dimvar = numbands)
+@:fortaxdef(double,  bands, "Income tax bands", amount, dim = maxIncTaxBands, dimvar = numbands)
+@:fortaxdef(double,  rates, "Income tax rates", rate, dim = maxIncTaxBands, dimvar = numbands)
