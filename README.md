@@ -280,4 +280,4 @@ fam = fam_gen(earn1 = 300.0, hrs1 = 20.0, ccexp = 100.0, kidage = [0, 4])
 net = calcNetInc(sys, fam)
 net_desc(net)
 ```
-The output from `net_desc` is identical to that which we saw before. The Julia structs defining `fam_t`, `sys_t`, etc. are immutable. If you wish to change the fields the user can use [Setfield.jl](https://github.com/jw3126/Setfield.jl), for example.
+The output from `net_desc` is identical to that which we saw before. The Julia structs defining `fam_t`, `sys_t`, etc. are immutable. If you wish to manually change any of the fields the user can use [Setfield.jl](https://github.com/jw3126/Setfield.jl), for example.
