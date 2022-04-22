@@ -3,7 +3,7 @@
 @:fortaxdef(double,  ccexp,      "Childcare expenditure",    amount)
 @:fortaxdef(double,  maint,      "Maintenance income",       amount)
 @:fortaxdef(integer, nkids,      "Number of children",       null)
-@:fortaxdef(integer, kidage,     "Age of children",          null, dim = maxkids, dimvar = nkids)
+@:fortaxdef(integer, kidage,     "Age of children",          null, dim = maxKids, dimvar = nkids)
 @:fortaxdef(integer, nothads,    "Number of other adults",   null)
 @:fortaxdef(integer, tenure,     "Housing tenure",           null, value = ${fortax_value_lab("tenure", "own_outright")}$, label = tenure)
 @:fortaxdef(double,  rent,       "Housing rent",             amount)
