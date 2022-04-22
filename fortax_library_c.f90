@@ -380,14 +380,18 @@ contains
         type(sys_t), intent(in) :: sys
         character(kind = c_char), dimension(*), optional, intent(in) :: fname
         integer(kind = c_int), optional, intent(in) :: len_fname
-        call FORTAX_printFortaxParams(sys, copy_a2s(fname(1:len_fname)))
+        if (present(fname) .and. present(len_fname)) then
+            call FORTAX_printFortaxParams(sys, copy_a2s(fname(1:len_fname)))
+        else
+            call FORTAX_printFortaxParams(sys)
+        end if
     end subroutine c_printFortaxParams
 
     subroutine c_writeFortaxParams(sys, fname, len_fname) bind(C, name = "C_FORTAX_writeFortaxParams")
         implicit none
         type(sys_t), intent(in) :: sys
-        character(kind = c_char), dimension(*), optional, intent(in) :: fname
-        integer(kind = c_int), optional, intent(in) :: len_fname
+        character(kind = c_char), dimension(*), intent(in) :: fname
+        integer(kind = c_int), intent(in) :: len_fname
         call FORTAX_writeFortaxParams(sys, copy_a2s(fname(1:len_fname)))
     end subroutine c_writeFortaxParams
 
