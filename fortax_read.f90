@@ -108,8 +108,8 @@ contains
         call json%get("inctax.bands", double_array, found)
         if (found) then
             sz = size(double_array)
-            if (sz > MaxIncTaxBands) then
-                call fortaxError("json file: length inctax.bands > MaxIncTaxBands")
+            if (sz > maxIncTaxBands) then
+                call fortaxError("json file: length inctax.bands > maxIncTaxBands")
             else
                 sys%inctax%bands(1:sz) = double_array
             endif
@@ -117,8 +117,8 @@ contains
         call json%get("inctax.rates", double_array, found)
         if (found) then
             sz = size(double_array)
-            if (sz > MaxIncTaxBands) then
-                call fortaxError("json file: length inctax.rates > MaxIncTaxBands")
+            if (sz > maxIncTaxBands) then
+                call fortaxError("json file: length inctax.rates > maxIncTaxBands")
             else
                 sys%inctax%rates(1:sz) = double_array
             endif
@@ -131,8 +131,8 @@ contains
         call json%get("natins.rates", double_array, found)
         if (found) then
             sz = size(double_array)
-            if (sz > MaxNatInsBands) then
-                call fortaxError("json file: length natins.rates > MaxNatInsBands")
+            if (sz > maxNatInsBands) then
+                call fortaxError("json file: length natins.rates > maxNatInsBands")
             else
                 sys%natins%rates(1:sz) = double_array
             endif
@@ -140,8 +140,8 @@ contains
         call json%get("natins.bands", double_array, found)
         if (found) then
             sz = size(double_array)
-            if (sz > MaxNatInsBands) then
-                call fortaxError("json file: length natins.bands > MaxNatInsBands")
+            if (sz > maxNatInsBands) then
+                call fortaxError("json file: length natins.bands > maxNatInsBands")
             else
                 sys%natins%bands(1:sz) = double_array
             endif
@@ -149,8 +149,8 @@ contains
         call json%get("natins.c4rates", double_array, found)
         if (found) then
             sz = size(double_array)
-            if (sz > MaxNatInsC4Bands) then
-                call fortaxError("json file: length natins.c4rates > MaxNatInsC4Bands")
+            if (sz > maxNatInsC4Bands) then
+                call fortaxError("json file: length natins.c4rates > maxNatInsC4Bands")
             else
                 sys%natins%c4rates(1:sz) = double_array
             endif
@@ -158,8 +158,8 @@ contains
         call json%get("natins.c4bands", double_array, found)
         if (found) then
             sz = size(double_array)
-            if (sz > MaxNatInsC4Bands) then
-                call fortaxError("json file: length natins.c4bands > MaxNatInsC4Bands")
+            if (sz > maxNatInsC4Bands) then
+                call fortaxError("json file: length natins.c4bands > maxNatInsC4Bands")
             else
                 sys%natins%c4bands(1:sz) = double_array
             endif
@@ -195,8 +195,8 @@ contains
         call json%get("fc.kidagel", integer_array, found)
         if (found) then
             sz = size(integer_array)
-            if (sz > MaxNumAgeRng) then
-                call fortaxError("json file: length fc.kidagel > MaxNumAgeRng")
+            if (sz > maxNumAgeRng) then
+                call fortaxError("json file: length fc.kidagel > maxNumAgeRng")
             else
                 sys%fc%kidagel(1:sz) = integer_array
             endif
@@ -204,8 +204,8 @@ contains
         call json%get("fc.kidageu", integer_array, found)
         if (found) then
             sz = size(integer_array)
-            if (sz > MaxNumAgeRng) then
-                call fortaxError("json file: length fc.kidageu > MaxNumAgeRng")
+            if (sz > maxNumAgeRng) then
+                call fortaxError("json file: length fc.kidageu > maxNumAgeRng")
             else
                 sys%fc%kidageu(1:sz) = integer_array
             endif
@@ -213,8 +213,8 @@ contains
         call json%get("fc.kidcred", double_array, found)
         if (found) then
             sz = size(double_array)
-            if (sz > MaxNumAgeRng) then
-                call fortaxError("json file: length fc.kidcred > MaxNumAgeRng")
+            if (sz > maxNumAgeRng) then
+                call fortaxError("json file: length fc.kidcred > maxNumAgeRng")
             else
                 sys%fc%kidcred(1:sz) = double_array
             endif
@@ -266,8 +266,8 @@ contains
         call json%get("incsup.AgeRngl", integer_array, found)
         if (found) then
             sz = size(integer_array)
-            if (sz > MaxNumAgeRng) then
-                call fortaxError("json file: length incsup.AgeRngl > MaxNumAgeRng")
+            if (sz > maxNumAgeRng) then
+                call fortaxError("json file: length incsup.AgeRngl > maxNumAgeRng")
             else
                 sys%incsup%AgeRngl(1:sz) = integer_array
             endif
@@ -275,8 +275,8 @@ contains
         call json%get("incsup.AgeRngu", integer_array, found)
         if (found) then
             sz = size(integer_array)
-            if (sz > MaxNumAgeRng) then
-                call fortaxError("json file: length incsup.AgeRngu > MaxNumAgeRng")
+            if (sz > maxNumAgeRng) then
+                call fortaxError("json file: length incsup.AgeRngu > maxNumAgeRng")
             else
                 sys%incsup%AgeRngu(1:sz) = integer_array
             endif
@@ -284,8 +284,8 @@ contains
         call json%get("incsup.AddKid", double_array, found)
         if (found) then
             sz = size(double_array)
-            if (sz > MaxNumAgeRng) then
-                call fortaxError("json file: length incsup.AddKid > MaxNumAgeRng")
+            if (sz > maxNumAgeRng) then
+                call fortaxError("json file: length incsup.AddKid > maxNumAgeRng")
             else
                 sys%incsup%AddKid(1:sz) = double_array
             endif
@@ -327,8 +327,8 @@ contains
         call json%get("rebatesys.AgeRngl", integer_array, found)
         if (found) then
             sz = size(integer_array)
-            if (sz > MaxNumAgeRng) then
-                call fortaxError("json file: length rebatesys.AgeRngl > MaxNumAgeRng")
+            if (sz > maxNumAgeRng) then
+                call fortaxError("json file: length rebatesys.AgeRngl > maxNumAgeRng")
             else
                 sys%rebatesys%AgeRngl(1:sz) = integer_array
             endif
@@ -336,8 +336,8 @@ contains
         call json%get("rebatesys.AgeRngu", integer_array, found)
         if (found) then
             sz = size(integer_array)
-            if (sz > MaxNumAgeRng) then
-                call fortaxError("json file: length rebatesys.AgeRngu > MaxNumAgeRng")
+            if (sz > maxNumAgeRng) then
+                call fortaxError("json file: length rebatesys.AgeRngu > maxNumAgeRng")
             else
                 sys%rebatesys%AgeRngu(1:sz) = integer_array
             endif
@@ -345,8 +345,8 @@ contains
         call json%get("rebatesys.AddKid", double_array, found)
         if (found) then
             sz = size(double_array)
-            if (sz > MaxNumAgeRng) then
-                call fortaxError("json file: length rebatesys.AddKid > MaxNumAgeRng")
+            if (sz > maxNumAgeRng) then
+                call fortaxError("json file: length rebatesys.AddKid > maxNumAgeRng")
             else
                 sys%rebatesys%AddKid(1:sz) = double_array
             endif

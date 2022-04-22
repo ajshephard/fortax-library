@@ -40,14 +40,14 @@ module fortax_type
 
     ! constants for array bounds and internal values
     integer, parameter, public :: maxKids = 16
-    integer, parameter, public :: maxRPI = 1024
+    integer, parameter, public :: maxRpi = 1024
     integer, parameter, public :: maxSysIndex = 128
-    integer, parameter, public :: MaxNumAgeRng = 32
-    integer, parameter, public :: MaxIncTaxBands = 32
-    integer, parameter, public :: MaxNatInsBands = 32
-    integer, parameter, public :: MaxNatInsC4Bands = 32
-    integer, parameter, public :: MaxKinks = 256
-    real(dp), parameter, public :: SysHuge = 1.0e100_dp
+    integer, parameter, public :: maxNumAgeRng = 32
+    integer, parameter, public :: maxIncTaxBands = 32
+    integer, parameter, public :: maxNatInsBands = 32
+    integer, parameter, public :: maxNatInsC4Bands = 32
+    integer, parameter, public :: maxKinks = 256
+    real(dp), parameter, public :: sysHuge = 1.0e100_dp
     integer, parameter, public :: len_sysname = 64
     integer, parameter, public :: len_sysdesc = 512
     integer, parameter, public :: len_sysindex = 256
@@ -163,7 +163,7 @@ module fortax_type
         real(dp) :: ccexp
         real(dp) :: maint
         integer :: nkids
-        integer :: kidage(maxkids)
+        integer :: kidage(maxKids)
         integer :: nothads
         integer :: tenure
         real(dp) :: rent
@@ -299,8 +299,8 @@ module fortax_type
         real(dp) :: mmarate
         real(dp) :: ctctaper
         real(dp) :: c4rebate
-        real(dp) :: bands(MaxIncTaxBands)
-        real(dp) :: rates(MaxIncTaxBands)
+        real(dp) :: bands(maxIncTaxBands)
+        real(dp) :: rates(maxIncTaxBands)
     end type inctax_t
 
     type, bind(c) :: natins_t
@@ -309,10 +309,10 @@ module fortax_type
         real(dp) :: c2floor
         real(dp) :: c2rate
         real(dp) :: ceiling
-        real(dp) :: rates(MaxNatInsBands)
-        real(dp) :: bands(MaxNatInsBands)
-        real(dp) :: c4rates(MaxNatInsC4Bands)
-        real(dp) :: c4bands(MaxNatInsC4Bands)
+        real(dp) :: rates(maxNatInsBands)
+        real(dp) :: bands(maxNatInsBands)
+        real(dp) :: c4rates(maxNatInsC4Bands)
+        real(dp) :: c4bands(maxNatInsC4Bands)
     end type natins_t
 
     type, bind(c) :: chben_t
@@ -347,9 +347,9 @@ module fortax_type
         real(dp) :: WFTCMaxCC2
         real(dp) :: WFTCPropCC
         real(dp) :: MinAmt
-        integer :: kidagel(MaxNumAgeRng)
-        integer :: kidageu(MaxNumAgeRng)
-        real(dp) :: kidcred(MaxNumAgeRng)
+        integer :: kidagel(maxNumAgeRng)
+        integer :: kidageu(maxNumAgeRng)
+        real(dp) :: kidcred(maxNumAgeRng)
     end type fc_t
 
     type, bind(c) :: ctc_t
@@ -406,9 +406,9 @@ module fortax_type
         real(dp) :: PremLP
         real(dp) :: hours
         real(dp) :: MaintDisreg
-        integer :: AgeRngl(MaxNumAgeRng)
-        integer :: AgeRngu(MaxNumAgeRng)
-        real(dp) :: AddKid(MaxNumAgeRng)
+        integer :: AgeRngl(maxNumAgeRng)
+        integer :: AgeRngu(maxNumAgeRng)
+        real(dp) :: AddKid(maxNumAgeRng)
     end type incsup_t
 
     type, bind(c) :: ctax_t
@@ -449,9 +449,9 @@ module fortax_type
         real(dp) :: MaxCC1
         real(dp) :: MaxCC2
         integer :: MaxAgeCC
-        integer :: AgeRngl(MaxNumAgeRng)
-        integer :: AgeRngu(MaxNumAgeRng)
-        real(dp) :: AddKid(MaxNumAgeRng)
+        integer :: AgeRngl(maxNumAgeRng)
+        integer :: AgeRngu(maxNumAgeRng)
+        real(dp) :: AddKid(maxNumAgeRng)
     end type rebatesys_t
 
     type, bind(c) :: hben_t
@@ -927,7 +927,7 @@ end function labstring_region
         if (present(maint)) fam%maint = maint
         if (present(nkids)) fam%nkids = nkids
         if (present(kidage)) then
-            if (size(kidage) > maxkids) then
+            if (size(kidage) > maxKids) then
                 call fortaxError("kidage exceeds bounds in fam_gen")
             else
                 fam%kidage(1:size(kidage)) = kidage
