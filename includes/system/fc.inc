@@ -1,4 +1,4 @@
-@:fortaxdef(bool,    dofamcred,    "", null)
+@:fortaxdef(bool,    dofamcred,    "", null, label = bool)
 @:fortaxdef(integer, NumAgeRng,    "", range)
 @:fortaxdef(integer, MaxAgeCC,     "", range)
 @:fortaxdef(integer, WFTCMaxAgeCC, "", range)

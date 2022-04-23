@@ -1,4 +1,4 @@
-@:fortaxdef(bool,   dopolltax, "", null)
+@:fortaxdef(bool,   dopolltax, "", null, label = bool)
 @:fortaxdef(double, taper,     "", rate)
 @:fortaxdef(double, PropElig,  "", scale)
 @:fortaxdef(double, MinAmt,    "", minamount)

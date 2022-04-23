@@ -1,5 +1,5 @@
-@:fortaxdef(bool,   doCap,     "", null)
-@:fortaxdef(bool,   doThruUC,  "", null)
+@:fortaxdef(bool,   doCap,     "", null, label = bool)
+@:fortaxdef(bool,   doThruUC,  "", null, label = bool)
 @:fortaxdef(double, sinNoKids, "", amount)
 @:fortaxdef(double, sinKids,   "", amount)
 @:fortaxdef(double, couNoKids, "", amount)

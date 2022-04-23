@@ -12,4 +12,4 @@
 @:fortaxdef(double,  PropCC,        "", rate)       
 @:fortaxdef(integer, MaxAgeCC,      "", range)
 @:fortaxdef(double,  NewDisreg,     "", range)
-@:fortaxdef(bool,    NewDisregCon,  "", null)
+@:fortaxdef(bool,    NewDisregCon,  "", null, label = bool)
