@@ -437,6 +437,7 @@ contains
     ! set to 0, doubles to 0.0_dp and logicals to .false. (and similarly
     ! for arrays)
 
+    !DEC$ ATTRIBUTES FORCEINLINE :: net_init
     elemental subroutine net_init(net)
 
         implicit none
