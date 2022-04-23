@@ -268,7 +268,7 @@ call FORTAX_writeFortaxParams(sys, fname)
 ```
 # Interfaces
 
-The FORTAX library can be called by other programming languages and software packages. The Fortran C bindings are defined in `fortax_library_c.f90`. A [Julia](https://julialang.org/) interface is provided in `fortax_julia.jl`. A [Stata](https://www.stata.com/) plugin is also available.
+The FORTAX library can be called by other programming languages and software packages. The Fortran C bindings are defined in `fortax_library_c.f90`. A [Julia](https://julialang.org/) interface is provided in `fortax_julia.jl`. A [Stata](https://www.stata.com/) plugin, which has more limited functionality, is available [here](https://github.com/ajshephard/fortax-stata).
 
 ### Julia
 
