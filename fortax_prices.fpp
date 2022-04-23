@@ -35,13 +35,19 @@ module fortax_prices
 
     public :: loadindex, setindex, getindex, upratefactor, upratesys
     public :: checkdate, loadsysindex, getsysindex, rpi_saveF90
-    public :: operator(*)
+    public :: operator(*), operator(/)
 
     interface operator(*)
         module procedure sys_times_factor
+        module procedure sys_times_factor_integer
         module procedure factor_times_sys
+        module procedure factor_times_sys_integer
     end interface
 
+    interface operator(/)
+        module procedure sys_div_factor
+        module procedure sys_div_factor_integer
+    end interface
 
 contains
 
@@ -243,6 +249,35 @@ contains
         #:endfor
     end function sys_times_factor
 
+    function sys_times_factor_integer(sys, factor) result(sys2)
+        use fortax_type, only : sys_t
+        implicit none
+        type(sys_t), intent(in) :: sys
+        integer, intent(in) :: factor
+        type(sys_t) :: sys2
+        sys2 = sys_times_factor(sys, real(factor, dp))
+    end function sys_times_factor_integer
+
+    function sys_div_factor(sys, factor) result(sys2)
+        use fortax_type, only : sys_t
+        implicit none
+        type(sys_t), intent(in) :: sys
+        real(dp), intent(in) :: factor
+        type(sys_t) :: sys2
+        sys2 = sys_times_factor(sys, (1.0_dp / factor))
+    end function sys_div_factor
+
+    function sys_div_factor_integer(sys, factor) result(sys2)
+        use fortax_type, only : sys_t
+        implicit none
+        type(sys_t), intent(in) :: sys
+        integer, intent(in) :: factor
+        type(sys_t) :: sys2
+        sys2 = sys_times_factor(sys, (1.0_dp / real(factor, dp)))
+    end function sys_div_factor_integer
+
+
+
     function factor_times_sys(factor, sys) result(sys2)
         use fortax_type, only : sys_t
         implicit none
@@ -253,6 +288,15 @@ contains
         @:fortax_uprate_op(${SYS}$, sys2%${SYS}$, sys%${SYS}$, factor, amount = True. minamount = True)
         #:endfor
     end function factor_times_sys
+
+    function factor_times_sys_integer(factor, sys) result(sys2)
+        use fortax_type, only : sys_t
+        implicit none
+        integer, intent(in) :: factor
+        type(sys_t), intent(in) :: sys
+        type(sys_t) :: sys2
+        sys2 = factor_times_sys(real(factor, dp), sys)
+    end function factor_times_sys_integer
 
     ! checkDate
     ! -----------------------------------------------------------------------

@@ -45,7 +45,7 @@ module fortax_library
                                     FORTAX_uprateFactor => uprateFactor,                        &
                                     FORTAX_loadSysIndex => loadSysIndex,                        &
                                     FORTAX_getSysIndex => getSysIndex,                          &
-                                    operator(*)
+                                    operator(*), operator(/)
 
     use fortax_read,        only :  FORTAX_readFortaxParams => readFortaxParams
 
