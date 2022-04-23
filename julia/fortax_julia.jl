@@ -224,3 +224,90 @@ function writeFortaxParams(sys::sys_t, fname::String)
     len_fname = Cint(length(fname))
     ccall((:C_FORTAX_writeFortaxParams, fortaxlib), Cvoid, (Ref{sys_t}, Ptr{UInt8}, Ref{Cint}), sys, fname, len_fname)
 end
+
+@generated function Base.:+(x::netad_t, y::netad_t)
+    expr = ( :(x.$f + y.$f) for f in fieldnames(netad_t) ) 
+    :( netad_t($(expr...)) )
+end
+
+@generated function Base.:-(x::netad_t, y::netad_t)
+    expr = ( :(x.$f - y.$f) for f in fieldnames(netad_t) ) 
+    :( netad_t($(expr...)) )
+end
+
+@generated function Base.:*(x::netad_t, y::Number)
+    expr = ( :(x.$f * y) for f in fieldnames(netad_t) ) 
+    :( netad_t($(expr...)) )
+end
+
+@generated function Base.:*(y::Number, x::netad_t)
+    expr = ( :(x.$f * y) for f in fieldnames(netad_t) ) 
+    :( netad_t($(expr...)) )
+end
+
+@generated function Base.:/(x::netad_t, y::Number)
+    expr = ( :(x.$f / y) for f in fieldnames(netad_t) ) 
+    :( netad_t($(expr...)) )
+end
+
+@generated function Base.:+(x::nettu_t, y::nettu_t)
+    expr = ( :(x.$f + y.$f) for f in fieldnames(nettu_t) ) 
+    :( nettu_t($(expr...)) )
+end
+
+@generated function Base.:-(x::nettu_t, y::nettu_t)
+    expr = ( :(x.$f - y.$f) for f in fieldnames(nettu_t) ) 
+    :( nettu_t($(expr...)) )
+end
+
+@generated function Base.:*(x::nettu_t, y::Number)
+    expr = ( :(x.$f * y) for f in fieldnames(nettu_t) ) 
+    :( nettu_t($(expr...)) )
+end
+
+@generated function Base.:*(y::Number, x::nettu_t)
+    expr = ( :(x.$f * y) for f in fieldnames(nettu_t) ) 
+    :( nettu_t($(expr...)) )
+end
+
+@generated function Base.:/(x::nettu_t, y::Number)
+    expr = ( :(x.$f / y) for f in fieldnames(nettu_t) ) 
+    :( nettu_t($(expr...)) )
+end
+
+@generated function Base.:+(x::net_t, y::net_t)
+    expr = ( :(x.$f + y.$f) for f in fieldnames(net_t) ) 
+    :( net_t($(expr...)) )
+end
+
+@generated function Base.:-(x::net_t, y::net_t)
+    expr = ( :(x.$f - y.$f) for f in fieldnames(net_t) ) 
+    :( net_t($(expr...)) )
+end
+
+@generated function Base.:*(x::net_t, y::Number)
+    expr = ( :(x.$f * y) for f in fieldnames(net_t) ) 
+    :( net_t($(expr...)) )
+end
+
+@generated function Base.:*(y::Number, x::net_t)
+    expr = ( :(x.$f * y) for f in fieldnames(net_t) ) 
+    :( net_t($(expr...)) )
+end
+
+@generated function Base.:/(x::net_t, y::Number)
+    expr = ( :(x.$f / y) for f in fieldnames(net_t) ) 
+    :( net_t($(expr...)) )
+end
+
+function Base.:*(x::sys_t, y::Number)
+    return uprateSys(x, y)
+end
+
+function Base.:*(y::Number, x::sys_t)
+    return uprateSys(x, y)
+end
+
+function Base.:/(x::sys_t, y::Number)
+    return uprateSys(x, 1.0 / y)
+end
