@@ -211,13 +211,13 @@ function fam_desc(fam::fam_t, fname::String)
     ccall((:C_FORTAX_fam_desc, fortaxlib), Cvoid, (Ref{fam_t}, Ptr{UInt8}, Ref{Cint}), fam, fname, len_fname)
 end
 
-function printFortaxParams(sys::sys_t)
-    ccall((:C_FORTAX_printFortaxParams, fortaxlib), Cvoid, (Ref{sys_t}, Ptr{Cvoid}, Ptr{Cvoid}), sys, C_NULL, C_NULL)
+function sys_desc(sys::sys_t)
+    ccall((:C_FORTAX_sys_desc, fortaxlib), Cvoid, (Ref{sys_t}, Ptr{Cvoid}, Ptr{Cvoid}), sys, C_NULL, C_NULL)
 end
 
-function printFortaxParams(sys::sys_t, fname::String)
+function sys_desc(sys::sys_t, fname::String)
     len_fname = Cint(length(fname))
-    ccall((:C_FORTAX_printFortaxParams, fortaxlib), Cvoid, (Ref{sys_t}, Ptr{UInt8}, Ref{Cint}), sys, fname, len_fname)
+    ccall((:C_FORTAX_sys_desc, fortaxlib), Cvoid, (Ref{sys_t}, Ptr{UInt8}, Ref{Cint}), sys, fname, len_fname)
 end
 
 function writeFortaxParams(sys::sys_t, fname::String)

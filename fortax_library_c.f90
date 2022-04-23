@@ -375,17 +375,17 @@ contains
 
     ! fortax_write
 
-    subroutine c_printFortaxParams(sys, fname, len_fname) bind(C, name = "C_FORTAX_printFortaxParams")
+    subroutine c_sys_desc(sys, fname, len_fname) bind(C, name = "C_FORTAX_sys_desc")
         implicit none
         type(sys_t), intent(in) :: sys
         character(kind = c_char), dimension(*), optional, intent(in) :: fname
         integer(kind = c_int), optional, intent(in) :: len_fname
         if (present(fname) .and. present(len_fname)) then
-            call FORTAX_printFortaxParams(sys, copy_a2s(fname(1:len_fname)))
+            call FORTAX_sys_desc(sys, copy_a2s(fname(1:len_fname)))
         else
-            call FORTAX_printFortaxParams(sys)
+            call FORTAX_sys_desc(sys)
         end if
-    end subroutine c_printFortaxParams
+    end subroutine c_sys_desc
 
     subroutine c_writeFortaxParams(sys, fname, len_fname) bind(C, name = "C_FORTAX_writeFortaxParams")
         implicit none

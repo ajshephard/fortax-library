@@ -33,10 +33,9 @@ module fortax_type
     public :: fam_init, net_init, sys_init
     public :: fam_saveF90, sys_saveF90
     public :: fam_t, net_t, sys_t, rpi_t, sysindex_t, bcout_t
-    public :: lab
-    public :: fam_gen, fam_desc
+    public :: lab, label_bool, label_ctax, label_region, label_tenure
+    public :: fam_gen, fam_desc, net_desc
     public :: operator(+), operator(*), operator(/), operator(-)
-    public :: net_desc
 
     ! constants for array bounds and internal values
     integer, parameter, public :: maxKids = 16

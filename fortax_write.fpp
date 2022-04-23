@@ -30,7 +30,7 @@ module fortax_write
     private :: dp
 
     private
-    public  :: printFortaxParams, writeFortaxParams
+    public  :: sys_desc, writeFortaxParams
 
 contains
 
@@ -40,10 +40,10 @@ contains
     ! is not specified. Otherwise, this output summary will be written to
     ! disk with file name fname. This printing code is self-maintaining
 
-    subroutine printFortaxParams(sys, fname)
+    subroutine sys_desc(sys, fname)
 
-        use fortax_type, only : sys_t
-        use fortax_util, only : upper, fortaxError
+        use fortax_type!, only : sys_t
+        use fortax_util, only : upper, fortaxError, strCentre, intToStr
         use, intrinsic :: iso_fortran_env
 
         implicit none
@@ -52,7 +52,7 @@ contains
         character(len=*), intent(in), optional :: fname
         character(len = 64) :: sysname
         character(len = 512) :: sysdesc
-        integer :: funit, ios
+        integer :: funit, ios, i
 
         sysname = transfer(sys%sysname, sysname)
         sysdesc = transfer(sys%sysdesc, sysdesc)
@@ -64,23 +64,25 @@ contains
             funit = output_unit
         end if
 
-        if ( sysname .ne. "" ) then
-            write(funit,*)
-            write(funit,'(1X,(A))') 'SYSNAME:'
-            write(funit,'(1X,(A))') trim(sysname)
-        end if
-
+        write(funit, *)
+        write(funit, '(A)') repeat("=", 62)
+        write(funit, '(A)') strCentre('sys_desc (' // trim(adjustl(sysname)) // '):', 62)
         if ( sysdesc .ne. "" ) then
-            write(funit,*)
-            write(funit,'(1X,(A))') 'SYSDESC:'
-            write(funit,'(1X,(A))') trim(sysdesc)
+            write(funit, '(A)') strCentre(trim(adjustl(sysdesc)), 62)
         end if
+        write(funit, '(A)') repeat("=", 62)
+
+        #:for SYS in SYSLIST
+        @:fortax_sys_desc(${SYS}$, sys%${SYS}$)        
+        write(funit, '(A)') repeat("=", 62)
+
+        #:endfor
 
         if (present(fname)) close(funit)
 
         return
 
-    end subroutine printFortaxParams
+    end subroutine sys_desc
 
 
     ! writeFortaxParams

@@ -618,4 +618,52 @@ end function labstring_${LAB}$
 #:endfor
 #:enddef
 
+#:def fortax_sys_desc(name, dt)
+write(funit, '(A)')
+write(funit, '(A)') "${SYS.upper()}$:"
+write(funit, '(A)')
+    #:def fortaxdef(type, var, str, attr, **kwargs)
+        #:if str.strip('"') == ""
+        #:set strvar = var
+        #:else
+        #:set strvar = str.strip('"') + " (" + var + ")"
+        #:endif
+        #:if type == "integer"
+        #:set fmt = "I20"
+        #:elif type == "bool"
+        #:set fmt = "I20"
+        #:elif type == "double"
+        #:set fmt = "F20.5"
+        #:endif
+        #:if 'dim' in kwargs
+        #:set dimvar = dt + "%" + kwargs["dimvar"]
+        if (${dt}$%${var}$(1) >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "${strvar}$", "unbounded"
+        else
+            write(funit, '(A40, 2X, ${fmt}$)') "${strvar}$", ${dt}$%${var}$(1)
+        end if
+        do i = 2, ${dimvar}$
+            if (${dt}$%${var}$(i) >= sysHuge) then
+                write(funit, '(A40, 2X, A20)') "", "unbounded"
+            else
+                write(funit, '(A40, 2X, ${fmt}$)') "", ${dt}$%${var}$(i)
+            end if
+        end do
+        #:else
+        if (${dt}$%${var}$ >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "${strvar}$", "unbounded"
+        else
+            #:if 'label' in kwargs
+            write(funit, '(A40, 2X, A20)') "${strvar}$", &
+                  trim(adjustl(label_${kwargs["label"]}$(${dt}$%${var}$))) 
+            #:else
+            write(funit, '(A40, 2X, ${fmt}$)') "${strvar}$", ${dt}$%${var}$
+            #:endif
+        end if
+        #:endif
+    #:enddef
+    #:include "include_files.fypp"
+write(funit, '(A)')
+#:enddef
+        
 #:endmute
