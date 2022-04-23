@@ -1,15 +1,10 @@
-_$header
-#include "header.inc"
-
-_$logical(docounciltax,null)
-_$double(bandD,amount)
-_$double(SinDis,scale)
-_$double(RatioA,scale)
-_$double(RatioB,scale)
-_$double(RatioC,scale)
-_$double(RatioE,scale)
-_$double(RatioF,scale)
-_$double(RatioG,scale)
-_$double(RatioH,scale)
-
-_$footer
+@:fortaxdef(bool,   docounciltax, "Calculate council tax", null, label = bool)
+@:fortaxdef(double, bandD,        "Average Band D amount", amount)
+@:fortaxdef(double, SinDis,       "Single discount", scale)
+@:fortaxdef(double, RatioA,       "Band A ratio", scale)
+@:fortaxdef(double, RatioB,       "Band B ratio", scale)
+@:fortaxdef(double, RatioC,       "Band C ratio", scale)
+@:fortaxdef(double, RatioE,       "Band E ratio", scale)
+@:fortaxdef(double, RatioF,       "Band F ratio", scale)
+@:fortaxdef(double, RatioG,       "Band G ratio", scale)
+@:fortaxdef(double, RatioH,       "Band H ratio", scale)

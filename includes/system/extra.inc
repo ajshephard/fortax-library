@@ -1,8 +1,3 @@
-_$header
-#include "header.inc"
-
-_$logical(fsminappamt,null)
-_$logical(matgrant,null)
-_$integer(prices,null)
-
-_$footer
+@:fortaxdef(bool,    fsminappamt, "", null, label = bool)
+@:fortaxdef(bool,    matgrant,    "", null, label = bool)
+@:fortaxdef(integer, prices,      "", null)

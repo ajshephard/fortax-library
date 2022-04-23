@@ -1,12 +1,7 @@
-_$header
-#include "header.inc"
-
-_$logical(doCap,null)
-_$logical(doThruUC,null)
-_$double(sinNoKids,amount)
-_$double(sinKids,amount)
-_$double(couNoKids,amount)
-_$double(couKids,amount)
-_$double(UCEarnThr,amount)
-
-_$footer
+@:fortaxdef(bool,   doCap,     "", null, label = bool)
+@:fortaxdef(bool,   doThruUC,  "", null, label = bool)
+@:fortaxdef(double, sinNoKids, "", amount)
+@:fortaxdef(double, sinKids,   "", amount)
+@:fortaxdef(double, couNoKids, "", amount)
+@:fortaxdef(double, couKids,   "", amount)
+@:fortaxdef(double, UCEarnThr, "", amount)

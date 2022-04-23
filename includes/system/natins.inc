@@ -1,14 +1,9 @@
-_$header
-#include "header.inc"
-
-_$integer(numrates,range)
-_$integer(c4nrates,range)
-_$double(c2floor,amount)
-_$double(c2rate,amount)
-_$double(ceiling,amount)
-_$doublearray(rates,rate,:)
-_$doublearray(bands,amount,:)
-_$doublearray(c4rates,rate,:)
-_$doublearray(c4bands,amount,:)
-
-_$footer
+@:fortaxdef(integer, numrates, "", range)
+@:fortaxdef(integer, c4nrates, "", range)
+@:fortaxdef(double,  c2floor,  "", amount)
+@:fortaxdef(double,  c2rate,   "", amount)
+@:fortaxdef(double,  ceiling,  "", amount)
+@:fortaxdef(double,  rates,    "", rate,   dim = maxNatInsBands,   dimvar = numrates)
+@:fortaxdef(double,  bands,    "", amount, dim = maxNatInsBands,   dimvar = numrates)
+@:fortaxdef(double,  c4rates,  "", rate,   dim = maxNatInsC4Bands, dimvar = c4nrates)
+@:fortaxdef(double,  c4bands,  "", amount, dim = maxNatInsC4Bands, dimvar = c4nrates)

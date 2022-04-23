@@ -1,0 +1,295 @@
+#:mute
+
+#! list for system components
+
+#:set SYSLIST = ['inctax', 'natins', 'chben', 'fc', 'ctc', 'wtc', &
+                 'ntc', 'incsup', 'ctax', 'rebatesys', 'hben', 'ctaxben', &
+                 'ccben', 'uc', 'statepen', 'bencap', 'extra']
+
+#! list for value labels
+
+#:set LABLIST = ['bool', 'ctax', 'tenure', 'region']
+
+#! prevision type mapping
+
+#:set JULIA_TYPE = {"integer": "Cint", "bool": "Cint", "double": "Cdouble"}
+
+#! default values by type
+
+#:set JULIA_TYPE_DEFAULT = {"integer": "0", "bool": "0", "double": "0.0"}
+
+#! Joins stripped lines with given character string
+
+#:def join_lines(txt, joinstr, prefix="", suffix="")
+    ${prefix + joinstr.join([line.strip() for line in txt.split("\n")]) + suffix}$
+#:enddef
+
+#! Remove blank lines from given character string
+
+#:def remove_blank_lines(txt)
+${"".join([s for s in txt.strip().splitlines(True) if s.strip()])}$
+#:enddef
+
+#! Add Fortran line continuation character
+
+#:def line_continutation(txt)
+${"".join([line+", &\n" for line in txt.split("\n")])}$
+#:enddef
+
+#! Adjust indentation
+
+#:def indent(txt)
+${"".join([" "*4 + line+"\n" for line in txt.split("\n")])}$
+#:enddef
+
+#! Check that the arguments are valid
+
+#:def check_fortax_arg(type, var, str, attr, kwargs)
+    #:assert attr in ['rate', 'amount', 'minamount', 'null', 'range', 'scale', 'label']
+    #:assert type in ['bool', 'integer', 'double']
+    #:for kw in kwargs
+        #:assert kw in ['dim', 'dimvar', 'value', 'label']
+    #:endfor
+#:enddef
+
+#! Defining types
+
+#:def fortax_type_def(name, **defkwargs)
+    #:for kw in defkwargs
+        #:assert kw in ['attributes', 'suffix', 'assumed']
+    #:endfor
+    #:if "attributes" in defkwargs
+        #:set attributes = ", " + defkwargs["attributes"].strip('"')
+    #:else
+        #:set attributes = ""
+    #:endif
+    #:if "suffix" in defkwargs
+        #:set suffix = defkwargs["suffix"].strip('"')
+    #:else
+        #:set suffix = ""
+    #:endif
+    #:def fortaxdef(type, var, str, attr, **kwargs)
+        #:mute
+            $:check_fortax_arg(type, var, str, attr, kwargs)
+            #:if "dim" in kwargs
+                #:set array = True
+            #:else
+                #:set array = False
+            #:endif
+        #:endmute
+        #:if array
+        ${var}$::SVector{${kwargs["dim"]}$, ${JULIA_TYPE[type]}$}
+        #:else
+        ${var}$::${JULIA_TYPE[type]}$
+        #:endif
+    #:enddef
+    #:include "include_files.fypp"
+#:enddef
+
+#! Type values
+
+#:def fortax_type_val(name, **defkwargs)
+    #:if 'suffix' in defkwargs
+    #:set sfx = defkwargs["suffix"]
+    #:else
+    #:set sfx = ""
+    #:endif
+    #:def fortaxdef(type, var, str, attr, **kwargs)
+    #:mute
+        $:check_fortax_arg(type, var, str, attr, kwargs)
+    #:endmute
+    #:if 'value' in kwargs
+    ${var}$${sfx}$ = ${kwargs["value"]}$
+    #:else
+    ${var}$${sfx}$ = ${JULIA_TYPE_DEFAULT[type]}$
+    #:endif
+    #:enddef
+    #:include "include_files.fypp"
+#:enddef
+
+#! Constant parameters
+
+#:def fortax_const()
+    #:def fortaxdef(type, var, str, attr, **kwargs)
+    #:mute
+    $:check_fortax_arg(type, var, str, attr, kwargs)
+    #:assert 'value' in kwargs
+    #:endmute
+    const ${var}$ = ${kwargs["value"]}$
+    #:enddef
+    #:include "fortax_const.inc"
+#:enddef
+
+#! parameterised labels
+
+#:def fortax_label_param()
+    #:for LAB in LABLIST
+        #:call join_lines(joinstr = ", ", prefix="const lab_" + LAB + " = (", suffix=")")
+        @:fortax_type_val(lab_${LAB}$)
+        #:endcall
+    #:endfor
+#:enddef
+
+#! value labels
+#:def fortax_value_lab(lab, labval)
+lab_${lab}$.${labval}$
+#:enddef
+
+#:endmute
+
+@:fortax_const()
+@:fortax_label_param()
+
+struct famad_t
+@:fortax_type_def(famad)
+end
+
+struct fam_t
+    @:fortax_type_def(fam)
+    ad::SVector{2, famad_t}
+end
+
+struct netad_t
+    @:fortax_type_def(netad)
+end
+
+struct nettu_t
+    @:fortax_type_def(nettu)
+end
+
+struct net_t
+    ad::SVector{2, netad_t}
+    tu::nettu_t
+end
+
+struct rpi_t
+    ndate::Cint
+    date::SVector{maxRpi, Cint}
+    index::SVector{maxRpi, Cdouble}
+end
+
+struct sysindex_t
+    nsys::Cint
+    date0::SVector{maxSysIndex, Cint}
+    date1::SVector{maxSysIndex, Cint}
+    index::SMatrix{len_sysindex, maxSysIndex, Cchar}
+end
+
+#:for SYS in SYSLIST
+struct ${SYS}$_t
+    @:fortax_type_def(${SYS}$)
+end
+
+#:endfor
+
+struct sys_t
+    sysname::SVector{len_sysname, Cchar}
+    sysdesc::SVector{len_sysdesc, Cchar}
+    #:for SYS in SYSLIST
+        ${SYS}$::${SYS}$_t
+    #:endfor
+end
+
+struct bcout_t
+    kinks_num::Cint
+    kinks_hrs::SVector{maxKinks, Cdouble}
+    kinks_earn::SVector{maxKinks, Cdouble}
+    kinks_net::SVector{maxKinks, Cdouble}
+    kinks_mtr::SVector{maxKinks, Cdouble}
+    bc_desc::SVector{len_bcdesc, Cchar}
+end
+
+
+#:def fam_gen_bounds(name, **defkwargs)
+    #:if 'suffix' in defkwargs
+        #:set sfx = defkwargs["suffix"]
+    #:else
+        #:set sfx = ""
+    #:endif
+    #:def fortaxdef(type, var, str, attr, **kwargs)
+        #:if 'dim' in kwargs
+            #:set dim = kwargs["dim"]
+            thislen = length(${var}$)
+            if thislen > ${dim}$
+                fortaxError("${var}$ exceeds bounds in fam_gam")
+            elseif thislen < ${dim}$
+                resize!(${var}$${sfx}$, ${dim}$)
+                #:if 'value' in kwargs
+                ${var}$${sfx}$[thislen+1:${dim}$] .= ${kwargs["value"]}$
+                #:else
+                ${var}$${sfx}$[thislen+1:${dim}$] .= ${JULIA_TYPE_DEFAULT[type]}$
+                #:endif
+                #:if 'dimvar' in kwargs
+                correct && (${kwargs["dimvar"]}$ = thislen)
+                #:endif
+            end
+        #:endif
+    #:enddef
+    #:include "include_files.fypp"
+#:enddef
+
+#:def fortax_type_list(name, **defkwargs)
+    #:for kw in defkwargs
+        #:assert kw in ['suffix']
+    #:endfor
+    #:if "suffix" in defkwargs
+        #:set suffix = defkwargs["suffix"].strip('"')
+    #:else
+        #:set suffix = ""
+    #:endif
+    #:def fortaxdef(type, var, str, attr, **kwargs)
+        #:mute
+            $:check_fortax_arg(type, var, str, attr, kwargs)
+        #:endmute
+        ${var}$${suffix}$
+    #:enddef
+    #:include "include_files.fypp"
+#:enddef
+
+#:def fortax_fam_gen()
+    #:call join_lines(joinstr = ", ", prefix="function fam_gen(;", suffix=")")
+    @:fortax_type_val(fam)
+    @:fortax_type_val(famad, suffix = 1)
+    @:fortax_type_list(famad, suffix = "2 = nothing")
+        correct = true
+    #:endcall
+
+    #:call join_lines(joinstr = ") && isnothing(", prefix="isnothing(", suffix=") ? (ad2 = false) : (ad2 = true)")
+        @:fortax_type_list(famad, suffix = 2)
+    #:endcall
+
+    #:set name = "famad"
+    #:def fortaxdef(type, var, str, attr, **kwargs)
+        #:if "value" in kwargs
+        isnothing(${var}$2) && (${var}$2 = ${kwargs["value"]}$)
+        #:else
+        isnothing(${var}$2) && (${var}$2 = ${JULIA_TYPE_DEFAULT[type]}$)
+        #:endif
+    #:enddef
+    #:include "include_files.fypp"
+
+    #:call join_lines(joinstr = ", ", prefix="famad1 = famad_t(", suffix=")")
+        @:fortax_type_list(famad, suffix = 1)
+    #:endcall
+    #:call join_lines(joinstr = ", ", prefix="famad2 = famad_t(", suffix=")")
+        @:fortax_type_list(famad, suffix = 2)
+    #:endcall
+
+    @:fam_gen_bounds(fam)
+    @:fam_gen_bounds(famad, suffix = 1)
+    @:fam_gen_bounds(famad, suffix = 2)
+
+    if (correct)
+        ad2 && (couple = 1)
+        married == 1 && (couple = 1)
+    end
+
+    #:call join_lines(joinstr = ", ", prefix="fam = fam_t(", suffix=")")
+        @:fortax_type_list(fam)
+        [famad1, famad2]
+    #:endcall
+    return fam
+    end
+#:enddef
+
+@:fortax_fam_gen()

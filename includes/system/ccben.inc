@@ -1,10 +1,5 @@
-_$header
-#include "header.inc"
-
-_$logical(dopolltax,null)
-_$double(taper,rate)
-_$double(PropElig,scale)
-_$double(MinAmt,minamount)
-_$double(CCrate,rate)
-
-_$footer
+@:fortaxdef(bool,   dopolltax, "", null, label = bool)
+@:fortaxdef(double, taper,     "", rate)
+@:fortaxdef(double, PropElig,  "", scale)
+@:fortaxdef(double, MinAmt,    "", minamount)
+@:fortaxdef(double, CCrate,    "", rate)

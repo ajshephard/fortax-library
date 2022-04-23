@@ -1,9 +1,4 @@
-_$header
-#include "header.inc"
-
-_$logical(docounciltaxben,null)
-_$double(taper,rate)
-_$logical(doEntitlementCut,null)
-_$double(entitlementShare,rate)
-
-_$footer
+@:fortaxdef(bool,   docounciltaxben,  "", null, label = bool)
+@:fortaxdef(double, taper,            "", rate)
+@:fortaxdef(bool,   doEntitlementCut, "", null, label = bool)
+@:fortaxdef(double, entitlementShare, "", rate)

@@ -1,0 +1,670 @@
+#:mute
+
+#! list for system components
+
+#:set SYSLIST = ['inctax', 'natins', 'chben', 'fc', 'ctc', 'wtc', &
+                 'ntc', 'incsup', 'ctax', 'rebatesys', 'hben', 'ctaxben', &
+                 'ccben', 'uc', 'statepen', 'bencap', 'extra']
+
+#! list for value labels
+
+#:set LABLIST = ['bool', 'ctax', 'tenure', 'region']
+
+#! prevision type mapping
+
+#:set FORTRAN_TYPE = {"integer": "integer", "bool": "integer", "double": "real(dp)"}
+
+#! default values by type
+
+#:set FORTRAN_TYPE_DEFAULT = {"integer": "0", "bool": "0", "double": "0.0_dp"}
+
+#! Joins stripped lines with given character string
+
+#:def join_lines(txt, joinstr, prefix="", suffix="")
+    ${prefix + joinstr.join([line.strip() for line in txt.split("\n")]) + suffix}$
+#:enddef
+
+#! Remove blank lines from given character string
+
+#:def remove_blank_lines(txt)
+${"".join([s for s in txt.strip().splitlines(True) if s.strip()])}$
+#:enddef
+
+#! Add Fortran line continuation character
+
+#:def line_continutation(txt)
+${"".join([line+", &\n" for line in txt.split("\n")])}$
+#:enddef
+
+#! Adjust indentation
+
+#:def indent(txt)
+${"".join([" "*4 + line+"\n" for line in txt.split("\n")])}$
+#:enddef
+
+#! Returns array dimension
+
+#:def get_fortax_vardim(kwargs, assumed)
+    #:if "dim" in kwargs
+        #:set vardim = "(:)" if assumed else "(" + kwargs["dim"] + ")"
+    #:else
+        #:set vardim = ""
+    #:endif
+    ${vardim}$
+#:enddef
+
+#! Check that the arguments are valid
+
+#:def check_fortax_arg(type, var, str, attr, kwargs)
+    #:assert attr in ['rate', 'amount', 'minamount', 'null', 'range', 'scale', 'label']
+    #:assert type in ['bool', 'integer', 'double']
+    #:for kw in kwargs
+        #:assert kw in ['dim', 'dimvar', 'value', 'label']
+    #:endfor
+#:enddef
+
+#! Defining types
+
+#:def fortax_type_def(name, **defkwargs)
+    #:for kw in defkwargs
+        #:assert kw in ['attributes', 'suffix', 'assumed']
+    #:endfor
+    #:if "attributes" in defkwargs
+        #:set attributes = ", " + defkwargs["attributes"].strip('"')
+    #:else
+        #:set attributes = ""
+    #:endif
+    #:if "suffix" in defkwargs
+        #:set suffix = defkwargs["suffix"].strip('"')
+    #:else
+        #:set suffix = ""
+    #:endif
+    #:set assumed = False
+    #:if "assumed" in defkwargs
+        #:set assumed = True if defkwargs['assumed'] else False
+    #:endif
+    #:def fortaxdef(type, var, str, attr, **kwargs)
+        #:mute
+            $:check_fortax_arg(type, var, str, attr, kwargs)
+            #:set vardim = get_fortax_vardim(kwargs, assumed).strip()
+        #:endmute
+        ${FORTRAN_TYPE[type]}$${attributes}$ :: ${var}$${suffix}$${vardim}$
+    #:enddef
+    #:include "include_files.fypp"
+#:enddef
+
+#! save system components using json
+
+#:def fortax_sys_write(inp, name, dt)
+    #:def fortaxdef(type, var, str, attr, **kwargs)
+        #:mute
+            $:check_fortax_arg(type, var, str, attr, kwargs)
+        #:endmute
+        #:if dt == ""
+            #:set tdt = ""
+        #:else
+            #:set tdt = dt + "%"
+        #:endif
+        #:if "dimvar" in kwargs
+            #:set dim = "(1:" + tdt + kwargs["dimvar"] + ")"
+        #:else
+            #:set dim = ""
+        #:endif
+        call json%add(${inp}$, "${var}$", ${tdt}$${var}$${dim}$)
+    #:enddef
+    #:include "include_files.fypp"
+#:enddef
+
+#! read json system
+#:def fortax_sys_read(name, dt)
+    #:def fortaxdef(type, var, str, attr, **kwargs)
+        #:mute
+            $:check_fortax_arg(type, var, str, attr, kwargs)
+        #:endmute
+        #:if dt == ""
+            #:set tdt = ""
+        #:else
+            #:set tdt = dt + "%"
+        #:endif
+        #:if "dim" in kwargs
+            #:set array = True
+            #:set dim = kwargs["dim"]
+            #:set dimvar = kwargs["dimvar"]
+        #:else
+            #:set array = False
+            #:set dim = ""
+            #:set dimvar = ""
+        #:endif
+        #:if type == "integer" and not array
+        call json%get("${name}$.${var}$", ${tdt}$${name}$%${var}$, found)
+        #:elif type == "integer" and array
+        call json%get("${name}$.${var}$", integer_array, found)
+        if (found) then
+            sz = size(integer_array)
+            if (sz > ${dim}$) then
+                call fortaxError("json file: length ${name}$.${var}$ > ${dim}$")
+            else
+                ${tdt}$${name}$%${var}$(1:sz) = integer_array
+            endif
+        end if
+        #:elif type == "bool" and not array
+        call json%get("${name}$.${var}$", ${tdt}$${name}$%${var}$, found)
+        #:elif type == "bool" and array
+        call json%get("${name}$.${var}$", integer_array, found)
+        if (found) then
+            sz = size(integer_array)
+            if (sz > ${dim}$) then
+                call fortaxError("json file: length ${name}$.${var}$ > ${dim}$")
+            else
+                ${tdt}$${name}$%${var}$(1:sz) = integer_array
+            endif
+        end if
+        #:elif type == "double" and not array
+        call json%get("${name}$.${var}$", ${tdt}$${name}$%${var}$, found)
+        #:elif type == "double" and array
+        call json%get("${name}$.${var}$", double_array, found)
+        if (found) then
+            sz = size(double_array)
+            if (sz > ${dim}$) then
+                call fortaxError("json file: length ${name}$.${var}$ > ${dim}$")
+            else
+                ${tdt}$${name}$%${var}$(1:sz) = double_array
+            endif
+        end if
+        #:endif
+    #:enddef
+    #:include "include_files.fypp"
+#:enddef
+
+#! List types
+
+#:def fortax_type_list(name, **defkwargs)
+    #:for kw in defkwargs
+        #:assert kw in ['suffix']
+    #:endfor
+    #:if "suffix" in defkwargs
+        #:set suffix = defkwargs["suffix"].strip('"')
+    #:else
+        #:set suffix = ""
+    #:endif
+    #:def fortaxdef(type, var, str, attr, **kwargs)
+        #:mute
+            $:check_fortax_arg(type, var, str, attr, kwargs)
+        #:endmute
+        ${var}$${suffix}$
+    #:enddef
+    #:include "include_files.fypp"
+#:enddef
+
+#! Initialise types
+
+#:def fortax_type_init(name, dt, **defkwargs)
+    #:if "attributes" in defkwargs
+        #:set attributes = ", " + defkwargs["attributes"].strip('"')
+    #:else
+        #:set attributes = ""
+    #:endif
+    #:def fortaxdef(type, var, str, attr, **kwargs)
+        #:mute
+            $:check_fortax_arg(type, var, str, attr, kwargs)
+            #:if "value" in kwargs
+                #:set vardefault = kwargs["value"]
+            #:else
+                #:set vardefault = FORTRAN_TYPE_DEFAULT[type]
+            #:endif
+        #:endmute
+        #:if dt == ""
+        ${var}$${attributes}$ = ${vardefault}$
+        #:else
+        ${dt}$%${var}$${attributes}$ = ${vardefault}$
+        #:endif
+    #:enddef
+    #:include "include_files.fypp"
+#:enddef
+
+#! Type values
+
+#:def fortax_type_val(name, **defkwargs)
+    #:def fortaxdef(type, var, str, attr, **kwargs)
+    #:mute
+        $:check_fortax_arg(type, var, str, attr, kwargs)
+    #:endmute
+    #:if 'value' in kwargs
+    ${kwargs["value"]}$
+    #:else
+    ${FORTRAN_TYPE_DEFAULT[type]}$
+    #:endif
+    #:enddef
+    #:include "include_files.fypp"
+#:enddef
+
+#! Saving types
+
+#:def fortax_type_save(name, dt, **defkwargs)
+    #:for kw in defkwargs
+        #:assert kw in ['attributes', 'suffix', 'assumed']
+    #:endfor
+    #:def fortaxdef(type, var, str, attr, **kwargs)
+        #:mute
+            $:check_fortax_arg(type, var, str, attr, kwargs)
+        #:endmute
+        #:if 'dimvar' in kwargs
+            #:if dt == ""
+        call write_f90(funit, "${var}$", ${var}$, ${kwargs["dimvar"]}$)
+            #:else
+        call write_f90(funit, "${dt}$%${var}$", ${dt}$%${var}$, ${dt}$%${kwargs["dimvar"]}$)
+            #:endif
+        #:else
+            #:if dt == ""
+        call write_f90(funit, "${var}$", ${var}$)
+            #:else
+        call write_f90(funit, "${dt}$%${var}$", ${dt}$%${var}$)
+            #:endif
+        #:endif
+    #:enddef
+    #:include "include_files.fypp"
+#:enddef
+
+#! Describing types
+
+#:def fortax_type_desc(name, dt, **defkwargs)
+    #:def fortaxdef(type, var, str, attr, **kwargs)
+        #:mute
+            $:check_fortax_arg(type, var, str, attr, kwargs)
+        #:endmute
+        #:if dt == ""
+        #:set dt1 = ""
+        #:else
+        #:set dt1 = dt + "%"
+        #:endif
+        #:if 'label' in kwargs
+        #:if 'dimvar' in kwargs
+        call desc_f90(funit, ${str}$, "${var}$", ${dt1}$${var}$, ${dt1}$${kwargs["dimvar"]}$, label_${kwargs["label"]}$(${dt1}$${var}$))
+        #:else
+        call desc_f90(funit, ${str}$, "${var}$", ${dt1}$${var}$, label_${kwargs["label"]}$(${dt1}$${var}$))
+        #:endif
+        #:else
+        #:if 'dimvar' in kwargs
+        call desc_f90(funit, ${str}$, "${var}$", ${dt1}$${var}$, ${dt1}$${kwargs["dimvar"]}$)
+        #:else
+        call desc_f90(funit, ${str}$, "${var}$", ${dt1}$${var}$)
+        #:endif
+        #:endif
+    #:enddef
+    #:include "include_files.fypp"
+#:enddef
+
+#! Constant parameters
+
+#:def fortax_const(public = False)
+    #:def fortaxdef(type, var, str, attr, **kwargs)
+    #:mute
+    $:check_fortax_arg(type, var, str, attr, kwargs)
+    #:assert 'value' in kwargs
+    #:endmute
+    #:if type == 'double'
+    #:set prec = "_dp"
+    #:else
+    #:set prec = ""
+    #:endif
+    #:if public
+    ${FORTRAN_TYPE[type]}$, parameter, public :: ${var}$ = ${kwargs["value"]}$${prec}$
+    #:else
+    ${FORTRAN_TYPE[type]}$, parameter :: ${var}$ = ${kwargs["value"]}$${prec}$
+    #:endif
+    #:enddef
+    #:include "fortax_const.inc"
+#:enddef
+
+#! generate a family
+
+#:def fam_gen(name, dt, **defkwargs)
+    #:if dt == ""
+        #:set parent = ""
+    #:else
+        #:set parent = dt.strip('"') + "%"
+    #:endif
+    #:for kw in defkwargs
+        #:assert kw in ['attributes', 'suffix', 'assumed']
+    #:endfor
+    #:if "suffix" in defkwargs
+        #:set suffix = defkwargs["suffix"].strip('"')
+    #:else
+        #:set suffix = ""
+    #:endif
+    #:def fortaxdef(type, var, str, attr, **kwargs)
+    #:if "dim" in kwargs
+        if (present(${var}$${suffix}$)) then
+            if (size(${var}$)${suffix}$ > ${kwargs["dim"]}$) then
+                call fortaxError("${var}$${suffix}$ exceeds bounds in fam_gen")
+            else
+                fam%${var}$(1:size(${var}$)) = ${var}$${suffix}$
+                if (.not. present(${kwargs["dimvar"]}$)) then
+                    ${parent}$${kwargs["dimvar"]}$ = size(${var}$${suffix}$)
+                end if
+            endif
+        end if
+    #:else
+        if (present(${var}$${suffix}$)) ${parent}$${var}$ = ${var}$${suffix}$
+    #:endif
+    #:enddef
+    #:include "include_files.fypp"
+#:enddef
+
+#! parameterised labels
+
+#:def fortax_label_param()
+    type(lab_t), parameter :: lab = lab_t( &
+    #:call indent
+    #:for LAB in LABLIST
+        #:if LAB == LABLIST[-1]
+            #:call join_lines(joinstr = ", ", prefix = "lab_" + LAB + "_t" + "(", suffix = "))")
+                @:fortax_type_val(lab_${LAB}$)
+            #:endcall
+        #:else
+            #:call join_lines(joinstr = ", ", prefix = "lab_" + LAB + "_t" + "(", suffix = "), &")
+                @:fortax_type_val(lab_${LAB}$)
+            #:endcall
+        #:endif
+    #:endfor
+    #:endcall
+#:enddef
+
+#! value labels
+#:def fortax_value_lab(lab, labval)
+lab%${lab}$%${labval}$
+#:enddef
+
+#! Operations for net
+
+#:def fortax_net_operator(netout, name, net1, net2, level, operator, **defkwargs)
+    #:set sc1 = False
+    #:set sc2 = False
+    #:if 'scalar1' in defkwargs
+        #:set scalar1 = defkwargs["scalar1"]
+        #:set sc1 = True
+    #:endif
+    #:if 'scalar2' in defkwargs
+        #:set scalar2 = defkwargs["scalar2"]
+        #:set sc2 = True
+    #:endif
+    #:def fortaxdef(type, var, str, attr, **kwargs)
+        #:mute
+        $:check_fortax_arg(type, var, str, attr, kwargs)
+        #:if level == ""
+            #:set netlevel = ""
+        #:else
+            #:set netlevel = level.strip('"') + "%"
+        #:endif
+        #:endmute
+        #:if sc1
+        ${netout}$%${netlevel}$${var}$ = ${scalar1}$ ${operator.strip('"')}$ ${net2}$%${netlevel}$${var}$
+        #:elif sc2
+        ${netout}$%${netlevel}$${var}$ = ${net1}$%${netlevel}$${var}$ ${operator.strip('"')}$ ${scalar2}$
+        #:else
+        ${netout}$%${netlevel}$${var}$ = ${net1}$%${netlevel}$${var}$ ${operator.strip('"')}$ ${net2}$%${netlevel}$${var}$
+        #:endif
+    #:enddef
+    #:include "include_files.fypp"
+#:enddef
+
+#:def fortax_fam_gen()
+    #:call join_lines(joinstr = ", ", prefix="subroutine fam_gen(fam, ", suffix=")")
+        @:fortax_type_list(fam)
+        @:fortax_type_list(famad, suffix = 1)
+        @:fortax_type_list(famad, suffix = 2)
+        correct
+    #:endcall
+
+        use fortax_util, only : fortaxError
+
+        implicit none
+
+        type(fam_t), intent(out) :: fam
+        @:fortax_type_def(fam, attributes = "intent(in), optional", assumed = True)
+        @:fortax_type_def(famad, attributes = "intent(in), optional", suffix = 1, assumed = True)
+        @:fortax_type_def(famad, attributes = "intent(in), optional", suffix = 2, assumed = True)
+        logical, intent(in), optional :: correct
+        logical :: correct2
+        integer :: kidSize
+        logical :: ad2
+
+        call fam_init(fam)
+
+        @:fam_gen(fam, fam)
+        @:fam_gen(famad, fam%ad(1), suffix = 1)
+        @:fam_gen(famad, fam%ad(2), suffix = 2)
+
+        if (present(correct)) then
+            correct2 = correct
+        else
+            correct2 = .true.
+        end if
+
+        if (correct2) then
+
+            !if married true, then couple is true regardless of whether specified
+            if (fam%married == 1) fam%couple = 1
+
+            !automatically set couple=.true. if any second adult information is passed
+            if (fam%couple == 0) then
+                ad2 = .false.
+                #:def fortaxdef(type, var, str, attr, **kwargs)
+                if (present(${var}$2)) ad2 = .true.
+                #:enddef
+                #:include "famad_t.inc"
+                if (ad2) fam%couple = 1
+            end if
+
+        end if
+
+    end subroutine fam_gen
+#:enddef
+
+#! set minamt
+
+#:def fortax_minamt(name, dt, minamt)
+    #:def fortaxdef(type, var, str, attr, **kwargs)
+        #:mute
+            $:check_fortax_arg(type, var, str, attr, kwargs)
+        #:endmute
+        #:if attr == "minamount"
+        #:if dt == ""
+            ${var}$ = minamt
+        #:else
+            ${dt}$%${var}$ = minamt
+        #:endif
+        #:endif
+    #:enddef
+    #:include "include_files.fypp"
+#:enddef
+
+#:def fortax_kinks_pointer(name, dt)
+    #:def fortaxdef(type, var, str, attr, **kwargs)
+        #:mute
+            $:check_fortax_arg(type, var, str, attr, kwargs)
+        #:endmute
+        #:if dt == ""
+        if (ltaxout == "${var.lower()}$") taxpoint(i)%p => net%ad(taxad)%${var}$
+        #:else
+        if (ltaxout == "${var.lower()}$") taxpoint(i)%p => ${dt}$%${var}$
+        #:endif
+    #:enddef
+    #:include "include_files.fypp"
+#:enddef
+
+#:def fortax_uprate(name, dt, factor, **defkwargs)
+    #:call remove_blank_lines
+    #:mute
+    #:set uprateAmount = False
+    #:set uprateMinAmount = False
+    #:if 'amount' in defkwargs
+        #:set uprateAmount = defkwargs["amount"]
+    #:endif
+    #:if 'minamount' in defkwargs
+        #:set uprateMinAmount = defkwargs["minamount"]
+    #:endif
+    #:endmute
+    #:def fortaxdef(type, var, str, attr, **kwargs)
+        #:mute
+        $:check_fortax_arg(type, var, str, attr, kwargs)
+        #:endmute
+        #:if attr == 'amount' and uprateAmount
+            #:if dt == ""
+            ${var}$ = ${var}$ * factor
+            #:else
+            ${dt}$%${var}$ = ${dt}$%${var}$ * factor
+            #:endif
+        #:endif
+        #:if attr == 'minamount' and uprateMinAmount
+            #:if dt == ""
+            ${var}$ = ${var}$ * factor
+            #:else
+            ${dt}$%${var}$ = ${dt}$%${var}$ * factor
+            #:endif
+        #:endif
+    #:enddef
+    #:include "include_files.fypp"
+    #:endcall
+#:enddef
+
+#:def fortax_uprate_op(name, dtout, dt, factor, **defkwargs)
+    #:call remove_blank_lines
+    #:if dt == ""
+    #:set dt1 = ""
+    #:else
+    #:set dt1 = dt + "%"
+    #:endif
+    #:if dtout == ""
+    #:set dt2 = ""
+    #:else
+    #:set dt2 = dtout + "%"
+    #:endif
+    #:mute
+    #:set uprateAmount = False
+    #:set uprateMinAmount = False
+    #:if 'amount' in defkwargs
+        #:set uprateAmount = defkwargs["amount"]
+    #:endif
+    #:if 'minamount' in defkwargs
+        #:set uprateMinAmount = defkwargs["minamount"]
+    #:endif
+    #:endmute
+    #:def fortaxdef(type, var, str, attr, **kwargs)
+        #:mute
+        $:check_fortax_arg(type, var, str, attr, kwargs)
+        #:endmute
+        #:if (attr == 'amount' and uprateAmount) or (attr == 'minamount' and uprateMinAmount)
+        ${dt2}$${var}$ = ${dt1}$${var}$ * factor
+        #:else
+        ${dt2}$${var}$ = ${dt1}$${var}$
+        #:endif
+    #:enddef
+    #:include "include_files.fypp"
+    #:endcall
+#:enddef
+
+#:def fortax_get_label()
+#:global len_label
+#:set len_label = 0
+#:global len_labstring
+#:set len_labstring = 0
+#:def fortaxdef(type, var, str, attr, **kwargs)
+    $:check_fortax_arg(type, var, str, attr, kwargs)
+    #:if var == "len_labstring"
+        #:global len_labstring
+        #:set len_labstring = kwargs["value"]
+    #:elif var == "len_label"
+        #:global len_label
+        #:set len_label = kwargs["value"]
+    #:endif
+#:enddef
+#:include "fortax_const.inc"
+
+#:for LAB in LABLIST
+elemental function label_${LAB}$(val) result(str)
+    implicit none
+    integer, intent(in) :: val
+    character(len = len_label) :: str
+    #:set name = "lab_" + LAB
+    select case(val)
+    #:def fortaxdef(type, var, str, attr, **kwargs)
+        #:assert len("${var}$") <= int(len_label)
+        case(lab%${LAB}$%${var}$)
+            str = "${var}$"
+    #:enddef
+    #:include "include_files.fypp"
+        case default
+            str = "INVALID VALUE"
+    end select
+end function label_${LAB}$
+
+elemental function labstring_${LAB}$(val) result(str)
+    implicit none
+    integer, intent(in) :: val
+    character(len = len_labstring) :: str
+    #:set name = "lab_" + LAB
+    select case(val)
+    #:def fortaxdef(type, var, str, attr, **kwargs)
+        #:assert len(str) <= int(len_labstring)
+        case(lab%${LAB}$%${var}$)
+            str = ${str}$
+    #:enddef
+    #:include "include_files.fypp"
+        case default
+            str = "INVALID VALUE"
+    end select
+end function labstring_${LAB}$
+
+#:endfor
+#:enddef
+
+#:def fortax_sys_desc(name, dt)
+write(funit, '(A)')
+write(funit, '(A)') "${SYS.upper()}$:"
+write(funit, '(A)')
+    #:def fortaxdef(type, var, str, attr, **kwargs)
+        #:if str.strip('"') == ""
+        #:set strvar = var
+        #:else
+        #:set strvar = str.strip('"') + " (" + var + ")"
+        #:endif
+        #:if type == "integer"
+        #:set fmt = "I20"
+        #:elif type == "bool"
+        #:set fmt = "I20"
+        #:elif type == "double"
+        #:set fmt = "F20.5"
+        #:endif
+        #:if 'dim' in kwargs
+        #:set dimvar = dt + "%" + kwargs["dimvar"]
+        if (${dt}$%${var}$(1) >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "${strvar}$", "unbounded"
+        else
+            write(funit, '(A40, 2X, ${fmt}$)') "${strvar}$", ${dt}$%${var}$(1)
+        end if
+        do i = 2, ${dimvar}$
+            if (${dt}$%${var}$(i) >= sysHuge) then
+                write(funit, '(A40, 2X, A20)') "", "unbounded"
+            else
+                write(funit, '(A40, 2X, ${fmt}$)') "", ${dt}$%${var}$(i)
+            end if
+        end do
+        #:else
+        if (${dt}$%${var}$ >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "${strvar}$", "unbounded"
+        else
+            #:if 'label' in kwargs
+            write(funit, '(A40, 2X, A20)') "${strvar}$", &
+                  trim(adjustl(label_${kwargs["label"]}$(${dt}$%${var}$))) 
+            #:else
+            write(funit, '(A40, 2X, ${fmt}$)') "${strvar}$", ${dt}$%${var}$
+            #:endif
+        end if
+        #:endif
+    #:enddef
+    #:include "include_files.fypp"
+write(funit, '(A)')
+#:enddef
+        
+#:endmute

@@ -1,9 +1,7 @@
-_$header
-_$lab(1,own_outright,'Own outright')
-_$lab(2,mortgage,'Mortgage')
-_$lab(3,part_own,'Part own, part rent')
-_$lab(4,social_renter,'Social renter')
-_$lab(5,private_renter,'Private renter')
-_$lab(6,rent_free,'Rent free')
-_$labn(7,other,'Other')
-_$footer
+@:fortaxdef(integer, own_outright, "Own outright", label, value = 1)
+@:fortaxdef(integer, mortgage, "Mortgage", label, value = 2)
+@:fortaxdef(integer, part_own, "Part own,  part rent", label, value = 3)
+@:fortaxdef(integer, social_renter, "Social renter", label, value = 4)
+@:fortaxdef(integer, private_renter, "Private renter", label, value = 5)
+@:fortaxdef(integer, rent_free, "Rent free", label, value = 6)
+@:fortaxdef(integer, other, "Other", label, value = 7)

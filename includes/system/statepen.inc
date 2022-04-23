@@ -1,8 +1,3 @@
-_$header
-#include "header.inc"
-
-_$logical(doStatePen,null)
-_$integer(PenAgeMan,range)
-_$integer(PenAgeWoman,range)
-
-_$footer
+@:fortaxdef(bool,    doStatePen,  "", null, label = bool)
+@:fortaxdef(integer, PenAgeMan,   "", range)
+@:fortaxdef(integer, PenAgeWoman, "", range)

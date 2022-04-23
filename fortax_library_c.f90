@@ -32,62 +32,213 @@ module fortax_library_c
 
 contains
 
-    pure function copy_a2s(a) result(s)    ! copy char array to string
-        character(kind=c_char), intent(in) :: a(:)
+    pure function copy_a2s(a) result(s)
+        character(kind = c_char), intent(in) :: a(:)
         character(size(a)) :: s
         integer :: i
+        s = ''
         do i = 1, size(a)
+            if (a(i) == c_null_char) exit
             s(i:i) = a(i)
         end do
     end function copy_a2s
 
-    pure function copy_s2a(s) result (a)   ! copy s(1:clen(s)) to char array
+    pure function copy_s2a(s) result(a)
         character(len = *), intent(in) :: s
-        character(kind=c_char) :: a(len(s))
+        character(kind = c_char) :: a(len(s))
         integer :: i
         do i = 1, len(s)
             a(i) = s(i:i)
         end do
     end function copy_s2a
 
-    ! use fortax_calc,        only :  Y FORTAX_calcNetInc => calcNetInc
+    ! fortax_calc
 
-    subroutine c_CalcNetInc(sys, fam, net)  bind(C, name = "C_FORTAX_calcNetInc")
+    function c_CalcNetInc(sys, fam) result(net) bind(C, name = "C_FORTAX_calcNetInc")
         implicit none
         type(sys_t), intent(in)  :: sys
         type(fam_t), intent(in)  :: fam
-        type(net_t), intent(out) :: net
+        type(net_t) :: net
         call FORTAX_CalcNetInc(sys, fam, net)
-    end subroutine c_CalcNetInc
+    end function c_CalcNetInc
 
-    ! use fortax_compare,     only :  FORTAX_writeFamCompareDatabase => writeFamCompareDatabase,  &
-    !                                 FORTAX_readFamCompareDatabase => readFamCompareDatabase,    &
-    !                                 FORTAX_compareFamDatabase => compareFamDatabase,            &
-    !                                 FORTAX_compareNet => compareNet
+    ! fortax_extra
 
-    ! use fortax_extra,       only :  FORTAX_setMinAmount => setMinAmount,                        &
-    !                                 FORTAX_abolishNIFee => abolishNIFee,                        &
-    !                                 FORTAX_disableTaperRounding => disableTaperRounding,        &
-    !                                 FORTAX_fsMinAppAmt => fsMinAppAmt,                          &
-    !                                 FORTAX_taperMatGrant => taperMatGrant,                      &
-    !                                 FORTAX_imposeUC => imposeUC,                                &
-    !                                 FORTAX_netoutDesc => netoutDesc,                            &
-    !                                 FORTAX_netoutDescNoName => netoutDescNoName
+    subroutine c_setMinAmount(sys, minamt) bind(C, name = "C_FORTAX_setMinAmount")
+        implicit none
+        type(sys_t), intent(inout) :: sys
+        real(kind = c_double), intent(in) :: minamt
+        call FORTAX_setMinAmount(sys, minamt)
+    end subroutine c_setMinAmount
 
-    ! use fortax_kinks,       only :  bcout_t,                                                    &
-    !                                 FORTAX_evalKinksHours => evalKinksHours,                    &
-    !                                 FORTAX_evalKinksEarn => evalKinksEarn,                      &
-    !                                 FORTAX_kinkshours => kinkshours,                            &
-    !                                 FORTAX_kinksearn => kinksearn,                              &
-    !                                 FORTAX_kinksccexp => kinksccexp,                            &
-    !                                 FORTAX_maxkinks => maxkinks
+    subroutine c_abolishNIFee(sys) bind(C, name = "C_FORTAX_abolishNIFee")
+        implicit none
+        type(sys_t), intent(inout) :: sys
+        call FORTAX_abolishNIFee(sys)
+    end subroutine c_abolishNIFee
 
-    ! use fortax_prices,      only :  sysIndex_t, &
-    !                         YY       FORTAX_loadIndex => loadIndex,                              &
-    !                         Y       FORTAX_uprateSys => uprateSys,                              &
-    !                         Y       FORTAX_uprateFactor => uprateFactor,                        &
-    !                         Y       FORTAX_loadSysIndex => loadSysIndex,                        &
-    !                         Y       FORTAX_getSysIndex => getSysIndex
+    subroutine c_disableTaperRounding(sys) bind(C, name = "C_FORTAX_disableTaperRounding")
+        implicit none
+        type(sys_t), intent(inout) :: sys
+        call FORTAX_disableTaperRounding(sys)
+    end subroutine c_disableTaperRounding
+
+    subroutine c_fsMinAppAmt(sys, inappamt) bind(C, name = "C_FORTAX_fsMinAppAmt")
+        implicit none
+        type(sys_t), intent(inout) :: sys
+        integer(kind = c_int), intent(in) :: inappamt
+        call FORTAX_fsMinAppAmt(sys, inappamt)
+    end subroutine c_fsMinAppAmt
+
+    subroutine c_taperMatGrant(sys, taper) bind(C, name = "C_FORTAX_taperMatGrant")
+        implicit none
+        type(sys_t), intent(inout) :: sys
+        integer(kind = c_int), intent(in) :: taper
+        call FORTAX_taperMatGrant(sys, taper)
+    end subroutine c_taperMatGrant
+
+    subroutine c_imposeUC(sys) bind(C, name = "C_FORTAX_imposeUC")
+        implicit none
+        type(sys_t), intent(inout) :: sys
+        call FORTAX_imposeUC(sys)
+    end subroutine c_imposeUC
+
+    ! fortax_kinks
+
+    subroutine c_evalKinksHours(bcout, hours, earn, net, mtr, iin, iout) bind(C, name = "C_FORTAX_evalKinksHours")
+        implicit none
+        type(bcout_t), intent(in)  :: bcout
+        real(kind = c_double), intent(in)  :: hours
+        real(kind = c_double), intent(out) :: earn, net, mtr
+        integer(kind = c_int), intent(in), optional :: iin
+        integer(kind = c_int), intent(out), optional :: iout
+        call FORTAX_evalKinksHours(bcout, hours, earn, net, mtr, iin, iout)
+    end subroutine c_evalKinksHours
+
+    subroutine c_evalKinksEarn(bcout, earn, hours, net, mtr, iin, iout) bind(C, name = "C_FORTAX_evalKinksEarn")
+        implicit none
+        type(bcout_t), intent(in)  :: bcout
+        real(kind = c_double), intent(in)  :: earn
+        real(kind = c_double), intent(out) :: hours, net, mtr
+        integer(kind = c_int), intent(in), optional :: iin
+        integer(kind = c_int), intent(out), optional :: iout
+        call FORTAX_evalKinksEarn(bcout, earn, hours, net, mtr, iin, iout)
+    end subroutine c_evalKinksEarn
+
+    function c_kinksHoursDefault(sys, fam, ad, wage, hours1, hours2) result(bcout) &
+        bind(C, name = "C_FORTAX_kinksHoursDefault")
+        use fortax_type, only : len_label
+        implicit none
+        type(sys_t), intent(in)  :: sys
+        type(fam_t), intent(in)  :: fam
+        integer(kind = c_int), intent(in) :: ad
+        real(kind = c_double), intent(in) :: wage
+        real(kind = c_double), intent(in) :: hours1, hours2
+        type(bcout_t) :: bcout
+        call FORTAX_kinksHours(sys, fam, ad, wage, hours1, hours2, bcout)
+    end function c_kinksHoursDefault
+
+    function c_kinksHours(sys, fam, ad, wage, hours1, hours2, taxlevel, len_taxlevel, taxoutc, len_taxout) &
+        result(bcout) bind(C, name = "C_FORTAX_kinksHours")
+        use fortax_type, only : len_label
+        implicit none
+        type(sys_t), intent(in)  :: sys
+        type(fam_t), intent(in)  :: fam
+        integer(kind = c_int), intent(in) :: ad
+        real(kind = c_double), intent(in) :: wage
+        real(kind = c_double), intent(in) :: hours1, hours2
+        integer(kind = c_int), intent(in) :: len_taxlevel
+        integer(kind = c_int), intent(in) :: len_taxout
+        character(kind = c_char), dimension(*), intent(in) :: taxlevel
+        character(kind = c_char), dimension(len_label, len_taxout), intent(in) :: taxoutc
+        character(len = len_label) :: taxout(len_taxout)
+        type(bcout_t) :: bcout
+        integer :: i
+        do i = 1, len_taxout
+            taxout(i) = copy_a2s(taxoutc(:, i))
+        end do
+        call FORTAX_kinksHours(sys, fam, ad, wage, hours1, hours2, bcout, copy_a2s(taxlevel(1:len_taxlevel)), taxout)
+    end function c_kinksHours
+
+    function c_kinksEarnDefault(sys, fam, ad, hours, earn1, earn2) result(bcout) &
+        bind(C, name = "C_FORTAX_kinksEarnDefault")
+        use fortax_type, only : len_label
+        implicit none
+        type(sys_t), intent(in)  :: sys
+        type(fam_t), intent(in)  :: fam
+        integer(kind = c_int), intent(in) :: ad
+        real(kind = c_double), intent(in) :: hours
+        real(kind = c_double), intent(in) :: earn1, earn2
+        type(bcout_t) :: bcout
+        call FORTAX_kinksEarn(sys, fam, ad, hours, earn1, earn2, bcout)
+    end function c_kinksEarnDefault
+
+    function c_kinksEarn(sys, fam, ad, hours, earn1, earn2, taxlevel, len_taxlevel, taxoutc, len_taxout) &
+        result(bcout) bind(C, name = "C_FORTAX_kinksEarn")
+        use fortax_type, only : len_label
+        implicit none
+        type(sys_t), intent(in)  :: sys
+        type(fam_t), intent(in)  :: fam
+        integer(kind = c_int), intent(in) :: ad
+        real(kind = c_double), intent(in) :: hours
+        real(kind = c_double), intent(in) :: earn1, earn2
+        integer(kind = c_int), intent(in) :: len_taxlevel
+        integer(kind = c_int), intent(in) :: len_taxout
+        character(kind = c_char), dimension(*), intent(in) :: taxlevel
+        character(kind = c_char), dimension(len_label, len_taxout), intent(in) :: taxoutc
+        character(len = len_label) :: taxout(len_taxout)
+        type(bcout_t) :: bcout
+        integer :: i
+        do i = 1, len_taxout
+            taxout(i) = copy_a2s(taxoutc(:, i))
+        end do
+        call FORTAX_kinksEarn(sys, fam, ad, hours, earn1, earn2, bcout, copy_a2s(taxlevel(1:len_taxlevel)), taxout)
+    end function c_kinksEarn
+
+    function c_kinksCcexpDefault(sys, fam, ad, hours, earn, ccexp1, ccexp2) &
+        result(bcout) bind(C, name = "C_FORTAX_kinksCcexpDefault")
+        use fortax_type, only : len_label
+        implicit none
+        type(sys_t), intent(in)  :: sys
+        type(fam_t), intent(in)  :: fam
+        integer(kind = c_int), intent(in) :: ad
+        real(kind = c_double), intent(in) :: hours
+        real(kind = c_double), intent(in) :: earn
+        real(kind = c_double), intent(in) :: ccexp1, ccexp2
+        type(bcout_t) :: bcout
+        call FORTAX_kinksCcexp(sys, fam, ad, hours, earn, ccexp1, ccexp2, bcout)
+    end function c_kinksCcexpDefault
+
+    function c_kinksCcexp(sys, fam, ad, hours, earn, ccexp1, ccexp2,  taxlevel, len_taxlevel, taxoutc, len_taxout) &
+        result(bcout) bind(C, name = "C_FORTAX_kinksCcexp")
+        use fortax_type, only : len_label
+        implicit none
+        type(sys_t), intent(in)  :: sys
+        type(fam_t), intent(in)  :: fam
+        integer(kind = c_int), intent(in) :: ad
+        real(kind = c_double), intent(in) :: hours
+        real(kind = c_double), intent(in) :: earn
+        real(kind = c_double), intent(in) :: ccexp1, ccexp2
+        integer(kind = c_int), intent(in) :: len_taxlevel
+        integer(kind = c_int), intent(in) :: len_taxout
+        character(kind = c_char), dimension(*), intent(in) :: taxlevel
+        character(kind = c_char), dimension(len_label, len_taxout), intent(in) :: taxoutc
+        character(len = len_label) :: taxout(len_taxout)
+        type(bcout_t) :: bcout
+        integer :: i
+        do i = 1, len_taxout
+            taxout(i) = copy_a2s(taxoutc(:, i))
+        end do
+        call FORTAX_kinksCcexp(sys, fam, ad, hours, earn, ccexp1, ccexp2, bcout, copy_a2s(taxlevel(1:len_taxlevel)), taxout)
+    end function c_kinksCcexp
+
+    subroutine c_kinks_desc(bcout) bind(C, name = "C_FORTAX_kinks_desc")
+        implicit none
+        type(bcout_t), intent(in) :: bcout
+        call FORTAX_kinks_desc(bcout)
+    end subroutine c_kinks_desc
+
+    ! fortax_prices
 
     subroutine c_loadIndex(rpi, fname, len_fname) bind(C, name = "C_FORTAX_loadIndex")
         implicit none
@@ -129,23 +280,21 @@ contains
         end if
     end subroutine c_loadsysindex
 
-    subroutine c_getsysindex(sysindex, date, systemformat, len_systemformat, c_sysfilepath, len_sysfilepath, sysnum) bind(C, name = "C_FORTAX_getSysIndex")
+    subroutine c_getsysindex(sysindex, date, c_sysfilepath, len_sysfilepath, sysnum) &
+        bind(C, name = "C_FORTAX_getSysIndex")
         implicit none
         type(sysindex_t), intent(in) :: sysindex
         integer(kind=c_int), intent(in) :: date
-        character(kind=c_char), dimension(*), intent(in) :: systemformat
-        integer(kind=c_int), intent(in) :: len_systemformat
-        character(kind=c_char), dimension(255), intent(out) :: c_sysfilepath
+        character(kind=c_char), dimension(256), intent(out) :: c_sysfilepath
         integer(kind=c_int), intent(out) :: len_sysfilepath
         integer(kind=c_int), intent(out) :: sysnum
-        character(len=255) :: sysfilepath
-        call FORTAX_getsysindex(sysindex, date, copy_a2s(systemformat(1:len_systemformat)), sysfilepath, sysnum)
+        character(len = 256) :: sysfilepath
+        call FORTAX_getsysindex(sysindex, date, sysfilepath, sysnum)
         len_sysfilepath = len_trim(sysfilepath)
-        c_sysfilepath = transfer(sysfilepath, c_sysfilepath)
-        ! c_sysfilepath = copy_s2a(sysfilepath)
+        c_sysfilepath = copy_s2a(sysfilepath)
     end subroutine c_getsysindex
 
-    ! use fortax_read,        only : Y FORTAX_readFortaxParams => readFortaxParams
+    ! fortax_read
 
     subroutine c_readFortaxParams(sys, systemFile, len_systemFile, prices) bind(C, name = "C_FORTAX_readFortaxParams")
         implicit none
@@ -156,22 +305,7 @@ contains
         call FORTAX_readFortaxParams(sys, copy_a2s(systemFile(1:len_systemFile)), prices)
     end subroutine c_readFortaxParams
 
-    ! use fortax_taxbenread,  only :  FORTAX_readTaxbenParams => readTaxbenParams,                &
-    !                                 FORTAX_batchConvertTaxben => batchConvertTaxben
-
-
-    ! use fortax_type,        only :  fam_t, net_t, sys_t, rpi_t,                                 &
-    !                               YY FORTAX_fam_init => fam_init,                                &
-    !                               YY FORTAX_net_init => net_init,                                &
-    !                               Y FORTAX_sys_init => sys_init,                                &
-    !                               YY FORTAX_fam_saveF90 => fam_saveF90,                          &
-    !                               Y FORTAX_sys_saveF90 => sys_saveF90,                          &
-    !                               X FORTAX_lab => lab,                                          &
-    !                               X FORTAX_maxkids => maxkids,                                  &
-    !                               X FORTAX_fam_gen => fam_gen,                                  &
-    !                               YY FORTAX_fam_desc => fam_desc,                                &
-    !                               YY FORTAX_net_desc => net_desc,                                &
-    !                               X operator(+), operator(*), operator(/)
+    ! fortax type
 
     subroutine c_fam_init(fam) bind(C, name = "C_FORTAX_fam_init")
         implicit none
@@ -215,7 +349,6 @@ contains
         end if
     end subroutine c_sys_saveF90
 
-
     subroutine c_fam_desc(fam, fname, len_fname) bind(C, name = "C_FORTAX_fam_desc")
         implicit none
         type(fam_t), intent(in) :: fam
@@ -231,8 +364,8 @@ contains
     subroutine c_net_desc(net, fname, len_fname) bind(C, name = "C_FORTAX_net_desc")
         implicit none
         type(net_t), intent(in) :: net
-        character(kind=c_char), dimension(*), optional, intent(in) :: fname
-        integer(kind=c_int), optional, intent(in) :: len_fname
+        character(kind = c_char), dimension(*), optional, intent(in) :: fname
+        integer(kind = c_int), optional, intent(in) :: len_fname
         if (present(fname) .and. present(len_fname)) then
             call FORTAX_net_desc(net, copy_a2s(fname(1:len_fname)))
         else
@@ -240,12 +373,26 @@ contains
         end if
     end subroutine c_net_desc
 
-    ! use fortax_write,       only :  FORTAX_fortaxPrint => fortaxPrint,                          &
-    !                                 FORTAX_fortaxWrite => fortaxWrite
+    ! fortax_write
 
-    ! use fortax_realtype,    only :  FORTAX_dp => dp,                                            &
-    !                                 FORTAX_sp => sp,                                            &
-    !                                 FORTAX_ep => ep,                                            &
-    !                                 FORTAX_qp => qp
+    subroutine c_sys_desc(sys, fname, len_fname) bind(C, name = "C_FORTAX_sys_desc")
+        implicit none
+        type(sys_t), intent(in) :: sys
+        character(kind = c_char), dimension(*), optional, intent(in) :: fname
+        integer(kind = c_int), optional, intent(in) :: len_fname
+        if (present(fname) .and. present(len_fname)) then
+            call FORTAX_sys_desc(sys, copy_a2s(fname(1:len_fname)))
+        else
+            call FORTAX_sys_desc(sys)
+        end if
+    end subroutine c_sys_desc
+
+    subroutine c_writeFortaxParams(sys, fname, len_fname) bind(C, name = "C_FORTAX_writeFortaxParams")
+        implicit none
+        type(sys_t), intent(in) :: sys
+        character(kind = c_char), dimension(*), intent(in) :: fname
+        integer(kind = c_int), intent(in) :: len_fname
+        call FORTAX_writeFortaxParams(sys, copy_a2s(fname(1:len_fname)))
+    end subroutine c_writeFortaxParams
 
 end module fortax_library_c

@@ -1,19 +1,14 @@
-_$header
-#include "header.inc"
-
-_$integer(numbands,range)
-_$double(pa,amount)
-_$logical(doPATaper,null)
-_$logical(disablePATaperRounding,null)
-_$double(paTaperThresh,amount)
-_$double(paTaperRate,rate)
-_$double(mma,amount)
-_$double(ctc,amount)
-_$double(ctcyng,amount)
-_$double(mmarate,rate)
-_$double(ctctaper,rate)
-_$double(c4rebate,rate)
-_$doublearray(bands,amount,:)
-_$doublearray(rates,rate,:)
-
-_$footer
+@:fortaxdef(integer, numbands, "Number of income tax bands", range)
+@:fortaxdef(double,  pa, "Personal allowance (PA)", amount)
+@:fortaxdef(bool,    doPATaper, "Taper PA", null, label = bool)
+@:fortaxdef(bool,    disablePATaperRounding, "Disable rounding of PA tapered amount", null, label = bool)
+@:fortaxdef(double,  paTaperThresh, "Threshold for PA taper", amount)
+@:fortaxdef(double,  paTaperRate, "PA taper rate", rate)
+@:fortaxdef(double,  mma, "", amount)
+@:fortaxdef(double,  ctc, "", amount)
+@:fortaxdef(double,  ctcyng, "", amount)
+@:fortaxdef(double,  mmarate, "", rate)
+@:fortaxdef(double,  ctctaper, "", rate)
+@:fortaxdef(double,  c4rebate, "", rate)
+@:fortaxdef(double,  bands, "Income tax bands", amount, dim = maxIncTaxBands, dimvar = numbands)
+@:fortaxdef(double,  rates, "Income tax rates", rate, dim = maxIncTaxBands, dimvar = numbands)

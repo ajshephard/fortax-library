@@ -1,4 +1,3 @@
-
 ! This file is part of the FORTAX library;
 
 ! FORTAX is free software: you can redistribute it and/or modify
@@ -15,16 +14,16 @@
 ! along with FORTAX.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
-
 ! fortax_type
 ! -----------------------------------------------------------------------
 ! module defines the main derived types that describe families, the tax
 ! system, and the information returned by the calculation routines, AS
 
+
 module fortax_type
 
     use fortax_realtype, only : dp
+    use iso_c_binding
 
     implicit none
 
@@ -33,33 +32,27 @@ module fortax_type
     private
     public :: fam_init, net_init, sys_init
     public :: fam_saveF90, sys_saveF90
-    public :: fam_t, net_t, sys_t, rpi_t
-    public :: lab, maxkids
-    public :: fam_gen, fam_desc
-    public :: operator(+), operator(*), operator(/)
-    public :: net_desc
+    public :: fam_t, net_t, sys_t, rpi_t, sysindex_t, bcout_t
+    public :: lab, label_bool, label_ctax, label_region, label_tenure
+    public :: fam_gen, fam_desc, net_desc
+    public :: operator(+), operator(*), operator(/), operator(-)
 
-!     public :: ctax_banda, ctax_bandb, ctax_bandc, ctax_bandd, &
-!         & ctax_bande, ctax_bandf, ctax_bandg, ctax_bandh
-
-    public :: sysHuge
-
-    ! sysHuge is the internal value for unbounded values in sys
-    real(dp), parameter :: sysHuge = 9.99999999999999E+099_dp
-
-#   ifndef _maxkids_
-    integer, parameter :: maxKids = 10
-#   else
-    integer, parameter :: maxKids = _maxkids_
-#   endif
-#   undef _maxkids_
-
-#   ifndef _maxrpi_
-    integer, public, parameter :: maxRPI = 1024
-#   else
-    integer, public, parameter :: maxRPI = _maxrpi_
-#   endif
-#   undef _maxrpi_
+    ! constants for array bounds and internal values
+    integer, parameter, public :: maxKids = 16
+    integer, parameter, public :: maxRpi = 1024
+    integer, parameter, public :: maxSysIndex = 128
+    integer, parameter, public :: maxNumAgeRng = 32
+    integer, parameter, public :: maxIncTaxBands = 32
+    integer, parameter, public :: maxNatInsBands = 32
+    integer, parameter, public :: maxNatInsC4Bands = 32
+    integer, parameter, public :: maxKinks = 256
+    real(dp), parameter, public :: sysHuge = 1.0e100_dp
+    integer, parameter, public :: len_sysname = 64
+    integer, parameter, public :: len_sysdesc = 512
+    integer, parameter, public :: len_sysindex = 256
+    integer, parameter, public :: len_label = 16
+    integer, parameter, public :: len_labstring = 64
+    integer, parameter, public :: len_bcdesc = 256
 
     ! lab_t
     ! -----------------------------------------------------------------------
@@ -67,78 +60,94 @@ module fortax_type
     ! include files. at the moment I am not using the string values, but they
     ! are still defined for possible future use
 
-#   include "includes/lab_t.inc"
+    type :: lab_bool_t
+        integer :: no
+        integer :: yes
+    end type lab_bool_t
+
+    type :: lab_ctax_t
+        integer :: banda
+        integer :: bandb
+        integer :: bandc
+        integer :: bandd
+        integer :: bande
+        integer :: bandf
+        integer :: bandg
+        integer :: bandh
+    end type lab_ctax_t
+
+    type :: lab_tenure_t
+        integer :: own_outright
+        integer :: mortgage
+        integer :: part_own
+        integer :: social_renter
+        integer :: private_renter
+        integer :: rent_free
+        integer :: other
+    end type lab_tenure_t
+
+    type :: lab_region_t
+        integer :: north_east
+        integer :: north_west
+        integer :: yorks
+        integer :: east_midlands
+        integer :: west_midlands
+        integer :: eastern
+        integer :: london
+        integer :: south_east
+        integer :: south_west
+        integer :: wales
+        integer :: scotland
+        integer :: northern_ireland
+    end type lab_region_t
 
 
-!   remove this code to implement my new style labeling...
+    type :: lab_t
+        type(lab_bool_t) :: bool
+        type(lab_ctax_t) :: ctax
+        type(lab_tenure_t) :: tenure
+        type(lab_region_t) :: region
+    end type lab_t
 
-!     type :: lab_t
-!         character(len=32), dimension(7)  :: tenure
-!         character(len=32), dimension(12) :: region
-!     end type lab_t
-
-!     type(lab_t), parameter :: lab = lab_t((/character(len=32) :: 'Own outright','Mortgage', &
-!         & 'Part own, part rent','Social renter','Private renter','Rent free','Other'/), &
-!         & (/character(len=32) :: 'North East','North West and Merseyside','Yorks and Humberside',&
-!         & 'East Midlands','West Midlands','Eastern','London','South East','South West','Wales',&
-!         & 'Scotland','Northern Ireland'/))
-
-!     integer, parameter :: ctax_banda = 1
-!     integer, parameter :: ctax_bandb = 2
-!     integer, parameter :: ctax_bandc = 3
-!     integer, parameter :: ctax_bandd = 4
-!     integer, parameter :: ctax_bande = 5
-!     integer, parameter :: ctax_bandf = 6
-!     integer, parameter :: ctax_bandg = 7
-!     integer, parameter :: ctax_bandh = 8
+    type(lab_t), parameter :: lab = lab_t( &
+        lab_bool_t(0, 1), &
+        lab_ctax_t(1, 2, 3, 4, 5, 6, 7, 8), &
+        lab_tenure_t(1, 2, 3, 4, 5, 6, 7), &
+        lab_region_t(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12))
 
 
     ! rpi_t
     ! -----------------------------------------------------------------------
     ! defines the prices indexing for uprating
 
-    type rpi_t
+    type, bind(c) :: rpi_t
         integer  :: ndate
         integer  :: date(maxRPI)
         real(dp) :: index(maxRPI)
     end type
 
+
+    ! sysindex_t
+    ! -----------------------------------------------------------------------
+    ! defines sysindex
+
+    type, bind(c) :: sysindex_t
+        integer :: nsys
+        integer :: date0(maxSysIndex), date1(maxSysIndex)
+        character(kind = c_char) :: fname(len_sysindex, maxSysIndex)
+    end type
+
+
     ! famad_t
     ! -----------------------------------------------------------------------
     ! defines the adult level family type structure (see fam_t below)
 
-    type :: famad_t
-
-#       undef  _$header
-#       undef  _$footer
-#       undef  _$integer
-#       undef  _$double
-#       undef  _$logical
-#       undef  _$doublearray
-#       undef  _$integerarray
-#       undef  _$logicalarray
-
-#       define _$header
-#       define _$footer
-#       define _$integer(x,y) integer  :: x
-#       define _$double(x,y)  real(dp) :: x
-#       define _$logical(x,y) logical  :: x
-#       define _$integerarray(x,y,z) integer  :: x(z)
-#       define _$doublearray(x,y,z)  real(dp) :: x(z)
-#       define _$logicalarray(x,y,z) logical  :: x(z)
-
-#       include "includes/famad_t.inc"
-
-#       undef  _$header
-#       undef  _$footer
-#       undef  _$integer
-#       undef  _$double
-#       undef  _$logical
-#       undef  _$doublearray
-#       undef  _$integerarray
-#       undef  _$logicalarray
+    type, bind(c) :: famad_t
+        integer :: age
+        integer :: selfemp
+        real(dp) :: hrs
+        real(dp) :: earn
     end type famad_t
-
 
     ! fam_t
     ! -----------------------------------------------------------------------
@@ -147,119 +156,69 @@ module fortax_type
     ! information. Anything that can affect the taxes and transfer payments
     ! of a family is defined in here.
 
-    type :: fam_t
-
-#       undef  _$header
-#       undef  _$footer
-#       undef  _$integer
-#       undef  _$double
-#       undef  _$logical
-#       undef  _$doublearray
-#       undef  _$integerarray
-#       undef  _$logicalarray
-
-#       define _$header
-#       define _$footer
-#       define _$integer(x,y) integer  :: x
-#       define _$double(x,y)  real(dp) :: x
-#       define _$logical(x,y) logical  :: x
-#       define _$integerarray(x,y,z) integer  :: x(z)
-#       define _$doublearray(x,y,z)  real(dp) :: x(z)
-#       define _$logicalarray(x,y,z) logical  :: x(z)
-
-#       include "includes/fam_t.inc"
-
-#       undef  _$header
-#       undef  _$footer
-#       undef  _$integer
-#       undef  _$double
-#       undef  _$logical
-#       undef  _$doublearray
-#       undef  _$integerarray
-#       undef  _$logicalarray
-
+    type, bind(c) :: fam_t
+        integer :: couple
+        integer :: married
+        real(dp) :: ccexp
+        real(dp) :: maint
+        integer :: nkids
+        integer :: kidage(maxKids)
+        integer :: nothads
+        integer :: tenure
+        real(dp) :: rent
+        real(dp) :: rentcap
+        integer :: region
+        integer :: ctband
+        real(dp) :: banddratio
+        integer :: intdate
         type(famad_t) :: ad(2)
-
     end type fam_t
-
 
     ! netad_t
     ! -----------------------------------------------------------------------
     ! defines the adult level information returned following calls to the
     ! main calculation routines (see net_t below).
 
-    type :: netad_t
-
-#       undef  _$header
-#       undef  _$footer
-#       undef  _$integer
-#       undef  _$double
-#       undef  _$logical
-#       undef  _$doublearray
-#       undef  _$integerarray
-#       undef  _$logicalarray
-
-#       define _$header
-#       define _$footer
-#       define _$integer(x,lab,y) integer  :: x
-#       define _$double(x,lab,y)  real(dp) :: x
-#       define _$logical(x,lab,y) logical  :: x
-#       define _$integerarray(x,lab,y,z) integer  :: x(z)
-#       define _$doublearray(x,lab,y,z)  real(dp) :: x(z)
-#       define _$logicalarray(x,lab,y,z) logical  :: x(z)
-
-#       include "includes/netad_t.inc"
-
-#       undef  _$header
-#       undef  _$footer
-#       undef  _$integer
-#       undef  _$double
-#       undef  _$logical
-#       undef  _$doublearray
-#       undef  _$integerarray
-#       undef  _$logicalarray
-
+    type, bind(c) :: netad_t
+        real(dp) :: taxable
+        real(dp) :: inctax
+        real(dp) :: natins
+        real(dp) :: natinsc1
+        real(dp) :: natinsc2
+        real(dp) :: natinsc4
+        real(dp) :: pretaxearn
+        real(dp) :: posttaxearn
     end type netad_t
-
 
     ! nettu_t
     ! -----------------------------------------------------------------------
     ! defines the tax unit level information returned following calls to the
     ! main calculation routines (see net_t below).
 
-    type :: nettu_t
-
-#       undef  _$header
-#       undef  _$footer
-#       undef  _$integer
-#       undef  _$double
-#       undef  _$logical
-#       undef  _$doublearray
-#       undef  _$integerarray
-#       undef  _$logicalarray
-
-#       define _$header
-#       define _$footer
-#       define _$integer(x,lab,y) integer  :: x
-#       define _$double(x,lab,y)  real(dp) :: x
-#       define _$logical(x,lab,y) logical  :: x
-#       define _$integerarray(x,lab,y,z) integer  :: x(z)
-#       define _$doublearray(x,lab,y,z)  real(dp) :: x(z)
-#       define _$logicalarray(x,lab,y,z) logical  :: x(z)
-
-#       include "includes/nettu_t.inc"
-
-#       undef  _$header
-#       undef  _$footer
-#       undef  _$integer
-#       undef  _$double
-#       undef  _$logical
-#       undef  _$doublearray
-#       undef  _$integerarray
-#       undef  _$logicalarray
-
+    type, bind(c) :: nettu_t
+        real(dp) :: pretaxearn
+        real(dp) :: posttaxearn
+        real(dp) :: chben
+        real(dp) :: matgrant
+        real(dp) :: fc
+        real(dp) :: wtc
+        real(dp) :: ctc
+        real(dp) :: ccexp
+        real(dp) :: incsup
+        real(dp) :: hben
+        real(dp) :: polltax
+        real(dp) :: polltaxben
+        real(dp) :: ctax
+        real(dp) :: ctaxben
+        real(dp) :: maxuc
+        real(dp) :: uc
+        real(dp) :: dispinc
+        real(dp) :: pretax
+        real(dp) :: nettax
+        real(dp) :: chcaresub
+        real(dp) :: fsm
+        real(dp) :: totben
     end type nettu_t
-
 
     ! net_t
     ! -----------------------------------------------------------------------
@@ -267,7 +226,7 @@ module fortax_type
     ! calculation routines within fortax_calc. It contains measures of net
     ! income, together with various tax amounts and other components of income
 
-    type :: net_t
+    type, bind(c) :: net_t
         type(netad_t) :: ad(2)
         type(nettu_t) :: tu
     end type net_t
@@ -283,18 +242,41 @@ module fortax_type
       module procedure net_minus_net
     end interface
 
-
     ! Associate "net_times_scalar" and "scalar_times_net" routines with "*" operator
     interface operator(*)
       module procedure net_times_scalar
+      module procedure net_times_scalar_integer
       module procedure scalar_times_net
+      module procedure scalar_times_net_integer
     end interface
 
     ! Associate "net_div_scalar" routine with "/" operator
     interface operator(/)
       module procedure net_div_scalar
+      module procedure net_div_scalar_integer
     end interface
 
+
+    interface write_f90
+        module procedure write_f90integer
+        module procedure write_f90integerarray
+        module procedure write_f90integerarray2
+        module procedure write_f90double
+        module procedure write_f90doublearray
+        module procedure write_f90doublearray2
+    end interface write_f90
+
+    interface desc_f90
+        module procedure desc_f90integer
+        module procedure desc_f90integer_label
+        module procedure desc_f90integerarray
+        module procedure desc_f90integerarray_label
+        module procedure desc_f90integerarray2
+        module procedure desc_f90integerarray2_label
+        module procedure desc_f90double
+        module procedure desc_f90doublearray
+        module procedure desc_f90doublearray2
+    end interface desc_f90
 
 
     ! sys_t
@@ -303,9 +285,274 @@ module fortax_type
     ! It describes all the parameters which are interpreted within the
     ! module fortax_calc
 
-    ! I use a lot of preprocessor stuff for handling the sys_t type
-    ! we just "include" it here to keep the code tidy, AS
-#   include "includes/sys_t.inc"
+    type, bind(c) :: inctax_t
+        integer :: numbands
+        real(dp) :: pa
+        integer :: doPATaper
+        integer :: disablePATaperRounding
+        real(dp) :: paTaperThresh
+        real(dp) :: paTaperRate
+        real(dp) :: mma
+        real(dp) :: ctc
+        real(dp) :: ctcyng
+        real(dp) :: mmarate
+        real(dp) :: ctctaper
+        real(dp) :: c4rebate
+        real(dp) :: bands(maxIncTaxBands)
+        real(dp) :: rates(maxIncTaxBands)
+    end type inctax_t
+
+    type, bind(c) :: natins_t
+        integer :: numrates
+        integer :: c4nrates
+        real(dp) :: c2floor
+        real(dp) :: c2rate
+        real(dp) :: ceiling
+        real(dp) :: rates(maxNatInsBands)
+        real(dp) :: bands(maxNatInsBands)
+        real(dp) :: c4rates(maxNatInsC4Bands)
+        real(dp) :: c4bands(maxNatInsC4Bands)
+    end type natins_t
+
+    type, bind(c) :: chben_t
+        integer :: doChBen
+        real(dp) :: basic
+        real(dp) :: kid1xtr
+        real(dp) :: opf
+        real(dp) :: MatGrantVal
+        integer :: MatGrantOnlyFirstKid
+        integer :: doTaper
+        integer :: disableTaperRounding
+        real(dp) :: taperStart
+        real(dp) :: taperRate
+        integer :: taperIsIncTax
+    end type chben_t
+
+    type, bind(c) :: fc_t
+        integer :: dofamcred
+        integer :: NumAgeRng
+        integer :: MaxAgeCC
+        integer :: WFTCMaxAgeCC
+        real(dp) :: adult
+        real(dp) :: ftprem
+        real(dp) :: hours1
+        real(dp) :: hours2
+        real(dp) :: thres
+        real(dp) :: taper
+        real(dp) :: MaintDisreg
+        real(dp) :: MaxCC1
+        real(dp) :: MaxCC2
+        real(dp) :: WFTCMaxCC1
+        real(dp) :: WFTCMaxCC2
+        real(dp) :: WFTCPropCC
+        real(dp) :: MinAmt
+        integer :: kidagel(maxNumAgeRng)
+        integer :: kidageu(maxNumAgeRng)
+        real(dp) :: kidcred(maxNumAgeRng)
+    end type fc_t
+
+    type, bind(c) :: ctc_t
+        real(dp) :: fam
+        real(dp) :: baby
+        real(dp) :: kid
+    end type ctc_t
+
+    type, bind(c) :: wtc_t
+        real(dp) :: Basic
+        real(dp) :: CouLP
+        real(dp) :: FT
+        real(dp) :: MinHrsKids
+        real(dp) :: MinHrsCouKids
+        real(dp) :: MinHrsNoKids
+        real(dp) :: FTHrs
+        integer :: MinAgeKids
+        integer :: MinAgeNoKids
+        real(dp) :: MaxCC1
+        real(dp) :: MaxCC2
+        real(dp) :: PropCC
+        integer :: MaxAgeCC
+        real(dp) :: NewDisreg
+        integer :: NewDisregCon
+    end type wtc_t
+
+    type, bind(c) :: ntc_t
+        integer :: donewtaxcred
+        real(dp) :: thr1lo
+        real(dp) :: thr1hi
+        real(dp) :: thr2
+        real(dp) :: taper1
+        real(dp) :: taper2
+        integer :: taperCTCInOneGo
+        real(dp) :: MinAmt
+    end type ntc_t
+
+    type, bind(c) :: incsup_t
+        integer :: doIncSup
+        integer :: IncChben
+        integer :: NumAgeRng
+        real(dp) :: MainCou
+        real(dp) :: YngCou
+        real(dp) :: MainLP
+        real(dp) :: YngLP
+        real(dp) :: MainSin
+        real(dp) :: YngSin
+        real(dp) :: ValFSM
+        real(dp) :: DisregLP
+        real(dp) :: DisregSin
+        real(dp) :: DisregCou
+        integer :: DisregShared
+        real(dp) :: PremFam
+        real(dp) :: PremLP
+        real(dp) :: hours
+        real(dp) :: MaintDisreg
+        integer :: AgeRngl(maxNumAgeRng)
+        integer :: AgeRngu(maxNumAgeRng)
+        real(dp) :: AddKid(maxNumAgeRng)
+    end type incsup_t
+
+    type, bind(c) :: ctax_t
+        integer :: docounciltax
+        real(dp) :: bandD
+        real(dp) :: SinDis
+        real(dp) :: RatioA
+        real(dp) :: RatioB
+        real(dp) :: RatioC
+        real(dp) :: RatioE
+        real(dp) :: RatioF
+        real(dp) :: RatioG
+        real(dp) :: RatioH
+    end type ctax_t
+
+    type, bind(c) :: rebatesys_t
+        integer :: RulesUnderFC
+        integer :: RulesUnderWFTC
+        integer :: RulesUnderNTC
+        integer :: RulesUnderUC
+        integer :: NumAgeRng
+        integer :: Restrict
+        integer :: docap
+        real(dp) :: MainCou
+        real(dp) :: YngCou
+        real(dp) :: MainLP
+        real(dp) :: YngLP
+        real(dp) :: MainSin
+        real(dp) :: YngSin
+        real(dp) :: DisregSin
+        real(dp) :: DisregLP
+        real(dp) :: DisregCou
+        integer :: CredInDisregCC
+        integer :: ChbenIsIncome
+        real(dp) :: PremFam
+        real(dp) :: PremLP
+        real(dp) :: MaintDisreg
+        real(dp) :: MaxCC1
+        real(dp) :: MaxCC2
+        integer :: MaxAgeCC
+        integer :: AgeRngl(maxNumAgeRng)
+        integer :: AgeRngu(maxNumAgeRng)
+        real(dp) :: AddKid(maxNumAgeRng)
+    end type rebatesys_t
+
+    type, bind(c) :: hben_t
+        integer :: doHBen
+        real(dp) :: taper
+        real(dp) :: MinAmt
+    end type hben_t
+
+    type, bind(c) :: ctaxben_t
+        integer :: docounciltaxben
+        real(dp) :: taper
+        integer :: doEntitlementCut
+        real(dp) :: entitlementShare
+    end type ctaxben_t
+
+    type, bind(c) :: ccben_t
+        integer :: dopolltax
+        real(dp) :: taper
+        real(dp) :: PropElig
+        real(dp) :: MinAmt
+        real(dp) :: CCrate
+    end type ccben_t
+
+    type, bind(c) :: uc_t
+        integer :: doUnivCred
+        real(dp) :: MainCou
+        real(dp) :: YngCou
+        real(dp) :: MainSin
+        real(dp) :: YngSin
+        integer :: MinAgeMain
+        real(dp) :: FirstKid
+        real(dp) :: OtherKid
+        real(dp) :: MaxCC1
+        real(dp) :: MaxCC2
+        real(dp) :: PropCC
+        integer :: MaxAgeCC
+        integer :: doRentCap
+        real(dp) :: DisregSinNoKidsHi
+        real(dp) :: DisregSinNoKidsLo
+        real(dp) :: DisregSinKidsHi
+        real(dp) :: DisregSinKidsLo
+        real(dp) :: DisregCouNoKidsHi
+        real(dp) :: DisregCouNoKidsLo
+        real(dp) :: DisregCouKidsHi
+        real(dp) :: DisregCouKidsLo
+        real(dp) :: taper
+        real(dp) :: MinAmt
+    end type uc_t
+
+    type, bind(c) :: statepen_t
+        integer :: doStatePen
+        integer :: PenAgeMan
+        integer :: PenAgeWoman
+    end type statepen_t
+
+    type, bind(c) :: bencap_t
+        integer :: doCap
+        integer :: doThruUC
+        real(dp) :: sinNoKids
+        real(dp) :: sinKids
+        real(dp) :: couNoKids
+        real(dp) :: couKids
+        real(dp) :: UCEarnThr
+    end type bencap_t
+
+    type, bind(c) :: extra_t
+        integer :: fsminappamt
+        integer :: matgrant
+        integer :: prices
+    end type extra_t
+
+
+    type, bind(c) :: sys_t
+        character(kind = c_char) :: sysname(len_sysname)
+        character(kind = c_char) :: sysdesc(len_sysdesc)
+        type(inctax_t) :: inctax
+        type(natins_t) :: natins
+        type(chben_t) :: chben
+        type(fc_t) :: fc
+        type(ctc_t) :: ctc
+        type(wtc_t) :: wtc
+        type(ntc_t) :: ntc
+        type(incsup_t) :: incsup
+        type(ctax_t) :: ctax
+        type(rebatesys_t) :: rebatesys
+        type(hben_t) :: hben
+        type(ctaxben_t) :: ctaxben
+        type(ccben_t) :: ccben
+        type(uc_t) :: uc
+        type(statepen_t) :: statepen
+        type(bencap_t) :: bencap
+        type(extra_t) :: extra
+    end type sys_t
+
+    type, bind(c) :: bcout_t
+        integer :: kinks_num
+        real(dp), dimension(maxkinks) :: kinks_hrs
+        real(dp), dimension(maxkinks) :: kinks_earn
+        real(dp), dimension(maxkinks) :: kinks_net
+        real(dp), dimension(maxkinks) :: kinks_mtr
+        character(kind = c_char) :: bc_desc(len_bcdesc)
+    end type bcout_t
 
 contains
 
@@ -321,64 +568,27 @@ contains
 
         implicit none
 
-        type(fam_t), intent(inout) :: fam
+        type(fam_t), intent(out) :: fam
 
-#       undef  _$header
-#       undef  _$footer
-#       undef  _$integer
-#       undef  _$double
-#       undef  _$logical
-#       undef  _$doublearray
-#       undef  _$integerarray
-#       undef  _$logicalarray
+        fam%couple = 0
+        fam%married = 0
+        fam%ccexp = 0.0_dp
+        fam%maint = 0.0_dp
+        fam%nkids = 0
+        fam%kidage = 0
+        fam%nothads = 0
+        fam%tenure = lab%tenure%own_outright
+        fam%rent = 0.0_dp
+        fam%rentcap = 0.0_dp
+        fam%region = lab%region%north_east
+        fam%ctband = lab%ctax%bandd
+        fam%banddratio = 1.0
+        fam%intdate = 19900101
 
-#       define _$header
-#       define _$footer
-#       define _$integer(x,y) fam%x = 0
-#       define _$double(x,y)  fam%x = 0.0_dp
-#       define _$logical(x,y) fam%x = .false.
-#       define _$integerarray(x,y,z) fam%x = 0
-#       define _$doublearray(x,y,z)  fam%x = 0.0_dp
-#       define _$logicalarray(x,y,z) fam%x = .false.
-
-#       include "includes/fam_t.inc"
-
-#       undef  _$header
-#       undef  _$footer
-#       undef  _$integer
-#       undef  _$double
-#       undef  _$logical
-#       undef  _$doublearray
-#       undef  _$integerarray
-#       undef  _$logicalarray
-
-#       define _$header
-#       define _$footer
-#       define _$integer(x,y) fam%ad%x = 0
-#       define _$double(x,y)  fam%ad%x = 0.0_dp
-#       define _$logical(x,y) fam%ad%x = .false.
-#       define _$integerarray(x,y,z) fam%ad(1)%x = 0; fam%ad(2)%x = 0
-#       define _$doublearray(x,y,z)  fam%ad(1)%x = 0.0_dp; fam%ad(2)%x = 0.0_dp
-#       define _$logicalarray(x,y,z) fam%ad(1)%x = .false.; fam%ad(2)%x = .false.
-
-#       include "includes/famad_t.inc"
-
-#       undef  _$header
-#       undef  _$footer
-#       undef  _$integer
-#       undef  _$double
-#       undef  _$logical
-#       undef  _$doublearray
-#       undef  _$integerarray
-#       undef  _$logicalarray
-
-        fam%ad(1)%age  = 25
-        fam%ad(2)%age  = 0
-        fam%tenure     = lab%tenure%own_outright !owner
-        fam%region     = lab%region%north_east   !north east
-        fam%ctBand     = lab%ctax%bandd          !band D
-        fam%bandDRatio = 1.0_dp
-        fam%intDate    = 19900101
+        fam%ad%age = 25
+        fam%ad%selfemp = 0
+        fam%ad%hrs = 0.0_dp
+        fam%ad%earn = 0.0_dp
 
     end subroutine fam_init
 
@@ -388,172 +598,284 @@ contains
     ! will display the information contained in the family variable fam and
     ! write this to a file if fname is specified
 
-    subroutine fam_desc(fam,fname)
+    subroutine fam_desc(fam, fname)
 
-        use fortax_util, only :  getUnit, intToStr, fortaxError
+        use fortax_util, only : intToStr, strCentre, fortaxError
 
         use, intrinsic :: iso_fortran_env
 
-        type(fam_t),      intent(in) :: fam
-        character(len=*), optional   :: fname
+        type(fam_t), intent(in) :: fam
+        character(len = *), optional :: fname
 
         integer :: funit, i, ios
 
         if (present(fname)) then
-            call getUnit(funit)
-            open(funit,file=fname,action='write',status='replace',iostat=ios)
+            open(newunit = funit, file = fname, action = 'write', status = 'replace', iostat = ios)
             if (ios .ne. 0) call fortaxError('error opening file for writing')
         else
             funit = output_unit
         end if
 
-#       undef  _$header
-#       undef  _$footer
-#       undef  _$integer
-#       undef  _$double
-#       undef  _$logical
-#       undef  _$doublearray
-#       undef  _$integerarray
-#       undef  _$logicalarray
+        write(funit, *)
+        write(funit, '(A)') repeat("=", 62)
+        write(funit, '(A)') strCentre('fam_desc (FAMILY):', 62)
+        write(funit, '(A)') repeat("=", 62)
+        call desc_f90(funit, "Married/cohabiting", "couple", fam%couple, label_bool(fam%couple))
+        call desc_f90(funit, "Married", "married", fam%married, label_bool(fam%married))
+        call desc_f90(funit, "Childcare expenditure", "ccexp", fam%ccexp)
+        call desc_f90(funit, "Maintenance income", "maint", fam%maint)
+        call desc_f90(funit, "Number of children", "nkids", fam%nkids)
+        call desc_f90(funit, "Age of children", "kidage", fam%kidage, fam%nkids)
+        call desc_f90(funit, "Number of other adults", "nothads", fam%nothads)
+        call desc_f90(funit, "Housing tenure", "tenure", fam%tenure, label_tenure(fam%tenure))
+        call desc_f90(funit, "Housing rent", "rent", fam%rent)
+        call desc_f90(funit, "Housing rent cap", "rentcap", fam%rentcap)
+        call desc_f90(funit, "Region", "region", fam%region, label_region(fam%region))
+        call desc_f90(funit, "Council tax band", "ctband", fam%ctband, label_ctax(fam%ctband))
+        call desc_f90(funit, "Council tax band-D ratio", "banddratio", fam%banddratio)
+        call desc_f90(funit, "Interview date", "intdate", fam%intdate)
+        write(funit, '(A)') repeat("=", 62)
 
-#       define _$header write(funit,*); write(funit,'(A16)') 'FAMILY'; write(funit,*)
-#       define _$footer
-#       define _$integer(x,y) call fam_descInteger(#x,funit,fam%x)
-#       define _$double(x,y)  call fam_descDouble(#x,funit,fam%x)
-#       define _$logical(x,y) call fam_descLogical(#x,funit,fam%x)
-#       define _$integerarray(x,y,z) call fam_descIntegerArray(#x,funit,fam%x,fam%nkids)
-#       define _$doublearray(x,y,z)  call fam_descDoubleArray(#x,funit,fam%x)
-#       define _$logicalarray(x,y,z) call fam_descLogicalArray(#x,funit,fam%x)
+        ! write(funit, *)
+        ! write(funit, '(A)') repeat("=", 62)
+        write(funit, '(A)') strCentre('fam_desc (ADULT 1):', 62)
+        write(funit, '(A)') repeat("=", 62)
+        call desc_f90(funit, "Age", "age", fam%ad(1)%age)
+        call desc_f90(funit, "Self-employed", "selfemp", fam%ad(1)%selfemp, label_bool(fam%ad(1)%selfemp))
+        call desc_f90(funit, "Hours-of-work", "hrs", fam%ad(1)%hrs)
+        call desc_f90(funit, "Earnings", "earn", fam%ad(1)%earn)
+        write(funit, '(A)') repeat("=", 62)
 
-#       include "includes/fam_t.inc"
-
-#       undef  _$header
-#       undef  _$footer
-#       undef  _$integer
-#       undef  _$double
-#       undef  _$logical
-#       undef  _$doublearray
-#       undef  _$integerarray
-#       undef  _$logicalarray
-
-#       define _$header write(funit,*); write(funit,'(A16)') 'ADULT1'; write(funit,*)
-#       define _$footer
-#       define _$integer(x,y) call fam_descInteger(#x,funit,fam%ad(1)%x)
-#       define _$double(x,y)  call fam_descDouble(#x,funit,fam%ad(1)%x)
-#       define _$logical(x,y) call fam_descLogical(#x,funit,fam%ad(1)%x)
-#       define _$integerarray(x,y,z) call fam_descIntegerArray(#x,funit,fam%ad(1)%x)
-#       define _$doublearray(x,y,z)  call fam_descDoubleArray(#x,funit,fam%ad(1)%x)
-#       define _$logicalarray(x,y,z) call fam_descLogicalArray(#x,funit,fam%ad(1)%x)
-
-#       include "includes/famad_t.inc"
-
-#       undef  _$header
-#       undef  _$footer
-#       undef  _$integer
-#       undef  _$double
-#       undef  _$logical
-#       undef  _$doublearray
-#       undef  _$integerarray
-#       undef  _$logicalarray
-
-#       undef  _$header
-#       undef  _$footer
-#       undef  _$integer
-#       undef  _$double
-#       undef  _$logical
-#       undef  _$doublearray
-#       undef  _$integerarray
-#       undef  _$logicalarray
-
-        if (fam%couple) then
-#           define _$header write(funit,*); write(funit,'(A16)') 'ADULT2'; write(funit,*)
-#           define _$footer
-#           define _$integer(x,y) call fam_descInteger(#x,funit,fam%ad(2)%x)
-#           define _$double(x,y)  call fam_descDouble(#x,funit,fam%ad(2)%x)
-#           define _$logical(x,y) call fam_descLogical(#x,funit,fam%ad(2)%x)
-#           define _$integerarray(x,y,z) call fam_descIntegerArray(#x,funit,fam%ad(2)%x)
-#           define _$doublearray(x,y,z)  call fam_descDoubleArray(#x,funit,fam%ad(2)%x)
-#           define _$logicalarray(x,y,z) call fam_descLogicalArray(#x,funit,fam%ad(2)%x)
-
-#           include "includes/famad_t.inc"
-
-#           undef  _$header
-#           undef  _$footer
-#           undef  _$integer
-#           undef  _$double
-#           undef  _$logical
-#           undef  _$doublearray
-#           undef  _$integerarray
-#           undef  _$logicalarray
+        if (fam%couple == 1) then
+        ! write(funit, *)
+        ! write(funit, '(A)') repeat("=", 62)
+        write(funit, '(A)') strCentre('fam_desc (ADULT 2):', 62)
+        write(funit, '(A)') repeat("=", 62)
+        call desc_f90(funit, "Age", "age", fam%ad(2)%age)
+        call desc_f90(funit, "Self-employed", "selfemp", fam%ad(2)%selfemp, label_bool(fam%ad(2)%selfemp))
+        call desc_f90(funit, "Hours-of-work", "hrs", fam%ad(2)%hrs)
+        call desc_f90(funit, "Earnings", "earn", fam%ad(2)%earn)
+        write(funit, '(A)') repeat("=", 62)
         end if
+        write(funit, *)
+
+        close(funit)
 
     end subroutine fam_desc
 
-    subroutine fam_descInteger(str,funit,myval)
-        implicit none
-        character(len=*), intent(in) :: str
-        integer,          intent(in) :: funit
-        integer,          intent(in) :: myval
-        write(funit,'(A16,2X,I16)') str, myval
-    end subroutine fam_descInteger
+    ! obtain string labels for the variable value labels
 
-    subroutine fam_descDouble(str,funit,myval)
-        implicit none
-        character(len=*), intent(in) :: str
-        integer,          intent(in) :: funit
-        real(dp),         intent(in) :: myval
-        write(funit,'(A16,2X,F16.4)') str, myval
-    end subroutine fam_descDouble
 
-    subroutine fam_descLogical(str,funit,myval)
-        implicit none
-        character(len=*), intent(in) :: str
-        integer,          intent(in) :: funit
-        logical,          intent(in) :: myval
-        write(funit,'(A16,2X,L16)') str, myval
-    end subroutine fam_descLogical
 
-    subroutine fam_descIntegerArray(str,funit,myval,mylen)
-        use fortax_util, only : intToStr
-        implicit none
-        character(len=*),  intent(in) :: str
-        integer,           intent(in) :: funit
-        integer,           intent(in) :: myval(:)
-        integer, optional, intent(in) :: mylen
-        integer                       :: i, szMyval
-        if (present(mylen)) then
-            szMyval = min(mylen,size(myval))
-        else
-            szMyval = size(myval)
-        end if
-        do i =1, szMyval
-            write(funit,'(A16,2X,I16)') str//'('//inttostr(i)//')', myval(i)
-        end do
-    end subroutine fam_descIntegerArray
 
-    subroutine fam_descLogicalArray(str,funit,myval)
-        use fortax_util, only : intToStr
-        implicit none
-        character(len=*), intent(in) :: str
-        integer,          intent(in) :: funit
-        logical,          intent(in) :: myval(:)
-        integer                      :: i
-        do i =1, size(myval)
-            write(funit,'(A16,2X,L16)') str//'('//inttostr(i)//')', myval(i)
-        end do
-    end subroutine fam_descLogicalArray
 
-    subroutine fam_descDoubleArray(str,funit,myval)
-        use fortax_util, only : intToStr
-        implicit none
-        character(len=*), intent(in) :: str
-        integer,          intent(in) :: funit
-        real(dp),         intent(in) :: myval(:)
-        integer                      :: i
-        do i =1, size(myval)
-            write(funit,'(A16,2X,F16.4)') str//'('//inttostr(i)//')', myval(i)
-        end do
-    end subroutine fam_descDoubleArray
+
+
+
+
+
+
+
+
+
+
+
+elemental function label_bool(val) result(str)
+    implicit none
+    integer, intent(in) :: val
+    character(len = len_label) :: str
+    select case(val)
+        case(lab%bool%no)
+            str = "no"
+        case(lab%bool%yes)
+            str = "yes"
+        case default
+            str = "INVALID VALUE"
+    end select
+end function label_bool
+
+elemental function labstring_bool(val) result(str)
+    implicit none
+    integer, intent(in) :: val
+    character(len = len_labstring) :: str
+    select case(val)
+        case(lab%bool%no)
+            str = "No"
+        case(lab%bool%yes)
+            str = "Yes"
+        case default
+            str = "INVALID VALUE"
+    end select
+end function labstring_bool
+
+elemental function label_ctax(val) result(str)
+    implicit none
+    integer, intent(in) :: val
+    character(len = len_label) :: str
+    select case(val)
+        case(lab%ctax%banda)
+            str = "banda"
+        case(lab%ctax%bandb)
+            str = "bandb"
+        case(lab%ctax%bandc)
+            str = "bandc"
+        case(lab%ctax%bandd)
+            str = "bandd"
+        case(lab%ctax%bande)
+            str = "bande"
+        case(lab%ctax%bandf)
+            str = "bandf"
+        case(lab%ctax%bandg)
+            str = "bandg"
+        case(lab%ctax%bandh)
+            str = "bandh"
+        case default
+            str = "INVALID VALUE"
+    end select
+end function label_ctax
+
+elemental function labstring_ctax(val) result(str)
+    implicit none
+    integer, intent(in) :: val
+    character(len = len_labstring) :: str
+    select case(val)
+        case(lab%ctax%banda)
+            str = "Council Tax Band A"
+        case(lab%ctax%bandb)
+            str = "Council Tax Band B"
+        case(lab%ctax%bandc)
+            str = "Council Tax Band C"
+        case(lab%ctax%bandd)
+            str = "Council Tax Band D"
+        case(lab%ctax%bande)
+            str = "Council Tax Band E"
+        case(lab%ctax%bandf)
+            str = "Council Tax Band F"
+        case(lab%ctax%bandg)
+            str = "Council Tax Band G"
+        case(lab%ctax%bandh)
+            str = "Council Tax Band H"
+        case default
+            str = "INVALID VALUE"
+    end select
+end function labstring_ctax
+
+elemental function label_tenure(val) result(str)
+    implicit none
+    integer, intent(in) :: val
+    character(len = len_label) :: str
+    select case(val)
+        case(lab%tenure%own_outright)
+            str = "own_outright"
+        case(lab%tenure%mortgage)
+            str = "mortgage"
+        case(lab%tenure%part_own)
+            str = "part_own"
+        case(lab%tenure%social_renter)
+            str = "social_renter"
+        case(lab%tenure%private_renter)
+            str = "private_renter"
+        case(lab%tenure%rent_free)
+            str = "rent_free"
+        case(lab%tenure%other)
+            str = "other"
+        case default
+            str = "INVALID VALUE"
+    end select
+end function label_tenure
+
+elemental function labstring_tenure(val) result(str)
+    implicit none
+    integer, intent(in) :: val
+    character(len = len_labstring) :: str
+    select case(val)
+        case(lab%tenure%own_outright)
+            str = "Own outright"
+        case(lab%tenure%mortgage)
+            str = "Mortgage"
+        case(lab%tenure%part_own)
+            str = "Part own,  part rent"
+        case(lab%tenure%social_renter)
+            str = "Social renter"
+        case(lab%tenure%private_renter)
+            str = "Private renter"
+        case(lab%tenure%rent_free)
+            str = "Rent free"
+        case(lab%tenure%other)
+            str = "Other"
+        case default
+            str = "INVALID VALUE"
+    end select
+end function labstring_tenure
+
+elemental function label_region(val) result(str)
+    implicit none
+    integer, intent(in) :: val
+    character(len = len_label) :: str
+    select case(val)
+        case(lab%region%north_east)
+            str = "north_east"
+        case(lab%region%north_west)
+            str = "north_west"
+        case(lab%region%yorks)
+            str = "yorks"
+        case(lab%region%east_midlands)
+            str = "east_midlands"
+        case(lab%region%west_midlands)
+            str = "west_midlands"
+        case(lab%region%eastern)
+            str = "eastern"
+        case(lab%region%london)
+            str = "london"
+        case(lab%region%south_east)
+            str = "south_east"
+        case(lab%region%south_west)
+            str = "south_west"
+        case(lab%region%wales)
+            str = "wales"
+        case(lab%region%scotland)
+            str = "scotland"
+        case(lab%region%northern_ireland)
+            str = "northern_ireland"
+        case default
+            str = "INVALID VALUE"
+    end select
+end function label_region
+
+elemental function labstring_region(val) result(str)
+    implicit none
+    integer, intent(in) :: val
+    character(len = len_labstring) :: str
+    select case(val)
+        case(lab%region%north_east)
+            str = "North East"
+        case(lab%region%north_west)
+            str = "North West and Merseyside"
+        case(lab%region%yorks)
+            str = "Yorks and Humberside"
+        case(lab%region%east_midlands)
+            str = "East Midlands"
+        case(lab%region%west_midlands)
+            str = "West Midlands"
+        case(lab%region%eastern)
+            str = "Eastern"
+        case(lab%region%london)
+            str = "London"
+        case(lab%region%south_east)
+            str = "South East"
+        case(lab%region%south_west)
+            str = "South West"
+        case(lab%region%wales)
+            str = "Wales"
+        case(lab%region%scotland)
+            str = "Scotland"
+        case(lab%region%northern_ireland)
+            str = "Northern Ireland"
+        case default
+            str = "INVALID VALUE"
+    end select
+end function labstring_region
+
 
     ! fam_gen
     ! -----------------------------------------------------------------------
@@ -561,144 +883,74 @@ contains
     ! specified. Adult information should be passed by adding a suffix 1 or 2
     ! for the respective adult number.
 
-    pure function fam_gen( &
-#       undef  _$header
-#       undef  _$footer
-#       undef  _$integer
-#       undef  _$double
-#       undef  _$logical
-#       undef  _$doublearray
-#       undef  _$integerarray
-#       undef  _$logicalarray
+    subroutine fam_gen(fam, couple, married, ccexp, maint, nkids, kidage, nothads, tenure, rent, rentcap, region, ctband,&
+        & banddratio, intdate, age1, selfemp1, hrs1, earn1, age2, selfemp2, hrs2, earn2, correct)
 
-#       define _$header
-#       define _$footer
-#       define _$integer(x,y) x, &
-#       define _$double(x,y)  x, &
-#       define _$logical(x,y) x, &
-#       define _$integerarray(x,y,z) x, &
-#       define _$doublearray(x,y,z)  x, &
-#       define _$logicalarray(x,y,z) x, &
-#       include "includes/fam_t.inc"
+        use fortax_util, only : fortaxError
 
-#       undef  _$header
-#       undef  _$footer
-#       undef  _$integer
-#       undef  _$double
-#       undef  _$logical
-#       undef  _$doublearray
-#       undef  _$integerarray
-#       undef  _$logicalarray
+        implicit none
 
-#       define _$header
-#       define _$footer correct)
-#       define _$integer(x,y) x##1, x##2, &
-#       define _$double(x,y)  x##1, x##2, &
-#       define _$logical(x,y) x##1, x##2, &
-#       define _$integerarray(x,y,z) x##1, x##2, &
-#       define _$doublearray(x,y,z)  x##1, x##2, &
-#       define _$logicalarray(x,y,z) x##1, x##2, &
-#       include "includes/famad_t.inc"
-
-#       undef  _$header
-#       undef  _$footer
-#       undef  _$integer
-#       undef  _$double
-#       undef  _$logical
-#       undef  _$doublearray
-#       undef  _$integerarray
-#       undef  _$logicalarray
-
-#       define _$header
-#       define _$footer
-#       define _$integer(x,y) integer,  optional, intent(in) :: x
-#       define _$double(x,y)  real(dp), optional, intent(in) :: x
-#       define _$logical(x,y) logical,  optional, intent(in) :: x
-#       define _$integerarray(x,y,z) integer,  optional, intent(in) :: x(:)
-#       define _$doublearray(x,y,z)  real(dp), optional, intent(in) :: x(:)
-#       define _$logicalarray(x,y,z) logical,  optional, intent(in) :: x(:)
-#       include "includes/fam_t.inc"
-#       undef  _$header
-#       undef  _$footer
-#       undef  _$integer
-#       undef  _$double
-#       undef  _$logical
-#       undef  _$doublearray
-#       undef  _$integerarray
-#       undef  _$logicalarray
-
-#       define _$header
-#       define _$footer
-#       define _$integer(x,y) integer,  optional, intent(in) :: x##1; integer,  optional, intent(in) :: x##2
-#       define _$double(x,y)  real(dp), optional, intent(in) :: x##1; real(dp), optional, intent(in) :: x##2
-#       define _$logical(x,y) logical,  optional, intent(in) :: x##1; logical,  optional, intent(in) :: x##2
-#       define _$integerarray(x,y,z) integer,  optional, intent(in) :: x##1(:); integer,  optional, intent(in) :: x##2(:)
-#       define _$doublearray(x,y,z)  real(dp), optional, intent(in) :: x##1(:); real(dp), optional, intent(in) :: x##2(:)
-#       define _$logicalarray(x,y,z) logical,  optional, intent(in) :: x##1(:); logical,  optional, intent(in) :: x##2(:)
-#       include "includes/famad_t.inc"
-#       undef  _$header
-#       undef  _$footer
-#       undef  _$integer
-#       undef  _$double
-#       undef  _$logical
-#       undef  _$doublearray
-#       undef  _$integerarray
-#       undef  _$logicalarray
-
+        type(fam_t), intent(out) :: fam
+        integer, intent(in), optional :: couple
+        integer, intent(in), optional :: married
+        real(dp), intent(in), optional :: ccexp
+        real(dp), intent(in), optional :: maint
+        integer, intent(in), optional :: nkids
+        integer, intent(in), optional :: kidage(:)
+        integer, intent(in), optional :: nothads
+        integer, intent(in), optional :: tenure
+        real(dp), intent(in), optional :: rent
+        real(dp), intent(in), optional :: rentcap
+        integer, intent(in), optional :: region
+        integer, intent(in), optional :: ctband
+        real(dp), intent(in), optional :: banddratio
+        integer, intent(in), optional :: intdate
+        integer, intent(in), optional :: age1
+        integer, intent(in), optional :: selfemp1
+        real(dp), intent(in), optional :: hrs1
+        real(dp), intent(in), optional :: earn1
+        integer, intent(in), optional :: age2
+        integer, intent(in), optional :: selfemp2
+        real(dp), intent(in), optional :: hrs2
+        real(dp), intent(in), optional :: earn2
         logical, intent(in), optional :: correct
+        logical :: correct2
+        integer :: kidSize
+        logical :: ad2
 
-        logical     :: correct2
-        type(fam_t) :: fam_gen
-        integer     :: kidsize
+        call fam_init(fam)
 
-        call fam_init(fam_gen)
-
-#       undef  _$header
-#       undef  _$footer
-#       undef  _$integer
-#       undef  _$double
-#       undef  _$logical
-#       undef  _$doublearray
-#       undef  _$integerarray
-#       undef  _$logicalarray
-
-#       define _$header
-#       define _$footer
-#       define _$integer(x,y) if (present(x)) fam_gen%x = x
-#       define _$double(x,y)  if (present(x)) fam_gen%x = x
-#       define _$logical(x,y) if (present(x)) fam_gen%x = x
-#       define _$integerarray(x,y,z) if (present(x)) fam_gen%x(1:size(x)) = x
-#       define _$doublearray(x,y,z)  if (present(x)) fam_gen%x(1:size(x)) = x
-#       define _$logicalarray(x,y,z) if (present(x)) fam_gen%x(1:size(x)) = x
-#       include "includes/fam_t.inc"
-
-#       undef  _$header
-#       undef  _$footer
-#       undef  _$integer
-#       undef  _$double
-#       undef  _$logical
-#       undef  _$doublearray
-#       undef  _$integerarray
-#       undef  _$logicalarray
-
-#       define _$header
-#       define _$footer
-#       define _$integer(x,y) if (present(x##1)) fam_gen%ad(1)%x = x##1; if (present(x##2)) fam_gen%ad(2)%x = x##2
-#       define _$double(x,y)  if (present(x##1)) fam_gen%ad(1)%x = x##1; if (present(x##2)) fam_gen%ad(2)%x = x##2
-#       define _$logical(x,y) if (present(x##1)) fam_gen%ad(1)%x = x##1; if (present(x##2)) fam_gen%ad(2)%x = x##2
-#       define _$integerarray(x,y,z) if (present(x##1)) fam_gen%ad(1)%x(1:size(x##1)) = x##1; if (present(x##2)) fam_gen%ad(2)%x(1:size(x##2)) = x##2
-#       define _$doublearray(x,y,z)  if (present(x##1)) fam_gen%ad(1)%x(1:size(x##1)) = x##1; if (present(x##2)) fam_gen%ad(2)%x(1:size(x##2)) = x##2
-#       define _$logicalarray(x,y,z) if (present(x##1)) fam_gen%ad(1)%x(1:size(x##1)) = x##1; if (present(x##2)) fam_gen%ad(2)%x(1:size(x##2)) = x##2
-#       include "includes/famad_t.inc"
-
-#       undef  _$header
-#       undef  _$footer
-#       undef  _$integer
-#       undef  _$double
-#       undef  _$logical
-#       undef  _$doublearray
-#       undef  _$integerarray
-#       undef  _$logicalarray
+        if (present(couple)) fam%couple = couple
+        if (present(married)) fam%married = married
+        if (present(ccexp)) fam%ccexp = ccexp
+        if (present(maint)) fam%maint = maint
+        if (present(nkids)) fam%nkids = nkids
+        if (present(kidage)) then
+            if (size(kidage) > maxKids) then
+                call fortaxError("kidage exceeds bounds in fam_gen")
+            else
+                fam%kidage(1:size(kidage)) = kidage
+                if (.not. present(nkids)) then
+                    fam%nkids = size(kidage)
+                end if
+            endif
+        end if
+        if (present(nothads)) fam%nothads = nothads
+        if (present(tenure)) fam%tenure = tenure
+        if (present(rent)) fam%rent = rent
+        if (present(rentcap)) fam%rentcap = rentcap
+        if (present(region)) fam%region = region
+        if (present(ctband)) fam%ctband = ctband
+        if (present(banddratio)) fam%banddratio = banddratio
+        if (present(intdate)) fam%intdate = intdate
+        if (present(age1)) fam%ad(1)%age = age1
+        if (present(selfemp1)) fam%ad(1)%selfemp = selfemp1
+        if (present(hrs1)) fam%ad(1)%hrs = hrs1
+        if (present(earn1)) fam%ad(1)%earn = earn1
+        if (present(age2)) fam%ad(2)%age = age2
+        if (present(selfemp2)) fam%ad(2)%selfemp = selfemp2
+        if (present(hrs2)) fam%ad(2)%hrs = hrs2
+        if (present(earn2)) fam%ad(2)%earn = earn2
 
         if (present(correct)) then
             correct2 = correct
@@ -706,119 +958,74 @@ contains
             correct2 = .true.
         end if
 
-        !rules:
-        !if kidage is specified, then set nkids equal to size unless nkids is present
-        !in this case, set nkids = max(nkids,size of kidage). kidage for additional kids
-        !is then set to zero (or to yngkid if present and .le. age of those specified)
-        !if kidage is not specified, any kids (equal to nkids if present) have age yngkid if present (otherwise zero)
-        !if neither kidage, not nkids is present, but yngkid is present. assign a single child with this age
-
         if (correct2) then
 
-            if ((.not. present(kidAge)) .and. (.not. (present(nkids))) .and. (present(yngKid))) then
-                fam_gen%nkids = 1
-                fam_gen%kidAge(1) = yngKid
-            end if
-
-            !how to handle kids
-            if (present(kidAge)) then
-                kidSize = size(kidAge)
-                if (present(nkids)) then
-                    if (nkids>size(kidAge)) then
-                        !fam_gen%nkids = nkids
-                        if (present(yngKid)) then
-                            if (yngKid .le. minval(kidAge)) then
-                                fam_gen%kidAge(kidSize+1:nkids) = yngKid
-                            else
-                                fam_gen%kidAge(kidSize+1:nkids) = 0
-                                fam_gen%yngkid = 0
-                            end if
-                            fam_gen%kidAge(kidSize+1:nkids) = 0
-                            fam_gen%yngKid = 0
-                        end if
-                    else
-                        fam_gen%nkids  = kidSize
-                        fam_gen%yngKid = minval(kidAge)
-                    end if
-                else
-                    fam_gen%nkids = kidSize
-                    fam_gen%yngKid = minval(kidAge)
-                end if
-            else
-                if (present(nkids)) then
-                    if (present(yngKid)) then
-                        fam_gen%kidAge(1:nkids) = yngKid
-                    else
-                        fam_gen%kidAge(1:nkids) = 0
-                    end if
-                end if
-            end if
-
             !if married true, then couple is true regardless of whether specified
-            if (fam_gen%married) fam_gen%couple = .true.
+            if (fam%married == 1) fam%couple = 1
 
             !automatically set couple=.true. if any second adult information is passed
-            if (.not. (fam_gen%couple)) then
-
-#               define _$header
-#               define _$footer
-#               define _$integer(x,y) if (present(x##2)) fam_gen%couple=.true.
-#               define _$double(x,y)  if (present(x##2)) fam_gen%couple=.true.
-#               define _$logical(x,y) if (present(x##2)) fam_gen%couple=.true.
-#               define _$integerarray(x,y,z) if (present(x##2)) fam_gen%couple=.true.
-#               define _$doublearray(x,y,z)  if (present(x##2)) fam_gen%couple=.true.
-#               define _$logicalarray(x,y,z) if (present(x##2)) fam_gen%couple=.true.
-#               include "includes/famad_t.inc"
-
-#               undef  _$header
-#               undef  _$footer
-#               undef  _$integer
-#               undef  _$double
-#               undef  _$logical
-#               undef  _$doublearray
-#               undef  _$integerarray
-#               undef  _$logicalarray
-
+            if (fam%couple == 0) then
+                ad2 = .false.
+                if (present(age2)) ad2 = .true.
+                if (present(selfemp2)) ad2 = .true.
+                if (present(hrs2)) ad2 = .true.
+                if (present(earn2)) ad2 = .true.
+                if (ad2) fam%couple = 1
             end if
-
-            if (.not. fam_gen%couple) fam_gen%ad(2)%age = 0
 
         end if
 
-    end function fam_gen
-
-
+    end subroutine fam_gen
 
 
     ! net_plus_net
     ! ------------------------------------
     ! Addition of two net_t type variables
 
-    type(net_t) function net_plus_net(net1, net2)
-
+    function net_plus_net(net1, net2) result(net)
+        implicit none
         type(net_t), intent(in) :: net1, net2
-        integer                 :: ad
+        type(net_t) :: net
 
-#       define _$header
-#       define _$footer
-#       define _$double(x,lab,y)  net_plus_net%_$level(ad)%x = net1%_$level(ad)%x + net2%_$level(ad)%x
+        net%ad(1)%taxable = net1%ad(1)%taxable + net2%ad(1)%taxable
+        net%ad(1)%inctax = net1%ad(1)%inctax + net2%ad(1)%inctax
+        net%ad(1)%natins = net1%ad(1)%natins + net2%ad(1)%natins
+        net%ad(1)%natinsc1 = net1%ad(1)%natinsc1 + net2%ad(1)%natinsc1
+        net%ad(1)%natinsc2 = net1%ad(1)%natinsc2 + net2%ad(1)%natinsc2
+        net%ad(1)%natinsc4 = net1%ad(1)%natinsc4 + net2%ad(1)%natinsc4
+        net%ad(1)%pretaxearn = net1%ad(1)%pretaxearn + net2%ad(1)%pretaxearn
+        net%ad(1)%posttaxearn = net1%ad(1)%posttaxearn + net2%ad(1)%posttaxearn
+        net%ad(2)%taxable = net1%ad(2)%taxable + net2%ad(2)%taxable
+        net%ad(2)%inctax = net1%ad(2)%inctax + net2%ad(2)%inctax
+        net%ad(2)%natins = net1%ad(2)%natins + net2%ad(2)%natins
+        net%ad(2)%natinsc1 = net1%ad(2)%natinsc1 + net2%ad(2)%natinsc1
+        net%ad(2)%natinsc2 = net1%ad(2)%natinsc2 + net2%ad(2)%natinsc2
+        net%ad(2)%natinsc4 = net1%ad(2)%natinsc4 + net2%ad(2)%natinsc4
+        net%ad(2)%pretaxearn = net1%ad(2)%pretaxearn + net2%ad(2)%pretaxearn
+        net%ad(2)%posttaxearn = net1%ad(2)%posttaxearn + net2%ad(2)%posttaxearn
 
-#       define _$level ad
-        do ad = 1, 2
-#         include "includes/netad_t.inc"
-        end do
-#       undef _$level
-
-#       undef  _$double
-#       define _$double(x,lab,y)  net_plus_net%_$level%x = net1%_$level%x + net2%_$level%x
-
-#       define _$level tu
-#       include "includes/nettu_t.inc"
-#       undef _$level
-
-#       undef  _$header
-#       undef  _$footer
-#       undef  _$double
+        net%tu%pretaxearn = net1%tu%pretaxearn + net2%tu%pretaxearn
+        net%tu%posttaxearn = net1%tu%posttaxearn + net2%tu%posttaxearn
+        net%tu%chben = net1%tu%chben + net2%tu%chben
+        net%tu%matgrant = net1%tu%matgrant + net2%tu%matgrant
+        net%tu%fc = net1%tu%fc + net2%tu%fc
+        net%tu%wtc = net1%tu%wtc + net2%tu%wtc
+        net%tu%ctc = net1%tu%ctc + net2%tu%ctc
+        net%tu%ccexp = net1%tu%ccexp + net2%tu%ccexp
+        net%tu%incsup = net1%tu%incsup + net2%tu%incsup
+        net%tu%hben = net1%tu%hben + net2%tu%hben
+        net%tu%polltax = net1%tu%polltax + net2%tu%polltax
+        net%tu%polltaxben = net1%tu%polltaxben + net2%tu%polltaxben
+        net%tu%ctax = net1%tu%ctax + net2%tu%ctax
+        net%tu%ctaxben = net1%tu%ctaxben + net2%tu%ctaxben
+        net%tu%maxuc = net1%tu%maxuc + net2%tu%maxuc
+        net%tu%uc = net1%tu%uc + net2%tu%uc
+        net%tu%dispinc = net1%tu%dispinc + net2%tu%dispinc
+        net%tu%pretax = net1%tu%pretax + net2%tu%pretax
+        net%tu%nettax = net1%tu%nettax + net2%tu%nettax
+        net%tu%chcaresub = net1%tu%chcaresub + net2%tu%chcaresub
+        net%tu%fsm = net1%tu%fsm + net2%tu%fsm
+        net%tu%totben = net1%tu%totben + net2%tu%totben
 
     end function net_plus_net
 
@@ -828,142 +1035,250 @@ contains
     ! --------------------------------------
     ! Difference of two net_t type variables
 
-    type(net_t) function net_minus_net(net1, net2)
-
+    function net_minus_net(net1, net2) result(net)
+        implicit none
         type(net_t), intent(in) :: net1, net2
-        integer                 :: ad
+        type(net_t) :: net
 
-#       define _$header
-#       define _$footer
-#       define _$double(x,lab,y)  net_minus_net%_$level(ad)%x = net1%_$level(ad)%x - net2%_$level(ad)%x
+        net%ad(1)%taxable = net1%ad(1)%taxable - net2%ad(1)%taxable
+        net%ad(1)%inctax = net1%ad(1)%inctax - net2%ad(1)%inctax
+        net%ad(1)%natins = net1%ad(1)%natins - net2%ad(1)%natins
+        net%ad(1)%natinsc1 = net1%ad(1)%natinsc1 - net2%ad(1)%natinsc1
+        net%ad(1)%natinsc2 = net1%ad(1)%natinsc2 - net2%ad(1)%natinsc2
+        net%ad(1)%natinsc4 = net1%ad(1)%natinsc4 - net2%ad(1)%natinsc4
+        net%ad(1)%pretaxearn = net1%ad(1)%pretaxearn - net2%ad(1)%pretaxearn
+        net%ad(1)%posttaxearn = net1%ad(1)%posttaxearn - net2%ad(1)%posttaxearn
+        net%ad(2)%taxable = net1%ad(2)%taxable - net2%ad(2)%taxable
+        net%ad(2)%inctax = net1%ad(2)%inctax - net2%ad(2)%inctax
+        net%ad(2)%natins = net1%ad(2)%natins - net2%ad(2)%natins
+        net%ad(2)%natinsc1 = net1%ad(2)%natinsc1 - net2%ad(2)%natinsc1
+        net%ad(2)%natinsc2 = net1%ad(2)%natinsc2 - net2%ad(2)%natinsc2
+        net%ad(2)%natinsc4 = net1%ad(2)%natinsc4 - net2%ad(2)%natinsc4
+        net%ad(2)%pretaxearn = net1%ad(2)%pretaxearn - net2%ad(2)%pretaxearn
+        net%ad(2)%posttaxearn = net1%ad(2)%posttaxearn - net2%ad(2)%posttaxearn
 
-#       define _$level ad
-        do ad = 1, 2
-#         include "includes/netad_t.inc"
-        end do
-#       undef _$level
-
-#       undef  _$double
-#       define _$double(x,lab,y)  net_minus_net%_$level%x = net1%_$level%x - net2%_$level%x
-
-#       define _$level tu
-#       include "includes/nettu_t.inc"
-#       undef _$level
-
-#       undef  _$header
-#       undef  _$footer
-#       undef  _$double
+        net%tu%pretaxearn = net1%tu%pretaxearn - net2%tu%pretaxearn
+        net%tu%posttaxearn = net1%tu%posttaxearn - net2%tu%posttaxearn
+        net%tu%chben = net1%tu%chben - net2%tu%chben
+        net%tu%matgrant = net1%tu%matgrant - net2%tu%matgrant
+        net%tu%fc = net1%tu%fc - net2%tu%fc
+        net%tu%wtc = net1%tu%wtc - net2%tu%wtc
+        net%tu%ctc = net1%tu%ctc - net2%tu%ctc
+        net%tu%ccexp = net1%tu%ccexp - net2%tu%ccexp
+        net%tu%incsup = net1%tu%incsup - net2%tu%incsup
+        net%tu%hben = net1%tu%hben - net2%tu%hben
+        net%tu%polltax = net1%tu%polltax - net2%tu%polltax
+        net%tu%polltaxben = net1%tu%polltaxben - net2%tu%polltaxben
+        net%tu%ctax = net1%tu%ctax - net2%tu%ctax
+        net%tu%ctaxben = net1%tu%ctaxben - net2%tu%ctaxben
+        net%tu%maxuc = net1%tu%maxuc - net2%tu%maxuc
+        net%tu%uc = net1%tu%uc - net2%tu%uc
+        net%tu%dispinc = net1%tu%dispinc - net2%tu%dispinc
+        net%tu%pretax = net1%tu%pretax - net2%tu%pretax
+        net%tu%nettax = net1%tu%nettax - net2%tu%nettax
+        net%tu%chcaresub = net1%tu%chcaresub - net2%tu%chcaresub
+        net%tu%fsm = net1%tu%fsm - net2%tu%fsm
+        net%tu%totben = net1%tu%totben - net2%tu%totben
 
     end function net_minus_net
-
 
 
     ! net_times_scalar
     ! ------------------------------------
     ! Multiply net_t type variable by scalar
 
-    type(net_t) function net_times_scalar(net, scalar)
+    function net_times_scalar(net1, scalar) result(net)
+        implicit none
+        type(net_t), intent(in) :: net1
+        real(dp), intent(in) :: scalar
+        type(net_t) :: net
 
-        use fortax_realtype, only : dp
-        type(net_t), intent(in) :: net
-        real(dp), intent(in)    :: scalar
-        integer                 :: ad
+        net%ad(1)%taxable = net1%ad(1)%taxable * scalar
+        net%ad(1)%inctax = net1%ad(1)%inctax * scalar
+        net%ad(1)%natins = net1%ad(1)%natins * scalar
+        net%ad(1)%natinsc1 = net1%ad(1)%natinsc1 * scalar
+        net%ad(1)%natinsc2 = net1%ad(1)%natinsc2 * scalar
+        net%ad(1)%natinsc4 = net1%ad(1)%natinsc4 * scalar
+        net%ad(1)%pretaxearn = net1%ad(1)%pretaxearn * scalar
+        net%ad(1)%posttaxearn = net1%ad(1)%posttaxearn * scalar
+        net%ad(2)%taxable = net1%ad(2)%taxable * scalar
+        net%ad(2)%inctax = net1%ad(2)%inctax * scalar
+        net%ad(2)%natins = net1%ad(2)%natins * scalar
+        net%ad(2)%natinsc1 = net1%ad(2)%natinsc1 * scalar
+        net%ad(2)%natinsc2 = net1%ad(2)%natinsc2 * scalar
+        net%ad(2)%natinsc4 = net1%ad(2)%natinsc4 * scalar
+        net%ad(2)%pretaxearn = net1%ad(2)%pretaxearn * scalar
+        net%ad(2)%posttaxearn = net1%ad(2)%posttaxearn * scalar
 
-#       define _$header
-#       define _$footer
-#       define _$double(x,lab,y)  net_times_scalar%_$level(ad)%x = net%_$level(ad)%x * scalar
-
-#       define _$level ad
-        do ad = 1, 2
-#         include "includes/netad_t.inc"
-        end do
-#       undef _$level
-
-#       undef  _$double
-#       define _$double(x,lab,y)  net_times_scalar%_$level%x = net%_$level%x * scalar
-
-#       define _$level tu
-#       include "includes/nettu_t.inc"
-#       undef _$level
-
-#       undef  _$header
-#       undef  _$footer
-#       undef  _$double
+        net%tu%pretaxearn = net1%tu%pretaxearn * scalar
+        net%tu%posttaxearn = net1%tu%posttaxearn * scalar
+        net%tu%chben = net1%tu%chben * scalar
+        net%tu%matgrant = net1%tu%matgrant * scalar
+        net%tu%fc = net1%tu%fc * scalar
+        net%tu%wtc = net1%tu%wtc * scalar
+        net%tu%ctc = net1%tu%ctc * scalar
+        net%tu%ccexp = net1%tu%ccexp * scalar
+        net%tu%incsup = net1%tu%incsup * scalar
+        net%tu%hben = net1%tu%hben * scalar
+        net%tu%polltax = net1%tu%polltax * scalar
+        net%tu%polltaxben = net1%tu%polltaxben * scalar
+        net%tu%ctax = net1%tu%ctax * scalar
+        net%tu%ctaxben = net1%tu%ctaxben * scalar
+        net%tu%maxuc = net1%tu%maxuc * scalar
+        net%tu%uc = net1%tu%uc * scalar
+        net%tu%dispinc = net1%tu%dispinc * scalar
+        net%tu%pretax = net1%tu%pretax * scalar
+        net%tu%nettax = net1%tu%nettax * scalar
+        net%tu%chcaresub = net1%tu%chcaresub * scalar
+        net%tu%fsm = net1%tu%fsm * scalar
+        net%tu%totben = net1%tu%totben * scalar
 
     end function net_times_scalar
+
+
+    ! net_times_scalar_integer
+    ! ------------------------------------
+    ! Multiply net_t type variable by an integer scalar
+
+    function net_times_scalar_integer(net1, int_scalar) result(net)
+        implicit none
+        type(net_t), intent(in) :: net1
+        integer, intent(in) :: int_scalar
+        type(net_t) :: net
+        net = net_times_scalar(net1, real(int_scalar, dp))
+    end function net_times_scalar_integer
 
 
     ! scalar_times_net
     ! ------------------------------------
     ! Multiply net_t type variable by scalar
 
-    type(net_t) function scalar_times_net(scalar, net)
+    function scalar_times_net(scalar, net2) result(net)
+        implicit none
+        real(dp), intent(in) :: scalar
+        type(net_t), intent(in) :: net2
+        type(net_t) :: net
 
-        use fortax_realtype, only : dp
-        real(dp), intent(in)    :: scalar
-        type(net_t), intent(in) :: net
-        integer                 :: ad
+        net%ad(1)%taxable = scalar * net2%ad(1)%taxable
+        net%ad(1)%inctax = scalar * net2%ad(1)%inctax
+        net%ad(1)%natins = scalar * net2%ad(1)%natins
+        net%ad(1)%natinsc1 = scalar * net2%ad(1)%natinsc1
+        net%ad(1)%natinsc2 = scalar * net2%ad(1)%natinsc2
+        net%ad(1)%natinsc4 = scalar * net2%ad(1)%natinsc4
+        net%ad(1)%pretaxearn = scalar * net2%ad(1)%pretaxearn
+        net%ad(1)%posttaxearn = scalar * net2%ad(1)%posttaxearn
+        net%ad(2)%taxable = scalar * net2%ad(2)%taxable
+        net%ad(2)%inctax = scalar * net2%ad(2)%inctax
+        net%ad(2)%natins = scalar * net2%ad(2)%natins
+        net%ad(2)%natinsc1 = scalar * net2%ad(2)%natinsc1
+        net%ad(2)%natinsc2 = scalar * net2%ad(2)%natinsc2
+        net%ad(2)%natinsc4 = scalar * net2%ad(2)%natinsc4
+        net%ad(2)%pretaxearn = scalar * net2%ad(2)%pretaxearn
+        net%ad(2)%posttaxearn = scalar * net2%ad(2)%posttaxearn
 
-#       define _$header
-#       define _$footer
-#       define _$double(x,lab,y)  scalar_times_net%_$level(ad)%x = net%_$level(ad)%x * scalar
-
-#       define _$level ad
-        do ad = 1, 2
-#         include "includes/netad_t.inc"
-        end do
-#       undef _$level
-
-#       undef  _$double
-#       define _$double(x,lab,y)  scalar_times_net%_$level%x = net%_$level%x * scalar
-
-#       define _$level tu
-#       include "includes/nettu_t.inc"
-#       undef _$level
-
-#       undef  _$header
-#       undef  _$footer
-#       undef  _$double
+        net%tu%pretaxearn = scalar * net2%tu%pretaxearn
+        net%tu%posttaxearn = scalar * net2%tu%posttaxearn
+        net%tu%chben = scalar * net2%tu%chben
+        net%tu%matgrant = scalar * net2%tu%matgrant
+        net%tu%fc = scalar * net2%tu%fc
+        net%tu%wtc = scalar * net2%tu%wtc
+        net%tu%ctc = scalar * net2%tu%ctc
+        net%tu%ccexp = scalar * net2%tu%ccexp
+        net%tu%incsup = scalar * net2%tu%incsup
+        net%tu%hben = scalar * net2%tu%hben
+        net%tu%polltax = scalar * net2%tu%polltax
+        net%tu%polltaxben = scalar * net2%tu%polltaxben
+        net%tu%ctax = scalar * net2%tu%ctax
+        net%tu%ctaxben = scalar * net2%tu%ctaxben
+        net%tu%maxuc = scalar * net2%tu%maxuc
+        net%tu%uc = scalar * net2%tu%uc
+        net%tu%dispinc = scalar * net2%tu%dispinc
+        net%tu%pretax = scalar * net2%tu%pretax
+        net%tu%nettax = scalar * net2%tu%nettax
+        net%tu%chcaresub = scalar * net2%tu%chcaresub
+        net%tu%fsm = scalar * net2%tu%fsm
+        net%tu%totben = scalar * net2%tu%totben
 
     end function scalar_times_net
 
+
+    ! scalar_times_net_integer
+    ! ------------------------------------
+    ! Multiply net_t type variable by scalar
+
+    function scalar_times_net_integer(int_scalar, net2) result(net)
+        implicit none
+        integer, intent(in) :: int_scalar
+        type(net_t), intent(in) :: net2
+        type(net_t) :: net
+        net = scalar_times_net(real(int_scalar, dp), net2)
+    end function scalar_times_net_integer
 
 
     ! net_div_scalar
     ! ------------------------------------
     ! Divide net_t type variable by scalar
 
-    type(net_t) function net_div_scalar(net, scalar)
+    function net_div_scalar(net1, scalar) result(net)
+        implicit none
+        type(net_t), intent(in) :: net1
+        real(dp), intent(in) :: scalar
+        type(net_t) :: net
 
-        use fortax_realtype, only : dp
-        type(net_t), intent(in) :: net
-        real(dp), intent(in)    :: scalar
-        integer                 :: ad
+        net%ad(1)%taxable = net1%ad(1)%taxable / scalar
+        net%ad(1)%inctax = net1%ad(1)%inctax / scalar
+        net%ad(1)%natins = net1%ad(1)%natins / scalar
+        net%ad(1)%natinsc1 = net1%ad(1)%natinsc1 / scalar
+        net%ad(1)%natinsc2 = net1%ad(1)%natinsc2 / scalar
+        net%ad(1)%natinsc4 = net1%ad(1)%natinsc4 / scalar
+        net%ad(1)%pretaxearn = net1%ad(1)%pretaxearn / scalar
+        net%ad(1)%posttaxearn = net1%ad(1)%posttaxearn / scalar
+        net%ad(2)%taxable = net1%ad(2)%taxable / scalar
+        net%ad(2)%inctax = net1%ad(2)%inctax / scalar
+        net%ad(2)%natins = net1%ad(2)%natins / scalar
+        net%ad(2)%natinsc1 = net1%ad(2)%natinsc1 / scalar
+        net%ad(2)%natinsc2 = net1%ad(2)%natinsc2 / scalar
+        net%ad(2)%natinsc4 = net1%ad(2)%natinsc4 / scalar
+        net%ad(2)%pretaxearn = net1%ad(2)%pretaxearn / scalar
+        net%ad(2)%posttaxearn = net1%ad(2)%posttaxearn / scalar
 
-#       define _$header
-#       define _$footer
-#       define _$double(x,lab,y)  net_div_scalar%_$level(ad)%x = net%_$level(ad)%x / scalar
-
-#       define _$level ad
-        do ad = 1, 2
-#         include "includes/netad_t.inc"
-        end do
-#       undef _$level
-
-#       undef  _$double
-#       define _$double(x,lab,y)  net_div_scalar%_$level%x = net%_$level%x / scalar
-
-#       define _$level tu
-#       include "includes/nettu_t.inc"
-#       undef _$level
-
-#       undef  _$header
-#       undef  _$footer
-#       undef  _$double
+        net%tu%pretaxearn = net1%tu%pretaxearn / scalar
+        net%tu%posttaxearn = net1%tu%posttaxearn / scalar
+        net%tu%chben = net1%tu%chben / scalar
+        net%tu%matgrant = net1%tu%matgrant / scalar
+        net%tu%fc = net1%tu%fc / scalar
+        net%tu%wtc = net1%tu%wtc / scalar
+        net%tu%ctc = net1%tu%ctc / scalar
+        net%tu%ccexp = net1%tu%ccexp / scalar
+        net%tu%incsup = net1%tu%incsup / scalar
+        net%tu%hben = net1%tu%hben / scalar
+        net%tu%polltax = net1%tu%polltax / scalar
+        net%tu%polltaxben = net1%tu%polltaxben / scalar
+        net%tu%ctax = net1%tu%ctax / scalar
+        net%tu%ctaxben = net1%tu%ctaxben / scalar
+        net%tu%maxuc = net1%tu%maxuc / scalar
+        net%tu%uc = net1%tu%uc / scalar
+        net%tu%dispinc = net1%tu%dispinc / scalar
+        net%tu%pretax = net1%tu%pretax / scalar
+        net%tu%nettax = net1%tu%nettax / scalar
+        net%tu%chcaresub = net1%tu%chcaresub / scalar
+        net%tu%fsm = net1%tu%fsm / scalar
+        net%tu%totben = net1%tu%totben / scalar
 
     end function net_div_scalar
 
 
+    ! net_div_scalar_integer
+    ! ------------------------------------
+    ! Divide net_t type variable by scalar
+
+    function net_div_scalar_integer(net1, int_scalar) result(net)
+        implicit none
+        type(net_t), intent(in) :: net1
+        integer, intent(in) :: int_scalar
+        type(net_t) :: net
+        net = net_div_scalar(net1, real(int_scalar, dp))
+    end function net_div_scalar_integer
 
 
     ! net_init
@@ -972,63 +1287,52 @@ contains
     ! set to 0, doubles to 0.0_dp and logicals to .false. (and similarly
     ! for arrays)
 
+    !DEC$ ATTRIBUTES FORCEINLINE :: net_init
     elemental subroutine net_init(net)
 
         implicit none
 
-        type(net_t), intent(inout) :: net
-        integer                    :: ad
+        type(net_t), intent(out) :: net
+        integer :: ad
 
-#       undef  _$header
-#       undef  _$footer
-#       undef  _$integer
-#       undef  _$double
-#       undef  _$logical
-#       undef  _$doublearray
-#       undef  _$integerarray
-#       undef  _$logicalarray
-
-#       define _$header
-#       define _$footer
-#       define _$integer(x,lab,y) net%_$level(ad)%x = 0
-#       define _$double(x,lab,y)  net%_$level(ad)%x = 0.0_dp
-#       define _$logical(x,lab,y) net%_$level(ad)%x = .false.
-#       define _$integerarray(x,lab,y,z) net%_$level(ad)%x = 0
-#       define _$doublearray(x,lab,y,z)  net%_$level(ad)%x = 0.0_dp
-#       define _$logicalarray(x,lab,y,z) net%_$level(ad)%x = .false.
-
-#       define _$level ad
-        do ad = 1, 2
-#           include "includes/netad_t.inc"
-        end do
-#       undef _$level
-
-#       undef  _$integer
-#       undef  _$double
-#       undef  _$logical
-#       undef  _$doublearray
-#       undef  _$integerarray
-#       undef  _$logicalarray
-
-#       define _$integer(x,lab,y) net%_$level%x = 0
-#       define _$double(x,lab,y)  net%_$level%x = 0.0_dp
-#       define _$logical(x,lab,y) net%_$level%x = .false.
-#       define _$integerarray(x,lab,y,z) net%_$level%x = 0
-#       define _$doublearray(x,lab,y,z)  net%_$level%x = 0.0_dp
-#       define _$logicalarray(x,lab,y,z) net%_$level%x = .false.
-
-#       define _$level tu
-#       include "includes/nettu_t.inc"
-#       undef _$level
-
-#       undef  _$header
-#       undef  _$footer
-#       undef  _$integer
-#       undef  _$double
-#       undef  _$logical
-#       undef  _$doublearray
-#       undef  _$integerarray
-#       undef  _$logicalarray
+        net%tu%pretaxearn = 0.0_dp
+        net%tu%posttaxearn = 0.0_dp
+        net%tu%chben = 0.0_dp
+        net%tu%matgrant = 0.0_dp
+        net%tu%fc = 0.0_dp
+        net%tu%wtc = 0.0_dp
+        net%tu%ctc = 0.0_dp
+        net%tu%ccexp = 0.0_dp
+        net%tu%incsup = 0.0_dp
+        net%tu%hben = 0.0_dp
+        net%tu%polltax = 0.0_dp
+        net%tu%polltaxben = 0.0_dp
+        net%tu%ctax = 0.0_dp
+        net%tu%ctaxben = 0.0_dp
+        net%tu%maxuc = 0.0_dp
+        net%tu%uc = 0.0_dp
+        net%tu%dispinc = 0.0_dp
+        net%tu%pretax = 0.0_dp
+        net%tu%nettax = 0.0_dp
+        net%tu%chcaresub = 0.0_dp
+        net%tu%fsm = 0.0_dp
+        net%tu%totben = 0.0_dp
+        net%ad(1)%taxable = 0.0_dp
+        net%ad(1)%inctax = 0.0_dp
+        net%ad(1)%natins = 0.0_dp
+        net%ad(1)%natinsc1 = 0.0_dp
+        net%ad(1)%natinsc2 = 0.0_dp
+        net%ad(1)%natinsc4 = 0.0_dp
+        net%ad(1)%pretaxearn = 0.0_dp
+        net%ad(1)%posttaxearn = 0.0_dp
+        net%ad(2)%taxable = 0.0_dp
+        net%ad(2)%inctax = 0.0_dp
+        net%ad(2)%natins = 0.0_dp
+        net%ad(2)%natinsc1 = 0.0_dp
+        net%ad(2)%natinsc2 = 0.0_dp
+        net%ad(2)%natinsc4 = 0.0_dp
+        net%ad(2)%pretaxearn = 0.0_dp
+        net%ad(2)%posttaxearn = 0.0_dp
 
     end subroutine net_init
 
@@ -1038,93 +1342,82 @@ contains
     ! will display the information contained in the net income structure and
     ! write this to a file if fname is specified
 
-    subroutine net_desc(net,fname)
+    subroutine net_desc(net, fname)
 
-        use fortax_util, only :  getUnit, intToStr, fortaxError
+        use fortax_util, only : intToStr, strCentre, fortaxError
 
         use, intrinsic :: iso_fortran_env
 
-        type(net_t),      intent(in) :: net
-        character(len=*), optional   :: fname
+        type(net_t), intent(in) :: net
+        character(len = *), optional   :: fname
 
         integer :: funit, i, ios
 
         if (present(fname)) then
-            call getUnit(funit)
-            open(funit,file=fname,action='write',status='replace',iostat=ios)
+            open(newunit = funit, file = fname, action = 'write', status = 'replace', iostat = ios)
             if (ios .ne. 0) call fortaxError('error opening file for writing')
         else
             funit = output_unit
         end if
 
-#       undef  _$header
-#       undef  _$footer
-#       undef  _$integer
-#       undef  _$double
-#       undef  _$logical
-#       undef  _$doublearray
-#       undef  _$integerarray
-#       undef  _$logicalarray
+        write(funit, *)
+        write(funit, '(A)') repeat("=", 62)
+        write(funit, '(A)') strCentre('net_desc (TAX UNIT):', 62)
+        write(funit, '(A)') repeat("=", 62)
+        call desc_f90(funit, "Pre-tax earnings", "pretaxearn", net%tu%pretaxearn)
+        call desc_f90(funit, "Post-tax earnings", "posttaxearn", net%tu%posttaxearn)
+        call desc_f90(funit, "Child benefit", "chben", net%tu%chben)
+        call desc_f90(funit, "Maternity grant", "matgrant", net%tu%matgrant)
+        call desc_f90(funit, "Family Credit/WFTC", "fc", net%tu%fc)
+        call desc_f90(funit, "Working Tax Credit", "wtc", net%tu%wtc)
+        call desc_f90(funit, "Child Tax Credit", "ctc", net%tu%ctc)
+        call desc_f90(funit, "Childcare expenditure", "ccexp", net%tu%ccexp)
+        call desc_f90(funit, "Income Support", "incsup", net%tu%incsup)
+        call desc_f90(funit, "Housing Benefit", "hben", net%tu%hben)
+        call desc_f90(funit, "Community Charge", "polltax", net%tu%polltax)
+        call desc_f90(funit, "Community Charge Benefit", "polltaxben", net%tu%polltaxben)
+        call desc_f90(funit, "Council Tax", "ctax", net%tu%ctax)
+        call desc_f90(funit, "Council Tax Benefit", "ctaxben", net%tu%ctaxben)
+        call desc_f90(funit, "Universal Credit maximum award", "maxuc", net%tu%maxuc)
+        call desc_f90(funit, "Universal Credit", "uc", net%tu%uc)
+        call desc_f90(funit, "Disposable income", "dispinc", net%tu%dispinc)
+        call desc_f90(funit, "Pre-tax income", "pretax", net%tu%pretax)
+        call desc_f90(funit, "Total net tax", "nettax", net%tu%nettax)
+        call desc_f90(funit, "Childcare subsidy", "chcaresub", net%tu%chcaresub)
+        call desc_f90(funit, "Free school meals value", "fsm", net%tu%fsm)
+        call desc_f90(funit, "Total benefits and Tax Credits", "totben", net%tu%totben)
+        write(funit, '(A)') repeat("=", 62)
 
-#       define _$header write(funit,*); write(funit,'(A40)') 'TAX UNIT'; write(funit,*)
-#       define _$footer
+        ! write(funit, *)
+        ! write(funit, '(A)') repeat("=", 62)
+        write(funit, '(A)') strCentre('net_desc (ADULT 1):', 62)
+        write(funit, '(A)') repeat("=", 62)
+        call desc_f90(funit, "Taxable income", "taxable", net%ad(1)%taxable)
+        call desc_f90(funit, "Income tax", "inctax", net%ad(1)%inctax)
+        call desc_f90(funit, "National Insurance", "natins", net%ad(1)%natins)
+        call desc_f90(funit, "National Insurance, class 1", "natinsc1", net%ad(1)%natinsc1)
+        call desc_f90(funit, "National Insurance, class 2", "natinsc2", net%ad(1)%natinsc2)
+        call desc_f90(funit, "National Insurance, class 4", "natinsc4", net%ad(1)%natinsc4)
+        call desc_f90(funit, "Pre-tax earnings", "pretaxearn", net%ad(1)%pretaxearn)
+        call desc_f90(funit, "Post-tax earnings", "posttaxearn", net%ad(1)%posttaxearn)
+        write(funit, '(A)') repeat("=", 62)
 
-#       define _$integer(x,y,z) write(funit,'(A40,2X,I16)') y//' ('//#x//')', net%tu%x
-#       define _$double(x,y,z)  write(funit,'(A40,2X,F16.4)') y//' ('//#x//')', net%tu%x
-#       define _$logical(x,y,z) write(funit,'(A40,2X,L16)') y//' ('//#x//')', net%tu%x
-
-#       include "includes/nettu_t.inc"
-
-#       undef  _$header
-#       undef  _$footer
-#       undef  _$integer
-#       undef  _$double
-#       undef  _$logical
-#       undef  _$doublearray
-#       undef  _$integerarray
-#       undef  _$logicalarray
-
-#       define _$header write(funit,*); write(funit,'(A40)') 'ADULT 1'; write(funit,*)
-#       define _$footer
-
-#       define _$integer(x,y,z) write(funit,'(A40,2X,I16)') y//' ('//#x//')', net%ad(1)%x
-#       define _$double(x,y,z)  write(funit,'(A40,2X,F16.4)') y//' ('//#x//')', net%ad(1)%x
-#       define _$logical(x,y,z) write(funit,'(A40,2X,L16)') y//' ('//#x//')', net%ad(1)%x
-
-#       include "includes/netad_t.inc"
-
-#       undef  _$header
-#       undef  _$footer
-#       undef  _$integer
-#       undef  _$double
-#       undef  _$logical
-#       undef  _$doublearray
-#       undef  _$integerarray
-#       undef  _$logicalarray
-
-#       define _$header write(funit,*); write(funit,'(A40)') 'ADULT 2'; write(funit,*)
-#       define _$footer
-
-#       define _$integer(x,y,z) write(funit,'(A40,2X,I16)') y//' ('//#x//')', net%ad(2)%x
-#       define _$double(x,y,z)  write(funit,'(A40,2X,F16.4)') y//' ('//#x//')', net%ad(2)%x
-#       define _$logical(x,y,z) write(funit,'(A40,2X,L16)') y//' ('//#x//')', net%ad(2)%x
-
-#       include "includes/netad_t.inc"
-
-#       undef  _$header
-#       undef  _$footer
-#       undef  _$integer
-#       undef  _$double
-#       undef  _$logical
-#       undef  _$doublearray
-#       undef  _$integerarray
-#       undef  _$logicalarray
+        ! write(funit, *)
+        ! write(funit, '(A)') repeat("=", 62)
+        write(funit, '(A)') strCentre('net_desc (ADULT 2):', 62)
+        write(funit, '(A)') repeat("=", 62)
+        call desc_f90(funit, "Taxable income", "taxable", net%ad(2)%taxable)
+        call desc_f90(funit, "Income tax", "inctax", net%ad(2)%inctax)
+        call desc_f90(funit, "National Insurance", "natins", net%ad(2)%natins)
+        call desc_f90(funit, "National Insurance, class 1", "natinsc1", net%ad(2)%natinsc1)
+        call desc_f90(funit, "National Insurance, class 2", "natinsc2", net%ad(2)%natinsc2)
+        call desc_f90(funit, "National Insurance, class 4", "natinsc4", net%ad(2)%natinsc4)
+        call desc_f90(funit, "Pre-tax earnings", "pretaxearn", net%ad(2)%pretaxearn)
+        call desc_f90(funit, "Post-tax earnings", "posttaxearn", net%ad(2)%posttaxearn)
+        write(funit, '(A)') repeat("=", 62)
+        close(funit)
 
     end subroutine net_desc
-
-    !again, i include the file here as it contains a lot of
-    !preprocessor directives, AS
-#   include "includes/sys_init.inc"
 
 
     ! sys_init
@@ -1133,43 +1426,217 @@ contains
     ! set to 0, doubles to 0.0_dp and logicals to .false. (and similarly
     ! for arrays)
 
-    subroutine sys_init(sys)
+    elemental subroutine sys_init(sys)
 
         implicit none
 
-        type(sys_t), intent(inout) :: sys
+        type(sys_t), intent(out) :: sys
 
         sys%sysname = ''
         sys%sysdesc = ''
 
-#       undef  _$header
-#       undef  _$footer
-#       undef  _$integer
-#       undef  _$double
-#       undef  _$logical
-#       undef  _$doublearray
-#       undef  _$integerarray
-#       undef  _$logicalarray
+        sys%inctax%numbands = 0
+        sys%inctax%pa = 0.0_dp
+        sys%inctax%doPATaper = 0
+        sys%inctax%disablePATaperRounding = 0
+        sys%inctax%paTaperThresh = 0.0_dp
+        sys%inctax%paTaperRate = 0.0_dp
+        sys%inctax%mma = 0.0_dp
+        sys%inctax%ctc = 0.0_dp
+        sys%inctax%ctcyng = 0.0_dp
+        sys%inctax%mmarate = 0.0_dp
+        sys%inctax%ctctaper = 0.0_dp
+        sys%inctax%c4rebate = 0.0_dp
+        sys%inctax%bands = 0.0_dp
+        sys%inctax%rates = 0.0_dp
 
-#       define _$header call concat(_$typelist,_init)(sys%_$typelist)
-#       define _$footer
-#       define _$integer(x,y)
-#       define _$double(x,y)
-#       define _$logical(x,y)
-#       define _$integerarray(x,y,z)
-#       define _$doublearray(x,y,z)
-#       define _$logicalarray(x,y,z)
+        sys%natins%numrates = 0
+        sys%natins%c4nrates = 0
+        sys%natins%c2floor = 0.0_dp
+        sys%natins%c2rate = 0.0_dp
+        sys%natins%ceiling = 0.0_dp
+        sys%natins%rates = 0.0_dp
+        sys%natins%bands = 0.0_dp
+        sys%natins%c4rates = 0.0_dp
+        sys%natins%c4bands = 0.0_dp
 
-#       include "includes/system/syslist.inc"
+        sys%chben%doChBen = 0
+        sys%chben%basic = 0.0_dp
+        sys%chben%kid1xtr = 0.0_dp
+        sys%chben%opf = 0.0_dp
+        sys%chben%MatGrantVal = 0.0_dp
+        sys%chben%MatGrantOnlyFirstKid = 0
+        sys%chben%doTaper = 0
+        sys%chben%disableTaperRounding = 0
+        sys%chben%taperStart = 0.0_dp
+        sys%chben%taperRate = 0.0_dp
+        sys%chben%taperIsIncTax = 0
 
-#       undef  _$header
-#       undef  _$footer
-#       undef  _$integer
-#       undef  _$double
-#       undef  _$logical
-#       undef  _$doublearray
-#       undef  _$integerarray
-#       undef  _$logicalarray
+        sys%fc%dofamcred = 0
+        sys%fc%NumAgeRng = 0
+        sys%fc%MaxAgeCC = 0
+        sys%fc%WFTCMaxAgeCC = 0
+        sys%fc%adult = 0.0_dp
+        sys%fc%ftprem = 0.0_dp
+        sys%fc%hours1 = 0.0_dp
+        sys%fc%hours2 = 0.0_dp
+        sys%fc%thres = 0.0_dp
+        sys%fc%taper = 0.0_dp
+        sys%fc%MaintDisreg = 0.0_dp
+        sys%fc%MaxCC1 = 0.0_dp
+        sys%fc%MaxCC2 = 0.0_dp
+        sys%fc%WFTCMaxCC1 = 0.0_dp
+        sys%fc%WFTCMaxCC2 = 0.0_dp
+        sys%fc%WFTCPropCC = 0.0_dp
+        sys%fc%MinAmt = 0.0_dp
+        sys%fc%kidagel = 0
+        sys%fc%kidageu = 0
+        sys%fc%kidcred = 0.0_dp
+
+        sys%ctc%fam = 0.0_dp
+        sys%ctc%baby = 0.0_dp
+        sys%ctc%kid = 0.0_dp
+
+        sys%wtc%Basic = 0.0_dp
+        sys%wtc%CouLP = 0.0_dp
+        sys%wtc%FT = 0.0_dp
+        sys%wtc%MinHrsKids = 0.0_dp
+        sys%wtc%MinHrsCouKids = 0.0_dp
+        sys%wtc%MinHrsNoKids = 0.0_dp
+        sys%wtc%FTHrs = 0.0_dp
+        sys%wtc%MinAgeKids = 0
+        sys%wtc%MinAgeNoKids = 0
+        sys%wtc%MaxCC1 = 0.0_dp
+        sys%wtc%MaxCC2 = 0.0_dp
+        sys%wtc%PropCC = 0.0_dp
+        sys%wtc%MaxAgeCC = 0
+        sys%wtc%NewDisreg = 0.0_dp
+        sys%wtc%NewDisregCon = 0
+
+        sys%ntc%donewtaxcred = 0
+        sys%ntc%thr1lo = 0.0_dp
+        sys%ntc%thr1hi = 0.0_dp
+        sys%ntc%thr2 = 0.0_dp
+        sys%ntc%taper1 = 0.0_dp
+        sys%ntc%taper2 = 0.0_dp
+        sys%ntc%taperCTCInOneGo = 0
+        sys%ntc%MinAmt = 0.0_dp
+
+        sys%incsup%doIncSup = 0
+        sys%incsup%IncChben = 0
+        sys%incsup%NumAgeRng = 0
+        sys%incsup%MainCou = 0.0_dp
+        sys%incsup%YngCou = 0.0_dp
+        sys%incsup%MainLP = 0.0_dp
+        sys%incsup%YngLP = 0.0_dp
+        sys%incsup%MainSin = 0.0_dp
+        sys%incsup%YngSin = 0.0_dp
+        sys%incsup%ValFSM = 0.0_dp
+        sys%incsup%DisregLP = 0.0_dp
+        sys%incsup%DisregSin = 0.0_dp
+        sys%incsup%DisregCou = 0.0_dp
+        sys%incsup%DisregShared = 0
+        sys%incsup%PremFam = 0.0_dp
+        sys%incsup%PremLP = 0.0_dp
+        sys%incsup%hours = 0.0_dp
+        sys%incsup%MaintDisreg = 0.0_dp
+        sys%incsup%AgeRngl = 0
+        sys%incsup%AgeRngu = 0
+        sys%incsup%AddKid = 0.0_dp
+
+        sys%ctax%docounciltax = 0
+        sys%ctax%bandD = 0.0_dp
+        sys%ctax%SinDis = 0.0_dp
+        sys%ctax%RatioA = 0.0_dp
+        sys%ctax%RatioB = 0.0_dp
+        sys%ctax%RatioC = 0.0_dp
+        sys%ctax%RatioE = 0.0_dp
+        sys%ctax%RatioF = 0.0_dp
+        sys%ctax%RatioG = 0.0_dp
+        sys%ctax%RatioH = 0.0_dp
+
+        sys%rebatesys%RulesUnderFC = 0
+        sys%rebatesys%RulesUnderWFTC = 0
+        sys%rebatesys%RulesUnderNTC = 0
+        sys%rebatesys%RulesUnderUC = 0
+        sys%rebatesys%NumAgeRng = 0
+        sys%rebatesys%Restrict = 0
+        sys%rebatesys%docap = 0
+        sys%rebatesys%MainCou = 0.0_dp
+        sys%rebatesys%YngCou = 0.0_dp
+        sys%rebatesys%MainLP = 0.0_dp
+        sys%rebatesys%YngLP = 0.0_dp
+        sys%rebatesys%MainSin = 0.0_dp
+        sys%rebatesys%YngSin = 0.0_dp
+        sys%rebatesys%DisregSin = 0.0_dp
+        sys%rebatesys%DisregLP = 0.0_dp
+        sys%rebatesys%DisregCou = 0.0_dp
+        sys%rebatesys%CredInDisregCC = 0
+        sys%rebatesys%ChbenIsIncome = 0
+        sys%rebatesys%PremFam = 0.0_dp
+        sys%rebatesys%PremLP = 0.0_dp
+        sys%rebatesys%MaintDisreg = 0.0_dp
+        sys%rebatesys%MaxCC1 = 0.0_dp
+        sys%rebatesys%MaxCC2 = 0.0_dp
+        sys%rebatesys%MaxAgeCC = 0
+        sys%rebatesys%AgeRngl = 0
+        sys%rebatesys%AgeRngu = 0
+        sys%rebatesys%AddKid = 0.0_dp
+
+        sys%hben%doHBen = 0
+        sys%hben%taper = 0.0_dp
+        sys%hben%MinAmt = 0.0_dp
+
+        sys%ctaxben%docounciltaxben = 0
+        sys%ctaxben%taper = 0.0_dp
+        sys%ctaxben%doEntitlementCut = 0
+        sys%ctaxben%entitlementShare = 0.0_dp
+
+        sys%ccben%dopolltax = 0
+        sys%ccben%taper = 0.0_dp
+        sys%ccben%PropElig = 0.0_dp
+        sys%ccben%MinAmt = 0.0_dp
+        sys%ccben%CCrate = 0.0_dp
+
+        sys%uc%doUnivCred = 0
+        sys%uc%MainCou = 0.0_dp
+        sys%uc%YngCou = 0.0_dp
+        sys%uc%MainSin = 0.0_dp
+        sys%uc%YngSin = 0.0_dp
+        sys%uc%MinAgeMain = 0
+        sys%uc%FirstKid = 0.0_dp
+        sys%uc%OtherKid = 0.0_dp
+        sys%uc%MaxCC1 = 0.0_dp
+        sys%uc%MaxCC2 = 0.0_dp
+        sys%uc%PropCC = 0.0_dp
+        sys%uc%MaxAgeCC = 0
+        sys%uc%doRentCap = 0
+        sys%uc%DisregSinNoKidsHi = 0.0_dp
+        sys%uc%DisregSinNoKidsLo = 0.0_dp
+        sys%uc%DisregSinKidsHi = 0.0_dp
+        sys%uc%DisregSinKidsLo = 0.0_dp
+        sys%uc%DisregCouNoKidsHi = 0.0_dp
+        sys%uc%DisregCouNoKidsLo = 0.0_dp
+        sys%uc%DisregCouKidsHi = 0.0_dp
+        sys%uc%DisregCouKidsLo = 0.0_dp
+        sys%uc%taper = 0.0_dp
+        sys%uc%MinAmt = 0.0_dp
+
+        sys%statepen%doStatePen = 0
+        sys%statepen%PenAgeMan = 0
+        sys%statepen%PenAgeWoman = 0
+
+        sys%bencap%doCap = 0
+        sys%bencap%doThruUC = 0
+        sys%bencap%sinNoKids = 0.0_dp
+        sys%bencap%sinKids = 0.0_dp
+        sys%bencap%couNoKids = 0.0_dp
+        sys%bencap%couKids = 0.0_dp
+        sys%bencap%UCEarnThr = 0.0_dp
+
+        sys%extra%fsminappamt = 0
+        sys%extra%matgrant = 0
+        sys%extra%prices = 0
 
     end subroutine sys_init
 
@@ -1179,145 +1646,271 @@ contains
     ! write as a file the contents of the system file which can then be
     ! directly included in the source code of the calling program
 
-#   include "includes/sys_save.inc"
+    subroutine sys_saveF90(sys, fname)
 
-    subroutine sys_saveInteger(typelist,str,funit,myval)
-        use fortax_util, only : intToStr
-        implicit none
-        character(len=*), intent(in) :: typelist
-        character(len=*), intent(in) :: str
-        integer,          intent(in) :: funit
-        integer,          intent(in) :: myval
-        write(funit,'(a)',advance="no") "sys%"//typelist//"%"//str//"="
-        write(funit,'(a)') intToStr(myval)
-    end subroutine sys_saveInteger
-
-    subroutine sys_saveIntegerArray(typelist,str,funit,myval)
-        use fortax_util, only : intToStr
-        implicit none
-        character(len=*), intent(in) :: typelist
-        character(len=*), intent(in) :: str
-        integer,          intent(in) :: funit
-        integer,          intent(in) :: myval(:)
-        integer :: i
-        write(funit,'(a)') "allocate(sys%"//typelist//"%"//str//"("//intToStr(size(myval))//"))"
-        do i = 1, size(myval)
-            write(funit,'(a)',advance="no") "sys%"//typelist//"%"//str//"("//intToStr(i)//")="
-            write(funit,'(a)') intToStr(myval(i))
-        end do
-    end subroutine sys_saveIntegerArray
-
-    subroutine sys_saveDouble(typelist,str,funit,myval)
-        use fortax_util, only : dblToStr
-        implicit none
-        character(len=*), intent(in) :: typelist
-        character(len=*), intent(in) :: str
-        integer,          intent(in) :: funit
-        real(dp),         intent(in) :: myval
-        write(funit,'(a)',advance="no") "sys%"//typelist//"%"//str//"="
-        write(funit,'(a)') dblToStr(myval)
-    end subroutine sys_saveDouble
-
-    subroutine sys_saveDoubleArray(typelist,str,funit,myval)
-        use fortax_util, only : intToStr, dblToStr
-        implicit none
-        character(len=*), intent(in) :: typelist
-        character(len=*), intent(in) :: str
-        integer,          intent(in) :: funit
-        real(dp),         intent(in) :: myval(:)
-        integer :: i
-        write(funit,'(a)') "allocate(sys%"//typelist//"%"//str//"("//intToStr(size(myval))//"))"
-        do i = 1, size(myval)
-            write(funit,'(a)',advance="no") "sys%"//typelist//"%"//str//"("//intToStr(i)//")="
-            write(funit,'(a)') dblToStr(myval(i))//'_dp'
-        end do
-    end subroutine sys_saveDoubleArray
-
-    subroutine sys_saveLogical(typelist,str,funit,myval)
-        use fortax_util, only : intToStr
-        implicit none
-        character(len=*), intent(in) :: typelist
-        character(len=*), intent(in) :: str
-        integer,          intent(in) :: funit
-        logical,          intent(in) :: myval
-        write(funit,'(a)',advance="no") "sys%"//typelist//"%"//str//"="
-        write(funit,'(a)') merge('.true. ','.false.', myval)
-    end subroutine sys_saveLogical
-
-    subroutine sys_saveLogicalArray(typelist,str,funit,myval)
-        use fortax_util, only : intToStr
-        implicit none
-        character(len=*), intent(in) :: typelist
-        character(len=*), intent(in) :: str
-        integer,          intent(in) :: funit
-        logical,          intent(in) :: myval(:)
-        integer :: i
-        write(funit,'(a)') "allocate(sys%"//typelist//"%"//str//"("//intToStr(size(myval))//"))"
-        do i = 1, size(myval)
-            write(funit,'(a)',advance="no") "sys%"//typelist//"%"//str//"("//intToStr(i)//")="
-            write(funit,'(a)') merge('.true. ','.false.', myval(i))
-        end do
-    end subroutine sys_saveLogicalArray
-
-    subroutine sys_saveF90(sys,fname)
-
-        !use fortax_type, only : sys_t
-        use fortax_util, only : getUnit, fortaxError
-
+        use fortax_util, only : fortaxError
         use, intrinsic :: iso_fortran_env
 
         implicit none
 
-        type(sys_t),      intent(in) :: sys
-        character(len=*), intent(in), optional :: fname
+        type(sys_t), intent(in) :: sys
+        character(len = *), intent(in), optional :: fname
 
         integer :: funit, ios
 
         if (present(fname)) then
-            call getUnit(funit)
-            open(funit,file=fname,action='write',status='replace',iostat=ios)
+            open(newunit = funit, file = fname, action = 'write', status = 'replace', iostat = ios)
             if (ios .ne. 0) call fortaxError('error opening file for writing')
         else
             funit = output_unit
         end if
 
-        write(funit,'(a)') '! .f90 FORTAX system; generated using sys_saveF90'
-        write(funit,*)
+        write(funit, '(A)') '! .f90 FORTAX system; generated using sys_saveF90'
+        write(funit, *)
 
-        write(funit,'(a)') 'call sys_init(sys) !deallocates arrays and sets values to default'
+        write(funit, '(A)') 'call sys_init(sys)'
 
-#       undef  _$header
-#       undef  _$footer
-#       undef  _$integer
-#       undef  _$double
-#       undef  _$logical
-#       undef  _$doublearray
-#       undef  _$integerarray
-#       undef  _$logicalarray
+        write(funit, *)
+        write(funit, '(A)') "! inctax"
+        call write_f90(funit, "sys%inctax%numbands", sys%inctax%numbands)
+        call write_f90(funit, "sys%inctax%pa", sys%inctax%pa)
+        call write_f90(funit, "sys%inctax%doPATaper", sys%inctax%doPATaper)
+        call write_f90(funit, "sys%inctax%disablePATaperRounding", sys%inctax%disablePATaperRounding)
+        call write_f90(funit, "sys%inctax%paTaperThresh", sys%inctax%paTaperThresh)
+        call write_f90(funit, "sys%inctax%paTaperRate", sys%inctax%paTaperRate)
+        call write_f90(funit, "sys%inctax%mma", sys%inctax%mma)
+        call write_f90(funit, "sys%inctax%ctc", sys%inctax%ctc)
+        call write_f90(funit, "sys%inctax%ctcyng", sys%inctax%ctcyng)
+        call write_f90(funit, "sys%inctax%mmarate", sys%inctax%mmarate)
+        call write_f90(funit, "sys%inctax%ctctaper", sys%inctax%ctctaper)
+        call write_f90(funit, "sys%inctax%c4rebate", sys%inctax%c4rebate)
+        call write_f90(funit, "sys%inctax%bands", sys%inctax%bands, sys%inctax%numbands)
+        call write_f90(funit, "sys%inctax%rates", sys%inctax%rates, sys%inctax%numbands)
 
-#       define _$header call concat(_$typelist,_save)(sys%_$typelist,funit)
-#       define _$footer
-#       define _$integer(x,y)
-#       define _$double(x,y)
-#       define _$logical(x,y)
-#       define _$integerarray(x,y,z)
-#       define _$doublearray(x,y,z)
-#       define _$logicalarray(x,y,z)
+        write(funit, *)
+        write(funit, '(A)') "! natins"
+        call write_f90(funit, "sys%natins%numrates", sys%natins%numrates)
+        call write_f90(funit, "sys%natins%c4nrates", sys%natins%c4nrates)
+        call write_f90(funit, "sys%natins%c2floor", sys%natins%c2floor)
+        call write_f90(funit, "sys%natins%c2rate", sys%natins%c2rate)
+        call write_f90(funit, "sys%natins%ceiling", sys%natins%ceiling)
+        call write_f90(funit, "sys%natins%rates", sys%natins%rates, sys%natins%numrates)
+        call write_f90(funit, "sys%natins%bands", sys%natins%bands, sys%natins%numrates)
+        call write_f90(funit, "sys%natins%c4rates", sys%natins%c4rates, sys%natins%c4nrates)
+        call write_f90(funit, "sys%natins%c4bands", sys%natins%c4bands, sys%natins%c4nrates)
 
-#       include "includes/system/syslist.inc"
+        write(funit, *)
+        write(funit, '(A)') "! chben"
+        call write_f90(funit, "sys%chben%doChBen", sys%chben%doChBen)
+        call write_f90(funit, "sys%chben%basic", sys%chben%basic)
+        call write_f90(funit, "sys%chben%kid1xtr", sys%chben%kid1xtr)
+        call write_f90(funit, "sys%chben%opf", sys%chben%opf)
+        call write_f90(funit, "sys%chben%MatGrantVal", sys%chben%MatGrantVal)
+        call write_f90(funit, "sys%chben%MatGrantOnlyFirstKid", sys%chben%MatGrantOnlyFirstKid)
+        call write_f90(funit, "sys%chben%doTaper", sys%chben%doTaper)
+        call write_f90(funit, "sys%chben%disableTaperRounding", sys%chben%disableTaperRounding)
+        call write_f90(funit, "sys%chben%taperStart", sys%chben%taperStart)
+        call write_f90(funit, "sys%chben%taperRate", sys%chben%taperRate)
+        call write_f90(funit, "sys%chben%taperIsIncTax", sys%chben%taperIsIncTax)
 
-#       undef  _$header
-#       undef  _$footer
-#       undef  _$integer
-#       undef  _$double
-#       undef  _$logical
-#       undef  _$doublearray
-#       undef  _$integerarray
-#       undef  _$logicalarray
+        write(funit, *)
+        write(funit, '(A)') "! fc"
+        call write_f90(funit, "sys%fc%dofamcred", sys%fc%dofamcred)
+        call write_f90(funit, "sys%fc%NumAgeRng", sys%fc%NumAgeRng)
+        call write_f90(funit, "sys%fc%MaxAgeCC", sys%fc%MaxAgeCC)
+        call write_f90(funit, "sys%fc%WFTCMaxAgeCC", sys%fc%WFTCMaxAgeCC)
+        call write_f90(funit, "sys%fc%adult", sys%fc%adult)
+        call write_f90(funit, "sys%fc%ftprem", sys%fc%ftprem)
+        call write_f90(funit, "sys%fc%hours1", sys%fc%hours1)
+        call write_f90(funit, "sys%fc%hours2", sys%fc%hours2)
+        call write_f90(funit, "sys%fc%thres", sys%fc%thres)
+        call write_f90(funit, "sys%fc%taper", sys%fc%taper)
+        call write_f90(funit, "sys%fc%MaintDisreg", sys%fc%MaintDisreg)
+        call write_f90(funit, "sys%fc%MaxCC1", sys%fc%MaxCC1)
+        call write_f90(funit, "sys%fc%MaxCC2", sys%fc%MaxCC2)
+        call write_f90(funit, "sys%fc%WFTCMaxCC1", sys%fc%WFTCMaxCC1)
+        call write_f90(funit, "sys%fc%WFTCMaxCC2", sys%fc%WFTCMaxCC2)
+        call write_f90(funit, "sys%fc%WFTCPropCC", sys%fc%WFTCPropCC)
+        call write_f90(funit, "sys%fc%MinAmt", sys%fc%MinAmt)
+        call write_f90(funit, "sys%fc%kidagel", sys%fc%kidagel, sys%fc%NumAgeRng)
+        call write_f90(funit, "sys%fc%kidageu", sys%fc%kidageu, sys%fc%NumAgeRng)
+        call write_f90(funit, "sys%fc%kidcred", sys%fc%kidcred, sys%fc%NumAgeRng)
 
-        write(funit,*)
-        write(funit,'(a)') '!.f90 FORTAX system; END-OF-FILE'
-        write(funit,*)
+        write(funit, *)
+        write(funit, '(A)') "! ctc"
+        call write_f90(funit, "sys%ctc%fam", sys%ctc%fam)
+        call write_f90(funit, "sys%ctc%baby", sys%ctc%baby)
+        call write_f90(funit, "sys%ctc%kid", sys%ctc%kid)
+
+        write(funit, *)
+        write(funit, '(A)') "! wtc"
+        call write_f90(funit, "sys%wtc%Basic", sys%wtc%Basic)
+        call write_f90(funit, "sys%wtc%CouLP", sys%wtc%CouLP)
+        call write_f90(funit, "sys%wtc%FT", sys%wtc%FT)
+        call write_f90(funit, "sys%wtc%MinHrsKids", sys%wtc%MinHrsKids)
+        call write_f90(funit, "sys%wtc%MinHrsCouKids", sys%wtc%MinHrsCouKids)
+        call write_f90(funit, "sys%wtc%MinHrsNoKids", sys%wtc%MinHrsNoKids)
+        call write_f90(funit, "sys%wtc%FTHrs", sys%wtc%FTHrs)
+        call write_f90(funit, "sys%wtc%MinAgeKids", sys%wtc%MinAgeKids)
+        call write_f90(funit, "sys%wtc%MinAgeNoKids", sys%wtc%MinAgeNoKids)
+        call write_f90(funit, "sys%wtc%MaxCC1", sys%wtc%MaxCC1)
+        call write_f90(funit, "sys%wtc%MaxCC2", sys%wtc%MaxCC2)
+        call write_f90(funit, "sys%wtc%PropCC", sys%wtc%PropCC)
+        call write_f90(funit, "sys%wtc%MaxAgeCC", sys%wtc%MaxAgeCC)
+        call write_f90(funit, "sys%wtc%NewDisreg", sys%wtc%NewDisreg)
+        call write_f90(funit, "sys%wtc%NewDisregCon", sys%wtc%NewDisregCon)
+
+        write(funit, *)
+        write(funit, '(A)') "! ntc"
+        call write_f90(funit, "sys%ntc%donewtaxcred", sys%ntc%donewtaxcred)
+        call write_f90(funit, "sys%ntc%thr1lo", sys%ntc%thr1lo)
+        call write_f90(funit, "sys%ntc%thr1hi", sys%ntc%thr1hi)
+        call write_f90(funit, "sys%ntc%thr2", sys%ntc%thr2)
+        call write_f90(funit, "sys%ntc%taper1", sys%ntc%taper1)
+        call write_f90(funit, "sys%ntc%taper2", sys%ntc%taper2)
+        call write_f90(funit, "sys%ntc%taperCTCInOneGo", sys%ntc%taperCTCInOneGo)
+        call write_f90(funit, "sys%ntc%MinAmt", sys%ntc%MinAmt)
+
+        write(funit, *)
+        write(funit, '(A)') "! incsup"
+        call write_f90(funit, "sys%incsup%doIncSup", sys%incsup%doIncSup)
+        call write_f90(funit, "sys%incsup%IncChben", sys%incsup%IncChben)
+        call write_f90(funit, "sys%incsup%NumAgeRng", sys%incsup%NumAgeRng)
+        call write_f90(funit, "sys%incsup%MainCou", sys%incsup%MainCou)
+        call write_f90(funit, "sys%incsup%YngCou", sys%incsup%YngCou)
+        call write_f90(funit, "sys%incsup%MainLP", sys%incsup%MainLP)
+        call write_f90(funit, "sys%incsup%YngLP", sys%incsup%YngLP)
+        call write_f90(funit, "sys%incsup%MainSin", sys%incsup%MainSin)
+        call write_f90(funit, "sys%incsup%YngSin", sys%incsup%YngSin)
+        call write_f90(funit, "sys%incsup%ValFSM", sys%incsup%ValFSM)
+        call write_f90(funit, "sys%incsup%DisregLP", sys%incsup%DisregLP)
+        call write_f90(funit, "sys%incsup%DisregSin", sys%incsup%DisregSin)
+        call write_f90(funit, "sys%incsup%DisregCou", sys%incsup%DisregCou)
+        call write_f90(funit, "sys%incsup%DisregShared", sys%incsup%DisregShared)
+        call write_f90(funit, "sys%incsup%PremFam", sys%incsup%PremFam)
+        call write_f90(funit, "sys%incsup%PremLP", sys%incsup%PremLP)
+        call write_f90(funit, "sys%incsup%hours", sys%incsup%hours)
+        call write_f90(funit, "sys%incsup%MaintDisreg", sys%incsup%MaintDisreg)
+        call write_f90(funit, "sys%incsup%AgeRngl", sys%incsup%AgeRngl, sys%incsup%NumAgeRng)
+        call write_f90(funit, "sys%incsup%AgeRngu", sys%incsup%AgeRngu, sys%incsup%NumAgeRng)
+        call write_f90(funit, "sys%incsup%AddKid", sys%incsup%AddKid, sys%incsup%NumAgeRng)
+
+        write(funit, *)
+        write(funit, '(A)') "! ctax"
+        call write_f90(funit, "sys%ctax%docounciltax", sys%ctax%docounciltax)
+        call write_f90(funit, "sys%ctax%bandD", sys%ctax%bandD)
+        call write_f90(funit, "sys%ctax%SinDis", sys%ctax%SinDis)
+        call write_f90(funit, "sys%ctax%RatioA", sys%ctax%RatioA)
+        call write_f90(funit, "sys%ctax%RatioB", sys%ctax%RatioB)
+        call write_f90(funit, "sys%ctax%RatioC", sys%ctax%RatioC)
+        call write_f90(funit, "sys%ctax%RatioE", sys%ctax%RatioE)
+        call write_f90(funit, "sys%ctax%RatioF", sys%ctax%RatioF)
+        call write_f90(funit, "sys%ctax%RatioG", sys%ctax%RatioG)
+        call write_f90(funit, "sys%ctax%RatioH", sys%ctax%RatioH)
+
+        write(funit, *)
+        write(funit, '(A)') "! rebatesys"
+        call write_f90(funit, "sys%rebatesys%RulesUnderFC", sys%rebatesys%RulesUnderFC)
+        call write_f90(funit, "sys%rebatesys%RulesUnderWFTC", sys%rebatesys%RulesUnderWFTC)
+        call write_f90(funit, "sys%rebatesys%RulesUnderNTC", sys%rebatesys%RulesUnderNTC)
+        call write_f90(funit, "sys%rebatesys%RulesUnderUC", sys%rebatesys%RulesUnderUC)
+        call write_f90(funit, "sys%rebatesys%NumAgeRng", sys%rebatesys%NumAgeRng)
+        call write_f90(funit, "sys%rebatesys%Restrict", sys%rebatesys%Restrict)
+        call write_f90(funit, "sys%rebatesys%docap", sys%rebatesys%docap)
+        call write_f90(funit, "sys%rebatesys%MainCou", sys%rebatesys%MainCou)
+        call write_f90(funit, "sys%rebatesys%YngCou", sys%rebatesys%YngCou)
+        call write_f90(funit, "sys%rebatesys%MainLP", sys%rebatesys%MainLP)
+        call write_f90(funit, "sys%rebatesys%YngLP", sys%rebatesys%YngLP)
+        call write_f90(funit, "sys%rebatesys%MainSin", sys%rebatesys%MainSin)
+        call write_f90(funit, "sys%rebatesys%YngSin", sys%rebatesys%YngSin)
+        call write_f90(funit, "sys%rebatesys%DisregSin", sys%rebatesys%DisregSin)
+        call write_f90(funit, "sys%rebatesys%DisregLP", sys%rebatesys%DisregLP)
+        call write_f90(funit, "sys%rebatesys%DisregCou", sys%rebatesys%DisregCou)
+        call write_f90(funit, "sys%rebatesys%CredInDisregCC", sys%rebatesys%CredInDisregCC)
+        call write_f90(funit, "sys%rebatesys%ChbenIsIncome", sys%rebatesys%ChbenIsIncome)
+        call write_f90(funit, "sys%rebatesys%PremFam", sys%rebatesys%PremFam)
+        call write_f90(funit, "sys%rebatesys%PremLP", sys%rebatesys%PremLP)
+        call write_f90(funit, "sys%rebatesys%MaintDisreg", sys%rebatesys%MaintDisreg)
+        call write_f90(funit, "sys%rebatesys%MaxCC1", sys%rebatesys%MaxCC1)
+        call write_f90(funit, "sys%rebatesys%MaxCC2", sys%rebatesys%MaxCC2)
+        call write_f90(funit, "sys%rebatesys%MaxAgeCC", sys%rebatesys%MaxAgeCC)
+        call write_f90(funit, "sys%rebatesys%AgeRngl", sys%rebatesys%AgeRngl, sys%rebatesys%NumAgeRng)
+        call write_f90(funit, "sys%rebatesys%AgeRngu", sys%rebatesys%AgeRngu, sys%rebatesys%NumAgeRng)
+        call write_f90(funit, "sys%rebatesys%AddKid", sys%rebatesys%AddKid, sys%rebatesys%NumAgeRng)
+
+        write(funit, *)
+        write(funit, '(A)') "! hben"
+        call write_f90(funit, "sys%hben%doHBen", sys%hben%doHBen)
+        call write_f90(funit, "sys%hben%taper", sys%hben%taper)
+        call write_f90(funit, "sys%hben%MinAmt", sys%hben%MinAmt)
+
+        write(funit, *)
+        write(funit, '(A)') "! ctaxben"
+        call write_f90(funit, "sys%ctaxben%docounciltaxben", sys%ctaxben%docounciltaxben)
+        call write_f90(funit, "sys%ctaxben%taper", sys%ctaxben%taper)
+        call write_f90(funit, "sys%ctaxben%doEntitlementCut", sys%ctaxben%doEntitlementCut)
+        call write_f90(funit, "sys%ctaxben%entitlementShare", sys%ctaxben%entitlementShare)
+
+        write(funit, *)
+        write(funit, '(A)') "! ccben"
+        call write_f90(funit, "sys%ccben%dopolltax", sys%ccben%dopolltax)
+        call write_f90(funit, "sys%ccben%taper", sys%ccben%taper)
+        call write_f90(funit, "sys%ccben%PropElig", sys%ccben%PropElig)
+        call write_f90(funit, "sys%ccben%MinAmt", sys%ccben%MinAmt)
+        call write_f90(funit, "sys%ccben%CCrate", sys%ccben%CCrate)
+
+        write(funit, *)
+        write(funit, '(A)') "! uc"
+        call write_f90(funit, "sys%uc%doUnivCred", sys%uc%doUnivCred)
+        call write_f90(funit, "sys%uc%MainCou", sys%uc%MainCou)
+        call write_f90(funit, "sys%uc%YngCou", sys%uc%YngCou)
+        call write_f90(funit, "sys%uc%MainSin", sys%uc%MainSin)
+        call write_f90(funit, "sys%uc%YngSin", sys%uc%YngSin)
+        call write_f90(funit, "sys%uc%MinAgeMain", sys%uc%MinAgeMain)
+        call write_f90(funit, "sys%uc%FirstKid", sys%uc%FirstKid)
+        call write_f90(funit, "sys%uc%OtherKid", sys%uc%OtherKid)
+        call write_f90(funit, "sys%uc%MaxCC1", sys%uc%MaxCC1)
+        call write_f90(funit, "sys%uc%MaxCC2", sys%uc%MaxCC2)
+        call write_f90(funit, "sys%uc%PropCC", sys%uc%PropCC)
+        call write_f90(funit, "sys%uc%MaxAgeCC", sys%uc%MaxAgeCC)
+        call write_f90(funit, "sys%uc%doRentCap", sys%uc%doRentCap)
+        call write_f90(funit, "sys%uc%DisregSinNoKidsHi", sys%uc%DisregSinNoKidsHi)
+        call write_f90(funit, "sys%uc%DisregSinNoKidsLo", sys%uc%DisregSinNoKidsLo)
+        call write_f90(funit, "sys%uc%DisregSinKidsHi", sys%uc%DisregSinKidsHi)
+        call write_f90(funit, "sys%uc%DisregSinKidsLo", sys%uc%DisregSinKidsLo)
+        call write_f90(funit, "sys%uc%DisregCouNoKidsHi", sys%uc%DisregCouNoKidsHi)
+        call write_f90(funit, "sys%uc%DisregCouNoKidsLo", sys%uc%DisregCouNoKidsLo)
+        call write_f90(funit, "sys%uc%DisregCouKidsHi", sys%uc%DisregCouKidsHi)
+        call write_f90(funit, "sys%uc%DisregCouKidsLo", sys%uc%DisregCouKidsLo)
+        call write_f90(funit, "sys%uc%taper", sys%uc%taper)
+        call write_f90(funit, "sys%uc%MinAmt", sys%uc%MinAmt)
+
+        write(funit, *)
+        write(funit, '(A)') "! statepen"
+        call write_f90(funit, "sys%statepen%doStatePen", sys%statepen%doStatePen)
+        call write_f90(funit, "sys%statepen%PenAgeMan", sys%statepen%PenAgeMan)
+        call write_f90(funit, "sys%statepen%PenAgeWoman", sys%statepen%PenAgeWoman)
+
+        write(funit, *)
+        write(funit, '(A)') "! bencap"
+        call write_f90(funit, "sys%bencap%doCap", sys%bencap%doCap)
+        call write_f90(funit, "sys%bencap%doThruUC", sys%bencap%doThruUC)
+        call write_f90(funit, "sys%bencap%sinNoKids", sys%bencap%sinNoKids)
+        call write_f90(funit, "sys%bencap%sinKids", sys%bencap%sinKids)
+        call write_f90(funit, "sys%bencap%couNoKids", sys%bencap%couNoKids)
+        call write_f90(funit, "sys%bencap%couKids", sys%bencap%couKids)
+        call write_f90(funit, "sys%bencap%UCEarnThr", sys%bencap%UCEarnThr)
+
+        write(funit, *)
+        write(funit, '(A)') "! extra"
+        call write_f90(funit, "sys%extra%fsminappamt", sys%extra%fsminappamt)
+        call write_f90(funit, "sys%extra%matgrant", sys%extra%matgrant)
+        call write_f90(funit, "sys%extra%prices", sys%extra%prices)
+
+
+        write(funit, *)
+        write(funit, '(A)') '! .f90 FORTAX system; END-OF-FILE'
+        write(funit, *)
 
         if (present(fname)) close(funit)
 
@@ -1329,275 +1922,288 @@ contains
     ! write as a file the contents of the family type which can then be
     ! directly included in the source code of the calling program
 
-    subroutine fam_saveF90(fam,fname)
+    subroutine fam_saveF90(fam, fname)
 
-        !use fortax_type, only : sys_t
-        use fortax_util, only : getUnit, dblToStr, intToStr, fortaxError
-
+        use fortax_util, only : fortaxError
         use, intrinsic :: iso_fortran_env
 
         implicit none
 
         type(fam_t), intent(in) :: fam
-        character(len=*), intent(in), optional :: fname
+        character(len = *), intent(in), optional :: fname
 
-        integer :: funit, ios, i
+        integer :: funit, ios
 
         if (present(fname)) then
-            call getUnit(funit)
-            open(funit,file=fname,action='write',status='replace',iostat=ios)
+            open(newunit = funit, file = fname, action = 'write', status = 'replace', iostat = ios)
             if (ios .ne. 0) call fortaxError('error opening file for writing')
         else
             funit = output_unit
         end if
 
-        write(funit,'(a)') '! .f90 FORTAX family; generated using fam_saveF90'
-        write(funit,*)
+        write(funit, '(A)') '! .f90 FORTAX family; generated using fam_saveF90'
+        write(funit, *)
 
-        write(funit,'(a)') 'call fam_init(fam) !deallocates arrays and sets values to default'
+        write(funit, '(A)') 'call fam_init(fam)'
 
-#       undef  _$header
-#       undef  _$footer
-#       undef  _$integer
-#       undef  _$double
-#       undef  _$logical
-#       undef  _$doublearray
-#       undef  _$integerarray
-#       undef  _$logicalarray
+        call write_f90(funit, "fam%couple", fam%couple)
+        call write_f90(funit, "fam%married", fam%married)
+        call write_f90(funit, "fam%ccexp", fam%ccexp)
+        call write_f90(funit, "fam%maint", fam%maint)
+        call write_f90(funit, "fam%nkids", fam%nkids)
+        call write_f90(funit, "fam%kidage", fam%kidage, fam%nkids)
+        call write_f90(funit, "fam%nothads", fam%nothads)
+        call write_f90(funit, "fam%tenure", fam%tenure)
+        call write_f90(funit, "fam%rent", fam%rent)
+        call write_f90(funit, "fam%rentcap", fam%rentcap)
+        call write_f90(funit, "fam%region", fam%region)
+        call write_f90(funit, "fam%ctband", fam%ctband)
+        call write_f90(funit, "fam%banddratio", fam%banddratio)
+        call write_f90(funit, "fam%intdate", fam%intdate)
 
-#       define _$header write(funit,*); write(funit,'(a)') '!family'
-#       define _$footer
-#       define _$integer(x,y) call fam_saveF90Integer(#x,'',funit,fam%x)
-#       define _$double(x,y)  call fam_saveF90Double(#x,'',funit,fam%x)
-#       define _$logical(x,y) call fam_saveF90Logical(#x,'',funit,fam%x)
-#       define _$doublearray(x,y,z) call fam_saveF90DoubleArray(#x,'',funit,fam%x,#z)
-#       define _$logicalarray(x,y,z) call fam_saveF90LogicalArray(#x,'',funit,fam%x,#z)
-#       define _$integerarray(x,y,z) call fam_saveF90IntegerArray(#x,'',funit,fam%x,#z)
+        call write_f90(funit, "fam%ad(1)%age", fam%ad(1)%age)
+        call write_f90(funit, "fam%ad(1)%selfemp", fam%ad(1)%selfemp)
+        call write_f90(funit, "fam%ad(1)%hrs", fam%ad(1)%hrs)
+        call write_f90(funit, "fam%ad(1)%earn", fam%ad(1)%earn)
 
-#       include "includes/fam_t.inc"
+        call write_f90(funit, "fam%ad(2)%age", fam%ad(2)%age)
+        call write_f90(funit, "fam%ad(2)%selfemp", fam%ad(2)%selfemp)
+        call write_f90(funit, "fam%ad(2)%hrs", fam%ad(2)%hrs)
+        call write_f90(funit, "fam%ad(2)%earn", fam%ad(2)%earn)
 
-#       undef  _$header
-#       undef  _$footer
-#       undef  _$integer
-#       undef  _$double
-#       undef  _$logical
-#       undef  _$doublearray
-#       undef  _$integerarray
-#       undef  _$logicalarray
-
-#       define _$header write(funit,*); write(funit,'(a)') '!adult1'
-#       define _$footer
-#       define _$integer(x,y) call fam_saveF90Integer(#x,'ad1',funit,fam%ad(1)%x)
-#       define _$double(x,y)  call fam_saveF90Double(#x,'ad1',funit,fam%ad(1)%x)
-#       define _$logical(x,y) call fam_saveF90Logical(#x,'ad1',funit,fam%ad(1)%x)
-#       define _$doublearray(x,y,z) call fam_saveF90DoubleArray(#x,'ad1',funit,fam%ad(1)%x,#z)
-#       define _$logicalarray(x,y,z) call fam_saveF90LogicalArray(#x,'ad1',funit,fam%ad(1)%x,#z)
-#       define _$integerarray(x,y,z) call fam_saveF90IntegerArray(#x,'ad1',funit,fam%ad(1)%x,#z)
-
-#       include "includes/famad_t.inc"
-
-#       undef  _$header
-#       undef  _$footer
-#       undef  _$integer
-#       undef  _$double
-#       undef  _$logical
-#       undef  _$doublearray
-#       undef  _$integerarray
-#       undef  _$logicalarray
-
-#       undef  _$header
-#       undef  _$footer
-#       undef  _$integer
-#       undef  _$double
-#       undef  _$logical
-#       undef  _$doublearray
-#       undef  _$integerarray
-#       undef  _$logicalarray
-
-        if (fam%couple) then
-#           define _$header write(funit,*); write(funit,'(a)') '!adult2'
-#           define _$footer
-#           define _$integer(x,y) call fam_saveF90Integer(#x,'ad2',funit,fam%ad(2)%x)
-#           define _$double(x,y)  call fam_saveF90Double(#x,'ad2',funit,fam%ad(2)%x)
-#           define _$logical(x,y) call fam_saveF90Logical(#x,'ad2',funit,fam%ad(2)%x)
-#           define _$doublearray(x,y,z) call fam_saveF90DoubleArray(#x,'ad2',funit,fam%ad(2)%x,#z)
-#           define _$logicalarray(x,y,z) call fam_saveF90LogicalArray(#x,'ad2',funit,fam%ad(2)%x,#z)
-#           define _$integerarray(x,y,z) call fam_saveF90IntegerArray(#x,'ad2',funit,fam%ad(2)%x,#z)
-
-#           include "includes/famad_t.inc"
-
-#           undef  _$header
-#           undef  _$footer
-#           undef  _$integer
-#           undef  _$double
-#           undef  _$logical
-#           undef  _$doublearray
-#           undef  _$integerarray
-#           undef  _$logicalarray
-        end if
-
-        write(funit,*)
-        write(funit,'(a)') '!.f90 FORTAX family; END-OF-FILE'
-        write(funit,*)
+        write(funit, *)
+        write(funit, '(A)') '! .f90 FORTAX family; END-OF-FILE'
+        write(funit, *)
 
         if (present(fname)) close(funit)
 
     end subroutine fam_saveF90
 
+    subroutine write_f90integer(funit, str, val)
+        implicit none
+        integer, intent(in) :: funit
+        character(len = *), intent(in) :: str
+        integer, intent(in) :: val
+        write(funit, '(A, " = ", I0)') str, val
+    end subroutine write_f90integer
 
-    subroutine fam_saveF90Integer(str,level,funit,myval)
+    subroutine write_f90integerarray(funit, str, val)
         use fortax_util, only : intToStr
         implicit none
-        character(len=*), intent(in) :: str
-        character(len=*), intent(in) :: level
         integer, intent(in) :: funit
-        integer, intent(in) :: myval
-        select case(level)
-        case('ad1')
-            write(funit,'(a)',advance="no") "fam%ad(1)%"//str//"="
-        case('ad2')
-            write(funit,'(a)',advance="no") "fam%ad(2)%"//str//"="
-        case default
-            write(funit,'(a)',advance="no") "fam%"//str//"="
-        end select
-        write(funit,'(a)') intToStr(myval)
-    end subroutine fam_saveF90Integer
+        character(len = *), intent(in) :: str
+        integer, intent(in) :: val(:)
+        integer :: ix
+        do ix = 1, size(val)
+            write(funit, '(A, " = ", I0)') str // "(" // intToStr(iX) // ")", val(ix)
+        end do
+    end subroutine write_f90integerarray
 
-    subroutine fam_saveF90Double(str,level,funit,myval)
-        use fortax_util, only : dblToStr
-        implicit none
-        character(len=*), intent(in) :: str
-        character(len=*), intent(in) :: level
-        integer,  intent(in) :: funit
-        real(dp), intent(in) :: myval
-        select case(level)
-        case('ad1')
-            write(funit,'(a)',advance="no") "fam%ad(1)%"//str//"="
-        case('ad2')
-            write(funit,'(a)',advance="no") "fam%ad(2)%"//str//"="
-        case default
-            write(funit,'(a)',advance="no") "fam%"//str//"="
-        end select
-        write(funit,'(a)') dblToStr(myval)//'_dp'
-    end subroutine fam_saveF90Double
-
-    subroutine fam_saveF90DoubleArray(str,level,funit,myval,mydim)
-        use fortax_util, only : dblToStr, intToStr
-        implicit none
-        character(len=*), intent(in) :: str
-        character(len=*), intent(in) :: level
-        integer,  intent(in) :: funit
-        real(dp), intent(in) :: myval(:)
-        character(len=*), intent(in) :: mydim
-        integer :: i
-
-        if (mydim==':') then
-            write(funit,'(a)') "allocate(fam%"//str//"("//intToStr(size(myval))//"))"
-        end if
-
-        select case(level)
-        case('ad1')
-            do i = 1, size(myval)
-                write(funit,'(a)',advance="no") "fam%ad(1)%"//str//"("//intToStr(i)//")="
-                write(funit,'(a)') dblToStr(myval(i))//'_dp'
-            end do
-        case('ad2')
-            do i = 1, size(myval)
-                write(funit,'(a)',advance="no") "fam%ad(2)%"//str//"("//intToStr(i)//")="
-                write(funit,'(a)') dblToStr(myval(i))//'_dp'
-            end do
-        case default
-            do i = 1, size(myval)
-                write(funit,'(a)',advance="no") "fam%"//str//"("//intToStr(i)//")="
-                write(funit,'(a)') dblToStr(myval(i))//'_dp'
-            end do
-        end select
-
-    end subroutine fam_saveF90DoubleArray
-
-    subroutine fam_saveF90IntegerArray(str,level,funit,myval,mydim)
+    subroutine write_f90integerarray2(funit, str, val, nval)
         use fortax_util, only : intToStr
         implicit none
-        character(len=*), intent(in) :: str
-        character(len=*), intent(in) :: level
         integer, intent(in) :: funit
-        integer, intent(in) :: myval(:)
-        character(len=*), intent(in) :: mydim
-        integer :: i
+        character(len = *), intent(in) :: str
+        integer, intent(in) :: val(:)
+        integer, intent(in) :: nval
+        integer :: ix
+        do ix = 1, nval
+            write(funit, '(A, " = ", I0)') str // "(" // intToStr(iX) // ")", val(ix)
+        end do
+    end subroutine write_f90integerarray2
 
-        if (mydim==':') then
-            write(funit,'(a)') "allocate(fam%"//str//"("//intToStr(size(myval))//"))"
-        end if
-
-        select case(level)
-        case('ad1')
-            do i = 1, size(myval)
-                write(funit,'(a)',advance="no") "fam%ad(1)%"//str//"("//intToStr(i)//")="
-                write(funit,'(a)') intToStr(myval(i))
-            end do
-        case('ad2')
-            do i = 1, size(myval)
-                write(funit,'(a)',advance="no") "fam%ad(2)%"//str//"("//intToStr(i)//")="
-                write(funit,'(a)') intToStr(myval(i))
-            end do
-        case default
-            do i = 1, size(myval)
-                write(funit,'(a)',advance="no") "fam%"//str//"("//intToStr(i)//")="
-                write(funit,'(a)') intToStr(myval(i))
-            end do
-        end select
-
-    end subroutine fam_saveF90IntegerArray
-
-    subroutine fam_saveF90Logical(str,level,funit,myval)
+    subroutine write_f90double(funit, str, val)
         implicit none
-        character(len=*), intent(in) :: str
-        character(len=*), intent(in) :: level
-        integer,  intent(in) :: funit
-        logical, intent(in) :: myval
-        select case(level)
-        case('ad1')
-            write(funit,'(a)',advance="no") "fam%ad(1)%"//str//"="
-        case('ad2')
-            write(funit,'(a)',advance="no") "fam%ad(2)%"//str//"="
-        case default
-            write(funit,'(a)',advance="no") "fam%"//str//"="
-        end select
-        write(funit,'(a)') merge('.true. ','.false.',myval)
-    end subroutine fam_saveF90Logical
+        integer, intent(in) :: funit
+        character(len = *), intent(in) :: str
+        real(dp), intent(in) :: val
+        write(funit, '(A, " = ", ES24.17, "_dp")') str, val
+    end subroutine write_f90double
 
-    subroutine fam_saveF90LogicalArray(str,level,funit,myval,mydim)
+    subroutine write_f90doublearray(funit, str, val)
         use fortax_util, only : intToStr
         implicit none
-        character(len=*), intent(in) :: str
-        character(len=*), intent(in) :: level
         integer, intent(in) :: funit
-        logical, intent(in) :: myval(:)
-        character(len=*), intent(in) :: mydim
-        integer :: i
+        character(len = *), intent(in) :: str
+        real(dp), intent(in) :: val(:)
+        integer :: ix
+        do ix = 1, size(val)
+            write(funit, '(A, " = ", ES24.17, "_dp")') str // "(" // intToStr(iX) // ")", val(ix)
+        end do
+    end subroutine write_f90doublearray
 
-        if (mydim==':') then
-            write(funit,'(a)') "allocate(fam%"//str//"("//intToStr(size(myval))//"))"
+    subroutine write_f90doublearray2(funit, str, val, nval)
+        use fortax_util, only : intToStr
+        implicit none
+        integer, intent(in) :: funit
+        character(len = *), intent(in) :: str
+        real(dp), intent(in) :: val(:)
+        integer, intent(in) :: nval
+        integer :: ix
+        do ix = 1, nval
+            write(funit, '(A, " = ", ES24.17, "_dp")') str // "(" // intToStr(iX) // ")", val(ix)
+        end do
+    end subroutine write_f90doublearray2
+
+    subroutine desc_f90integer(funit, longstr, shortstr, val)
+        implicit none
+        integer, intent(in) :: funit
+        character(len = *), intent(in) :: longstr
+        character(len = *), intent(in) :: shortstr
+        integer, intent(in) :: val
+        if (longstr .ne. "") then
+            write(funit, '(A40, 2X, I20)') longstr // ' (' // shortstr // ')', val
+        else
+            write(funit, '(A40, 2X, I20)') shortstr, val
         end if
+    end subroutine desc_f90integer
 
-        select case(level)
-        case('ad1')
-            do i = 1, size(myval)
-                write(funit,'(a)',advance="no") "fam%ad(1)%"//str//"("//intToStr(i)//")="
-                write(funit,'(a)') merge('.true. ','.false.',myval(i))
-            end do
-        case('ad2')
-            do i = 1, size(myval)
-                write(funit,'(a)',advance="no") "fam%ad(2)%"//str//"("//intToStr(i)//")="
-                write(funit,'(a)') merge('.true. ','.false.',myval(i))
-            end do
-        case default
-            do i = 1, size(myval)
-                write(funit,'(a)',advance="no") "fam%"//str//"("//intToStr(i)//")="
-                write(funit,'(a)') merge('.true. ','.false.',myval(i))
-            end do
-        end select
+    subroutine desc_f90integer_label(funit, longstr, shortstr, val, label)
+        use fortax_util, only : intToStr
+        implicit none
+        integer, intent(in) :: funit
+        character(len = *), intent(in) :: longstr
+        character(len = *), intent(in) :: shortstr
+        integer, intent(in) :: val
+        character(len = len_label), intent(in) :: label
+        if (longstr .ne. "") then
+            write(funit, '(A40, 2X, A20)') longstr // ' (' // shortstr // ')', &
+                trim(adjustl(label)) // ' (' // intToStr(val) // ')'
+        else
+            write(funit, '(A40, 2X, A20)') shortstr, label
+        end if
+    end subroutine desc_f90integer_label
 
-    end subroutine fam_saveF90LogicalArray
+    subroutine desc_f90integerarray(funit, longstr, shortstr, val)
+        use fortax_util, only : intToStr
+        implicit none
+        integer, intent(in) :: funit
+        character(len = *), intent(in) :: longstr
+        character(len = *), intent(in) :: shortstr
+        integer, intent(in) :: val(:)
+        integer :: ix
+        if (longstr .ne. "") then
+            do ix = 1, size(val)
+                write(funit, '(A40, 2X, I20)') longstr // ' (' // shortstr // '[' // intToStr(ix) // '])', val(ix)
+            end do
+        else
+            do ix = 1, size(val)
+                write(funit, '(A40, 2X, I20)') shortstr // '[' // intToStr(ix) // ']', val(ix)
+            end do
+        end if
+    end subroutine desc_f90integerarray
+
+    subroutine desc_f90integerarray_label(funit, longstr, shortstr, val, label)
+        use fortax_util, only : intToStr
+        implicit none
+        integer, intent(in) :: funit
+        character(len = *), intent(in) :: longstr
+        character(len = *), intent(in) :: shortstr
+        integer, intent(in) :: val(:)
+        character(len = len_label), intent(in) :: label(:)
+        integer :: ix
+        if (longstr .ne. "") then
+            do ix = 1, size(val)
+                write(funit, '(A40, 2X, I20)') longstr // ' (' // shortstr // '[' // intToStr(ix) // '])', label(ix)
+            end do
+        else
+            do ix = 1, size(val)
+                write(funit, '(A40, 2X, I20)') shortstr // '[' // intToStr(ix) // ']', label(ix)
+            end do
+        end if
+    end subroutine desc_f90integerarray_label
+
+    subroutine desc_f90integerarray2(funit, longstr, shortstr, val, nval)
+        use fortax_util, only : intToStr
+        implicit none
+        integer, intent(in) :: funit
+        character(len = *), intent(in) :: longstr
+        character(len = *), intent(in) :: shortstr
+        integer, intent(in) :: val(:)
+        integer, intent(in) :: nval
+        integer :: ix
+        if (longstr .ne. "") then
+            do ix = 1, nval
+                write(funit, '(A40, 2X, I20)') longstr // ' (' // shortstr // '[' // intToStr(ix) // '])', val(ix)
+            end do
+        else
+            do ix = 1, nval
+                write(funit, '(A40, 2X, I20)') shortstr // '[' // intToStr(ix) // ']', val(ix)
+            end do
+        end if
+    end subroutine desc_f90integerarray2
+
+    subroutine desc_f90integerarray2_label(funit, longstr, shortstr, val, nval, label)
+        use fortax_util, only : intToStr
+        implicit none
+        integer, intent(in) :: funit
+        character(len = *), intent(in) :: longstr
+        character(len = *), intent(in) :: shortstr
+        integer, intent(in) :: val(:)
+        integer, intent(in) :: nval
+        character(len = len_label), intent(in) :: label(:)
+        integer :: ix
+        if (longstr .ne. "") then
+            do ix = 1, nval
+                write(funit, '(A40, 2X, I20)') longstr // ' (' // shortstr // '[' // intToStr(ix) // '])', label(ix)
+            end do
+        else
+            do ix = 1, nval
+                write(funit, '(A40, 2X, I20)') shortstr // '[' // intToStr(ix) // ']', label(ix)
+            end do
+        end if
+    end subroutine desc_f90integerarray2_label
+
+    subroutine desc_f90double(funit, longstr, shortstr, val)
+        implicit none
+        integer, intent(in) :: funit
+        character(len = *), intent(in) :: longstr
+        character(len = *), intent(in) :: shortstr
+        real(dp), intent(in) :: val
+        if (longstr .ne. "") then
+            write(funit, '(A40, 2X, F20.4)') longstr // ' (' // shortstr // ')', val
+        else
+            write(funit, '(A40, 2X, F20.4)') shortstr, val
+        end if
+    end subroutine desc_f90double
+
+    subroutine desc_f90doublearray(funit, longstr, shortstr, val)
+        use fortax_util, only : intToStr
+        implicit none
+        integer, intent(in) :: funit
+        character(len = *), intent(in) :: longstr
+        character(len = *), intent(in) :: shortstr
+        real(dp), intent(in) :: val(:)
+        integer :: ix
+        if (longstr .ne. "") then
+            do ix = 1, size(val)
+                write(funit, '(A40, 2X, F20.4)') longstr // ' (' // shortstr // '[' // intToStr(ix) // '])', val(ix)
+            end do
+        else
+            do ix = 1, size(val)
+                write(funit, '(A40, 2X, F20.4)') shortstr // '[' // intToStr(ix) // ']', val(ix)
+            end do
+        end if
+    end subroutine desc_f90doublearray
+
+    subroutine desc_f90doublearray2(funit, longstr, shortstr, val, nval)
+        use fortax_util, only : intToStr
+        implicit none
+        integer, intent(in) :: funit
+        character(len = *), intent(in) :: longstr
+        character(len = *), intent(in) :: shortstr
+        real(dp), intent(in) :: val(:)
+        integer, intent(in) :: nval
+        integer :: ix
+        if (longstr .ne. "") then
+            do ix = 1, nval
+                write(funit, '(A40, 2X, F20.4)') longstr // ' (' // shortstr // '[' // intToStr(ix) // '])', val(ix)
+            end do
+        else
+            do ix = 1, nval
+                write(funit, '(A40, 2X, F20.4)') shortstr // '[' // intToStr(ix) // ']', val(ix)
+            end do
+        end if
+    end subroutine desc_f90doublearray2
 
 end module fortax_type

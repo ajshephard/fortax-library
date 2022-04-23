@@ -1,8 +1,3 @@
-_$header
-#include "header.inc"
-
-_$double(fam,amount)
-_$double(baby,amount)
-_$double(kid,amount)
-
-_$footer
+@:fortaxdef(double, fam,  "", amount)
+@:fortaxdef(double, baby, "", amount)
+@:fortaxdef(double, kid,  "", amount)

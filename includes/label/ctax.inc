@@ -1,0 +1,8 @@
+@:fortaxdef(integer, banda, "Council Tax Band A", label, value = 1)
+@:fortaxdef(integer, bandb, "Council Tax Band B", label, value = 2)
+@:fortaxdef(integer, bandc, "Council Tax Band C", label, value = 3)
+@:fortaxdef(integer, bandd, "Council Tax Band D", label, value = 4)
+@:fortaxdef(integer, bande, "Council Tax Band E", label, value = 5)
+@:fortaxdef(integer, bandf, "Council Tax Band F", label, value = 6)
+@:fortaxdef(integer, bandg, "Council Tax Band G", label, value = 7)
+@:fortaxdef(integer, bandh, "Council Tax Band H", label, value = 8)

@@ -1,8 +1,3 @@
-_$header
-#include "header.inc"
-
-_$logical(doHBen,null)
-_$double(taper,rate)
-_$double(MinAmt,minamount)
-
-_$footer
+@:fortaxdef(bool,   doHBen, "Calculate housing benefit", null, label = bool)
+@:fortaxdef(double, taper,  "Taper rate", rate)
+@:fortaxdef(double, MinAmt, "Minimum amount", minamount)
