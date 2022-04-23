@@ -231,7 +231,7 @@ The output of `FORTAX_kinks_desc` is
         50.000         300.000          62.067        0.33000
 ==============================================================
 ```
-Here `Income` is the combined income and National Insurance liability, while `rate` is the combined marginal tax rate.
+Here `Income` is the combined income and National Insurance liability, while `Rate` is the combined marginal tax rate.
 
 In some settings we may wish to vary earnings at fixed hours. For this purpose, the user can use the `FORTAX_kinksEarn` and `FORTAX_evalKinksEarn` subroutines. Internally, both `FORTAX_kinksHours` and `FORTAX_kinksEarn` are repeatedly calling `FORTAX_calcNetInc` to construct the budget constraint. Whether it is more appropriate for a user to call `FORTAX_calcNetInc` directly, or to first summarise the entire budget constraint using `FORTAX_kinksHours` or `FORTAX_kinksEarn` is application specific.
 
