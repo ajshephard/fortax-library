@@ -647,7 +647,7 @@ contains
         integer, intent(in) :: funit
         character(len = *), intent(in) :: str
         real(dp), intent(in) :: val
-        write(funit, '(A, " = ", ES24.17)') str, val
+        write(funit, '(A, " = ", ES24.17, "_dp")') str, val
     end subroutine write_f90double
 
     subroutine write_f90doublearray(funit, str, val)
@@ -658,7 +658,7 @@ contains
         real(dp), intent(in) :: val(:)
         integer :: ix
         do ix = 1, size(val)
-            write(funit, '(A, " = ", ES24.17)') str // "(" // intToStr(iX) // ")", val(ix)
+            write(funit, '(A, " = ", ES24.17, "_dp")') str // "(" // intToStr(iX) // ")", val(ix)
         end do
     end subroutine write_f90doublearray
 
@@ -671,7 +671,7 @@ contains
         integer, intent(in) :: nval
         integer :: ix
         do ix = 1, nval
-            write(funit, '(A, " = ", ES24.17)') str // "(" // intToStr(iX) // ")", val(ix)
+            write(funit, '(A, " = ", ES24.17, "_dp")') str // "(" // intToStr(iX) // ")", val(ix)
         end do
     end subroutine write_f90doublearray2
 

@@ -1685,9 +1685,7 @@ end function labstring_region
         call write_f90(funit, "sys%inctax%ctctaper", sys%inctax%ctctaper)
         call write_f90(funit, "sys%inctax%c4rebate", sys%inctax%c4rebate)
         call write_f90(funit, "sys%inctax%bands", sys%inctax%bands, sys%inctax%numbands)
-        call write_f90(funit, "sys%inctax%bands", sys%inctax%bands)
         call write_f90(funit, "sys%inctax%rates", sys%inctax%rates, sys%inctax%numbands)
-        call write_f90(funit, "sys%inctax%rates", sys%inctax%rates)
 
         write(funit, *)
         write(funit, '(A)') "! natins"
@@ -1697,13 +1695,9 @@ end function labstring_region
         call write_f90(funit, "sys%natins%c2rate", sys%natins%c2rate)
         call write_f90(funit, "sys%natins%ceiling", sys%natins%ceiling)
         call write_f90(funit, "sys%natins%rates", sys%natins%rates, sys%natins%numrates)
-        call write_f90(funit, "sys%natins%rates", sys%natins%rates)
         call write_f90(funit, "sys%natins%bands", sys%natins%bands, sys%natins%numrates)
-        call write_f90(funit, "sys%natins%bands", sys%natins%bands)
         call write_f90(funit, "sys%natins%c4rates", sys%natins%c4rates, sys%natins%c4nrates)
-        call write_f90(funit, "sys%natins%c4rates", sys%natins%c4rates)
         call write_f90(funit, "sys%natins%c4bands", sys%natins%c4bands, sys%natins%c4nrates)
-        call write_f90(funit, "sys%natins%c4bands", sys%natins%c4bands)
 
         write(funit, *)
         write(funit, '(A)') "! chben"
@@ -1739,11 +1733,8 @@ end function labstring_region
         call write_f90(funit, "sys%fc%WFTCPropCC", sys%fc%WFTCPropCC)
         call write_f90(funit, "sys%fc%MinAmt", sys%fc%MinAmt)
         call write_f90(funit, "sys%fc%kidagel", sys%fc%kidagel, sys%fc%NumAgeRng)
-        call write_f90(funit, "sys%fc%kidagel", sys%fc%kidagel)
         call write_f90(funit, "sys%fc%kidageu", sys%fc%kidageu, sys%fc%NumAgeRng)
-        call write_f90(funit, "sys%fc%kidageu", sys%fc%kidageu)
         call write_f90(funit, "sys%fc%kidcred", sys%fc%kidcred, sys%fc%NumAgeRng)
-        call write_f90(funit, "sys%fc%kidcred", sys%fc%kidcred)
 
         write(funit, *)
         write(funit, '(A)') "! ctc"
@@ -1801,11 +1792,8 @@ end function labstring_region
         call write_f90(funit, "sys%incsup%hours", sys%incsup%hours)
         call write_f90(funit, "sys%incsup%MaintDisreg", sys%incsup%MaintDisreg)
         call write_f90(funit, "sys%incsup%AgeRngl", sys%incsup%AgeRngl, sys%incsup%NumAgeRng)
-        call write_f90(funit, "sys%incsup%AgeRngl", sys%incsup%AgeRngl)
         call write_f90(funit, "sys%incsup%AgeRngu", sys%incsup%AgeRngu, sys%incsup%NumAgeRng)
-        call write_f90(funit, "sys%incsup%AgeRngu", sys%incsup%AgeRngu)
         call write_f90(funit, "sys%incsup%AddKid", sys%incsup%AddKid, sys%incsup%NumAgeRng)
-        call write_f90(funit, "sys%incsup%AddKid", sys%incsup%AddKid)
 
         write(funit, *)
         write(funit, '(A)') "! ctax"
@@ -1847,11 +1835,8 @@ end function labstring_region
         call write_f90(funit, "sys%rebatesys%MaxCC2", sys%rebatesys%MaxCC2)
         call write_f90(funit, "sys%rebatesys%MaxAgeCC", sys%rebatesys%MaxAgeCC)
         call write_f90(funit, "sys%rebatesys%AgeRngl", sys%rebatesys%AgeRngl, sys%rebatesys%NumAgeRng)
-        call write_f90(funit, "sys%rebatesys%AgeRngl", sys%rebatesys%AgeRngl)
         call write_f90(funit, "sys%rebatesys%AgeRngu", sys%rebatesys%AgeRngu, sys%rebatesys%NumAgeRng)
-        call write_f90(funit, "sys%rebatesys%AgeRngu", sys%rebatesys%AgeRngu)
         call write_f90(funit, "sys%rebatesys%AddKid", sys%rebatesys%AddKid, sys%rebatesys%NumAgeRng)
-        call write_f90(funit, "sys%rebatesys%AddKid", sys%rebatesys%AddKid)
 
         write(funit, *)
         write(funit, '(A)') "! hben"
@@ -1967,7 +1952,6 @@ end function labstring_region
         call write_f90(funit, "fam%maint", fam%maint)
         call write_f90(funit, "fam%nkids", fam%nkids)
         call write_f90(funit, "fam%kidage", fam%kidage, fam%nkids)
-        call write_f90(funit, "fam%kidage", fam%kidage)
         call write_f90(funit, "fam%nothads", fam%nothads)
         call write_f90(funit, "fam%tenure", fam%tenure)
         call write_f90(funit, "fam%rent", fam%rent)
@@ -2033,7 +2017,7 @@ end function labstring_region
         integer, intent(in) :: funit
         character(len = *), intent(in) :: str
         real(dp), intent(in) :: val
-        write(funit, '(A, " = ", ES24.17)') str, val
+        write(funit, '(A, " = ", ES24.17, "_dp")') str, val
     end subroutine write_f90double
 
     subroutine write_f90doublearray(funit, str, val)
@@ -2044,7 +2028,7 @@ end function labstring_region
         real(dp), intent(in) :: val(:)
         integer :: ix
         do ix = 1, size(val)
-            write(funit, '(A, " = ", ES24.17)') str // "(" // intToStr(iX) // ")", val(ix)
+            write(funit, '(A, " = ", ES24.17, "_dp")') str // "(" // intToStr(iX) // ")", val(ix)
         end do
     end subroutine write_f90doublearray
 
@@ -2057,7 +2041,7 @@ end function labstring_region
         integer, intent(in) :: nval
         integer :: ix
         do ix = 1, nval
-            write(funit, '(A, " = ", ES24.17)') str // "(" // intToStr(iX) // ")", val(ix)
+            write(funit, '(A, " = ", ES24.17, "_dp")') str // "(" // intToStr(iX) // ")", val(ix)
         end do
     end subroutine write_f90doublearray2
 

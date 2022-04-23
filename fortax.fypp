@@ -249,16 +249,17 @@ ${"".join([" "*4 + line+"\n" for line in txt.split("\n")])}$
             $:check_fortax_arg(type, var, str, attr, kwargs)
         #:endmute
         #:if 'dimvar' in kwargs
-        #:if dt == ""
+            #:if dt == ""
         call write_f90(funit, "${var}$", ${var}$, ${kwargs["dimvar"]}$)
-        #:else
+            #:else
         call write_f90(funit, "${dt}$%${var}$", ${dt}$%${var}$, ${dt}$%${kwargs["dimvar"]}$)
-        #:endif
-        #:endif
-        #:if dt == ""
-        call write_f90(funit, "${var}$", ${var}$)
+            #:endif
         #:else
+            #:if dt == ""
+        call write_f90(funit, "${var}$", ${var}$)
+            #:else
         call write_f90(funit, "${dt}$%${var}$", ${dt}$%${var}$)
+            #:endif
         #:endif
     #:enddef
     #:include "include_files.fypp"
