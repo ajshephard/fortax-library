@@ -1,0 +1,6 @@
+@:fortaxdef(bool,    doCCTaxRefund, "", null, label = bool)
+@:fortaxdef(double,  MaxPerChild,   "", amount)
+@:fortaxdef(integer, MaxAge,        "", range)
+@:fortaxdef(double,  ReceiptProp,   "", rate)
+@:fortaxdef(double,  MinEarn,       "", amount)
+@:fortaxdef(double,  MaxInc,        "", amount)

@@ -6,6 +6,7 @@
 @:fortaxdef(double, wtc,         "Working Tax Credit",             amount)
 @:fortaxdef(double, ctc,         "Child Tax Credit",               amount)
 @:fortaxdef(double, ccexp,       "Childcare expenditure",          amount)
+@:fortaxdef(double, cctaxrefund, "Childcare tax refund",           amount)
 @:fortaxdef(double, incsup,      "Income Support",                 amount)
 @:fortaxdef(double, hben,        "Housing Benefit",                amount)
 @:fortaxdef(double, polltax,     "Community Charge",               amount)

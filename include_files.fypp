@@ -32,6 +32,8 @@
 #:include "includes/system/bencap.inc"
 #:elif name == "extra"
 #:include "includes/system/extra.inc"
+#:elif name == "cctaxrefund"
+#:include "includes/system/cctaxrefund.inc"
 #:elif name == "famad"
 #:include "includes/famad_t.inc"
 #:elif name == "fam"
@@ -50,4 +52,6 @@
 #:include "includes/label/tenure.inc"
 #:elif name == "lab_region"
 #:include "includes/label/region.inc"
+#:elif name == "lab_sex"
+#:include "includes/label/sex.inc"
 #:endif

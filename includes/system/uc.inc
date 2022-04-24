@@ -6,6 +6,7 @@
 @:fortaxdef(integer, MinAgeMain,        "", range)
 @:fortaxdef(double,  FirstKid,          "", amount)
 @:fortaxdef(double,  OtherKid,          "", amount)
+@:fortaxdef(integer, MaxKids,           "", range)
 @:fortaxdef(double,  MaxCC1,            "", amount)     
 @:fortaxdef(double,  MaxCC2,            "", amount)         
 @:fortaxdef(double,  PropCC,            "", rate)       

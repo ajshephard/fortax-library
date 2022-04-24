@@ -699,25 +699,76 @@ contains
                 !Work out number of liable adults in hh (assume all other adults are 18+)
                 nliabhh = nliabbu + fam%nothads
                 fracbu = real(nliabbu, dp) / real(nliabhh, dp)
+
                 !Calculate CT
-                select case (fam%ctband)
-                    case (lab%ctax%banda)
-                        ratio = sys%ctax%RatioA
-                    case (lab%ctax%bandb)
-                        ratio = sys%ctax%RatioB
-                    case (lab%ctax%bandc)
-                        ratio = sys%ctax%RatioC
-                    case (lab%ctax%bandd)
-                        ratio = 1.0_dp
-                    case (lab%ctax%bande)
-                        ratio = sys%ctax%RatioE
-                    case (lab%ctax%bandf)
-                        ratio = sys%ctax%RatioF
-                    case (lab%ctax%bandg)
-                        ratio = sys%ctax%RatioG
-                    case (lab%ctax%bandh)
-                        ratio = sys%ctax%RatioH
-                end select
+                select case (fam%region)
+                    case (lab%region%wales)
+                        select case (fam%ctband)
+                            case (lab%ctax%banda)
+                                ratio = sys%ctax%WalesRatioA
+                            case (lab%ctax%bandb)
+                                ratio = sys%ctax%WalesRatioB
+                            case (lab%ctax%bandc)
+                                ratio = sys%ctax%WalesRatioC
+                            case (lab%ctax%bandd)
+                                ratio = 1.0_dp
+                            case (lab%ctax%bande)
+                                ratio = sys%ctax%WalesRatioE
+                            case (lab%ctax%bandf)
+                                ratio = sys%ctax%WalesRatioF
+                            case (lab%ctax%bandg)
+                                ratio = sys%ctax%WalesRatioG
+                            case (lab%ctax%bandh)
+                                ratio = sys%ctax%WalesRatioH
+                            case (lab%ctax%bandi)
+                                ratio = sys%ctax%WalesRatioI
+                        end select
+
+                    case (lab%region%scotland)
+                        select case (fam%ctband)
+                            case (lab%ctax%banda)
+                                ratio = sys%ctax%ScotlandRatioA
+                            case (lab%ctax%bandb)
+                                ratio = sys%ctax%ScotlandRatioB
+                            case (lab%ctax%bandc)
+                                ratio = sys%ctax%ScotlandRatioC
+                            case (lab%ctax%bandd)
+                                ratio = 1.0_dp
+                            case (lab%ctax%bande)
+                                ratio = sys%ctax%ScotlandRatioE
+                            case (lab%ctax%bandf)
+                                ratio = sys%ctax%ScotlandRatioF
+                            case (lab%ctax%bandg)
+                                ratio = sys%ctax%ScotlandRatioG
+                            case (lab%ctax%bandh)
+                                ratio = sys%ctax%ScotlandRatioH
+                            case (lab%ctax%bandi)
+                                ratio = sys%ctax%ScotlandRatioI
+                        end select
+
+                    case default ! England
+                        select case (fam%ctband)
+                            case (lab%ctax%banda)
+                                ratio = sys%ctax%EnglandRatioA
+                            case (lab%ctax%bandb)
+                                ratio = sys%ctax%EnglandRatioB
+                            case (lab%ctax%bandc)
+                                ratio = sys%ctax%EnglandRatioC
+                            case (lab%ctax%bandd)
+                                ratio = 1.0_dp
+                            case (lab%ctax%bande)
+                                ratio = sys%ctax%EnglandRatioE
+                            case (lab%ctax%bandf)
+                                ratio = sys%ctax%EnglandRatioF
+                            case (lab%ctax%bandg)
+                                ratio = sys%ctax%EnglandRatioG
+                            case (lab%ctax%bandh)
+                                ratio = sys%ctax%EnglandRatioH
+                            case (lab%ctax%bandi)
+                                ratio = sys%ctax%EnglandRatioI
+                        end select
+
+                end select ! fam%region
 
                 !we scale council
                 if (nliabhh == 1) then
@@ -1005,14 +1056,37 @@ contains
 
             !Cap CTB at band E from 1998 to 2003
             if ((fam%ctband > lab%ctax%bande) .and. (sys%rebatesys%Restrict == 1)) then
-                select case (fam%ctband)
-                    case (lab%ctax%bandf)
-                        maxctb = maxctb * sys%ctax%RatioE / sys%ctax%RatioF
-                    case (lab%ctax%bandg)
-                        maxctb = maxctb * sys%ctax%RatioE / sys%ctax%RatioG
-                    case (lab%ctax%bandh)
-                        maxctb = maxctb * sys%ctax%RatioE / sys%ctax%RatioH
-                end select
+                select case (fam%region)
+                    case (lab%region%wales)
+                        select case (fam%ctband)
+                            case (lab%ctax%bandf)
+                                maxctb = maxctb * sys%ctax%WalesRatioE / sys%ctax%WalesRatioF
+                            case (lab%ctax%bandg)
+                                maxctb = maxctb * sys%ctax%WalesRatioE / sys%ctax%WalesRatioG
+                            case (lab%ctax%bandh)
+                                maxctb = maxctb * sys%ctax%WalesRatioE / sys%ctax%WalesRatioH
+                        end select
+
+                    case (lab%region%scotland)
+                        select case (fam%ctband)
+                            case (lab%ctax%bandf)
+                                maxctb = maxctb * sys%ctax%ScotlandRatioE / sys%ctax%ScotlandRatioF
+                            case (lab%ctax%bandg)
+                                maxctb = maxctb * sys%ctax%ScotlandRatioE / sys%ctax%ScotlandRatioG
+                            case (lab%ctax%bandh)
+                                maxctb = maxctb * sys%ctax%ScotlandRatioE / sys%ctax%ScotlandRatioH
+                        end select
+                    
+                    case default
+                        select case (fam%ctband)
+                            case (lab%ctax%bandf)
+                                maxctb = maxctb * sys%ctax%EnglandRatioE / sys%ctax%EnglandRatioF
+                            case (lab%ctax%bandg)
+                                maxctb = maxctb * sys%ctax%EnglandRatioE / sys%ctax%EnglandRatioG
+                            case (lab%ctax%bandh)
+                                maxctb = maxctb * sys%ctax%EnglandRatioE / sys%ctax%EnglandRatioH
+                        end select
+                end select ! fam%region
             end if
 
 
@@ -1020,7 +1094,8 @@ contains
             if (sys%ctaxben%doEntitlementCut == 1) then
 
                 ! Note: in England, cut only applies to nonpensioners (we ignore this because FORTAX only works for
-                ! working age individuals). Wales is region 10, Scotland is region 11
+
+                ! working age individuals).
                 if ((fam%region .ne. lab%region%wales) .and. (fam%region .ne. lab%region%scotland)) then
                     maxctb = maxctb * sys%ctaxben%entitlementShare
                 end if

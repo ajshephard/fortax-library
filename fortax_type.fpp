@@ -734,11 +734,13 @@ contains
         integer :: ix
         if (longstr .ne. "") then
             do ix = 1, size(val)
-                write(funit, '(A40, 2X, I20)') longstr // ' (' // shortstr // '[' // intToStr(ix) // '])', label(ix)
+                write(funit, '(A40, 2X, A20)') longstr // ' (' // shortstr // '[' // intToStr(ix) // '])', &
+                      trim(adjustl(label(ix))) // ' (' // intToStr(val(ix)) // ')'
             end do
         else
             do ix = 1, size(val)
-                write(funit, '(A40, 2X, I20)') shortstr // '[' // intToStr(ix) // ']', label(ix)
+                write(funit, '(A40, 2X, A20)') shortstr // '[' // intToStr(ix) // ']', &
+                      trim(adjustl(label(ix))) // ' (' // intToStr(val(ix)) // ')'
             end do
         end if
     end subroutine desc_f90integerarray_label
@@ -775,11 +777,13 @@ contains
         integer :: ix
         if (longstr .ne. "") then
             do ix = 1, nval
-                write(funit, '(A40, 2X, I20)') longstr // ' (' // shortstr // '[' // intToStr(ix) // '])', label(ix)
+                write(funit, '(A40, 2X, A20)') longstr // ' (' // shortstr // '[' // intToStr(ix) // '])', &
+                      trim(adjustl(label(ix))) // ' (' // intToStr(val(ix)) // ')'
             end do
         else
             do ix = 1, nval
-                write(funit, '(A40, 2X, I20)') shortstr // '[' // intToStr(ix) // ']', label(ix)
+                write(funit, '(A40, 2X, A20)') shortstr // '[' // intToStr(ix) // ']', &
+                      trim(adjustl(label(ix))) // ' (' // intToStr(val(ix)) // ')'
             end do
         end if
     end subroutine desc_f90integerarray2_label

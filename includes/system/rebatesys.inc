@@ -5,6 +5,8 @@
 @:fortaxdef(integer, NumAgeRng, "", range)
 @:fortaxdef(bool,    Restrict, "", null, label = bool)
 @:fortaxdef(bool,    docap, "", null, label = bool)
+@:fortaxdef(integer, MinAgeMain, "", range)
+@:fortaxdef(integer, MinAgeMainSin, "", range)
 @:fortaxdef(double,  MainCou, "", amount)    
 @:fortaxdef(double,  YngCou, "", amount)   
 @:fortaxdef(double,  MainLP, "", amount)     
@@ -25,3 +27,4 @@
 @:fortaxdef(integer, AgeRngl, "", range, dim = maxNumAgeRng, dimvar = NumAgeRng)
 @:fortaxdef(integer, AgeRngu, "", range, dim = maxNumAgeRng, dimvar = NumAgeRng)
 @:fortaxdef(double,  AddKid, "", amount, dim = maxNumAgeRng, dimvar = NumAgeRng)
+@:fortaxdef(integer, MaxKids, "", range)

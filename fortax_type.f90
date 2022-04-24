@@ -46,6 +46,8 @@ module fortax_type
     integer, parameter, public :: maxNatInsBands = 32
     integer, parameter, public :: maxNatInsC4Bands = 32
     integer, parameter, public :: maxKinks = 256
+    integer, parameter, public :: maxUnderOccBands = 8
+    integer, parameter, public :: maxLHABands = 8
     real(dp), parameter, public :: sysHuge = 1.0e100_dp
     integer, parameter, public :: len_sysname = 64
     integer, parameter, public :: len_sysdesc = 512
@@ -74,6 +76,7 @@ module fortax_type
         integer :: bandf
         integer :: bandg
         integer :: bandh
+        integer :: bandi
     end type lab_ctax_t
 
     type :: lab_tenure_t
@@ -101,19 +104,26 @@ module fortax_type
         integer :: northern_ireland
     end type lab_region_t
 
+    type :: lab_sex_t
+        integer :: male
+        integer :: female
+    end type lab_sex_t
+
 
     type :: lab_t
         type(lab_bool_t) :: bool
         type(lab_ctax_t) :: ctax
         type(lab_tenure_t) :: tenure
         type(lab_region_t) :: region
+        type(lab_sex_t) :: sex
     end type lab_t
 
     type(lab_t), parameter :: lab = lab_t( &
         lab_bool_t(0, 1), &
-        lab_ctax_t(1, 2, 3, 4, 5, 6, 7, 8), &
+        lab_ctax_t(1, 2, 3, 4, 5, 6, 7, 8, 9), &
         lab_tenure_t(1, 2, 3, 4, 5, 6, 7), &
-        lab_region_t(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12))
+        lab_region_t(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12), &
+        lab_sex_t(0, 1))
 
 
     ! rpi_t
@@ -163,10 +173,12 @@ module fortax_type
         real(dp) :: maint
         integer :: nkids
         integer :: kidage(maxKids)
+        integer :: kidsex(maxKids)
         integer :: nothads
         integer :: tenure
         real(dp) :: rent
         real(dp) :: rentcap
+        integer :: bedrooms
         integer :: region
         integer :: ctband
         real(dp) :: banddratio
@@ -204,6 +216,7 @@ module fortax_type
         real(dp) :: wtc
         real(dp) :: ctc
         real(dp) :: ccexp
+        real(dp) :: cctaxrefund
         real(dp) :: incsup
         real(dp) :: hben
         real(dp) :: polltax
@@ -292,6 +305,8 @@ module fortax_type
         integer :: disablePATaperRounding
         real(dp) :: paTaperThresh
         real(dp) :: paTaperRate
+        integer :: doTPA
+        real(dp) :: maxTPA
         real(dp) :: mma
         real(dp) :: ctc
         real(dp) :: ctcyng
@@ -355,6 +370,7 @@ module fortax_type
         real(dp) :: fam
         real(dp) :: baby
         real(dp) :: kid
+        integer :: maxKids
     end type ctc_t
 
     type, bind(c) :: wtc_t
@@ -386,16 +402,29 @@ module fortax_type
         real(dp) :: MinAmt
     end type ntc_t
 
+    type, bind(c) :: cctaxrefund_t
+        integer :: doCCTaxRefund
+        real(dp) :: MaxPerChild
+        integer :: MaxAge
+        real(dp) :: ReceiptProp
+        real(dp) :: MinEarn
+        real(dp) :: MaxInc
+    end type cctaxrefund_t
+
     type, bind(c) :: incsup_t
         integer :: doIncSup
         integer :: IncChben
         integer :: NumAgeRng
+        integer :: MinAgeMain
+        integer :: MinAgeMainSin
         real(dp) :: MainCou
         real(dp) :: YngCou
         real(dp) :: MainLP
         real(dp) :: YngLP
         real(dp) :: MainSin
         real(dp) :: YngSin
+        integer :: MinAgeFSM
+        integer :: MaxAgeUniversalFSM
         real(dp) :: ValFSM
         real(dp) :: DisregLP
         real(dp) :: DisregSin
@@ -414,13 +443,30 @@ module fortax_type
         integer :: docounciltax
         real(dp) :: bandD
         real(dp) :: SinDis
-        real(dp) :: RatioA
-        real(dp) :: RatioB
-        real(dp) :: RatioC
-        real(dp) :: RatioE
-        real(dp) :: RatioF
-        real(dp) :: RatioG
-        real(dp) :: RatioH
+        real(dp) :: EnglandRatioA
+        real(dp) :: EnglandRatioB
+        real(dp) :: EnglandRatioC
+        real(dp) :: EnglandRatioE
+        real(dp) :: EnglandRatioF
+        real(dp) :: EnglandRatioG
+        real(dp) :: EnglandRatioH
+        real(dp) :: EnglandRatioI
+        real(dp) :: ScotlandRatioA
+        real(dp) :: ScotlandRatioB
+        real(dp) :: ScotlandRatioC
+        real(dp) :: ScotlandRatioE
+        real(dp) :: ScotlandRatioF
+        real(dp) :: ScotlandRatioG
+        real(dp) :: ScotlandRatioH
+        real(dp) :: ScotlandRatioI
+        real(dp) :: WalesRatioA
+        real(dp) :: WalesRatioB
+        real(dp) :: WalesRatioC
+        real(dp) :: WalesRatioE
+        real(dp) :: WalesRatioF
+        real(dp) :: WalesRatioG
+        real(dp) :: WalesRatioH
+        real(dp) :: WalesRatioI
     end type ctax_t
 
     type, bind(c) :: rebatesys_t
@@ -431,6 +477,8 @@ module fortax_type
         integer :: NumAgeRng
         integer :: Restrict
         integer :: docap
+        integer :: MinAgeMain
+        integer :: MinAgeMainSin
         real(dp) :: MainCou
         real(dp) :: YngCou
         real(dp) :: MainLP
@@ -451,12 +499,22 @@ module fortax_type
         integer :: AgeRngl(maxNumAgeRng)
         integer :: AgeRngu(maxNumAgeRng)
         real(dp) :: AddKid(maxNumAgeRng)
+        integer :: MaxKids
     end type rebatesys_t
 
     type, bind(c) :: hben_t
         integer :: doHBen
         real(dp) :: taper
         real(dp) :: MinAmt
+        integer :: doUnderOccCharge
+        integer :: doUnderOccChargeScotland
+        integer :: doUnderOccChargeNI
+        integer :: numUnderOccBands
+        real(dp) :: underOccRates(maxUnderOccBands)
+        integer :: doLHA
+        integer :: LHASharedAccAge
+        integer :: numLHABands
+        real(dp) :: LHARates(maxLHABands)
     end type hben_t
 
     type, bind(c) :: ctaxben_t
@@ -483,6 +541,7 @@ module fortax_type
         integer :: MinAgeMain
         real(dp) :: FirstKid
         real(dp) :: OtherKid
+        integer :: MaxKids
         real(dp) :: MaxCC1
         real(dp) :: MaxCC2
         real(dp) :: PropCC
@@ -508,11 +567,17 @@ module fortax_type
 
     type, bind(c) :: bencap_t
         integer :: doCap
+        integer :: doNI
         integer :: doThruUC
         real(dp) :: sinNoKids
         real(dp) :: sinKids
         real(dp) :: couNoKids
         real(dp) :: couKids
+        integer :: LondonCapAmt
+        real(dp) :: LondonSinNoKids
+        real(dp) :: LondonSinKids
+        real(dp) :: LondonCouNoKids
+        real(dp) :: LondonCouKids
         real(dp) :: UCEarnThr
     end type bencap_t
 
@@ -533,6 +598,7 @@ module fortax_type
         type(ctc_t) :: ctc
         type(wtc_t) :: wtc
         type(ntc_t) :: ntc
+        type(cctaxrefund_t) :: cctaxrefund
         type(incsup_t) :: incsup
         type(ctax_t) :: ctax
         type(rebatesys_t) :: rebatesys
@@ -576,10 +642,12 @@ contains
         fam%maint = 0.0_dp
         fam%nkids = 0
         fam%kidage = 0
+        fam%kidsex = 0
         fam%nothads = 0
         fam%tenure = lab%tenure%own_outright
         fam%rent = 0.0_dp
         fam%rentcap = 0.0_dp
+        fam%bedrooms = 0
         fam%region = lab%region%north_east
         fam%ctband = lab%ctax%bandd
         fam%banddratio = 1.0
@@ -626,10 +694,12 @@ contains
         call desc_f90(funit, "Maintenance income", "maint", fam%maint)
         call desc_f90(funit, "Number of children", "nkids", fam%nkids)
         call desc_f90(funit, "Age of children", "kidage", fam%kidage, fam%nkids)
+        call desc_f90(funit, "Sex of children", "kidsex", fam%kidsex, fam%nkids, label_sex(fam%kidsex))
         call desc_f90(funit, "Number of other adults", "nothads", fam%nothads)
         call desc_f90(funit, "Housing tenure", "tenure", fam%tenure, label_tenure(fam%tenure))
         call desc_f90(funit, "Housing rent", "rent", fam%rent)
         call desc_f90(funit, "Housing rent cap", "rentcap", fam%rentcap)
+        call desc_f90(funit, "Number of bedrooms", "bedrooms", fam%bedrooms)
         call desc_f90(funit, "Region", "region", fam%region, label_region(fam%region))
         call desc_f90(funit, "Council tax band", "ctband", fam%ctband, label_ctax(fam%ctband))
         call desc_f90(funit, "Council tax band-D ratio", "banddratio", fam%banddratio)
@@ -664,6 +734,8 @@ contains
     end subroutine fam_desc
 
     ! obtain string labels for the variable value labels
+
+
 
 
 
@@ -729,6 +801,8 @@ elemental function label_ctax(val) result(str)
             str = "bandg"
         case(lab%ctax%bandh)
             str = "bandh"
+        case(lab%ctax%bandi)
+            str = "bandi"
         case default
             str = "INVALID VALUE"
     end select
@@ -755,6 +829,8 @@ elemental function labstring_ctax(val) result(str)
             str = "Council Tax Band G"
         case(lab%ctax%bandh)
             str = "Council Tax Band H"
+        case(lab%ctax%bandi)
+            str = "Council Tax Band I"
         case default
             str = "INVALID VALUE"
     end select
@@ -876,6 +952,34 @@ elemental function labstring_region(val) result(str)
     end select
 end function labstring_region
 
+elemental function label_sex(val) result(str)
+    implicit none
+    integer, intent(in) :: val
+    character(len = len_label) :: str
+    select case(val)
+        case(lab%sex%male)
+            str = "male"
+        case(lab%sex%female)
+            str = "female"
+        case default
+            str = "INVALID VALUE"
+    end select
+end function label_sex
+
+elemental function labstring_sex(val) result(str)
+    implicit none
+    integer, intent(in) :: val
+    character(len = len_labstring) :: str
+    select case(val)
+        case(lab%sex%male)
+            str = "Male"
+        case(lab%sex%female)
+            str = "Female"
+        case default
+            str = "INVALID VALUE"
+    end select
+end function labstring_sex
+
 
     ! fam_gen
     ! -----------------------------------------------------------------------
@@ -883,8 +987,8 @@ end function labstring_region
     ! specified. Adult information should be passed by adding a suffix 1 or 2
     ! for the respective adult number.
 
-    subroutine fam_gen(fam, couple, married, ccexp, maint, nkids, kidage, nothads, tenure, rent, rentcap, region, ctband,&
-        & banddratio, intdate, age1, selfemp1, hrs1, earn1, age2, selfemp2, hrs2, earn2, correct)
+    subroutine fam_gen(fam, couple, married, ccexp, maint, nkids, kidage, kidsex, nothads, tenure, rent, rentcap, bedrooms,&
+        & region, ctband, banddratio, intdate, age1, selfemp1, hrs1, earn1, age2, selfemp2, hrs2, earn2, correct)
 
         use fortax_util, only : fortaxError
 
@@ -897,10 +1001,12 @@ end function labstring_region
         real(dp), intent(in), optional :: maint
         integer, intent(in), optional :: nkids
         integer, intent(in), optional :: kidage(:)
+        integer, intent(in), optional :: kidsex(:)
         integer, intent(in), optional :: nothads
         integer, intent(in), optional :: tenure
         real(dp), intent(in), optional :: rent
         real(dp), intent(in), optional :: rentcap
+        integer, intent(in), optional :: bedrooms
         integer, intent(in), optional :: region
         integer, intent(in), optional :: ctband
         real(dp), intent(in), optional :: banddratio
@@ -935,10 +1041,21 @@ end function labstring_region
                 end if
             endif
         end if
+        if (present(kidsex)) then
+            if (size(kidsex) > maxKids) then
+                call fortaxError("kidsex exceeds bounds in fam_gen")
+            else
+                fam%kidsex(1:size(kidsex)) = kidsex
+                if (.not. present(nkids)) then
+                    fam%nkids = size(kidsex)
+                end if
+            endif
+        end if
         if (present(nothads)) fam%nothads = nothads
         if (present(tenure)) fam%tenure = tenure
         if (present(rent)) fam%rent = rent
         if (present(rentcap)) fam%rentcap = rentcap
+        if (present(bedrooms)) fam%bedrooms = bedrooms
         if (present(region)) fam%region = region
         if (present(ctband)) fam%ctband = ctband
         if (present(banddratio)) fam%banddratio = banddratio
@@ -1012,6 +1129,7 @@ end function labstring_region
         net%tu%wtc = net1%tu%wtc + net2%tu%wtc
         net%tu%ctc = net1%tu%ctc + net2%tu%ctc
         net%tu%ccexp = net1%tu%ccexp + net2%tu%ccexp
+        net%tu%cctaxrefund = net1%tu%cctaxrefund + net2%tu%cctaxrefund
         net%tu%incsup = net1%tu%incsup + net2%tu%incsup
         net%tu%hben = net1%tu%hben + net2%tu%hben
         net%tu%polltax = net1%tu%polltax + net2%tu%polltax
@@ -1065,6 +1183,7 @@ end function labstring_region
         net%tu%wtc = net1%tu%wtc - net2%tu%wtc
         net%tu%ctc = net1%tu%ctc - net2%tu%ctc
         net%tu%ccexp = net1%tu%ccexp - net2%tu%ccexp
+        net%tu%cctaxrefund = net1%tu%cctaxrefund - net2%tu%cctaxrefund
         net%tu%incsup = net1%tu%incsup - net2%tu%incsup
         net%tu%hben = net1%tu%hben - net2%tu%hben
         net%tu%polltax = net1%tu%polltax - net2%tu%polltax
@@ -1118,6 +1237,7 @@ end function labstring_region
         net%tu%wtc = net1%tu%wtc * scalar
         net%tu%ctc = net1%tu%ctc * scalar
         net%tu%ccexp = net1%tu%ccexp * scalar
+        net%tu%cctaxrefund = net1%tu%cctaxrefund * scalar
         net%tu%incsup = net1%tu%incsup * scalar
         net%tu%hben = net1%tu%hben * scalar
         net%tu%polltax = net1%tu%polltax * scalar
@@ -1184,6 +1304,7 @@ end function labstring_region
         net%tu%wtc = scalar * net2%tu%wtc
         net%tu%ctc = scalar * net2%tu%ctc
         net%tu%ccexp = scalar * net2%tu%ccexp
+        net%tu%cctaxrefund = scalar * net2%tu%cctaxrefund
         net%tu%incsup = scalar * net2%tu%incsup
         net%tu%hben = scalar * net2%tu%hben
         net%tu%polltax = scalar * net2%tu%polltax
@@ -1250,6 +1371,7 @@ end function labstring_region
         net%tu%wtc = net1%tu%wtc / scalar
         net%tu%ctc = net1%tu%ctc / scalar
         net%tu%ccexp = net1%tu%ccexp / scalar
+        net%tu%cctaxrefund = net1%tu%cctaxrefund / scalar
         net%tu%incsup = net1%tu%incsup / scalar
         net%tu%hben = net1%tu%hben / scalar
         net%tu%polltax = net1%tu%polltax / scalar
@@ -1303,6 +1425,7 @@ end function labstring_region
         net%tu%wtc = 0.0_dp
         net%tu%ctc = 0.0_dp
         net%tu%ccexp = 0.0_dp
+        net%tu%cctaxrefund = 0.0_dp
         net%tu%incsup = 0.0_dp
         net%tu%hben = 0.0_dp
         net%tu%polltax = 0.0_dp
@@ -1372,6 +1495,7 @@ end function labstring_region
         call desc_f90(funit, "Working Tax Credit", "wtc", net%tu%wtc)
         call desc_f90(funit, "Child Tax Credit", "ctc", net%tu%ctc)
         call desc_f90(funit, "Childcare expenditure", "ccexp", net%tu%ccexp)
+        call desc_f90(funit, "Childcare tax refund", "cctaxrefund", net%tu%cctaxrefund)
         call desc_f90(funit, "Income Support", "incsup", net%tu%incsup)
         call desc_f90(funit, "Housing Benefit", "hben", net%tu%hben)
         call desc_f90(funit, "Community Charge", "polltax", net%tu%polltax)
@@ -1441,6 +1565,8 @@ end function labstring_region
         sys%inctax%disablePATaperRounding = 0
         sys%inctax%paTaperThresh = 0.0_dp
         sys%inctax%paTaperRate = 0.0_dp
+        sys%inctax%doTPA = 0
+        sys%inctax%maxTPA = 0.0_dp
         sys%inctax%mma = 0.0_dp
         sys%inctax%ctc = 0.0_dp
         sys%inctax%ctcyng = 0.0_dp
@@ -1496,6 +1622,7 @@ end function labstring_region
         sys%ctc%fam = 0.0_dp
         sys%ctc%baby = 0.0_dp
         sys%ctc%kid = 0.0_dp
+        sys%ctc%maxKids = 0
 
         sys%wtc%Basic = 0.0_dp
         sys%wtc%CouLP = 0.0_dp
@@ -1522,15 +1649,26 @@ end function labstring_region
         sys%ntc%taperCTCInOneGo = 0
         sys%ntc%MinAmt = 0.0_dp
 
+        sys%cctaxrefund%doCCTaxRefund = 0
+        sys%cctaxrefund%MaxPerChild = 0.0_dp
+        sys%cctaxrefund%MaxAge = 0
+        sys%cctaxrefund%ReceiptProp = 0.0_dp
+        sys%cctaxrefund%MinEarn = 0.0_dp
+        sys%cctaxrefund%MaxInc = 0.0_dp
+
         sys%incsup%doIncSup = 0
         sys%incsup%IncChben = 0
         sys%incsup%NumAgeRng = 0
+        sys%incsup%MinAgeMain = 0
+        sys%incsup%MinAgeMainSin = 0
         sys%incsup%MainCou = 0.0_dp
         sys%incsup%YngCou = 0.0_dp
         sys%incsup%MainLP = 0.0_dp
         sys%incsup%YngLP = 0.0_dp
         sys%incsup%MainSin = 0.0_dp
         sys%incsup%YngSin = 0.0_dp
+        sys%incsup%MinAgeFSM = 0
+        sys%incsup%MaxAgeUniversalFSM = 0
         sys%incsup%ValFSM = 0.0_dp
         sys%incsup%DisregLP = 0.0_dp
         sys%incsup%DisregSin = 0.0_dp
@@ -1547,13 +1685,30 @@ end function labstring_region
         sys%ctax%docounciltax = 0
         sys%ctax%bandD = 0.0_dp
         sys%ctax%SinDis = 0.0_dp
-        sys%ctax%RatioA = 0.0_dp
-        sys%ctax%RatioB = 0.0_dp
-        sys%ctax%RatioC = 0.0_dp
-        sys%ctax%RatioE = 0.0_dp
-        sys%ctax%RatioF = 0.0_dp
-        sys%ctax%RatioG = 0.0_dp
-        sys%ctax%RatioH = 0.0_dp
+        sys%ctax%EnglandRatioA = 0.0_dp
+        sys%ctax%EnglandRatioB = 0.0_dp
+        sys%ctax%EnglandRatioC = 0.0_dp
+        sys%ctax%EnglandRatioE = 0.0_dp
+        sys%ctax%EnglandRatioF = 0.0_dp
+        sys%ctax%EnglandRatioG = 0.0_dp
+        sys%ctax%EnglandRatioH = 0.0_dp
+        sys%ctax%EnglandRatioI = 0.0_dp
+        sys%ctax%ScotlandRatioA = 0.0_dp
+        sys%ctax%ScotlandRatioB = 0.0_dp
+        sys%ctax%ScotlandRatioC = 0.0_dp
+        sys%ctax%ScotlandRatioE = 0.0_dp
+        sys%ctax%ScotlandRatioF = 0.0_dp
+        sys%ctax%ScotlandRatioG = 0.0_dp
+        sys%ctax%ScotlandRatioH = 0.0_dp
+        sys%ctax%ScotlandRatioI = 0.0_dp
+        sys%ctax%WalesRatioA = 0.0_dp
+        sys%ctax%WalesRatioB = 0.0_dp
+        sys%ctax%WalesRatioC = 0.0_dp
+        sys%ctax%WalesRatioE = 0.0_dp
+        sys%ctax%WalesRatioF = 0.0_dp
+        sys%ctax%WalesRatioG = 0.0_dp
+        sys%ctax%WalesRatioH = 0.0_dp
+        sys%ctax%WalesRatioI = 0.0_dp
 
         sys%rebatesys%RulesUnderFC = 0
         sys%rebatesys%RulesUnderWFTC = 0
@@ -1562,6 +1717,8 @@ end function labstring_region
         sys%rebatesys%NumAgeRng = 0
         sys%rebatesys%Restrict = 0
         sys%rebatesys%docap = 0
+        sys%rebatesys%MinAgeMain = 0
+        sys%rebatesys%MinAgeMainSin = 0
         sys%rebatesys%MainCou = 0.0_dp
         sys%rebatesys%YngCou = 0.0_dp
         sys%rebatesys%MainLP = 0.0_dp
@@ -1582,10 +1739,20 @@ end function labstring_region
         sys%rebatesys%AgeRngl = 0
         sys%rebatesys%AgeRngu = 0
         sys%rebatesys%AddKid = 0.0_dp
+        sys%rebatesys%MaxKids = 0
 
         sys%hben%doHBen = 0
         sys%hben%taper = 0.0_dp
         sys%hben%MinAmt = 0.0_dp
+        sys%hben%doUnderOccCharge = 0
+        sys%hben%doUnderOccChargeScotland = 0
+        sys%hben%doUnderOccChargeNI = 0
+        sys%hben%numUnderOccBands = 0
+        sys%hben%underOccRates = 0.0_dp
+        sys%hben%doLHA = 0
+        sys%hben%LHASharedAccAge = 0
+        sys%hben%numLHABands = 0
+        sys%hben%LHARates = 0.0_dp
 
         sys%ctaxben%docounciltaxben = 0
         sys%ctaxben%taper = 0.0_dp
@@ -1606,6 +1773,7 @@ end function labstring_region
         sys%uc%MinAgeMain = 0
         sys%uc%FirstKid = 0.0_dp
         sys%uc%OtherKid = 0.0_dp
+        sys%uc%MaxKids = 0
         sys%uc%MaxCC1 = 0.0_dp
         sys%uc%MaxCC2 = 0.0_dp
         sys%uc%PropCC = 0.0_dp
@@ -1627,11 +1795,17 @@ end function labstring_region
         sys%statepen%PenAgeWoman = 0
 
         sys%bencap%doCap = 0
+        sys%bencap%doNI = 0
         sys%bencap%doThruUC = 0
         sys%bencap%sinNoKids = 0.0_dp
         sys%bencap%sinKids = 0.0_dp
         sys%bencap%couNoKids = 0.0_dp
         sys%bencap%couKids = 0.0_dp
+        sys%bencap%LondonCapAmt = 0
+        sys%bencap%LondonSinNoKids = 0.0_dp
+        sys%bencap%LondonSinKids = 0.0_dp
+        sys%bencap%LondonCouNoKids = 0.0_dp
+        sys%bencap%LondonCouKids = 0.0_dp
         sys%bencap%UCEarnThr = 0.0_dp
 
         sys%extra%fsminappamt = 0
@@ -1678,6 +1852,8 @@ end function labstring_region
         call write_f90(funit, "sys%inctax%disablePATaperRounding", sys%inctax%disablePATaperRounding)
         call write_f90(funit, "sys%inctax%paTaperThresh", sys%inctax%paTaperThresh)
         call write_f90(funit, "sys%inctax%paTaperRate", sys%inctax%paTaperRate)
+        call write_f90(funit, "sys%inctax%doTPA", sys%inctax%doTPA)
+        call write_f90(funit, "sys%inctax%maxTPA", sys%inctax%maxTPA)
         call write_f90(funit, "sys%inctax%mma", sys%inctax%mma)
         call write_f90(funit, "sys%inctax%ctc", sys%inctax%ctc)
         call write_f90(funit, "sys%inctax%ctcyng", sys%inctax%ctcyng)
@@ -1741,6 +1917,7 @@ end function labstring_region
         call write_f90(funit, "sys%ctc%fam", sys%ctc%fam)
         call write_f90(funit, "sys%ctc%baby", sys%ctc%baby)
         call write_f90(funit, "sys%ctc%kid", sys%ctc%kid)
+        call write_f90(funit, "sys%ctc%maxKids", sys%ctc%maxKids)
 
         write(funit, *)
         write(funit, '(A)') "! wtc"
@@ -1772,16 +1949,29 @@ end function labstring_region
         call write_f90(funit, "sys%ntc%MinAmt", sys%ntc%MinAmt)
 
         write(funit, *)
+        write(funit, '(A)') "! cctaxrefund"
+        call write_f90(funit, "sys%cctaxrefund%doCCTaxRefund", sys%cctaxrefund%doCCTaxRefund)
+        call write_f90(funit, "sys%cctaxrefund%MaxPerChild", sys%cctaxrefund%MaxPerChild)
+        call write_f90(funit, "sys%cctaxrefund%MaxAge", sys%cctaxrefund%MaxAge)
+        call write_f90(funit, "sys%cctaxrefund%ReceiptProp", sys%cctaxrefund%ReceiptProp)
+        call write_f90(funit, "sys%cctaxrefund%MinEarn", sys%cctaxrefund%MinEarn)
+        call write_f90(funit, "sys%cctaxrefund%MaxInc", sys%cctaxrefund%MaxInc)
+
+        write(funit, *)
         write(funit, '(A)') "! incsup"
         call write_f90(funit, "sys%incsup%doIncSup", sys%incsup%doIncSup)
         call write_f90(funit, "sys%incsup%IncChben", sys%incsup%IncChben)
         call write_f90(funit, "sys%incsup%NumAgeRng", sys%incsup%NumAgeRng)
+        call write_f90(funit, "sys%incsup%MinAgeMain", sys%incsup%MinAgeMain)
+        call write_f90(funit, "sys%incsup%MinAgeMainSin", sys%incsup%MinAgeMainSin)
         call write_f90(funit, "sys%incsup%MainCou", sys%incsup%MainCou)
         call write_f90(funit, "sys%incsup%YngCou", sys%incsup%YngCou)
         call write_f90(funit, "sys%incsup%MainLP", sys%incsup%MainLP)
         call write_f90(funit, "sys%incsup%YngLP", sys%incsup%YngLP)
         call write_f90(funit, "sys%incsup%MainSin", sys%incsup%MainSin)
         call write_f90(funit, "sys%incsup%YngSin", sys%incsup%YngSin)
+        call write_f90(funit, "sys%incsup%MinAgeFSM", sys%incsup%MinAgeFSM)
+        call write_f90(funit, "sys%incsup%MaxAgeUniversalFSM", sys%incsup%MaxAgeUniversalFSM)
         call write_f90(funit, "sys%incsup%ValFSM", sys%incsup%ValFSM)
         call write_f90(funit, "sys%incsup%DisregLP", sys%incsup%DisregLP)
         call write_f90(funit, "sys%incsup%DisregSin", sys%incsup%DisregSin)
@@ -1800,13 +1990,30 @@ end function labstring_region
         call write_f90(funit, "sys%ctax%docounciltax", sys%ctax%docounciltax)
         call write_f90(funit, "sys%ctax%bandD", sys%ctax%bandD)
         call write_f90(funit, "sys%ctax%SinDis", sys%ctax%SinDis)
-        call write_f90(funit, "sys%ctax%RatioA", sys%ctax%RatioA)
-        call write_f90(funit, "sys%ctax%RatioB", sys%ctax%RatioB)
-        call write_f90(funit, "sys%ctax%RatioC", sys%ctax%RatioC)
-        call write_f90(funit, "sys%ctax%RatioE", sys%ctax%RatioE)
-        call write_f90(funit, "sys%ctax%RatioF", sys%ctax%RatioF)
-        call write_f90(funit, "sys%ctax%RatioG", sys%ctax%RatioG)
-        call write_f90(funit, "sys%ctax%RatioH", sys%ctax%RatioH)
+        call write_f90(funit, "sys%ctax%EnglandRatioA", sys%ctax%EnglandRatioA)
+        call write_f90(funit, "sys%ctax%EnglandRatioB", sys%ctax%EnglandRatioB)
+        call write_f90(funit, "sys%ctax%EnglandRatioC", sys%ctax%EnglandRatioC)
+        call write_f90(funit, "sys%ctax%EnglandRatioE", sys%ctax%EnglandRatioE)
+        call write_f90(funit, "sys%ctax%EnglandRatioF", sys%ctax%EnglandRatioF)
+        call write_f90(funit, "sys%ctax%EnglandRatioG", sys%ctax%EnglandRatioG)
+        call write_f90(funit, "sys%ctax%EnglandRatioH", sys%ctax%EnglandRatioH)
+        call write_f90(funit, "sys%ctax%EnglandRatioI", sys%ctax%EnglandRatioI)
+        call write_f90(funit, "sys%ctax%ScotlandRatioA", sys%ctax%ScotlandRatioA)
+        call write_f90(funit, "sys%ctax%ScotlandRatioB", sys%ctax%ScotlandRatioB)
+        call write_f90(funit, "sys%ctax%ScotlandRatioC", sys%ctax%ScotlandRatioC)
+        call write_f90(funit, "sys%ctax%ScotlandRatioE", sys%ctax%ScotlandRatioE)
+        call write_f90(funit, "sys%ctax%ScotlandRatioF", sys%ctax%ScotlandRatioF)
+        call write_f90(funit, "sys%ctax%ScotlandRatioG", sys%ctax%ScotlandRatioG)
+        call write_f90(funit, "sys%ctax%ScotlandRatioH", sys%ctax%ScotlandRatioH)
+        call write_f90(funit, "sys%ctax%ScotlandRatioI", sys%ctax%ScotlandRatioI)
+        call write_f90(funit, "sys%ctax%WalesRatioA", sys%ctax%WalesRatioA)
+        call write_f90(funit, "sys%ctax%WalesRatioB", sys%ctax%WalesRatioB)
+        call write_f90(funit, "sys%ctax%WalesRatioC", sys%ctax%WalesRatioC)
+        call write_f90(funit, "sys%ctax%WalesRatioE", sys%ctax%WalesRatioE)
+        call write_f90(funit, "sys%ctax%WalesRatioF", sys%ctax%WalesRatioF)
+        call write_f90(funit, "sys%ctax%WalesRatioG", sys%ctax%WalesRatioG)
+        call write_f90(funit, "sys%ctax%WalesRatioH", sys%ctax%WalesRatioH)
+        call write_f90(funit, "sys%ctax%WalesRatioI", sys%ctax%WalesRatioI)
 
         write(funit, *)
         write(funit, '(A)') "! rebatesys"
@@ -1817,6 +2024,8 @@ end function labstring_region
         call write_f90(funit, "sys%rebatesys%NumAgeRng", sys%rebatesys%NumAgeRng)
         call write_f90(funit, "sys%rebatesys%Restrict", sys%rebatesys%Restrict)
         call write_f90(funit, "sys%rebatesys%docap", sys%rebatesys%docap)
+        call write_f90(funit, "sys%rebatesys%MinAgeMain", sys%rebatesys%MinAgeMain)
+        call write_f90(funit, "sys%rebatesys%MinAgeMainSin", sys%rebatesys%MinAgeMainSin)
         call write_f90(funit, "sys%rebatesys%MainCou", sys%rebatesys%MainCou)
         call write_f90(funit, "sys%rebatesys%YngCou", sys%rebatesys%YngCou)
         call write_f90(funit, "sys%rebatesys%MainLP", sys%rebatesys%MainLP)
@@ -1837,12 +2046,22 @@ end function labstring_region
         call write_f90(funit, "sys%rebatesys%AgeRngl", sys%rebatesys%AgeRngl, sys%rebatesys%NumAgeRng)
         call write_f90(funit, "sys%rebatesys%AgeRngu", sys%rebatesys%AgeRngu, sys%rebatesys%NumAgeRng)
         call write_f90(funit, "sys%rebatesys%AddKid", sys%rebatesys%AddKid, sys%rebatesys%NumAgeRng)
+        call write_f90(funit, "sys%rebatesys%MaxKids", sys%rebatesys%MaxKids)
 
         write(funit, *)
         write(funit, '(A)') "! hben"
         call write_f90(funit, "sys%hben%doHBen", sys%hben%doHBen)
         call write_f90(funit, "sys%hben%taper", sys%hben%taper)
         call write_f90(funit, "sys%hben%MinAmt", sys%hben%MinAmt)
+        call write_f90(funit, "sys%hben%doUnderOccCharge", sys%hben%doUnderOccCharge)
+        call write_f90(funit, "sys%hben%doUnderOccChargeScotland", sys%hben%doUnderOccChargeScotland)
+        call write_f90(funit, "sys%hben%doUnderOccChargeNI", sys%hben%doUnderOccChargeNI)
+        call write_f90(funit, "sys%hben%numUnderOccBands", sys%hben%numUnderOccBands)
+        call write_f90(funit, "sys%hben%underOccRates", sys%hben%underOccRates, sys%hben%numUnderOccBands)
+        call write_f90(funit, "sys%hben%doLHA", sys%hben%doLHA)
+        call write_f90(funit, "sys%hben%LHASharedAccAge", sys%hben%LHASharedAccAge)
+        call write_f90(funit, "sys%hben%numLHABands", sys%hben%numLHABands)
+        call write_f90(funit, "sys%hben%LHARates", sys%hben%LHARates, sys%hben%numLHABands)
 
         write(funit, *)
         write(funit, '(A)') "! ctaxben"
@@ -1869,6 +2088,7 @@ end function labstring_region
         call write_f90(funit, "sys%uc%MinAgeMain", sys%uc%MinAgeMain)
         call write_f90(funit, "sys%uc%FirstKid", sys%uc%FirstKid)
         call write_f90(funit, "sys%uc%OtherKid", sys%uc%OtherKid)
+        call write_f90(funit, "sys%uc%MaxKids", sys%uc%MaxKids)
         call write_f90(funit, "sys%uc%MaxCC1", sys%uc%MaxCC1)
         call write_f90(funit, "sys%uc%MaxCC2", sys%uc%MaxCC2)
         call write_f90(funit, "sys%uc%PropCC", sys%uc%PropCC)
@@ -1894,11 +2114,17 @@ end function labstring_region
         write(funit, *)
         write(funit, '(A)') "! bencap"
         call write_f90(funit, "sys%bencap%doCap", sys%bencap%doCap)
+        call write_f90(funit, "sys%bencap%doNI", sys%bencap%doNI)
         call write_f90(funit, "sys%bencap%doThruUC", sys%bencap%doThruUC)
         call write_f90(funit, "sys%bencap%sinNoKids", sys%bencap%sinNoKids)
         call write_f90(funit, "sys%bencap%sinKids", sys%bencap%sinKids)
         call write_f90(funit, "sys%bencap%couNoKids", sys%bencap%couNoKids)
         call write_f90(funit, "sys%bencap%couKids", sys%bencap%couKids)
+        call write_f90(funit, "sys%bencap%LondonCapAmt", sys%bencap%LondonCapAmt)
+        call write_f90(funit, "sys%bencap%LondonSinNoKids", sys%bencap%LondonSinNoKids)
+        call write_f90(funit, "sys%bencap%LondonSinKids", sys%bencap%LondonSinKids)
+        call write_f90(funit, "sys%bencap%LondonCouNoKids", sys%bencap%LondonCouNoKids)
+        call write_f90(funit, "sys%bencap%LondonCouKids", sys%bencap%LondonCouKids)
         call write_f90(funit, "sys%bencap%UCEarnThr", sys%bencap%UCEarnThr)
 
         write(funit, *)
@@ -1952,10 +2178,12 @@ end function labstring_region
         call write_f90(funit, "fam%maint", fam%maint)
         call write_f90(funit, "fam%nkids", fam%nkids)
         call write_f90(funit, "fam%kidage", fam%kidage, fam%nkids)
+        call write_f90(funit, "fam%kidsex", fam%kidsex, fam%nkids)
         call write_f90(funit, "fam%nothads", fam%nothads)
         call write_f90(funit, "fam%tenure", fam%tenure)
         call write_f90(funit, "fam%rent", fam%rent)
         call write_f90(funit, "fam%rentcap", fam%rentcap)
+        call write_f90(funit, "fam%bedrooms", fam%bedrooms)
         call write_f90(funit, "fam%region", fam%region)
         call write_f90(funit, "fam%ctband", fam%ctband)
         call write_f90(funit, "fam%banddratio", fam%banddratio)
@@ -2104,11 +2332,13 @@ end function labstring_region
         integer :: ix
         if (longstr .ne. "") then
             do ix = 1, size(val)
-                write(funit, '(A40, 2X, I20)') longstr // ' (' // shortstr // '[' // intToStr(ix) // '])', label(ix)
+                write(funit, '(A40, 2X, A20)') longstr // ' (' // shortstr // '[' // intToStr(ix) // '])', &
+                      trim(adjustl(label(ix))) // ' (' // intToStr(val(ix)) // ')'
             end do
         else
             do ix = 1, size(val)
-                write(funit, '(A40, 2X, I20)') shortstr // '[' // intToStr(ix) // ']', label(ix)
+                write(funit, '(A40, 2X, A20)') shortstr // '[' // intToStr(ix) // ']', &
+                      trim(adjustl(label(ix))) // ' (' // intToStr(val(ix)) // ')'
             end do
         end if
     end subroutine desc_f90integerarray_label
@@ -2145,11 +2375,13 @@ end function labstring_region
         integer :: ix
         if (longstr .ne. "") then
             do ix = 1, nval
-                write(funit, '(A40, 2X, I20)') longstr // ' (' // shortstr // '[' // intToStr(ix) // '])', label(ix)
+                write(funit, '(A40, 2X, A20)') longstr // ' (' // shortstr // '[' // intToStr(ix) // '])', &
+                      trim(adjustl(label(ix))) // ' (' // intToStr(val(ix)) // ')'
             end do
         else
             do ix = 1, nval
-                write(funit, '(A40, 2X, I20)') shortstr // '[' // intToStr(ix) // ']', label(ix)
+                write(funit, '(A40, 2X, A20)') shortstr // '[' // intToStr(ix) // ']', &
+                      trim(adjustl(label(ix))) // ' (' // intToStr(val(ix)) // ')'
             end do
         end if
     end subroutine desc_f90integerarray2_label

@@ -2,13 +2,13 @@
 
 #! list for system components
 
-#:set SYSLIST = ['inctax', 'natins', 'chben', 'fc', 'ctc', 'wtc', &
-                 'ntc', 'incsup', 'ctax', 'rebatesys', 'hben', 'ctaxben', &
+#:set SYSLIST = ['inctax', 'natins', 'chben', 'fc', 'ctc', 'wtc', 'ntc', &
+                 'cctaxrefund', 'incsup', 'ctax', 'rebatesys', 'hben', 'ctaxben', &
                  'ccben', 'uc', 'statepen', 'bencap', 'extra']
 
 #! list for value labels
 
-#:set LABLIST = ['bool', 'ctax', 'tenure', 'region']
+#:set LABLIST = ['bool', 'ctax', 'tenure', 'region', 'sex']
 
 #! prevision type mapping
 

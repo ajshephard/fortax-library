@@ -372,6 +372,7 @@ contains
         if (ltaxout == "wtc") taxpoint(i)%p => net%tu%wtc
         if (ltaxout == "ctc") taxpoint(i)%p => net%tu%ctc
         if (ltaxout == "ccexp") taxpoint(i)%p => net%tu%ccexp
+        if (ltaxout == "cctaxrefund") taxpoint(i)%p => net%tu%cctaxrefund
         if (ltaxout == "incsup") taxpoint(i)%p => net%tu%incsup
         if (ltaxout == "hben") taxpoint(i)%p => net%tu%hben
         if (ltaxout == "polltax") taxpoint(i)%p => net%tu%polltax
@@ -836,6 +837,7 @@ loopmax : do
         if (ltaxout == "wtc") taxpoint(i)%p => net%tu%wtc
         if (ltaxout == "ctc") taxpoint(i)%p => net%tu%ctc
         if (ltaxout == "ccexp") taxpoint(i)%p => net%tu%ccexp
+        if (ltaxout == "cctaxrefund") taxpoint(i)%p => net%tu%cctaxrefund
         if (ltaxout == "incsup") taxpoint(i)%p => net%tu%incsup
         if (ltaxout == "hben") taxpoint(i)%p => net%tu%hben
         if (ltaxout == "polltax") taxpoint(i)%p => net%tu%polltax
@@ -1266,6 +1268,7 @@ loopmax : do
         if (ltaxout == "wtc") taxpoint(i)%p => net%tu%wtc
         if (ltaxout == "ctc") taxpoint(i)%p => net%tu%ctc
         if (ltaxout == "ccexp") taxpoint(i)%p => net%tu%ccexp
+        if (ltaxout == "cctaxrefund") taxpoint(i)%p => net%tu%cctaxrefund
         if (ltaxout == "incsup") taxpoint(i)%p => net%tu%incsup
         if (ltaxout == "hben") taxpoint(i)%p => net%tu%hben
         if (ltaxout == "polltax") taxpoint(i)%p => net%tu%polltax

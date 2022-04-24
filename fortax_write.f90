@@ -106,35 +106,46 @@ write(funit, '(A)')
         else
             write(funit, '(A40, 2X, F20.5)') "PA taper rate (paTaperRate)", sys%inctax%paTaperRate
         end if
-        if (sys%inctax%mma >= sysHuge) then
-            write(funit, '(A40, 2X, A20)') "mma", "unbounded"
+        if (sys%inctax%doTPA >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "Transferable marriage allowance (doTPA)", "unbounded"
         else
-            write(funit, '(A40, 2X, F20.5)') "mma", sys%inctax%mma
+            write(funit, '(A40, 2X, A20)') "Transferable marriage allowance (doTPA)", &
+                  trim(adjustl(label_bool(sys%inctax%doTPA))) 
+        end if
+        if (sys%inctax%maxTPA >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "Max. transferable marriage allowance (maxTPA)", "unbounded"
+        else
+            write(funit, '(A40, 2X, F20.5)') "Max. transferable marriage allowance (maxTPA)", sys%inctax%maxTPA
+        end if
+        if (sys%inctax%mma >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "Married couples allowance (mma)", "unbounded"
+        else
+            write(funit, '(A40, 2X, F20.5)') "Married couples allowance (mma)", sys%inctax%mma
         end if
         if (sys%inctax%ctc >= sysHuge) then
-            write(funit, '(A40, 2X, A20)') "ctc", "unbounded"
+            write(funit, '(A40, 2X, A20)') "Children's tax credit (ctc)", "unbounded"
         else
-            write(funit, '(A40, 2X, F20.5)') "ctc", sys%inctax%ctc
+            write(funit, '(A40, 2X, F20.5)') "Children's tax credit (ctc)", sys%inctax%ctc
         end if
         if (sys%inctax%ctcyng >= sysHuge) then
-            write(funit, '(A40, 2X, A20)') "ctcyng", "unbounded"
+            write(funit, '(A40, 2X, A20)') "Children's tax credit young kid (ctcyng)", "unbounded"
         else
-            write(funit, '(A40, 2X, F20.5)') "ctcyng", sys%inctax%ctcyng
+            write(funit, '(A40, 2X, F20.5)') "Children's tax credit young kid (ctcyng)", sys%inctax%ctcyng
         end if
         if (sys%inctax%mmarate >= sysHuge) then
-            write(funit, '(A40, 2X, A20)') "mmarate", "unbounded"
+            write(funit, '(A40, 2X, A20)') "Married couples allowance rate (mmarate)", "unbounded"
         else
-            write(funit, '(A40, 2X, F20.5)') "mmarate", sys%inctax%mmarate
+            write(funit, '(A40, 2X, F20.5)') "Married couples allowance rate (mmarate)", sys%inctax%mmarate
         end if
         if (sys%inctax%ctctaper >= sysHuge) then
-            write(funit, '(A40, 2X, A20)') "ctctaper", "unbounded"
+            write(funit, '(A40, 2X, A20)') "Children's tax credit taper (ctctaper)", "unbounded"
         else
-            write(funit, '(A40, 2X, F20.5)') "ctctaper", sys%inctax%ctctaper
+            write(funit, '(A40, 2X, F20.5)') "Children's tax credit taper (ctctaper)", sys%inctax%ctctaper
         end if
         if (sys%inctax%c4rebate >= sysHuge) then
-            write(funit, '(A40, 2X, A20)') "c4rebate", "unbounded"
+            write(funit, '(A40, 2X, A20)') "Rebate for Class 4 NI (c4rebate)", "unbounded"
         else
-            write(funit, '(A40, 2X, F20.5)') "c4rebate", sys%inctax%c4rebate
+            write(funit, '(A40, 2X, F20.5)') "Rebate for Class 4 NI (c4rebate)", sys%inctax%c4rebate
         end if
         if (sys%inctax%bands(1) >= sysHuge) then
             write(funit, '(A40, 2X, A20)') "Income tax bands (bands)", "unbounded"
@@ -454,6 +465,11 @@ write(funit, '(A)')
         else
             write(funit, '(A40, 2X, F20.5)') "kid", sys%ctc%kid
         end if
+        if (sys%ctc%maxKids >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "maxKids", "unbounded"
+        else
+            write(funit, '(A40, 2X, I20)') "maxKids", sys%ctc%maxKids
+        end if
 write(funit, '(A)')
         write(funit, '(A)') repeat("=", 62)
 
@@ -588,6 +604,43 @@ write(funit, '(A)')
         write(funit, '(A)') repeat("=", 62)
 
 write(funit, '(A)')
+write(funit, '(A)') "CCTAXREFUND:"
+write(funit, '(A)')
+        if (sys%cctaxrefund%doCCTaxRefund >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "doCCTaxRefund", "unbounded"
+        else
+            write(funit, '(A40, 2X, A20)') "doCCTaxRefund", &
+                  trim(adjustl(label_bool(sys%cctaxrefund%doCCTaxRefund))) 
+        end if
+        if (sys%cctaxrefund%MaxPerChild >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "MaxPerChild", "unbounded"
+        else
+            write(funit, '(A40, 2X, F20.5)') "MaxPerChild", sys%cctaxrefund%MaxPerChild
+        end if
+        if (sys%cctaxrefund%MaxAge >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "MaxAge", "unbounded"
+        else
+            write(funit, '(A40, 2X, I20)') "MaxAge", sys%cctaxrefund%MaxAge
+        end if
+        if (sys%cctaxrefund%ReceiptProp >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "ReceiptProp", "unbounded"
+        else
+            write(funit, '(A40, 2X, F20.5)') "ReceiptProp", sys%cctaxrefund%ReceiptProp
+        end if
+        if (sys%cctaxrefund%MinEarn >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "MinEarn", "unbounded"
+        else
+            write(funit, '(A40, 2X, F20.5)') "MinEarn", sys%cctaxrefund%MinEarn
+        end if
+        if (sys%cctaxrefund%MaxInc >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "MaxInc", "unbounded"
+        else
+            write(funit, '(A40, 2X, F20.5)') "MaxInc", sys%cctaxrefund%MaxInc
+        end if
+write(funit, '(A)')
+        write(funit, '(A)') repeat("=", 62)
+
+write(funit, '(A)')
 write(funit, '(A)') "INCSUP:"
 write(funit, '(A)')
         if (sys%incsup%doIncSup >= sysHuge) then
@@ -606,6 +659,16 @@ write(funit, '(A)')
             write(funit, '(A40, 2X, A20)') "NumAgeRng", "unbounded"
         else
             write(funit, '(A40, 2X, I20)') "NumAgeRng", sys%incsup%NumAgeRng
+        end if
+        if (sys%incsup%MinAgeMain >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "MinAgeMain", "unbounded"
+        else
+            write(funit, '(A40, 2X, I20)') "MinAgeMain", sys%incsup%MinAgeMain
+        end if
+        if (sys%incsup%MinAgeMainSin >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "MinAgeMainSin", "unbounded"
+        else
+            write(funit, '(A40, 2X, I20)') "MinAgeMainSin", sys%incsup%MinAgeMainSin
         end if
         if (sys%incsup%MainCou >= sysHuge) then
             write(funit, '(A40, 2X, A20)') "MainCou", "unbounded"
@@ -636,6 +699,16 @@ write(funit, '(A)')
             write(funit, '(A40, 2X, A20)') "YngSin", "unbounded"
         else
             write(funit, '(A40, 2X, F20.5)') "YngSin", sys%incsup%YngSin
+        end if
+        if (sys%incsup%MinAgeFSM >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "MinAgeFSM", "unbounded"
+        else
+            write(funit, '(A40, 2X, I20)') "MinAgeFSM", sys%incsup%MinAgeFSM
+        end if
+        if (sys%incsup%MaxAgeUniversalFSM >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "MaxAgeUniversalFSM", "unbounded"
+        else
+            write(funit, '(A40, 2X, I20)') "MaxAgeUniversalFSM", sys%incsup%MaxAgeUniversalFSM
         end if
         if (sys%incsup%ValFSM >= sysHuge) then
             write(funit, '(A40, 2X, A20)') "ValFSM", "unbounded"
@@ -741,40 +814,125 @@ write(funit, '(A)')
         else
             write(funit, '(A40, 2X, F20.5)') "Single discount (SinDis)", sys%ctax%SinDis
         end if
-        if (sys%ctax%RatioA >= sysHuge) then
-            write(funit, '(A40, 2X, A20)') "Band A ratio (RatioA)", "unbounded"
+        if (sys%ctax%EnglandRatioA >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "England Band A ratio (EnglandRatioA)", "unbounded"
         else
-            write(funit, '(A40, 2X, F20.5)') "Band A ratio (RatioA)", sys%ctax%RatioA
+            write(funit, '(A40, 2X, F20.5)') "England Band A ratio (EnglandRatioA)", sys%ctax%EnglandRatioA
         end if
-        if (sys%ctax%RatioB >= sysHuge) then
-            write(funit, '(A40, 2X, A20)') "Band B ratio (RatioB)", "unbounded"
+        if (sys%ctax%EnglandRatioB >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "England Band B ratio (EnglandRatioB)", "unbounded"
         else
-            write(funit, '(A40, 2X, F20.5)') "Band B ratio (RatioB)", sys%ctax%RatioB
+            write(funit, '(A40, 2X, F20.5)') "England Band B ratio (EnglandRatioB)", sys%ctax%EnglandRatioB
         end if
-        if (sys%ctax%RatioC >= sysHuge) then
-            write(funit, '(A40, 2X, A20)') "Band C ratio (RatioC)", "unbounded"
+        if (sys%ctax%EnglandRatioC >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "England Band C ratio (EnglandRatioC)", "unbounded"
         else
-            write(funit, '(A40, 2X, F20.5)') "Band C ratio (RatioC)", sys%ctax%RatioC
+            write(funit, '(A40, 2X, F20.5)') "England Band C ratio (EnglandRatioC)", sys%ctax%EnglandRatioC
         end if
-        if (sys%ctax%RatioE >= sysHuge) then
-            write(funit, '(A40, 2X, A20)') "Band E ratio (RatioE)", "unbounded"
+        if (sys%ctax%EnglandRatioE >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "England Band E ratio (EnglandRatioE)", "unbounded"
         else
-            write(funit, '(A40, 2X, F20.5)') "Band E ratio (RatioE)", sys%ctax%RatioE
+            write(funit, '(A40, 2X, F20.5)') "England Band E ratio (EnglandRatioE)", sys%ctax%EnglandRatioE
         end if
-        if (sys%ctax%RatioF >= sysHuge) then
-            write(funit, '(A40, 2X, A20)') "Band F ratio (RatioF)", "unbounded"
+        if (sys%ctax%EnglandRatioF >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "England Band F ratio (EnglandRatioF)", "unbounded"
         else
-            write(funit, '(A40, 2X, F20.5)') "Band F ratio (RatioF)", sys%ctax%RatioF
+            write(funit, '(A40, 2X, F20.5)') "England Band F ratio (EnglandRatioF)", sys%ctax%EnglandRatioF
         end if
-        if (sys%ctax%RatioG >= sysHuge) then
-            write(funit, '(A40, 2X, A20)') "Band G ratio (RatioG)", "unbounded"
+        if (sys%ctax%EnglandRatioG >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "England Band G ratio (EnglandRatioG)", "unbounded"
         else
-            write(funit, '(A40, 2X, F20.5)') "Band G ratio (RatioG)", sys%ctax%RatioG
+            write(funit, '(A40, 2X, F20.5)') "England Band G ratio (EnglandRatioG)", sys%ctax%EnglandRatioG
         end if
-        if (sys%ctax%RatioH >= sysHuge) then
-            write(funit, '(A40, 2X, A20)') "Band H ratio (RatioH)", "unbounded"
+        if (sys%ctax%EnglandRatioH >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "England Band H ratio (EnglandRatioH)", "unbounded"
         else
-            write(funit, '(A40, 2X, F20.5)') "Band H ratio (RatioH)", sys%ctax%RatioH
+            write(funit, '(A40, 2X, F20.5)') "England Band H ratio (EnglandRatioH)", sys%ctax%EnglandRatioH
+        end if
+        if (sys%ctax%EnglandRatioI >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "England Band I ratio (EnglandRatioI)", "unbounded"
+        else
+            write(funit, '(A40, 2X, F20.5)') "England Band I ratio (EnglandRatioI)", sys%ctax%EnglandRatioI
+        end if
+        if (sys%ctax%ScotlandRatioA >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "Scotland Band A ratio (ScotlandRatioA)", "unbounded"
+        else
+            write(funit, '(A40, 2X, F20.5)') "Scotland Band A ratio (ScotlandRatioA)", sys%ctax%ScotlandRatioA
+        end if
+        if (sys%ctax%ScotlandRatioB >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "Scotland Band B ratio (ScotlandRatioB)", "unbounded"
+        else
+            write(funit, '(A40, 2X, F20.5)') "Scotland Band B ratio (ScotlandRatioB)", sys%ctax%ScotlandRatioB
+        end if
+        if (sys%ctax%ScotlandRatioC >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "Scotland Band C ratio (ScotlandRatioC)", "unbounded"
+        else
+            write(funit, '(A40, 2X, F20.5)') "Scotland Band C ratio (ScotlandRatioC)", sys%ctax%ScotlandRatioC
+        end if
+        if (sys%ctax%ScotlandRatioE >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "Scotland Band E ratio (ScotlandRatioE)", "unbounded"
+        else
+            write(funit, '(A40, 2X, F20.5)') "Scotland Band E ratio (ScotlandRatioE)", sys%ctax%ScotlandRatioE
+        end if
+        if (sys%ctax%ScotlandRatioF >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "Scotland Band F ratio (ScotlandRatioF)", "unbounded"
+        else
+            write(funit, '(A40, 2X, F20.5)') "Scotland Band F ratio (ScotlandRatioF)", sys%ctax%ScotlandRatioF
+        end if
+        if (sys%ctax%ScotlandRatioG >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "Scotland Band G ratio (ScotlandRatioG)", "unbounded"
+        else
+            write(funit, '(A40, 2X, F20.5)') "Scotland Band G ratio (ScotlandRatioG)", sys%ctax%ScotlandRatioG
+        end if
+        if (sys%ctax%ScotlandRatioH >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "Scotland Band H ratio (ScotlandRatioH)", "unbounded"
+        else
+            write(funit, '(A40, 2X, F20.5)') "Scotland Band H ratio (ScotlandRatioH)", sys%ctax%ScotlandRatioH
+        end if
+        if (sys%ctax%ScotlandRatioI >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "Scotland Band I ratio (ScotlandRatioI)", "unbounded"
+        else
+            write(funit, '(A40, 2X, F20.5)') "Scotland Band I ratio (ScotlandRatioI)", sys%ctax%ScotlandRatioI
+        end if
+        if (sys%ctax%WalesRatioA >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "Wales Band A ratio (WalesRatioA)", "unbounded"
+        else
+            write(funit, '(A40, 2X, F20.5)') "Wales Band A ratio (WalesRatioA)", sys%ctax%WalesRatioA
+        end if
+        if (sys%ctax%WalesRatioB >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "Wales Band B ratio (WalesRatioB)", "unbounded"
+        else
+            write(funit, '(A40, 2X, F20.5)') "Wales Band B ratio (WalesRatioB)", sys%ctax%WalesRatioB
+        end if
+        if (sys%ctax%WalesRatioC >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "Wales Band C ratio (WalesRatioC)", "unbounded"
+        else
+            write(funit, '(A40, 2X, F20.5)') "Wales Band C ratio (WalesRatioC)", sys%ctax%WalesRatioC
+        end if
+        if (sys%ctax%WalesRatioE >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "Wales Band E ratio (WalesRatioE)", "unbounded"
+        else
+            write(funit, '(A40, 2X, F20.5)') "Wales Band E ratio (WalesRatioE)", sys%ctax%WalesRatioE
+        end if
+        if (sys%ctax%WalesRatioF >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "Wales Band F ratio (WalesRatioF)", "unbounded"
+        else
+            write(funit, '(A40, 2X, F20.5)') "Wales Band F ratio (WalesRatioF)", sys%ctax%WalesRatioF
+        end if
+        if (sys%ctax%WalesRatioG >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "Wales Band G ratio (WalesRatioG)", "unbounded"
+        else
+            write(funit, '(A40, 2X, F20.5)') "Wales Band G ratio (WalesRatioG)", sys%ctax%WalesRatioG
+        end if
+        if (sys%ctax%WalesRatioH >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "Wales Band H ratio (WalesRatioH)", "unbounded"
+        else
+            write(funit, '(A40, 2X, F20.5)') "Wales Band H ratio (WalesRatioH)", sys%ctax%WalesRatioH
+        end if
+        if (sys%ctax%WalesRatioI >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "Wales Band I ratio (WalesRatioI)", "unbounded"
+        else
+            write(funit, '(A40, 2X, F20.5)') "Wales Band I ratio (WalesRatioI)", sys%ctax%WalesRatioI
         end if
 write(funit, '(A)')
         write(funit, '(A)') repeat("=", 62)
@@ -822,6 +980,16 @@ write(funit, '(A)')
         else
             write(funit, '(A40, 2X, A20)') "docap", &
                   trim(adjustl(label_bool(sys%rebatesys%docap))) 
+        end if
+        if (sys%rebatesys%MinAgeMain >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "MinAgeMain", "unbounded"
+        else
+            write(funit, '(A40, 2X, I20)') "MinAgeMain", sys%rebatesys%MinAgeMain
+        end if
+        if (sys%rebatesys%MinAgeMainSin >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "MinAgeMainSin", "unbounded"
+        else
+            write(funit, '(A40, 2X, I20)') "MinAgeMainSin", sys%rebatesys%MinAgeMainSin
         end if
         if (sys%rebatesys%MainCou >= sysHuge) then
             write(funit, '(A40, 2X, A20)') "MainCou", "unbounded"
@@ -946,6 +1114,11 @@ write(funit, '(A)')
                 write(funit, '(A40, 2X, F20.5)') "", sys%rebatesys%AddKid(i)
             end if
         end do
+        if (sys%rebatesys%MaxKids >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "MaxKids", "unbounded"
+        else
+            write(funit, '(A40, 2X, I20)') "MaxKids", sys%rebatesys%MaxKids
+        end if
 write(funit, '(A)')
         write(funit, '(A)') repeat("=", 62)
 
@@ -968,6 +1141,68 @@ write(funit, '(A)')
         else
             write(funit, '(A40, 2X, F20.5)') "Minimum amount (MinAmt)", sys%hben%MinAmt
         end if
+        if (sys%hben%doUnderOccCharge >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "Under occupancy charge (doUnderOccCharge)", "unbounded"
+        else
+            write(funit, '(A40, 2X, A20)') "Under occupancy charge (doUnderOccCharge)", &
+                  trim(adjustl(label_bool(sys%hben%doUnderOccCharge))) 
+        end if
+        if (sys%hben%doUnderOccChargeScotland >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "Under occupancy charge Scotland (doUnderOccChargeScotland)", "unbounded"
+        else
+            write(funit, '(A40, 2X, A20)') "Under occupancy charge Scotland (doUnderOccChargeScotland)", &
+                  trim(adjustl(label_bool(sys%hben%doUnderOccChargeScotland))) 
+        end if
+        if (sys%hben%doUnderOccChargeNI >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "Under occupancy charge NI (doUnderOccChargeNI)", "unbounded"
+        else
+            write(funit, '(A40, 2X, A20)') "Under occupancy charge NI (doUnderOccChargeNI)", &
+                  trim(adjustl(label_bool(sys%hben%doUnderOccChargeNI))) 
+        end if
+        if (sys%hben%numUnderOccBands >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "Under occupancy bands (numUnderOccBands)", "unbounded"
+        else
+            write(funit, '(A40, 2X, I20)') "Under occupancy bands (numUnderOccBands)", sys%hben%numUnderOccBands
+        end if
+        if (sys%hben%underOccRates(1) >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "Under occupancy rates (underOccRates)", "unbounded"
+        else
+            write(funit, '(A40, 2X, F20.5)') "Under occupancy rates (underOccRates)", sys%hben%underOccRates(1)
+        end if
+        do i = 2, sys%hben%numUnderOccBands
+            if (sys%hben%underOccRates(i) >= sysHuge) then
+                write(funit, '(A40, 2X, A20)') "", "unbounded"
+            else
+                write(funit, '(A40, 2X, F20.5)') "", sys%hben%underOccRates(i)
+            end if
+        end do
+        if (sys%hben%doLHA >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "Local housing allowance (doLHA)", "unbounded"
+        else
+            write(funit, '(A40, 2X, I20)') "Local housing allowance (doLHA)", sys%hben%doLHA
+        end if
+        if (sys%hben%LHASharedAccAge >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "Shared accommodation age (LHASharedAccAge)", "unbounded"
+        else
+            write(funit, '(A40, 2X, I20)') "Shared accommodation age (LHASharedAccAge)", sys%hben%LHASharedAccAge
+        end if
+        if (sys%hben%numLHABands >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "Number LHA bands (numLHABands)", "unbounded"
+        else
+            write(funit, '(A40, 2X, I20)') "Number LHA bands (numLHABands)", sys%hben%numLHABands
+        end if
+        if (sys%hben%LHARates(1) >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "LHA Rates (LHARates)", "unbounded"
+        else
+            write(funit, '(A40, 2X, F20.5)') "LHA Rates (LHARates)", sys%hben%LHARates(1)
+        end if
+        do i = 2, sys%hben%numLHABands
+            if (sys%hben%LHARates(i) >= sysHuge) then
+                write(funit, '(A40, 2X, A20)') "", "unbounded"
+            else
+                write(funit, '(A40, 2X, F20.5)') "", sys%hben%LHARates(i)
+            end if
+        end do
 write(funit, '(A)')
         write(funit, '(A)') repeat("=", 62)
 
@@ -1074,6 +1309,11 @@ write(funit, '(A)')
             write(funit, '(A40, 2X, A20)') "OtherKid", "unbounded"
         else
             write(funit, '(A40, 2X, F20.5)') "OtherKid", sys%uc%OtherKid
+        end if
+        if (sys%uc%MaxKids >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "MaxKids", "unbounded"
+        else
+            write(funit, '(A40, 2X, I20)') "MaxKids", sys%uc%MaxKids
         end if
         if (sys%uc%MaxCC1 >= sysHuge) then
             write(funit, '(A40, 2X, A20)') "MaxCC1", "unbounded"
@@ -1185,6 +1425,12 @@ write(funit, '(A)')
             write(funit, '(A40, 2X, A20)') "doCap", &
                   trim(adjustl(label_bool(sys%bencap%doCap))) 
         end if
+        if (sys%bencap%doNI >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "doNI", "unbounded"
+        else
+            write(funit, '(A40, 2X, A20)') "doNI", &
+                  trim(adjustl(label_bool(sys%bencap%doNI))) 
+        end if
         if (sys%bencap%doThruUC >= sysHuge) then
             write(funit, '(A40, 2X, A20)') "doThruUC", "unbounded"
         else
@@ -1210,6 +1456,32 @@ write(funit, '(A)')
             write(funit, '(A40, 2X, A20)') "couKids", "unbounded"
         else
             write(funit, '(A40, 2X, F20.5)') "couKids", sys%bencap%couKids
+        end if
+        if (sys%bencap%LondonCapAmt >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "LondonCapAmt", "unbounded"
+        else
+            write(funit, '(A40, 2X, A20)') "LondonCapAmt", &
+                  trim(adjustl(label_bool(sys%bencap%LondonCapAmt))) 
+        end if
+        if (sys%bencap%LondonSinNoKids >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "LondonSinNoKids", "unbounded"
+        else
+            write(funit, '(A40, 2X, F20.5)') "LondonSinNoKids", sys%bencap%LondonSinNoKids
+        end if
+        if (sys%bencap%LondonSinKids >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "LondonSinKids", "unbounded"
+        else
+            write(funit, '(A40, 2X, F20.5)') "LondonSinKids", sys%bencap%LondonSinKids
+        end if
+        if (sys%bencap%LondonCouNoKids >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "LondonCouNoKids", "unbounded"
+        else
+            write(funit, '(A40, 2X, F20.5)') "LondonCouNoKids", sys%bencap%LondonCouNoKids
+        end if
+        if (sys%bencap%LondonCouKids >= sysHuge) then
+            write(funit, '(A40, 2X, A20)') "LondonCouKids", "unbounded"
+        else
+            write(funit, '(A40, 2X, F20.5)') "LondonCouKids", sys%bencap%LondonCouKids
         end if
         if (sys%bencap%UCEarnThr >= sysHuge) then
             write(funit, '(A40, 2X, A20)') "UCEarnThr", "unbounded"
@@ -1294,6 +1566,8 @@ write(funit, '(A)')
         call json%add(inp, "disablePATaperRounding", sys%inctax%disablePATaperRounding)
         call json%add(inp, "paTaperThresh", sys%inctax%paTaperThresh)
         call json%add(inp, "paTaperRate", sys%inctax%paTaperRate)
+        call json%add(inp, "doTPA", sys%inctax%doTPA)
+        call json%add(inp, "maxTPA", sys%inctax%maxTPA)
         call json%add(inp, "mma", sys%inctax%mma)
         call json%add(inp, "ctc", sys%inctax%ctc)
         call json%add(inp, "ctcyng", sys%inctax%ctcyng)
@@ -1361,6 +1635,7 @@ write(funit, '(A)')
         call json%add(inp, "fam", sys%ctc%fam)
         call json%add(inp, "baby", sys%ctc%baby)
         call json%add(inp, "kid", sys%ctc%kid)
+        call json%add(inp, "maxKids", sys%ctc%maxKids)
         nullify(inp)
 
         call json%create_object(inp, "wtc")
@@ -1394,17 +1669,31 @@ write(funit, '(A)')
         call json%add(inp, "MinAmt", sys%ntc%MinAmt)
         nullify(inp)
 
+        call json%create_object(inp, "cctaxrefund")
+        call json%add(p, inp) !add it to the root
+        call json%add(inp, "doCCTaxRefund", sys%cctaxrefund%doCCTaxRefund)
+        call json%add(inp, "MaxPerChild", sys%cctaxrefund%MaxPerChild)
+        call json%add(inp, "MaxAge", sys%cctaxrefund%MaxAge)
+        call json%add(inp, "ReceiptProp", sys%cctaxrefund%ReceiptProp)
+        call json%add(inp, "MinEarn", sys%cctaxrefund%MinEarn)
+        call json%add(inp, "MaxInc", sys%cctaxrefund%MaxInc)
+        nullify(inp)
+
         call json%create_object(inp, "incsup")
         call json%add(p, inp) !add it to the root
         call json%add(inp, "doIncSup", sys%incsup%doIncSup)
         call json%add(inp, "IncChben", sys%incsup%IncChben)
         call json%add(inp, "NumAgeRng", sys%incsup%NumAgeRng)
+        call json%add(inp, "MinAgeMain", sys%incsup%MinAgeMain)
+        call json%add(inp, "MinAgeMainSin", sys%incsup%MinAgeMainSin)
         call json%add(inp, "MainCou", sys%incsup%MainCou)
         call json%add(inp, "YngCou", sys%incsup%YngCou)
         call json%add(inp, "MainLP", sys%incsup%MainLP)
         call json%add(inp, "YngLP", sys%incsup%YngLP)
         call json%add(inp, "MainSin", sys%incsup%MainSin)
         call json%add(inp, "YngSin", sys%incsup%YngSin)
+        call json%add(inp, "MinAgeFSM", sys%incsup%MinAgeFSM)
+        call json%add(inp, "MaxAgeUniversalFSM", sys%incsup%MaxAgeUniversalFSM)
         call json%add(inp, "ValFSM", sys%incsup%ValFSM)
         call json%add(inp, "DisregLP", sys%incsup%DisregLP)
         call json%add(inp, "DisregSin", sys%incsup%DisregSin)
@@ -1424,13 +1713,30 @@ write(funit, '(A)')
         call json%add(inp, "docounciltax", sys%ctax%docounciltax)
         call json%add(inp, "bandD", sys%ctax%bandD)
         call json%add(inp, "SinDis", sys%ctax%SinDis)
-        call json%add(inp, "RatioA", sys%ctax%RatioA)
-        call json%add(inp, "RatioB", sys%ctax%RatioB)
-        call json%add(inp, "RatioC", sys%ctax%RatioC)
-        call json%add(inp, "RatioE", sys%ctax%RatioE)
-        call json%add(inp, "RatioF", sys%ctax%RatioF)
-        call json%add(inp, "RatioG", sys%ctax%RatioG)
-        call json%add(inp, "RatioH", sys%ctax%RatioH)
+        call json%add(inp, "EnglandRatioA", sys%ctax%EnglandRatioA)
+        call json%add(inp, "EnglandRatioB", sys%ctax%EnglandRatioB)
+        call json%add(inp, "EnglandRatioC", sys%ctax%EnglandRatioC)
+        call json%add(inp, "EnglandRatioE", sys%ctax%EnglandRatioE)
+        call json%add(inp, "EnglandRatioF", sys%ctax%EnglandRatioF)
+        call json%add(inp, "EnglandRatioG", sys%ctax%EnglandRatioG)
+        call json%add(inp, "EnglandRatioH", sys%ctax%EnglandRatioH)
+        call json%add(inp, "EnglandRatioI", sys%ctax%EnglandRatioI)
+        call json%add(inp, "ScotlandRatioA", sys%ctax%ScotlandRatioA)
+        call json%add(inp, "ScotlandRatioB", sys%ctax%ScotlandRatioB)
+        call json%add(inp, "ScotlandRatioC", sys%ctax%ScotlandRatioC)
+        call json%add(inp, "ScotlandRatioE", sys%ctax%ScotlandRatioE)
+        call json%add(inp, "ScotlandRatioF", sys%ctax%ScotlandRatioF)
+        call json%add(inp, "ScotlandRatioG", sys%ctax%ScotlandRatioG)
+        call json%add(inp, "ScotlandRatioH", sys%ctax%ScotlandRatioH)
+        call json%add(inp, "ScotlandRatioI", sys%ctax%ScotlandRatioI)
+        call json%add(inp, "WalesRatioA", sys%ctax%WalesRatioA)
+        call json%add(inp, "WalesRatioB", sys%ctax%WalesRatioB)
+        call json%add(inp, "WalesRatioC", sys%ctax%WalesRatioC)
+        call json%add(inp, "WalesRatioE", sys%ctax%WalesRatioE)
+        call json%add(inp, "WalesRatioF", sys%ctax%WalesRatioF)
+        call json%add(inp, "WalesRatioG", sys%ctax%WalesRatioG)
+        call json%add(inp, "WalesRatioH", sys%ctax%WalesRatioH)
+        call json%add(inp, "WalesRatioI", sys%ctax%WalesRatioI)
         nullify(inp)
 
         call json%create_object(inp, "rebatesys")
@@ -1442,6 +1748,8 @@ write(funit, '(A)')
         call json%add(inp, "NumAgeRng", sys%rebatesys%NumAgeRng)
         call json%add(inp, "Restrict", sys%rebatesys%Restrict)
         call json%add(inp, "docap", sys%rebatesys%docap)
+        call json%add(inp, "MinAgeMain", sys%rebatesys%MinAgeMain)
+        call json%add(inp, "MinAgeMainSin", sys%rebatesys%MinAgeMainSin)
         call json%add(inp, "MainCou", sys%rebatesys%MainCou)
         call json%add(inp, "YngCou", sys%rebatesys%YngCou)
         call json%add(inp, "MainLP", sys%rebatesys%MainLP)
@@ -1462,6 +1770,7 @@ write(funit, '(A)')
         call json%add(inp, "AgeRngl", sys%rebatesys%AgeRngl(1:sys%rebatesys%NumAgeRng))
         call json%add(inp, "AgeRngu", sys%rebatesys%AgeRngu(1:sys%rebatesys%NumAgeRng))
         call json%add(inp, "AddKid", sys%rebatesys%AddKid(1:sys%rebatesys%NumAgeRng))
+        call json%add(inp, "MaxKids", sys%rebatesys%MaxKids)
         nullify(inp)
 
         call json%create_object(inp, "hben")
@@ -1469,6 +1778,15 @@ write(funit, '(A)')
         call json%add(inp, "doHBen", sys%hben%doHBen)
         call json%add(inp, "taper", sys%hben%taper)
         call json%add(inp, "MinAmt", sys%hben%MinAmt)
+        call json%add(inp, "doUnderOccCharge", sys%hben%doUnderOccCharge)
+        call json%add(inp, "doUnderOccChargeScotland", sys%hben%doUnderOccChargeScotland)
+        call json%add(inp, "doUnderOccChargeNI", sys%hben%doUnderOccChargeNI)
+        call json%add(inp, "numUnderOccBands", sys%hben%numUnderOccBands)
+        call json%add(inp, "underOccRates", sys%hben%underOccRates(1:sys%hben%numUnderOccBands))
+        call json%add(inp, "doLHA", sys%hben%doLHA)
+        call json%add(inp, "LHASharedAccAge", sys%hben%LHASharedAccAge)
+        call json%add(inp, "numLHABands", sys%hben%numLHABands)
+        call json%add(inp, "LHARates", sys%hben%LHARates(1:sys%hben%numLHABands))
         nullify(inp)
 
         call json%create_object(inp, "ctaxben")
@@ -1498,6 +1816,7 @@ write(funit, '(A)')
         call json%add(inp, "MinAgeMain", sys%uc%MinAgeMain)
         call json%add(inp, "FirstKid", sys%uc%FirstKid)
         call json%add(inp, "OtherKid", sys%uc%OtherKid)
+        call json%add(inp, "MaxKids", sys%uc%MaxKids)
         call json%add(inp, "MaxCC1", sys%uc%MaxCC1)
         call json%add(inp, "MaxCC2", sys%uc%MaxCC2)
         call json%add(inp, "PropCC", sys%uc%PropCC)
@@ -1525,11 +1844,17 @@ write(funit, '(A)')
         call json%create_object(inp, "bencap")
         call json%add(p, inp) !add it to the root
         call json%add(inp, "doCap", sys%bencap%doCap)
+        call json%add(inp, "doNI", sys%bencap%doNI)
         call json%add(inp, "doThruUC", sys%bencap%doThruUC)
         call json%add(inp, "sinNoKids", sys%bencap%sinNoKids)
         call json%add(inp, "sinKids", sys%bencap%sinKids)
         call json%add(inp, "couNoKids", sys%bencap%couNoKids)
         call json%add(inp, "couKids", sys%bencap%couKids)
+        call json%add(inp, "LondonCapAmt", sys%bencap%LondonCapAmt)
+        call json%add(inp, "LondonSinNoKids", sys%bencap%LondonSinNoKids)
+        call json%add(inp, "LondonSinKids", sys%bencap%LondonSinKids)
+        call json%add(inp, "LondonCouNoKids", sys%bencap%LondonCouNoKids)
+        call json%add(inp, "LondonCouKids", sys%bencap%LondonCouKids)
         call json%add(inp, "UCEarnThr", sys%bencap%UCEarnThr)
         nullify(inp)
 
