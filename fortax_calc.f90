@@ -300,7 +300,7 @@ contains
                     !Now reduce tax due
                     net%ad(2)%inctax = net%ad(2)%inctax - ctc
                     if (net%ad(2)%inctax < 0.0_dp) then
-                        if (fam%couple == 1) net%ad(1)%inctax = max(net%ad(1)%inctax+net%ad(2)%inctax, 0.0_dp)
+                        if (fam%couple == 1) net%ad(1)%inctax = max(net%ad(1)%inctax + net%ad(2)%inctax, 0.0_dp)
                         net%ad(2)%inctax = 0.0_dp
                     end if
                 end if
@@ -523,7 +523,7 @@ contains
             if (sys%extra%fsminappamt == 1) then
                 !add fsm to applicable amount
                 do i = 1, fam%nkids
-                    if (fam%kidage(i) > 4) appamt = appamt + sys%incsup%ValFSM
+                    if (fam%kidage(i) >= sys%incSup%MinAgeFSM) appamt = appamt + sys%incsup%ValFSM
                 end do
             end if
 
@@ -602,14 +602,14 @@ contains
 
             if (fam%nkids > 0) then
                 !Lone parent
-                if (fam%ad(1)%age < 18) then
+                if (fam%ad(1)%age < sys%incSup%MinAgeMain) then
                     ISAppAmt = sys%incsup%YngLP + sys%incsup%PremFam + sys%incsup%PremLP
                 else
                     ISAppAmt = sys%incsup%MainLP + sys%incsup%PremFam + sys%incsup%PremLP
                 end if
             else
                 !Single childless
-                if (fam%ad(1)%age < 25) then
+                if (fam%ad(1)%age < sys%incSup%MinAgeMainSin) then
                     ISAppAmt = sys%incsup%YngSin
                 else
                     ISAppAmt = sys%incsup%MainSin
@@ -618,7 +618,7 @@ contains
 
         else
             !Couples (ignore cases: one over 18, one under 18)
-            if ((fam%ad(1)%age < 18) .and. (fam%ad(2)%age < 18)) then
+            if ((fam%ad(1)%age < sys%incSup%MinAgeMain) .and. (fam%ad(2)%age < sys%incSup%MinAgeMain)) then
                 ISAppAmt = sys%incsup%YngCou
             else
                 ISAppAmt = sys%incsup%MainCou
