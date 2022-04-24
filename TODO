@@ -15,3 +15,14 @@ Child benefit
 
 UC/CTB
 * Decide whether to include UC in CTB taper
+
+UC
+* Validate UC when parameters have been incorporated into TAXBEN PARAMS.mdb database
+
+General
+* Incorporate asset conditions in benefits
+* Code up for 60+
+* Employer NI
+* Indirect taxes
+* NI domestic rates
+* Student loan repayments
