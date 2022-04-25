@@ -1308,6 +1308,7 @@ contains
             !Cap CTB at band E from 1998 to 2003
             if ((fam%ctband > lab%ctax%bande) .and. (sys%rebatesys%Restrict == 1)) then
                 select case (fam%region)
+                  
                     case (lab%region%wales)
                         select case (fam%ctband)
                             case (lab%ctax%bandf)
@@ -1434,7 +1435,7 @@ contains
     !DEC$ ATTRIBUTES FORCEINLINE :: HBAppAmt
     real(dp) pure function HBAppAmt(sys, fam, net)
 
-        use fortax_type, only : sys_t, fam_t, net_t
+        use fortax_type, only : sys_t, fam_t, net_t, maxKids
 
         implicit none
 
@@ -1442,8 +1443,9 @@ contains
         type(fam_t), intent(in) :: fam
         type(net_t), intent(in) :: net
 
-        integer                 :: i, j
-
+        integer :: i, j
+        integer :: kidage(maxKids)
+        integer :: tmp1, prevKidAge
 
         ! Under UC, applicable amount for CTB is just the maximum (pre-taper) UC entitlement
         if (sys%rebatesys%rulesUnderUC == 1) then
@@ -1456,14 +1458,14 @@ contains
                 if (fam%nkids > 0) then
                     !Lone parent
                     !sys%rebatesys%PremLP abolished Apr 98, but don't need to condition on year here because parameter should be zero for later years
-                    if (fam%ad(1)%age < 18) then
+                    if (fam%ad(1)%age < sys%rebateSys%minAgeMain) then
                         HBAppAmt = sys%rebatesys%YngLP + sys%rebatesys%PremFam + sys%rebatesys%PremLP
                     else
                         HBAppAmt = sys%rebatesys%MainLP + sys%rebatesys%PremFam + sys%rebatesys%PremLP
                     end if
                 else
                     !Single childless
-                    if (fam%ad(1)%age < 25) then
+                    if (fam%ad(1)%age < sys%rebateSys%minAgeMainSin) then
                         HBAppAmt = sys%rebatesys%YngSin
                     else
                         HBAppAmt = sys%rebatesys%MainSin
@@ -1471,7 +1473,7 @@ contains
                 end if
             else
                 !Couples
-                if ((fam%ad(1)%age < 18) .and. (fam%ad(2)%age < 18)) then
+                if ((fam%ad(1)%age < sys%rebateSys%minAgeMain) .and. (fam%ad(2)%age < sys%rebateSys%minAgeMain)) then
                     HBAppAmt = sys%rebatesys%YngCou
                 else
                     HBAppAmt = sys%rebatesys%MainCou
@@ -1483,15 +1485,47 @@ contains
 
             !Child additions
             if (fam%nkids > 0) then
-
-                do i = 1, fam%nkids
-                    do j = 1, sys%rebatesys%NumAgeRng
-                        if ((fam%kidage(i) >= sys%rebatesys%AgeRngl(j)) .and. (fam%kidage(i) <= sys%rebatesys%AgeRngu(j))) then
-                            HBAppAmt = HBAppAmt + sys%rebatesys%AddKid(j)
-                            exit
-                        end if
+                if (fam%nkids <= sys%rebatesys%MaxKids) then
+                    do i = 1, fam%nkids
+                        do j = 1, sys%rebatesys%NumAgeRng
+                            if ((fam%kidage(i) >= sys%rebatesys%AgeRngl(j)) .and. (fam%kidage(i) <= sys%rebatesys%AgeRngu(j))) then
+                                HBAppAmt = HBAppAmt + sys%rebatesys%AddKid(j)
+                                exit
+                            end if
+                        end do
                     end do
-                end do
+                    
+                else
+                  
+                    kidage(1:fam%nkids) = fam%kidage(1:fam%nkids)
+
+                    ! insertion sort
+                    do i = 2, fam%nkids
+                        tmp1 = kidage(i)
+                        j = i - 1
+                        do while (j >= 1)
+                            if (kidage(j) >= tmp1) exit
+                            kidage(j + 1) = kidage(j)
+                            j = j - 1
+                        end do
+                        kidage(j + 1) = tmp1
+                    end do
+
+                    ! Give child addition if (i) within first sys%rebatesys%MaxKids children, or (ii) previous child was same age (so multiple birth exemption applies)
+                    prevKidAge = -1
+                    do i = 1, fam%nkids
+                        if ((i <= sys%rebatesys%MaxKids) .or. (kidage(i) == prevKidAge)) then
+                            do j = 1, sys%rebatesys%NumAgeRng
+                                if ((kidage(i) >= sys%rebatesys%AgeRngl(j)) .and. (kidage(i) <= sys%rebatesys%AgeRngu(j))) then
+                                    HBAppAmt = HBAppAmt + sys%rebatesys%AddKid(j)
+                                end if
+                                exit
+                            end do
+                        end if
+                        prevKidAge = kidage(i)
+                    end do
+                  
+                end if
 
             end if
 
