@@ -1855,11 +1855,41 @@ contains
         type(sys_t), intent(in) :: sys
         type(fam_t), intent(in) :: fam
 
+        integer                 :: kidage(fam%nkids)
+        integer                 :: kidagesorted(fam%nkids)
+        integer                 :: i
+        integer                 :: maxageloc
+        integer                 :: prevKidAge
+        
         select case (fam%nkids)
         case (0)
             MaxCTCKid = 0.0_dp
+        
         case (1:)
+            if (fam%nkids <= sys%ctc%maxKids) then
             MaxCTCKid = real(fam%nkids, dp) * sys%ctc%kid
+            
+            else
+                ! Sort the kidage array
+                kidage = fam%kidage(1:fam%nkids)
+                do i = 1, fam%nkids
+                    maxageloc = maxloc(kidage, dim=1)
+                    kidagesorted(i) = kidage(maxageloc)
+                    kidage(maxageloc) = -1
+                end do
+
+                ! Give child element if (i) within first sys%ctc%maxKids children, or (ii) previous child was same age (so multiple birth exemption applies)
+                MaxCTCKid = 0.0_dp
+                prevKidAge = -1
+                do i = 1, fam%nkids
+                    if ((i <= sys%ctc%maxKids) .or. (kidagesorted(i) == prevKidAge)) then
+                        MaxCTCKid = MaxCTCKid + sys%ctc%kid
+                    end if
+                    prevKidAge = kidagesorted(i)
+                end do
+                
+            end if
+
         end select
 
     end function MaxCTCKid
