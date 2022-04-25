@@ -2316,8 +2316,8 @@ contains
     ! This introduces discontinuities in the BC. Does Andrew want these
     ! to be dealt with somehow?
         
-    !DEC$ ATTRIBUTES FORCEINLINE :: ChBen
-    pure subroutine CCTaxRefund(sys,fam,net)
+    !DEC$ ATTRIBUTES FORCEINLINE :: CCTaxRefund
+    pure subroutine CCTaxRefund(sys, fam, net)
 
         use fortax_type, only : sys_t, fam_t, net_t
 
@@ -2329,7 +2329,6 @@ contains
         
         integer                    :: nkidselig
         logical                    :: earningsOK
-
         
         net%tu%cctaxrefund = 0.0_dp
         
