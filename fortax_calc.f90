@@ -1656,7 +1656,7 @@ contains
                             if (fam%ad(1)%hrs >= sys%wtc%MinHrsKids - tol) FTDisreg = sys%wtc%NewDisreg
                         end if
                     else
-                        if (_famcouple_) then
+                        if (fam%couple == 1) then
                             if (((fam%ad(1)%hrs >= sys%wtc%MinHrsNoKids-tol) .and. &
                                 & (fam%ad(1)%age >= sys%wtc%MinAgeNoKids)) .or. &
                                 & ((fam%ad(2)%hrs >= sys%wtc%MinHrsNoKids-tol) .and. &
@@ -1864,10 +1864,9 @@ contains
         select case (fam%nkids)
         case (0)
             MaxCTCKid = 0.0_dp
-        
         case (1:)
             if (fam%nkids <= sys%ctc%maxKids) then
-            MaxCTCKid = real(fam%nkids, dp) * sys%ctc%kid
+                MaxCTCKid = real(fam%nkids, dp) * sys%ctc%kid
             
             else
                 ! Sort the kidage array
@@ -2025,12 +2024,12 @@ contains
 !        famearn = fam%ad(1)%earn
 !        if (fam%couple) famearn = famearn + fam%ad(2)%earn
 
-        if ((MaxCTCFam <= tol) .and. (MaxWTC <= tol)) then
+        if ((MaxCTCFam + MaxCTCKid <= tol) .and. (MaxWTC <= tol)) then
             net%tu%wtc = 0.0_dp
             net%tu%ctc = 0.0_dp
         else
             ! Higher threshold if only entitled to CTC
-            if ((MaxCTCFam > tol) .and. (MaxWTC <= tol)) then
+            if ((MaxCTCFam + MaxCTCKid > tol) .and. (MaxWTC <= tol)) then
                 Thr1 = sys%ntc%thr1hi
             else
                 ! Threshold lower in other cases
@@ -2290,6 +2289,73 @@ contains
 
     end function FCDisreg
 
+
+    
+    ! ----------------------CHILDCARE TAX REFUND----------------------
+
+    ! CCTaxRefund - Calculates tax refund on childcare spending
+
+    ! ----------------------CHILDCARE TAX REFUND----------------------
+
+    
+    ! CCTaxRefund
+    ! ----------------------------------------------------------------
+    ! Tax refund on childcare spending
+    ! Note there is a slight inconsistency in including this because
+    ! Fortax does not model childcare vouchers, which this tax refund
+    ! is nominally replacing
+    !
+    ! Other things to note
+    ! We assume all childcare spending is on children aged under 11 if
+    ! there are any children aged under 11 in the family
+    ! MinEarn threshold depends on age-specific minimum wage. TAXBEN
+    ! only has the age-25+ min wage threshold so that's all we do here
+    ! WTC/CTC enters the taper for other benefits (e.g. HB) so it's 
+    ! possible that CTC + WTC > CCTaxRefund, but dispinc with tax 
+    ! credits < dispinc with CCTaxRefund
+    ! This introduces discontinuities in the BC. Does Andrew want these
+    ! to be dealt with somehow?
+        
+    !DEC$ ATTRIBUTES FORCEINLINE :: ChBen
+    pure subroutine CCTaxRefund(sys,fam,net)
+
+        use fortax_type, only : sys_t, fam_t, net_t
+
+        implicit none
+
+        type(sys_t), intent(in)    :: sys
+        type(fam_t), intent(in)    :: fam
+        type(net_t), intent(inout) :: net
+        
+        integer                    :: nkidselig
+        logical                    :: earningsOK
+
+        
+        net%tu%cctaxrefund = 0.0_dp
+        
+        if (fam%ccexp > tol) then
+        
+            nkidselig = count(fam%kidage(:fam%nkids) <= sys%cctaxrefund%MaxAge)
+            
+            if (nkidselig > 0) then
+              
+                ! Earn right amount
+                earningsOK = .true.
+                if ((fam%ad(1)%earn < sys%cctaxrefund%MinEarn - tol) .or. (fam%ad(1)%earn > sys%cctaxrefund%MaxInc + tol)) earningsOK = .false.
+                if (fam%couple == 1) then
+                    if ((fam%ad(2)%earn < sys%cctaxrefund%MinEarn - tol) .or. (fam%ad(2)%earn > sys%cctaxrefund%MaxInc + tol)) earningsOK = .false.
+                end if
+              
+                if (earningsOK) then
+                    net%tu%cctaxrefund = min(fam%ccexp, sys%cctaxrefund%MaxPerChild*real(nkidselig, dp)) * sys%cctaxrefund%receiptProp
+                end if ! earnings OK
+              
+            end if ! has eligible children
+    
+        end if ! +ve ccexp
+        
+    end subroutine CCTaxRefund
+        
 
     ! ----------------------CHILD BENEFIT/MAT GRANT/FSM----------------------
 
