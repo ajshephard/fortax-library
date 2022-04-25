@@ -2862,7 +2862,7 @@ contains
     !DEC$ ATTRIBUTES FORCEINLINE :: ImposeBenCap
     pure subroutine ImposeBenCap(sys, fam, net)
 
-        use fortax_type, only : sys_t, fam_t, net_t
+        use fortax_type, only : sys_t, fam_t, net_t, lab
 
         implicit none
 
@@ -2873,11 +2873,14 @@ contains
         integer                    :: maxage
         real(dp)                   :: preCapBens
         real(dp)                   :: excess
-        real(dp)                   :: UCChCareElement
+        real(dp)                   :: maxWTC
+        real(dp)                   :: chcaresub
 
+
+        if ((fam%region .ne. lab%region%northern_ireland) .or. (sys%bencap%doNI == 1)) then
 
         ! If through UC
-        if (sys%bencap%doThruUC == 1) then
+            if (sys%bencap%doThruUC == 1) then
 
             ! UC benefit cap applies if:
                 ! Positive UC award
@@ -2902,13 +2905,18 @@ contains
 
             ! HB benefit cap applies if:
                 ! Positive HB award
-                ! Not entitled to WTC (taken to mean a zero award)
+                    ! Not entitled to WTC (excludes families where award has been fully tapered away)
                 ! Neither adult has reached qualifying age for pension credit
 
             maxage = fam%ad(1)%age
             if (fam%couple == 1) maxage = max(maxage, fam%ad(2)%age)
 
-            if ((net%tu%hben > tol) .and. (net%tu%wtc < tol) .and. (maxage < sys%statepen%penAgeWoman)) then
+                ! Need to find out whether would have been entitled to WTC if income had been sufficiently low
+                chcaresub = net%tu%chcaresub
+                call MaxWTCamt(sys,fam,net,maxWTC)
+                net%tu%chcaresub = chcaresub
+
+                if ((net%tu%hben > tol) .and. (maxWTC <= tol) .and. (maxage < sys%statepen%penAgeWoman)) then
 
                 ! Total benefits to be capped
                 preCapBens = net%tu%incsup + net%tu%hben + net%tu%chben + net%tu%ctc
@@ -2918,6 +2926,8 @@ contains
 
                 ! Reduce HB by excess (or until HB award is minimum HB award)
                 net%tu%hben = max(sys%hben%minAmt, net%tu%hben - excess)
+
+                end if
 
             end if
 
@@ -2935,28 +2945,49 @@ contains
     !DEC$ ATTRIBUTES FORCEINLINE :: BenCapLevel
     real(dp) pure function BenCapLevel(sys, fam)
 
-        use fortax_type, only : sys_t, fam_t
+        use fortax_type, only : sys_t, fam_t, lab
 
         implicit none
 
         type(sys_t), intent(in) :: sys
         type(fam_t), intent(in) :: fam
 
-        ! Level of cap depends only on family composition
-        if (fam%couple == 1) then
-            if (fam%nkids > 0) then
-                BenCapLevel = sys%bencap%couKids
-            else
-                BenCapLevel = sys%bencap%couNoKids
-            end if !fam%nkids > 0
-        else
-            if (fam%nkids > 0) then
-                BenCapLevel = sys%bencap%sinKids
-            else
-                BenCapLevel = sys%bencap%sinNoKids
-            end if !fam%nkids > 0
-        end if !fam%couple
+        if ((fam%region == lab%region%london) .and. (sys%bencap%LondonCapAmt == 1)) then
 
+        ! Level of cap depends only on family composition
+            if (fam%couple == 1) then
+                if (fam%nkids > 0) then
+                    BenCapLevel = sys%bencap%LondonCouKids
+                else
+                    BenCapLevel = sys%bencap%LondonCouNoKids
+                end if
+            else
+                if (fam%nkids > 0) then
+                    BenCapLevel = sys%bencap%LondonSinKids
+                else
+                    BenCapLevel = sys%bencap%LondonSinNoKids
+                end if
+            end if
+
+        else
+
+            ! Level of cap depends only on family composition
+            if (fam%couple == 1) then
+                if (fam%nkids > 0) then
+                    BenCapLevel = sys%bencap%couKids
+                else
+                    BenCapLevel = sys%bencap%couNoKids
+                end if
+            else
+                if (fam%nkids > 0) then
+                    BenCapLevel = sys%bencap%sinKids
+                else
+                    BenCapLevel = sys%bencap%sinNoKids
+                end if
+            end if
+
+
+        end if
 
     end function BenCapLevel
 
@@ -3094,7 +3125,45 @@ contains
         call fsm(sys, fam, net)
 
 
-        !7. HB, CTB AND CCB
+        !7. Tax refund on childcare expenditure
+        !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        
+        if (sys%cctaxrefund%doCCTaxRefund == 1) then
+            call CCTaxRefund(sys, fam, net)
+            
+            ! You can't get this tax refund at the same time as tax credits or universal credit, so pick whichever is higher
+            ! matgrant eligibility also at stake
+            if (sys%fc%dofamcred == 1) then
+                if (net%tu%cctaxrefund > net%tu%fc) then
+                    net%tu%fc = 0.0_dp
+                    net%tu%chcaresub = net%tu%cctaxrefund
+                else
+                    net%tu%cctaxrefund = 0.0_dp
+                end if
+            else if (sys%ntc%donewtaxcred == 1) then
+                if (net%tu%cctaxrefund > net%tu%ctc + net%tu%wtc) then
+                    net%tu%ctc = 0.0_dp
+                    net%tu%wtc = 0.0_dp
+                    net%tu%chcaresub = net%tu%cctaxrefund
+                else
+                    net%tu%cctaxrefund = 0.0_dp
+                end if
+            else if (sys%uc%doUnivCred == 1) then
+                if (net%tu%cctaxrefund > net%tu%uc) then
+                    net%tu%uc = 0.0_dp
+                    net%tu%chcaresub = net%tu%cctaxrefund
+                else
+                    net%tu%cctaxrefund = 0.0_dp
+                end if
+            end if
+            
+        else
+            net%tu%cctaxrefund = 0.0_dp
+        end if
+
+        
+        
+        !8. HB, CTB AND CCB
         !!!!!!!!!!!!!!!!!!!
 
         ! Preliminary calculations (disregRebate passed to subsequent routines)
@@ -3128,11 +3197,18 @@ contains
         end if
 
 
+        !9. BENEFIT CAP
+        !!!!!!!!!!!!!!!
+        
+        if (sys%bencap%docap == 1) then
+            call imposeBenCap(sys,fam,net)
+        end if
+        
 
         ! Disposable income
         !!!!!!!!!!!!!!!!!!!
 
-        net%tu%totben = net%tu%chben + net%tu%matgrant + net%tu%fc + net%tu%wtc + net%tu%ctc &
+        net%tu%totben = net%tu%chben + net%tu%matgrant + net%tu%fc + net%tu%wtc + net%tu%ctc + net%tu%cctaxrefund &
             & + net%tu%incsup + net%tu%fsm + net%tu%hben + net%tu%ctaxben + net%tu%polltaxben &
             & + net%tu%uc
 
