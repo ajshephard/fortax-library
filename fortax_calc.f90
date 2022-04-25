@@ -131,15 +131,15 @@ contains
 
         ! Transferable marriage allowance (from April 2015)
         if ((sys%inctax%doTPA == 1) .and. (fam%couple == 1) .and. (fam%married == 1)) then
-            
+
             ! Calculate unused personal allowance
             persAllowUnused1 = max(persAllow1 - fam%ad(1)%earn, 0.0_dp)
             persAllowUnused2 = max(persAllow2 - fam%ad(2)%earn, 0.0_dp)
-          
+
             ! Calculate whether higher-rate taxpayer
             isHRT1 = (net%ad(1)%taxable > sys%inctax%bands(2))
             isHRT2 = (net%ad(2)%taxable > sys%inctax%bands(2))
-            
+
             ! Transfer personal allowance from adult 1 to adult 2
             if ((persAllowUnused1 > tol) .and. (persAllowUnused2 <= tol) .and. (.not. isHRT2)) then
                 net%ad(2)%taxable = max(net%ad(2)%taxable - min(persAllowUnused1, sys%inctax%maxTPA), 0.0_dp)
@@ -151,7 +151,7 @@ contains
             end if
 
         end if
-        
+
 
         ! Rebate for Class 4 NI contributions (1985/86-1995/96)
         if (sys%inctax%c4rebate > tol) then
@@ -677,6 +677,7 @@ contains
     ! prelimcalc   - Preliminary calculations for HBen, CTBen and CCBen
     ! HBen         - Calculates housing benefit for family
     ! HBFull       - Works out whether family is entitled to full HB
+    ! HBUnderOccMaxBedrooms - Calculates maximum number of bedrooms for under-occupancy charge
     ! ctaxBen      - Calculates council tax benefit for family
     ! polltaxBen   - Calculates community charge benefit for family
     ! HBAppAmt     - Calculates applicable amount for HB/CTB/CCB (called by prelimcalc)
@@ -727,6 +728,7 @@ contains
 
                 !Calculate CT
                 select case (fam%region)
+
                     case (lab%region%wales)
                         select case (fam%ctband)
                             case (lab%ctax%banda)
@@ -975,6 +977,8 @@ contains
         real(dp),    intent(in)    :: disregRebate
 
         real(dp)                   :: eligrent
+        logical                    :: underOccChargeOperational
+        integer                    :: numExtraBedrooms
 
         if (fam%rent > 0.0_dp) then
 
@@ -982,6 +986,34 @@ contains
             eligrent = fam%rent
             if ((sys%rebatesys%docap == 1) .and. (fam%tenure == lab%tenure%private_renter)) then
                 eligrent = min(fam%rent, fam%rentcap)
+            end if
+
+
+            ! Under-occupancy charge (bedroom tax)
+            if ((sys%hben%doUnderOccCharge == 1) .and. (fam%tenure == lab%tenure%social_renter) .and. (fam%bedrooms > 1)) then
+
+                ! Is Under-occupancy charge operational?
+                underOccChargeOperational = .true.
+                if (fam%region == lab%region%scotland) then
+                    underOccChargeOperational = sys%hben%doUnderOccChargeScotland == 1
+                else if (fam%region == lab%region%northern_ireland) then
+                    underOccChargeOperational = sys%hben%doUnderOccChargeNI == 1
+                end if
+
+                ! Impose under-occupancy charge if operational
+                if (underOccChargeOperational) then
+                    numExtraBedrooms = max(fam%bedrooms - HBUnderOccMaxBedrooms(sys, fam), 0)
+                    if (numExtraBedrooms > 0) then
+                        eligrent = eligrent * (1.0_dp - sys%hben%underOccRates(min(numExtraBedrooms, sys%hben%numUnderOccBands)))
+                    end if
+                end if
+
+            end if
+
+
+            ! Local Housing Allowance (private renters)
+            if ((sys%hben%doLHA == 1) .and. (fam%tenure == lab%tenure%private_renter)) then
+                eligrent = min(eligrent, sys%hben%LHARates(LHABand(sys,fam)))
             end if
 
             !Passport to full entitlement if on IS or income-based JSA
@@ -1040,6 +1072,200 @@ contains
         end if
 
     end function HBFull
+
+
+
+    ! HBUnderOccMaxBedrooms
+    ! -----------------------------------------------------------------------
+    ! Calculate maximum number of bedrooms for under-occupancy charge
+    ! Note: the rules are slightly different for LHA
+
+    !DEC$ ATTRIBUTES FORCEINLINE :: HBUnderOccMaxBedrooms
+    integer pure function HBUnderOccMaxBedrooms(sys, fam)
+
+        use fortax_type, only : sys_t, fam_t
+
+        implicit none
+
+        type(sys_t), intent(in) :: sys
+        type(fam_t), intent(in) :: fam
+
+        integer                 :: kidage(fam%nkids), kidagesorted(fam%nkids)
+        integer                 :: kidsex(fam%nkids)
+        integer                 :: kidsexsorted(fam%nkids)
+        integer                 :: maxageloc
+        logical                 :: taken(fam%nkids)
+        integer                 :: i, j
+
+        HBUnderOccMaxBedrooms = 1
+
+        if (fam%nkids > 0) then
+
+            ! Sort kidage and kidsex arrays
+            kidage = fam%kidage(1:fam%nkids)
+            kidsex = fam%kidsex(1:fam%nkids)
+            do i = 1, fam%nkids
+                maxageloc = maxloc(kidage, dim=1)
+                kidagesorted(i) = kidage(maxageloc)
+                kidsexsorted(i) = kidsex(maxageloc)
+                kidage(maxageloc) = -1
+            end do
+
+            ! Work out max number of bedrooms
+            taken = .false.
+            do i = 1, fam%nkids
+
+                if (.not. taken(i)) then
+
+                    taken(i) = .true.
+                    HBUnderOccMaxBedrooms = HBUnderOccMaxBedrooms + 1
+
+                    ! Can child i be paired up with anyone?
+                    select case (kidagesorted(i))
+
+                        ! Children aged 10-15 can only be paired with other children of the same sex
+                        case (10:15)
+                            do j = i+1, fam%nkids
+                                if (.not. taken(j)) then
+                                    if (kidsexsorted(j) == kidsexsorted(i)) then
+                                        taken(j) = .true.
+                                        exit
+                                    end if
+                                end if
+                            end do
+
+                        ! Children aged 0-9 can be paired with children of different sex
+                        case (:9)
+                            do j = i+1, fam%nkids
+                                if (.not. taken(j)) then
+                                    taken(j) = .true.
+                                    exit
+                                end if
+                            end do
+
+                    end select
+
+                end if
+
+            end do
+
+        end if
+
+    end function HBUnderOccMaxBedrooms
+
+    !DEC$ ATTRIBUTES FORCEINLINE :: HBUnderOccMaxBedrooms2
+    integer pure function HBUnderOccMaxBedrooms2(sys, fam)
+
+        use fortax_type, only : sys_t, fam_t, maxKids
+
+        implicit none
+
+        type(sys_t), intent(in) :: sys
+        type(fam_t), intent(in) :: fam
+
+        integer :: kidage(maxKids)
+        integer :: kidsex(maxKids)
+        logical :: taken(maxKids)
+        integer :: i, j
+        integer :: tmp1, tmp2
+
+        HBUnderOccMaxBedrooms2 = 1
+
+        if (fam%nkids > 0) then
+
+            ! Sort kidage and kidfemale arrays
+            kidage(1:fam%nkids) = fam%kidage(1:fam%nkids)
+            kidsex(1:fam%nkids) = fam%kidsex(1:fam%nkids)
+
+            ! insertion sort
+            do i = 2, fam%nkids
+                tmp1 = kidage(i)
+                tmp2 = kidsex(i)
+                j = i - 1
+                do while (j >= 1)
+                    if (kidage(j) >= tmp1) exit
+                    kidage(j + 1) = kidage(j)
+                    kidsex(j + 1) = kidsex(j)
+                    j = j - 1
+                end do
+                kidage(j + 1) = tmp1
+                kidsex(j + 1) = tmp2
+            end do
+
+            ! Work out max number of bedrooms
+            taken = .false.
+            do i = 1, fam%nkids
+
+                if (.not. taken(i)) then
+
+                    taken(i) = .true.
+                    HBUnderOccMaxBedrooms2 = HBUnderOccMaxBedrooms2 + 1
+
+                    ! Can child i be paired up with anyone?
+                    select case (kidage(i))
+
+                        ! Children aged 10-15 can only be paired with other children of the same sex
+                        case (10:15)
+                            do j = i + 1, fam%nkids
+                                if (.not. taken(j)) then
+                                    if (kidsex(j) == kidsex(i)) then
+                                        taken(j) = .true.
+                                        exit
+                                    end if
+                                end if
+                            end do
+
+                        ! Children aged 0-9 can be paired with children of different sex
+                        case (:9)
+                            do j = i + 1, fam%nkids
+                                if (.not. taken(j)) then
+                                    taken(j) = .true.
+                                    exit
+                                end if
+                            end do
+
+                    end select
+
+                end if
+
+            end do
+
+        end if
+
+    end function HBUnderOccMaxBedrooms2
+
+    ! LHABand
+    ! -----------------------------------------------------------------------
+    ! Calculate relevant LHA band for family
+
+    !DEC$ ATTRIBUTES FORCEINLINE :: LHABand
+    integer pure function LHABand(sys,fam)
+
+        use fortax_type, only : sys_t, fam_t
+
+        implicit none
+
+        type(sys_t), intent(in) :: sys
+        type(fam_t), intent(in) :: fam
+
+        integer                 :: maxBedrooms
+
+        ! Find maximum number of bedrooms allowed
+        ! Same as for under-occupancy charge but with a maximum of four bedrooms
+        maxBedrooms = min(HBUnderOccMaxBedrooms(sys, fam), 4)
+
+
+        ! To get the shared-accommodation rate, you need to be single and under 35
+        if ((fam%couple == 0) .and. (maxBedrooms == 1) .and. (fam%ad(1)%age < sys%hben%LHASharedAccAge)) then
+            LHABand = 1
+        else
+            LHABand = maxBedrooms + 1
+        end if
+
+
+    end function LHABand
+
+
 
 
     ! ctaxBen
@@ -1101,7 +1327,7 @@ contains
                             case (lab%ctax%bandh)
                                 maxctb = maxctb * sys%ctax%ScotlandRatioE / sys%ctax%ScotlandRatioH
                         end select
-                    
+
                     case default
                         select case (fam%ctband)
                             case (lab%ctax%bandf)
