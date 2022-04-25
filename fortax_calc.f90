@@ -2489,6 +2489,8 @@ contains
                 if (net%tu%fc > tol) dogrant = .true.
             else if (sys%rebatesys%rulesunderNTC == 1) then
                 if (net%tu%ctc > MaxCTCFam(sys, fam) + tol) dogrant = .true.
+            else if (sys%rebatesys%rulesUnderUC == 1) then
+                if (net%tu%uc > tol) dogrant = .true.
             end if
 
             !From Apr-11: no maternity grant if there's another child aged under 16 in the family (except for multiple
@@ -2516,24 +2518,32 @@ contains
     !DEC$ ATTRIBUTES FORCEINLINE :: fsm
     pure subroutine fsm(sys, fam, net)
 
-        use fortax_type, only : sys_t, fam_t, net_t
+        use fortax_type, only : sys_t, fam_t, net_t, lab
 
         implicit none
 
         type(sys_t), intent(in)    :: sys
         type(fam_t), intent(in)    :: fam
         type(net_t), intent(inout) :: net
+        logical                    :: passesMeansTest
+        logical                    :: inEnglandOrScotland
 
         integer                     :: i
 
         ! Before April 2003, you get FSM if you're on IS/IB-JSA
         ! From April 2003, you also get it if you're on full CTC and zero WTC
+        ! From September 2014, FSM are given to all English and Scottish children in reception, year 1 and year2
 
         net%tu%fsm = 0.0_dp
-        if (((net%tu%incsup > tol) .or. ((net%tu%ctc > tol) .and. (net%tu%wtc <= tol) &
-            & .and. (net%tu%pretaxearn <= sys%ntc%thr1hi + tol))) .and. (sys%extra%fsminappamt == 0)) then
+        if (sys%extra%fsminappamt == 0) then
+            passesMeansTest = ((net%tu%incsup > tol) .or. ((net%tu%ctc > tol) .and. (net%tu%wtc <= tol) &
+                .and. (net%tu%pretaxearn <= sys%ntc%thr1hi + tol)))
+            inEnglandOrScotland = ((fam%region .ne. lab%region%northern_ireland) .and. (fam%region .ne. lab%region%wales))
             do i = 1, fam%nkids
-                if (fam%kidage(i) > 4) net%tu%fsm = net%tu%fsm + sys%incsup%ValFSM
+                if ((fam%kidage(i) >= sys%incSup%MinAgeFSM) &
+                    & .and. (((fam%kidage(i) <= sys%incSup%MaxAgeUniversalFSM) .and. inEnglandOrScotland) &
+                    & .or. (passesMeansTest))) &
+                    net%tu%fsm = net%tu%fsm + sys%incsup%ValFSM
             end do
         end if
 
@@ -2660,17 +2670,41 @@ contains
         type(sys_t), intent(in) :: sys
         type(fam_t), intent(in) :: fam
 
+        integer                 :: kidage(fam%nkids), kidagesorted(fam%nkids)
+        integer                 :: maxageloc
+        integer                 :: i
+        integer                 :: prevKidAge
+        
         select case (fam%nkids)
         case (0)
             UCKid = 0.0_dp
         case (1:)
+            if (fam%nkids <= sys%uc%MaxKids) then
             UCKid = sys%uc%FirstKid + real(fam%nkids-1,dp)*sys%uc%OtherKid
+
+            else
+                ! Sort the kidage array
+                kidage = fam%kidage(1:fam%nkids)
+                do i = 1, fam%nkids
+                    maxageloc = maxloc(kidage, dim=1)
+                    kidagesorted(i) = kidage(maxageloc)
+                    kidage(maxageloc) = -1
+                end do
+            end if
+
+                ! Give child element if (i) within first sys%uc%maxKids children, or (ii) previous child was same age (so multiple birth exemption applies)
+                UCKid = sys%uc%FirstKid
+                prevKidAge = kidagesorted(1)
+                do i = 2, fam%nkids
+                    if ((i <= sys%uc%maxKids) .or. (kidagesorted(i) == prevKidAge)) then
+                        UCKid = UCKid + sys%uc%OtherKid
+                    end if
+                    prevKidAge = kidagesorted(i)
+                end do
+
         end select
 
     end function UCKid
-
-
-
 
 
 
