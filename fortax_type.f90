@@ -193,6 +193,7 @@ integer :: couple
         real(dp) :: banddratio
         integer :: intdate
         integer :: famtype
+        integer :: yngkid
         type(famad_t) :: ad(2)
     end type fam_t
 
@@ -663,6 +664,7 @@ contains
         fam%banddratio = 1.0
         fam%intdate = 19900101
         fam%famtype = lab%famtype%single_nokids
+        fam%yngkid = 0
 
         fam%ad%age = 25
         fam%ad%selfemp = 0
@@ -716,6 +718,7 @@ contains
         call desc_f90(funit, "Council tax band-D ratio", "banddratio", fam%banddratio)
         call desc_f90(funit, "Interview date", "intdate", fam%intdate)
         call desc_f90(funit, "Family type", "famtype", fam%famtype, label_famtype(fam%famtype))
+        call desc_f90(funit, "Youngest child", "yngkid", fam%yngkid)
         write(funit, '(A)') repeat("=", 62)
 
         ! write(funit, *)
@@ -1108,6 +1111,7 @@ integer, intent(in), optional :: age2
         if (present(ctband)) fam%ctband = ctband
         if (present(banddratio)) fam%banddratio = banddratio
         if (present(intdate)) fam%intdate = intdate
+
 
         if (present(age1)) fam%ad(1)%age = age1
         if (present(selfemp1)) fam%ad(1)%selfemp = selfemp1
@@ -2240,6 +2244,7 @@ integer, intent(in), optional :: age2
         call write_f90(funit, "fam%banddratio", fam%banddratio)
         call write_f90(funit, "fam%intdate", fam%intdate)
         call write_f90(funit, "fam%famtype", fam%famtype)
+        call write_f90(funit, "fam%yngkid", fam%yngkid)
 
         call write_f90(funit, "fam%ad(1)%age", fam%ad(1)%age)
         call write_f90(funit, "fam%ad(1)%selfemp", fam%ad(1)%selfemp)
@@ -2520,6 +2525,12 @@ integer, intent(in), optional :: age2
                 fam%kidage(j + 1) = tmp1
                 fam%kidsex(j + 1) = tmp2
             end do
+
+            fam%yngkid = fam%kidage(fam%nkids)
+
+        else
+
+            fam%yngkid = -1
 
         end if
 

@@ -871,6 +871,12 @@ contains
                 fam%kidsex(j + 1) = tmp2
             end do
 
+            fam%yngkid = fam%kidage(fam%nkids)
+
+        else
+
+            fam%yngkid = -1
+
         end if
 
         ! familty type

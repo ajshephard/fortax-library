@@ -15,3 +15,4 @@
 @:fortaxdef(double,  banddratio, "Council tax band-D ratio", null, value = 1.0)
 @:fortaxdef(integer, intdate,    "Interview date",           null, value = 19900101)
 @:fortaxdef(integer, famtype,    "Family type",              null, value = ${fortax_value_lab("famtype", "single_nokids")}$, label = famtype, ignore = True)
+@:fortaxdef(integer, yngkid,     "Youngest child",           null, ignore = True)
