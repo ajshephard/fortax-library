@@ -1,6 +1,6 @@
 {
   "sysname": "Autumn99",
-  "sysdesc": "TB system as at 01/12/1999",
+  "sysdesc": "TB system as at 12/1/1999",
   "inctax": {
     "numbands": 3,
     "pa": 0.83365384615384599E+2,
@@ -8,6 +8,8 @@
     "disablePATaperRounding": 0,
     "paTaperThresh": 0.0E+0,
     "paTaperRate": 0.0E+0,
+    "doTPA": 0,
+    "maxTPA": 0.0E+0,
     "mma": 0.37884615384615401E+2,
     "ctc": 0.0E+0,
     "ctcyng": 0.0E+0,
@@ -103,7 +105,8 @@
   "ctc": {
     "fam": 0.0E+0,
     "baby": 0.0E+0,
-    "kid": 0.0E+0
+    "kid": 0.0E+0,
+    "maxKids": 0
   },
   "wtc": {
     "Basic": 0.0E+0,
@@ -132,16 +135,28 @@
     "taperCTCInOneGo": 0,
     "MinAmt": 0.0E+0
   },
+  "cctaxrefund": {
+    "doCCTaxRefund": 0,
+    "MaxPerChild": 0.0E+0,
+    "MaxAge": 0,
+    "ReceiptProp": 0.0E+0,
+    "MinEarn": 0.0E+0,
+    "MaxInc": 0.0E+0
+  },
   "incsup": {
     "doIncSup": 1,
     "IncChben": 1,
     "NumAgeRng": 4,
+    "MinAgeMain": 18,
+    "MinAgeMainSin": 25,
     "MainCou": 0.80650000000000006E+2,
     "YngCou": 0.61350000000000001E+2,
     "MainLP": 0.51399999999999999E+2,
     "YngLP": 0.30949999999999999E+2,
     "MainSin": 0.51399999999999999E+2,
     "YngSin": 0.40700000000000003E+2,
+    "MinAgeFSM": 5,
+    "MaxAgeUniversalFSM": 0,
     "ValFSM": 0.44000000000000004E+1,
     "DisregLP": 0.15E+2,
     "DisregSin": 0.5E+1,
@@ -174,13 +189,30 @@
     "docounciltax": 1,
     "bandD": 0.151380769230769E+2,
     "SinDis": 0.25E+0,
-    "RatioA": 0.67000000000000004E+0,
-    "RatioB": 0.77000000000000002E+0,
-    "RatioC": 0.88E+0,
-    "RatioE": 0.122E+1,
-    "RatioF": 0.14399999999999999E+1,
-    "RatioG": 0.16699999999999999E+1,
-    "RatioH": 0.2E+1
+    "EnglandRatioA": 0.67000000000000004E+0,
+    "EnglandRatioB": 0.77000000000000002E+0,
+    "EnglandRatioC": 0.88E+0,
+    "EnglandRatioE": 0.122E+1,
+    "EnglandRatioF": 0.14399999999999999E+1,
+    "EnglandRatioG": 0.16699999999999999E+1,
+    "EnglandRatioH": 0.2E+1,
+    "EnglandRatioI": 0.2E+1,
+    "ScotlandRatioA": 0.67000000000000004E+0,
+    "ScotlandRatioB": 0.77000000000000002E+0,
+    "ScotlandRatioC": 0.88E+0,
+    "ScotlandRatioE": 0.122E+1,
+    "ScotlandRatioF": 0.14399999999999999E+1,
+    "ScotlandRatioG": 0.16699999999999999E+1,
+    "ScotlandRatioH": 0.2E+1,
+    "ScotlandRatioI": 0.2E+1,
+    "WalesRatioA": 0.67000000000000004E+0,
+    "WalesRatioB": 0.77000000000000002E+0,
+    "WalesRatioC": 0.88E+0,
+    "WalesRatioE": 0.122E+1,
+    "WalesRatioF": 0.14399999999999999E+1,
+    "WalesRatioG": 0.16699999999999999E+1,
+    "WalesRatioH": 0.2E+1,
+    "WalesRatioI": 0.2E+1
   },
   "rebatesys": {
     "RulesUnderFC": 0,
@@ -190,6 +222,8 @@
     "NumAgeRng": 4,
     "Restrict": 1,
     "docap": 0,
+    "MinAgeMain": 18,
+    "MinAgeMainSin": 25,
     "MainCou": 0.80650000000000006E+2,
     "YngCou": 0.61350000000000001E+2,
     "MainLP": 0.51399999999999999E+2,
@@ -224,12 +258,22 @@
       0.25899999999999999E+2,
       0.30949999999999999E+2,
       0.30949999999999999E+2
-    ]
+    ],
+    "MaxKids": 98
   },
   "hben": {
     "doHBen": 1,
     "taper": 0.65000000000000002E+0,
-    "MinAmt": 0.5E+0
+    "MinAmt": 0.5E+0,
+    "doUnderOccCharge": 0,
+    "doUnderOccChargeScotland": 0,
+    "doUnderOccChargeNI": 0,
+    "numUnderOccBands": 0,
+    "underOccRates": [],
+    "doLHA": 0,
+    "LHASharedAccAge": 0,
+    "numLHABands": 0,
+    "LHARates": []
   },
   "ctaxben": {
     "docounciltaxben": 1,
@@ -253,6 +297,7 @@
     "MinAgeMain": 0,
     "FirstKid": 0.0E+0,
     "OtherKid": 0.0E+0,
+    "MaxKids": 0,
     "MaxCC1": 0.0E+0,
     "MaxCC2": 0.0E+0,
     "PropCC": 0.0E+0,
@@ -276,11 +321,17 @@
   },
   "bencap": {
     "doCap": 0,
+    "doNI": 0,
     "doThruUC": 0,
     "sinNoKids": 0.1E+101,
     "sinKids": 0.1E+101,
     "couNoKids": 0.1E+101,
     "couKids": 0.1E+101,
+    "LondonCapAmt": 0,
+    "LondonSinNoKids": 0.99999E+5,
+    "LondonSinKids": 0.99999E+5,
+    "LondonCouNoKids": 0.99999E+5,
+    "LondonCouKids": 0.99999E+5,
     "UCEarnThr": 0.0E+0
   },
   "extra": {
