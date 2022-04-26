@@ -8,7 +8,7 @@
 
 #! list for value labels
 
-#:set LABLIST = ['bool', 'ctax', 'tenure', 'region', 'sex']
+#:set LABLIST = ['bool', 'ctax', 'tenure', 'region', 'sex', 'famtype']
 
 #! prevision type mapping
 

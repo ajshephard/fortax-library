@@ -840,4 +840,54 @@ contains
         end if
     end subroutine desc_f90doublearray2
 
+    subroutine fam_refresh(fam)
+        implicit none
+        type(fam_t), intent(inout) :: fam
+
+        integer :: i, j
+        integer :: tmp1, tmp2
+
+        ! if married, must be a couple
+
+        if (fam%married == 1) fam%couple = 1
+
+        fam%nkids = max(fam%nkids, 0)
+
+        ! Sort kidage and kidsex arrays
+        if (fam%nkids > 0) then
+
+            ! insertion sort
+            do i = 2, fam%nkids
+                tmp1 = fam%kidage(i)
+                tmp2 = fam%kidsex(i)
+                j = i - 1
+                do while (j >= 1)
+                    if (fam%kidage(j) >= tmp1) exit
+                    fam%kidage(j + 1) = fam%kidage(j)
+                    fam%kidsex(j + 1) = fam%kidsex(j)
+                    j = j - 1
+                end do
+                fam%kidage(j + 1) = tmp1
+                fam%kidsex(j + 1) = tmp2
+            end do
+
+        end if
+
+        ! familty type
+        if (fam%couple == 0) then
+            if (fam%nkids == 0) then
+                fam%famtype = lab%famtype%single_nokids
+            else
+                fam%famtype = lab%famtype%single_kids
+            end if
+        else
+            if (fam%nkids == 0) then
+                fam%famtype = lab%famtype%couple_nokids
+            else
+                fam%famtype = lab%famtype%couple_kids
+            end if
+        end if
+
+    end subroutine fam_refresh
+
 end module fortax_type

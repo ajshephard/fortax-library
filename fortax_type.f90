@@ -63,12 +63,12 @@ module fortax_type
     ! are still defined for possible future use
 
     type :: lab_bool_t
-        integer :: no
+integer :: no
         integer :: yes
     end type lab_bool_t
 
     type :: lab_ctax_t
-        integer :: banda
+integer :: banda
         integer :: bandb
         integer :: bandc
         integer :: bandd
@@ -80,7 +80,7 @@ module fortax_type
     end type lab_ctax_t
 
     type :: lab_tenure_t
-        integer :: own_outright
+integer :: own_outright
         integer :: mortgage
         integer :: part_own
         integer :: social_renter
@@ -90,7 +90,7 @@ module fortax_type
     end type lab_tenure_t
 
     type :: lab_region_t
-        integer :: north_east
+integer :: north_east
         integer :: north_west
         integer :: yorks
         integer :: east_midlands
@@ -105,9 +105,16 @@ module fortax_type
     end type lab_region_t
 
     type :: lab_sex_t
-        integer :: male
+integer :: male
         integer :: female
     end type lab_sex_t
+
+    type :: lab_famtype_t
+integer :: single_nokids
+        integer :: single_kids
+        integer :: couple_nokids
+        integer :: couple_kids
+    end type lab_famtype_t
 
 
     type :: lab_t
@@ -116,6 +123,7 @@ module fortax_type
         type(lab_tenure_t) :: tenure
         type(lab_region_t) :: region
         type(lab_sex_t) :: sex
+        type(lab_famtype_t) :: famtype
     end type lab_t
 
     type(lab_t), parameter :: lab = lab_t( &
@@ -123,7 +131,8 @@ module fortax_type
         lab_ctax_t(1, 2, 3, 4, 5, 6, 7, 8, 9), &
         lab_tenure_t(1, 2, 3, 4, 5, 6, 7), &
         lab_region_t(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12), &
-        lab_sex_t(0, 1))
+        lab_sex_t(0, 1), &
+        lab_famtype_t(1, 2, 3, 4))
 
 
     ! rpi_t
@@ -153,7 +162,7 @@ module fortax_type
     ! defines the adult level family type structure (see fam_t below)
 
     type, bind(c) :: famad_t
-        integer :: age
+integer :: age
         integer :: selfemp
         real(dp) :: hrs
         real(dp) :: earn
@@ -167,7 +176,7 @@ module fortax_type
     ! of a family is defined in here.
 
     type, bind(c) :: fam_t
-        integer :: couple
+integer :: couple
         integer :: married
         real(dp) :: ccexp
         real(dp) :: maint
@@ -183,6 +192,7 @@ module fortax_type
         integer :: ctband
         real(dp) :: banddratio
         integer :: intdate
+        integer :: famtype
         type(famad_t) :: ad(2)
     end type fam_t
 
@@ -192,7 +202,7 @@ module fortax_type
     ! main calculation routines (see net_t below).
 
     type, bind(c) :: netad_t
-        real(dp) :: taxable
+real(dp) :: taxable
         real(dp) :: inctax
         real(dp) :: natins
         real(dp) :: natinsc1
@@ -208,7 +218,7 @@ module fortax_type
     ! main calculation routines (see net_t below).
 
     type, bind(c) :: nettu_t
-        real(dp) :: pretaxearn
+real(dp) :: pretaxearn
         real(dp) :: posttaxearn
         real(dp) :: chben
         real(dp) :: matgrant
@@ -299,7 +309,7 @@ module fortax_type
     ! module fortax_calc
 
     type, bind(c) :: inctax_t
-        integer :: numbands
+integer :: numbands
         real(dp) :: pa
         integer :: doPATaper
         integer :: disablePATaperRounding
@@ -318,7 +328,7 @@ module fortax_type
     end type inctax_t
 
     type, bind(c) :: natins_t
-        integer :: numrates
+integer :: numrates
         integer :: c4nrates
         real(dp) :: c2floor
         real(dp) :: c2rate
@@ -330,7 +340,7 @@ module fortax_type
     end type natins_t
 
     type, bind(c) :: chben_t
-        integer :: doChBen
+integer :: doChBen
         real(dp) :: basic
         real(dp) :: kid1xtr
         real(dp) :: opf
@@ -344,7 +354,7 @@ module fortax_type
     end type chben_t
 
     type, bind(c) :: fc_t
-        integer :: dofamcred
+integer :: dofamcred
         integer :: NumAgeRng
         integer :: MaxAgeCC
         integer :: WFTCMaxAgeCC
@@ -367,14 +377,14 @@ module fortax_type
     end type fc_t
 
     type, bind(c) :: ctc_t
-        real(dp) :: fam
+real(dp) :: fam
         real(dp) :: baby
         real(dp) :: kid
         integer :: maxKids
     end type ctc_t
 
     type, bind(c) :: wtc_t
-        real(dp) :: Basic
+real(dp) :: Basic
         real(dp) :: CouLP
         real(dp) :: FT
         real(dp) :: MinHrsKids
@@ -392,7 +402,7 @@ module fortax_type
     end type wtc_t
 
     type, bind(c) :: ntc_t
-        integer :: donewtaxcred
+integer :: donewtaxcred
         real(dp) :: thr1lo
         real(dp) :: thr1hi
         real(dp) :: thr2
@@ -403,7 +413,7 @@ module fortax_type
     end type ntc_t
 
     type, bind(c) :: cctaxrefund_t
-        integer :: doCCTaxRefund
+integer :: doCCTaxRefund
         real(dp) :: MaxPerChild
         integer :: MaxAge
         real(dp) :: ReceiptProp
@@ -412,7 +422,7 @@ module fortax_type
     end type cctaxrefund_t
 
     type, bind(c) :: incsup_t
-        integer :: doIncSup
+integer :: doIncSup
         integer :: IncChben
         integer :: NumAgeRng
         integer :: MinAgeMain
@@ -440,7 +450,7 @@ module fortax_type
     end type incsup_t
 
     type, bind(c) :: ctax_t
-        integer :: docounciltax
+integer :: docounciltax
         real(dp) :: bandD
         real(dp) :: SinDis
         real(dp) :: EnglandRatioA
@@ -470,7 +480,7 @@ module fortax_type
     end type ctax_t
 
     type, bind(c) :: rebatesys_t
-        integer :: RulesUnderFC
+integer :: RulesUnderFC
         integer :: RulesUnderWFTC
         integer :: RulesUnderNTC
         integer :: RulesUnderUC
@@ -503,7 +513,7 @@ module fortax_type
     end type rebatesys_t
 
     type, bind(c) :: hben_t
-        integer :: doHBen
+integer :: doHBen
         real(dp) :: taper
         real(dp) :: MinAmt
         integer :: doUnderOccCharge
@@ -518,14 +528,14 @@ module fortax_type
     end type hben_t
 
     type, bind(c) :: ctaxben_t
-        integer :: docounciltaxben
+integer :: docounciltaxben
         real(dp) :: taper
         integer :: doEntitlementCut
         real(dp) :: entitlementShare
     end type ctaxben_t
 
     type, bind(c) :: ccben_t
-        integer :: dopolltax
+integer :: dopolltax
         real(dp) :: taper
         real(dp) :: PropElig
         real(dp) :: MinAmt
@@ -533,7 +543,7 @@ module fortax_type
     end type ccben_t
 
     type, bind(c) :: uc_t
-        integer :: doUnivCred
+integer :: doUnivCred
         real(dp) :: MainCou
         real(dp) :: YngCou
         real(dp) :: MainSin
@@ -560,13 +570,13 @@ module fortax_type
     end type uc_t
 
     type, bind(c) :: statepen_t
-        integer :: doStatePen
+integer :: doStatePen
         integer :: PenAgeMan
         integer :: PenAgeWoman
     end type statepen_t
 
     type, bind(c) :: bencap_t
-        integer :: doCap
+integer :: doCap
         integer :: doNI
         integer :: doThruUC
         real(dp) :: sinNoKids
@@ -582,7 +592,7 @@ module fortax_type
     end type bencap_t
 
     type, bind(c) :: extra_t
-        integer :: fsminappamt
+integer :: fsminappamt
         integer :: matgrant
         integer :: prices
     end type extra_t
@@ -652,6 +662,7 @@ contains
         fam%ctband = lab%ctax%bandd
         fam%banddratio = 1.0
         fam%intdate = 19900101
+        fam%famtype = lab%famtype%single_nokids
 
         fam%ad%age = 25
         fam%ad%selfemp = 0
@@ -704,6 +715,7 @@ contains
         call desc_f90(funit, "Council tax band", "ctband", fam%ctband, label_ctax(fam%ctband))
         call desc_f90(funit, "Council tax band-D ratio", "banddratio", fam%banddratio)
         call desc_f90(funit, "Interview date", "intdate", fam%intdate)
+        call desc_f90(funit, "Family type", "famtype", fam%famtype, label_famtype(fam%famtype))
         write(funit, '(A)') repeat("=", 62)
 
         ! write(funit, *)
@@ -980,6 +992,42 @@ elemental function labstring_sex(val) result(str)
     end select
 end function labstring_sex
 
+elemental function label_famtype(val) result(str)
+    implicit none
+    integer, intent(in) :: val
+    character(len = len_label) :: str
+    select case(val)
+        case(lab%famtype%single_nokids)
+            str = "single_nokids"
+        case(lab%famtype%single_kids)
+            str = "single_kids"
+        case(lab%famtype%couple_nokids)
+            str = "couple_nokids"
+        case(lab%famtype%couple_kids)
+            str = "couple_kids"
+        case default
+            str = "INVALID VALUE"
+    end select
+end function label_famtype
+
+elemental function labstring_famtype(val) result(str)
+    implicit none
+    integer, intent(in) :: val
+    character(len = len_labstring) :: str
+    select case(val)
+        case(lab%famtype%single_nokids)
+            str = "Single, no children"
+        case(lab%famtype%single_kids)
+            str = "Lone parent"
+        case(lab%famtype%couple_nokids)
+            str = "Couple, no children"
+        case(lab%famtype%couple_kids)
+            str = "Couple, children"
+        case default
+            str = "INVALID VALUE"
+    end select
+end function labstring_famtype
+
 
     ! fam_gen
     ! -----------------------------------------------------------------------
@@ -995,7 +1043,7 @@ end function labstring_sex
         implicit none
 
         type(fam_t), intent(out) :: fam
-        integer, intent(in), optional :: couple
+integer, intent(in), optional :: couple
         integer, intent(in), optional :: married
         real(dp), intent(in), optional :: ccexp
         real(dp), intent(in), optional :: maint
@@ -1011,11 +1059,11 @@ end function labstring_sex
         integer, intent(in), optional :: ctband
         real(dp), intent(in), optional :: banddratio
         integer, intent(in), optional :: intdate
-        integer, intent(in), optional :: age1
+integer, intent(in), optional :: age1
         integer, intent(in), optional :: selfemp1
         real(dp), intent(in), optional :: hrs1
         real(dp), intent(in), optional :: earn1
-        integer, intent(in), optional :: age2
+integer, intent(in), optional :: age2
         integer, intent(in), optional :: selfemp2
         real(dp), intent(in), optional :: hrs2
         real(dp), intent(in), optional :: earn2
@@ -1060,6 +1108,7 @@ end function labstring_sex
         if (present(ctband)) fam%ctband = ctband
         if (present(banddratio)) fam%banddratio = banddratio
         if (present(intdate)) fam%intdate = intdate
+
         if (present(age1)) fam%ad(1)%age = age1
         if (present(selfemp1)) fam%ad(1)%selfemp = selfemp1
         if (present(hrs1)) fam%ad(1)%hrs = hrs1
@@ -1091,6 +1140,8 @@ end function labstring_sex
             end if
 
         end if
+
+        call fam_refresh(fam)
 
     end subroutine fam_gen
 
@@ -2188,6 +2239,7 @@ end function labstring_sex
         call write_f90(funit, "fam%ctband", fam%ctband)
         call write_f90(funit, "fam%banddratio", fam%banddratio)
         call write_f90(funit, "fam%intdate", fam%intdate)
+        call write_f90(funit, "fam%famtype", fam%famtype)
 
         call write_f90(funit, "fam%ad(1)%age", fam%ad(1)%age)
         call write_f90(funit, "fam%ad(1)%selfemp", fam%ad(1)%selfemp)
@@ -2437,5 +2489,55 @@ end function labstring_sex
             end do
         end if
     end subroutine desc_f90doublearray2
+
+    subroutine fam_refresh(fam)
+        implicit none
+        type(fam_t), intent(inout) :: fam
+
+        integer :: i, j
+        integer :: tmp1, tmp2
+
+        ! if married, must be a couple
+
+        if (fam%married == 1) fam%couple = 1
+
+        fam%nkids = max(fam%nkids, 0)
+
+        ! Sort kidage and kidsex arrays
+        if (fam%nkids > 0) then
+
+            ! insertion sort
+            do i = 2, fam%nkids
+                tmp1 = fam%kidage(i)
+                tmp2 = fam%kidsex(i)
+                j = i - 1
+                do while (j >= 1)
+                    if (fam%kidage(j) >= tmp1) exit
+                    fam%kidage(j + 1) = fam%kidage(j)
+                    fam%kidsex(j + 1) = fam%kidsex(j)
+                    j = j - 1
+                end do
+                fam%kidage(j + 1) = tmp1
+                fam%kidsex(j + 1) = tmp2
+            end do
+
+        end if
+
+        ! familty type
+        if (fam%couple == 0) then
+            if (fam%nkids == 0) then
+                fam%famtype = lab%famtype%single_nokids
+            else
+                fam%famtype = lab%famtype%single_kids
+            end if
+        else
+            if (fam%nkids == 0) then
+                fam%famtype = lab%famtype%couple_nokids
+            else
+                fam%famtype = lab%famtype%couple_kids
+            end if
+        end if
+
+    end subroutine fam_refresh
 
 end module fortax_type

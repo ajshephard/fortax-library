@@ -54,4 +54,6 @@
 #:include "includes/label/region.inc"
 #:elif name == "lab_sex"
 #:include "includes/label/sex.inc"
+#:elif name == "lab_famtype"
+#:include "includes/label/famtype.inc"
 #:endif

@@ -8,7 +8,7 @@
 
 #! list for value labels
 
-#:set LABLIST = ['bool', 'ctax', 'tenure', 'region', 'sex']
+#:set LABLIST = ['bool', 'ctax', 'tenure', 'region', 'sex', 'famtype']
 
 #! prevision type mapping
 
@@ -59,16 +59,22 @@ ${"".join([" "*4 + line+"\n" for line in txt.split("\n")])}$
     #:assert attr in ['rate', 'amount', 'minamount', 'null', 'range', 'scale', 'label']
     #:assert type in ['bool', 'integer', 'double']
     #:for kw in kwargs
-        #:assert kw in ['dim', 'dimvar', 'value', 'label']
+        #:assert kw in ['dim', 'dimvar', 'value', 'label', 'ignore']
     #:endfor
 #:enddef
 
 #! Defining types
 
 #:def fortax_type_def(name, **defkwargs)
+    #:call remove_blank_lines
     #:for kw in defkwargs
-        #:assert kw in ['attributes', 'suffix', 'assumed']
+        #:assert kw in ['attributes', 'suffix', 'assumed', 'ignore']
     #:endfor
+    #:if "ignore" in defkwargs
+        #:set allow_ignore = defkwargs['ignore']
+    #:else
+        #:set allow_ignore = False
+    #:endif    
     #:if "attributes" in defkwargs
         #:set attributes = ", " + defkwargs["attributes"].strip('"')
     #:else
@@ -87,10 +93,22 @@ ${"".join([" "*4 + line+"\n" for line in txt.split("\n")])}$
         #:mute
             $:check_fortax_arg(type, var, str, attr, kwargs)
             #:set vardim = get_fortax_vardim(kwargs, assumed).strip()
+            #:if allow_ignore
+                #:if 'ignore' in kwargs
+                    #:set ignore = kwargs["ignore"]
+                #:else
+                    #:set ignore = False
+                #:endif
+            #:else
+                #:set ignore = False
+            #:endif            
         #:endmute
+        #:if not ignore    
         ${FORTRAN_TYPE[type]}$${attributes}$ :: ${var}$${suffix}$${vardim}$
+        #:endif
     #:enddef
     #:include "include_files.fypp"
+    #:endcall
 #:enddef
 
 #! save system components using json
@@ -179,21 +197,39 @@ ${"".join([" "*4 + line+"\n" for line in txt.split("\n")])}$
 #! List types
 
 #:def fortax_type_list(name, **defkwargs)
+    #:call remove_blank_lines
     #:for kw in defkwargs
-        #:assert kw in ['suffix']
+        #:assert kw in ['suffix', 'ignore']
     #:endfor
     #:if "suffix" in defkwargs
         #:set suffix = defkwargs["suffix"].strip('"')
     #:else
         #:set suffix = ""
     #:endif
+    #:if "ignore" in defkwargs
+        #:set allow_ignore = defkwargs['ignore']
+    #:else
+        #:set allow_ignore = False
+    #:endif
     #:def fortaxdef(type, var, str, attr, **kwargs)
         #:mute
             $:check_fortax_arg(type, var, str, attr, kwargs)
+            #:if allow_ignore
+                #:if 'ignore' in kwargs
+                    #:set ignore = kwargs["ignore"]
+                #:else
+                    #:set ignore = False
+                #:endif
+            #:else
+                #:set ignore = False
+            #:endif
         #:endmute
+        #:if not ignore
         ${var}$${suffix}$
+        #:endif
     #:enddef
     #:include "include_files.fypp"
+    #:endcall
 #:enddef
 
 #! Initialise types
@@ -325,14 +361,29 @@ ${"".join([" "*4 + line+"\n" for line in txt.split("\n")])}$
         #:set parent = dt.strip('"') + "%"
     #:endif
     #:for kw in defkwargs
-        #:assert kw in ['attributes', 'suffix', 'assumed']
+        #:assert kw in ['attributes', 'suffix', 'assumed', 'ignore']
     #:endfor
     #:if "suffix" in defkwargs
         #:set suffix = defkwargs["suffix"].strip('"')
     #:else
         #:set suffix = ""
     #:endif
+    #:if "ignore" in defkwargs
+        #:set allow_ignore = defkwargs['ignore']
+    #:else
+        #:set allow_ignore = False
+    #:endif
     #:def fortaxdef(type, var, str, attr, **kwargs)
+    #:if allow_ignore
+        #:if 'ignore' in kwargs
+            #:set ignore = kwargs["ignore"]
+        #:else
+            #:set ignore = False
+        #:endif
+    #:else
+        #:set ignore = False
+    #:endif    
+    #:if not ignore    
     #:if "dim" in kwargs
         if (present(${var}$${suffix}$)) then
             if (size(${var}$)${suffix}$ > ${kwargs["dim"]}$) then
@@ -346,6 +397,7 @@ ${"".join([" "*4 + line+"\n" for line in txt.split("\n")])}$
         end if
     #:else
         if (present(${var}$${suffix}$)) ${parent}$${var}$ = ${var}$${suffix}$
+    #:endif
     #:endif
     #:enddef
     #:include "include_files.fypp"
@@ -410,9 +462,9 @@ lab%${lab}$%${labval}$
 
 #:def fortax_fam_gen()
     #:call join_lines(joinstr = ", ", prefix="subroutine fam_gen(fam, ", suffix=")")
-        @:fortax_type_list(fam)
-        @:fortax_type_list(famad, suffix = 1)
-        @:fortax_type_list(famad, suffix = 2)
+        @:fortax_type_list(fam, ignore = True)
+        @:fortax_type_list(famad, suffix = 1, ignore = True)
+        @:fortax_type_list(famad, suffix = 2, ignore = True)
         correct
     #:endcall
 
@@ -421,9 +473,9 @@ lab%${lab}$%${labval}$
         implicit none
 
         type(fam_t), intent(out) :: fam
-        @:fortax_type_def(fam, attributes = "intent(in), optional", assumed = True)
-        @:fortax_type_def(famad, attributes = "intent(in), optional", suffix = 1, assumed = True)
-        @:fortax_type_def(famad, attributes = "intent(in), optional", suffix = 2, assumed = True)
+        @:fortax_type_def(fam, attributes = "intent(in), optional", assumed = True, ignore = True)
+        @:fortax_type_def(famad, attributes = "intent(in), optional", suffix = 1, assumed = True, ignore = True)
+        @:fortax_type_def(famad, attributes = "intent(in), optional", suffix = 2, assumed = True, ignore = True)
         logical, intent(in), optional :: correct
         logical :: correct2
         integer :: kidSize
@@ -431,9 +483,9 @@ lab%${lab}$%${labval}$
 
         call fam_init(fam)
 
-        @:fam_gen(fam, fam)
-        @:fam_gen(famad, fam%ad(1), suffix = 1)
-        @:fam_gen(famad, fam%ad(2), suffix = 2)
+        @:fam_gen(fam, fam, ignore = True)
+        @:fam_gen(famad, fam%ad(1), suffix = 1, ignore = True)
+        @:fam_gen(famad, fam%ad(2), suffix = 2, ignore = True)
 
         if (present(correct)) then
             correct2 = correct
@@ -457,6 +509,8 @@ lab%${lab}$%${labval}$
             end if
 
         end if
+
+        call fam_refresh(fam)
 
     end subroutine fam_gen
 #:enddef
