@@ -169,6 +169,7 @@ module fortax_type
     end interface write_f90
 
     interface desc_f90
+        module procedure desc_f90string
         module procedure desc_f90integer
         module procedure desc_f90integer_label
         module procedure desc_f90integerarray
@@ -675,6 +676,19 @@ contains
         end do
     end subroutine write_f90doublearray2
 
+    subroutine desc_f90string(funit, longstr, shortstr, val)
+        implicit none
+        integer, intent(in) :: funit
+        character(len = *), intent(in) :: longstr
+        character(len = *), intent(in) :: shortstr
+        character(len = *), intent(in) :: val
+        if (longstr .ne. "") then
+            write(funit, '(A40, 2X, A20)') longstr // ' (' // shortstr // ')', val
+        else
+            write(funit, '(A40, 2X, A20)') shortstr, val
+        end if
+    end subroutine desc_f90string
+
     subroutine desc_f90integer(funit, longstr, shortstr, val)
         implicit none
         integer, intent(in) :: funit
@@ -895,5 +909,54 @@ contains
         end if
 
     end subroutine fam_refresh
+
+
+    pure function cumsum(x, n) result(y)
+        !! calculates the cumulative sum of x
+        !DEC$ ATTRIBUTES FORCEINLINE :: cumsum
+
+        implicit none
+
+        ! Arguments
+        integer, intent(in) :: n
+            !! number of x points
+        integer, intent(in) :: x(n)
+            !! value of x points
+        integer :: y(n)
+            !! cumulative sum of x
+        integer :: iX
+
+        y(1) = x(1)
+        do iX = 2, n
+            y(iX) = x(iX) + y(iX - 1)
+        end do
+
+    end function cumsum
+
+
+    ! formatDate
+    ! -----------------------------------------------------------------------
+    ! format date as a string for printing
+
+    function formatDate(date) result(datestr)
+
+        use fortax_util, only : intToStr, checkDate
+
+        implicit none
+
+        integer, intent(in) :: date
+        character(len = :), allocatable :: datestr
+        character(len = :), allocatable :: intstr
+        logical :: valid
+
+        intstr = intToStr(date)
+        valid = checkDate(date)
+        if (valid) then
+            datestr = intstr(1:4) // '/' // intstr(5:6) // '/' // intstr(7:8)
+        else
+            datestr = "invalid (" // trim(adjustl(intstr)) // ')'
+        end if
+
+    end function formatDate
 
 end module fortax_type
