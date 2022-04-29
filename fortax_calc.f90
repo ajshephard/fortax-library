@@ -514,19 +514,22 @@ contains
 
             if (sys%extra%fsminappamt == 1) then
                 !add fsm to applicable amount
-                do i = 1, fam%nkids
-                    if (fam%kidage(i) >= sys%incSup%MinAgeFSM) appamt = appamt + sys%incsup%ValFSM
-                end do
+                ! do i = 1, fam%nkids
+                !     if (fam%kidage(i) >= sys%incSup%MinAgeFSM) appamt = appamt + sys%incsup%ValFSM
+                ! end do
+                appamt = appamt + (fam%nkids - fam%kidagedist(sys%incSup%MinAgeFSM - 1)) * sys%incsup%ValFSM
             end if
 
             if ((sys%extra%matgrant == 1) .and. (fam%yngkid == 0)) then
                 !add maternity grant to applicable amount
                 !call MatGrant(sys,fam,net,.true.)
                 !MatGrInIS = net%matgrant
-                MatGrInIS = 0.0_dp
-                do i = 1, fam%nkids
-                    if (fam%kidage(i) == 0) MatGrInIS = MatGrInIS + (sys%chben%MatGrantVal / 52.0_dp)
-                end do
+
+                ! MatGrInIS = 0.0_dp
+                ! do i = 1, fam%nkids
+                !     if (fam%kidage(i) == 0) MatGrInIS = MatGrInIS + (sys%chben%MatGrantVal / 52.0_dp)
+                ! end do
+                MatGrInIS = fam%kidagedist(0) * sys%chben%MatGrantVal / 52.0_dp
                 appamt = appamt + MatGrInIS
             end if
 
@@ -573,7 +576,7 @@ contains
     !DEC$ ATTRIBUTES FORCEINLINE :: ISAppAmt
     real(dp) pure function ISAppAmt(sys, fam)
 
-        use fortax_type, only : sys_t, fam_t
+        use fortax_type, only : sys_t, fam_t, lab
 
         implicit none
 
@@ -590,45 +593,50 @@ contains
         !In both cases, could simplify by adding year conditions
 
         !Allowances and family/LP premiums
-        if (fam%couple == 0) then
+        select case(fam%famtype)
+            case(lab%famtype%single_nokids)
 
-            if (fam%nkids > 0) then
-                !Lone parent
-                if (fam%ad(1)%age < sys%incSup%MinAgeMain) then
-                    ISAppAmt = sys%incsup%YngLP + sys%incsup%PremFam + sys%incsup%PremLP
-                else
-                    ISAppAmt = sys%incsup%MainLP + sys%incsup%PremFam + sys%incsup%PremLP
-                end if
-            else
                 !Single childless
                 if (fam%ad(1)%age < sys%incSup%MinAgeMainSin) then
                     ISAppAmt = sys%incsup%YngSin
                 else
                     ISAppAmt = sys%incsup%MainSin
                 end if
-            end if
 
-        else
-            !Couples (ignore cases: one over 18, one under 18)
-            if ((fam%ad(1)%age < sys%incSup%MinAgeMain) .and. (fam%ad(2)%age < sys%incSup%MinAgeMain)) then
-                ISAppAmt = sys%incsup%YngCou
-            else
-                ISAppAmt = sys%incsup%MainCou
-            end if
+            case(lab%famtype%single_kids)
 
-            if (fam%nkids > 0) ISAppAmt = ISAppAmt + sys%incsup%PremFam
+                !Lone parent
+                if (fam%ad(1)%age < sys%incSup%MinAgeMain) then
+                    ISAppAmt = sys%incsup%YngLP + sys%incsup%PremFam + sys%incsup%PremLP
+                else
+                    ISAppAmt = sys%incsup%MainLP + sys%incsup%PremFam + sys%incsup%PremLP
+                end if
 
-        end if
+            case default
+
+                !Couples (ignore cases: one over 18, one under 18)
+                if ((fam%ad(1)%age < sys%incSup%MinAgeMain) .and. (fam%ad(2)%age < sys%incSup%MinAgeMain)) then
+                    ISAppAmt = sys%incsup%YngCou
+                else
+                    ISAppAmt = sys%incsup%MainCou
+                end if
+
+                if (fam%nkids > 0) ISAppAmt = ISAppAmt + sys%incsup%PremFam
+
+        end select
 
         !Child additions (this could be more efficient if we required that kids age structure is sorted)
         if (fam%nkids > 0) then
-            do i = 1, fam%nkids
-                do j = 1, sys%incsup%NumAgeRng
-                    if ((fam%kidage(i) >= sys%incsup%AgeRngl(j)) .and. (fam%kidage(i) <= sys%incsup%AgeRngu(j))) then
-                        ISAppAmt = ISAppAmt + sys%incsup%AddKid(j)
-                        exit
-                    end if
-                end do
+            ! do i = 1, fam%nkids
+            !     do j = 1, sys%incsup%NumAgeRng
+            !         if ((fam%kidage(i) >= sys%incsup%AgeRngl(j)) .and. (fam%kidage(i) <= sys%incsup%AgeRngu(j))) then
+            !             ISAppAmt = ISAppAmt + sys%incsup%AddKid(j)
+            !             exit
+            !         end if
+            !     end do
+            ! end do
+            do j = 1, sys%incsup%NumAgeRng
+                ISAppAmt = ISAppAmt + (fam%kidagedist(sys%incsup%AgeRngu(j)) - fam%kidagedist(sys%incsup%AgeRngl(j) - 1)) * sys%incsup%AddKid(j)
             end do
         end if
 
@@ -642,22 +650,21 @@ contains
     !DEC$ ATTRIBUTES FORCEINLINE :: ISDisreg
     real(dp) pure function ISDisreg(sys, fam)
 
-        use fortax_type, only : sys_t, fam_t
+        use fortax_type, only : sys_t, fam_t, lab
 
         implicit none
 
         type(sys_t), intent(in) :: sys
         type(fam_t), intent(in) :: fam
 
-        if (fam%couple == 0) then
-            if (fam%nkids > 0) then
-                ISDisreg = sys%incsup%DisregLP
-            else
+        select case(fam%famtype)
+            case(lab%famtype%single_nokids)
                 ISDisreg = sys%incsup%DisregSin
-            end if
-        else
-            ISDisreg = sys%incsup%DisregCou
-        end if
+            case(lab%famtype%single_kids)
+                ISDisreg = sys%incsup%DisregLP
+            case default
+                ISDisreg = sys%incsup%DisregCou
+        end select
 
     end function ISDisreg
 
@@ -1082,149 +1089,100 @@ contains
         type(sys_t), intent(in) :: sys
         type(fam_t), intent(in) :: fam
 
-        integer                 :: kidage(fam%nkids), kidagesorted(fam%nkids)
-        integer                 :: kidsex(fam%nkids)
-        integer                 :: kidsexsorted(fam%nkids)
-        integer                 :: maxageloc
-        logical                 :: taken(fam%nkids)
-        integer                 :: i, j
+        integer :: nkid0_015, nkid1_015
 
-        HBUnderOccMaxBedrooms = 1
+        ! integer                 :: kidage(fam%nkids), kidagesorted(fam%nkids)
+        ! integer                 :: kidsex(fam%nkids)
+        ! integer                 :: kidsexsorted(fam%nkids)
+        ! integer                 :: maxageloc
+        ! logical                 :: taken(fam%nkids)
+        ! integer                 :: i, j
 
-        if (fam%nkids > 0) then
+        ! HBUnderOccMaxBedrooms = 1
 
-            ! Sort kidage and kidsex arrays
-            kidage = fam%kidage(1:fam%nkids)
-            kidsex = fam%kidsex(1:fam%nkids)
-            do i = 1, fam%nkids
-                maxageloc = maxloc(kidage, dim=1)
-                kidagesorted(i) = kidage(maxageloc)
-                kidsexsorted(i) = kidsex(maxageloc)
-                kidage(maxageloc) = -1
-            end do
+        ! if (fam%nkids > 0) then
 
-            ! Work out max number of bedrooms
-            taken = .false.
-            do i = 1, fam%nkids
+        !     ! Sort kidage and kidsex arrays
+        !     kidage = fam%kidage(1:fam%nkids)
+        !     kidsex = fam%kidsex(1:fam%nkids)
+        !     do i = 1, fam%nkids
+        !         maxageloc = maxloc(kidage, dim=1)
+        !         kidagesorted(i) = kidage(maxageloc)
+        !         kidsexsorted(i) = kidsex(maxageloc)
+        !         kidage(maxageloc) = -1
+        !     end do
 
-                if (.not. taken(i)) then
+        !     ! Work out max number of bedrooms
+        !     taken = .false.
+        !     do i = 1, fam%nkids
 
-                    taken(i) = .true.
-                    HBUnderOccMaxBedrooms = HBUnderOccMaxBedrooms + 1
+        !         if (.not. taken(i)) then
 
-                    ! Can child i be paired up with anyone?
-                    select case (kidagesorted(i))
+        !             taken(i) = .true.
+        !             HBUnderOccMaxBedrooms = HBUnderOccMaxBedrooms + 1
 
-                        ! Children aged 10-15 can only be paired with other children of the same sex
-                        case (10:15)
-                            do j = i+1, fam%nkids
-                                if (.not. taken(j)) then
-                                    if (kidsexsorted(j) == kidsexsorted(i)) then
-                                        taken(j) = .true.
-                                        exit
-                                    end if
-                                end if
-                            end do
+        !             ! Can child i be paired up with anyone?
+        !             select case (kidagesorted(i))
 
-                        ! Children aged 0-9 can be paired with children of different sex
-                        case (:9)
-                            do j = i+1, fam%nkids
-                                if (.not. taken(j)) then
-                                    taken(j) = .true.
-                                    exit
-                                end if
-                            end do
+        !                 ! Children aged 10-15 can only be paired with other children of the same sex
+        !                 case (10:15)
+        !                     do j = i+1, fam%nkids
+        !                         if (.not. taken(j)) then
+        !                             if (kidsexsorted(j) == kidsexsorted(i)) then
+        !                                 taken(j) = .true.
+        !                                 exit
+        !                             end if
+        !                         end if
+        !                     end do
 
-                    end select
+        !                 ! Children aged 0-9 can be paired with children of different sex
+        !                 case (:9)
+        !                     do j = i+1, fam%nkids
+        !                         if (.not. taken(j)) then
+        !                             taken(j) = .true.
+        !                             exit
+        !                         end if
+        !                     end do
 
-                end if
+        !             end select
 
-            end do
+        !         end if
 
+        !     end do
+
+        ! end if
+
+        ! count the number of boys and girls less no older than 15
+        nkid0_015 = fam%kidagedist0(15)
+        nkid1_015 = fam%kidagedist1(15)
+
+        ! rooms for adult(s) and kids 16+
+        HBUnderOccMaxBedrooms = 1 + (fam%nkids - fam%kidagedist(15))
+
+        if (mod(nkid0_015, 2) == 0) then
+            ! all boys can be paired together
+            HBUnderOccMaxBedrooms = HBUnderOccMaxBedrooms &
+                                  + nkid0_015 / 2         &
+                                  + nkid1_015 / 2 + mod(nkid1_015, 2)
+        else
+            if (mod(nkid1_015, 2) == 0) then
+                ! all girl can be paired together
+                HBUnderOccMaxBedrooms = HBUnderOccMaxBedrooms &
+                                      + nkid1_015 / 2         &
+                                      + nkid0_015 / 2 + mod(nkid0_015, 2)
+            else
+                ! neither gender can be paired excxlusivey together
+                ! as long as their is one girl and one boy less then 10,
+                ! we will be able to match them in one additional room
+                HBUnderOccMaxBedrooms = HBUnderOccMaxBedrooms &
+                                      + nkid0_015 / 2         &
+                                      + nkid1_015 / 2         &
+                                      + merge(1, 2, fam%kidagedist0(9) > 0 .and. fam%kidagedist1(9) > 0)
+
+            end if
         end if
 
     end function HBUnderOccMaxBedrooms
-
-    !DEC$ ATTRIBUTES FORCEINLINE :: HBUnderOccMaxBedrooms2
-    integer pure function HBUnderOccMaxBedrooms2(sys, fam)
-
-        use fortax_type, only : sys_t, fam_t, maxKids
-
-        implicit none
-
-        type(sys_t), intent(in) :: sys
-        type(fam_t), intent(in) :: fam
-
-        integer :: kidage(maxKids)
-        integer :: kidsex(maxKids)
-        logical :: taken(maxKids)
-        integer :: i, j
-        integer :: tmp1, tmp2
-
-        HBUnderOccMaxBedrooms2 = 1
-
-        if (fam%nkids > 0) then
-
-            ! Sort kidage and kidfemale arrays
-            kidage(1:fam%nkids) = fam%kidage(1:fam%nkids)
-            kidsex(1:fam%nkids) = fam%kidsex(1:fam%nkids)
-
-            ! insertion sort
-            do i = 2, fam%nkids
-                tmp1 = kidage(i)
-                tmp2 = kidsex(i)
-                j = i - 1
-                do while (j >= 1)
-                    if (kidage(j) >= tmp1) exit
-                    kidage(j + 1) = kidage(j)
-                    kidsex(j + 1) = kidsex(j)
-                    j = j - 1
-                end do
-                kidage(j + 1) = tmp1
-                kidsex(j + 1) = tmp2
-            end do
-
-            ! Work out max number of bedrooms
-            taken = .false.
-            do i = 1, fam%nkids
-
-                if (.not. taken(i)) then
-
-                    taken(i) = .true.
-                    HBUnderOccMaxBedrooms2 = HBUnderOccMaxBedrooms2 + 1
-
-                    ! Can child i be paired up with anyone?
-                    select case (kidage(i))
-
-                        ! Children aged 10-15 can only be paired with other children of the same sex
-                        case (10:15)
-                            do j = i + 1, fam%nkids
-                                if (.not. taken(j)) then
-                                    if (kidsex(j) == kidsex(i)) then
-                                        taken(j) = .true.
-                                        exit
-                                    end if
-                                end if
-                            end do
-
-                        ! Children aged 0-9 can be paired with children of different sex
-                        case (:9)
-                            do j = i + 1, fam%nkids
-                                if (.not. taken(j)) then
-                                    taken(j) = .true.
-                                    exit
-                                end if
-                            end do
-
-                    end select
-
-                end if
-
-            end do
-
-        end if
-
-    end function HBUnderOccMaxBedrooms2
 
     ! LHABand
     ! -----------------------------------------------------------------------
@@ -1300,7 +1258,7 @@ contains
             !Cap CTB at band E from 1998 to 2003
             if ((fam%ctband > lab%ctax%bande) .and. (sys%rebatesys%Restrict == 1)) then
                 select case (fam%region)
-                  
+
                     case (lab%region%wales)
                         select case (fam%ctband)
                             case (lab%ctax%bandf)
@@ -1427,7 +1385,7 @@ contains
     !DEC$ ATTRIBUTES FORCEINLINE :: HBAppAmt
     real(dp) pure function HBAppAmt(sys, fam, net)
 
-        use fortax_type, only : sys_t, fam_t, net_t, maxKids
+        use fortax_type, only : sys_t, fam_t, net_t, maxKids, lab
 
         implicit none
 
@@ -1435,7 +1393,7 @@ contains
         type(fam_t), intent(in) :: fam
         type(net_t), intent(in) :: net
 
-        integer :: i, j
+        integer :: i, j, j0, j1
         integer :: kidage(maxKids)
         integer :: tmp1, prevKidAge
 
@@ -1446,8 +1404,18 @@ contains
         else
 
             !Allowances and family/LP premiums
-            if (fam%couple == 0) then
-                if (fam%nkids > 0) then
+            select case(fam%famtype)
+                case(lab%famtype%single_nokids)
+
+                    !Single childless
+                    if (fam%ad(1)%age < sys%rebateSys%minAgeMainSin) then
+                        HBAppAmt = sys%rebatesys%YngSin
+                    else
+                        HBAppAmt = sys%rebatesys%MainSin
+                    end if
+
+                case(lab%famtype%single_kids)
+
                     !Lone parent
                     !sys%rebatesys%PremLP abolished Apr 98, but don't need to condition on year here because parameter should be zero for later years
                     if (fam%ad(1)%age < sys%rebateSys%minAgeMain) then
@@ -1455,40 +1423,38 @@ contains
                     else
                         HBAppAmt = sys%rebatesys%MainLP + sys%rebatesys%PremFam + sys%rebatesys%PremLP
                     end if
-                else
-                    !Single childless
-                    if (fam%ad(1)%age < sys%rebateSys%minAgeMainSin) then
-                        HBAppAmt = sys%rebatesys%YngSin
+
+                case default
+
+                    !Couples
+                    if ((fam%ad(1)%age < sys%rebateSys%minAgeMain) .and. (fam%ad(2)%age < sys%rebateSys%minAgeMain)) then
+                        HBAppAmt = sys%rebatesys%YngCou
                     else
-                        HBAppAmt = sys%rebatesys%MainSin
+                        HBAppAmt = sys%rebatesys%MainCou
                     end if
-                end if
-            else
-                !Couples
-                if ((fam%ad(1)%age < sys%rebateSys%minAgeMain) .and. (fam%ad(2)%age < sys%rebateSys%minAgeMain)) then
-                    HBAppAmt = sys%rebatesys%YngCou
-                else
-                    HBAppAmt = sys%rebatesys%MainCou
-                end if
 
-                if (fam%nkids > 0) HBAppAmt = HBAppAmt + sys%rebatesys%PremFam
+                    if (fam%nkids > 0) HBAppAmt = HBAppAmt + sys%rebatesys%PremFam
 
-            end if
+            end select
 
             !Child additions
             if (fam%nkids > 0) then
                 if (fam%nkids <= sys%rebatesys%MaxKids) then
-                    do i = 1, fam%nkids
-                        do j = 1, sys%rebatesys%NumAgeRng
-                            if ((fam%kidage(i) >= sys%rebatesys%AgeRngl(j)) .and. (fam%kidage(i) <= sys%rebatesys%AgeRngu(j))) then
-                                HBAppAmt = HBAppAmt + sys%rebatesys%AddKid(j)
-                                exit
-                            end if
-                        end do
+                    ! do i = 1, fam%nkids
+                    !     do j = 1, sys%rebatesys%NumAgeRng
+                    !         if ((fam%kidage(i) >= sys%rebatesys%AgeRngl(j)) .and. (fam%kidage(i) <= sys%rebatesys%AgeRngu(j))) then
+                    !             HBAppAmt = HBAppAmt + sys%rebatesys%AddKid(j)
+                    !             exit
+                    !         end if
+                    !     end do
+                    ! end do
+
+                    do j = 1, sys%rebatesys%NumAgeRng
+                        HBAppAmt = HBAppAmt + (fam%kidagedist(sys%rebatesys%AgeRngu(j)) - fam%kidagedist(sys%rebatesys%AgeRngl(j) - 1)) * sys%rebatesys%AddKid(j)
                     end do
-                    
+
                 else
-                  
+
                     kidage(1:fam%nkids) = fam%kidage(1:fam%nkids)
 
                     ! insertion sort
@@ -1516,7 +1482,7 @@ contains
                         end if
                         prevKidAge = kidage(i)
                     end do
-                  
+
                 end if
 
             end if
@@ -1533,7 +1499,7 @@ contains
     !DEC$ ATTRIBUTES FORCEINLINE :: StdDisreg
     real(dp) pure function StdDisreg(sys, fam)
 
-        use fortax_type, only : sys_t, fam_t
+        use fortax_type, only : sys_t, fam_t, lab
 
         implicit none
 
@@ -1541,15 +1507,14 @@ contains
         type(fam_t), intent(in) :: fam
 
         !Main disregard
-        if (fam%couple == 0) then
-            if (fam%nkids > 0) then
-                StdDisreg = sys%rebatesys%DisregLP
-            else
+        select case(fam%famtype)
+            case(lab%famtype%single_nokids)
                 StdDisreg = sys%rebatesys%DisregSin
-            end if
-        else
-            StdDisreg = sys%rebatesys%DisregCou
-        end if
+            case(lab%famtype%single_kids)
+                StdDisreg = sys%rebatesys%DisregLP
+            case default
+                StdDisreg = sys%rebatesys%DisregCou
+        end select
 
     end function StdDisreg
 
@@ -1562,7 +1527,7 @@ contains
     !DEC$ ATTRIBUTES FORCEINLINE :: FTDisreg
     real(dp) pure function FTDisreg(sys, fam, net)
 
-        use fortax_type, only : sys_t, fam_t, net_t
+        use fortax_type, only : sys_t, fam_t, net_t, lab
 
         implicit none
 
@@ -1615,50 +1580,53 @@ contains
             if (sys%rebatesys%rulesunderNTC == 1) then
                 !Rules less generous in first year of WTC (2003)
                 if (sys%wtc%NewDisregCon == 0) then
-                    if (fam%nkids > 0) then
-                        if (fam%couple == 1) then
-                            if (((fam%ad(1)%hrs >= sys%wtc%MinHrsKids - tol) .or. &
-                                & (fam%ad(2)%hrs >= sys%wtc%MinHrsKids - tol)) &
-                                & .and. (fam%ad(1)%hrs + fam%ad(2)%hrs >= sys%wtc%FTHrs-tol)) FTDisreg = sys%wtc%FT
-                            else
-                                if (fam%ad(1)%hrs >= sys%wtc%FTHrs-tol) FTDisreg = sys%wtc%FT
-                        end if
-                    else
-                        if (fam%couple == 1) then
+
+                    select case(fam%famtype)
+                        case(lab%famtype%single_nokids)
+                            if ((fam%ad(1)%hrs >= sys%wtc%MinHrsNoKids - tol) .and. &
+                                & (fam%ad(1)%age >= sys%wtc%MinAgeNoKids)) FTDisreg = sys%wtc%FT
+
+                        case(lab%famtype%single_kids)
+                            if (fam%ad(1)%hrs >= sys%wtc%FTHrs-tol) FTDisreg = sys%wtc%FT
+
+                        case(lab%famtype%couple_nokids)
                             if (((fam%ad(1)%hrs >= sys%wtc%MinHrsNoKids - tol) .and. &
                                 & (fam%ad(1)%age >= sys%wtc%MinAgeNoKids)) .or. &
                                 & ((fam%ad(2)%hrs >= sys%wtc%MinHrsNoKids - tol) .and. &
                                 & (fam%ad(2)%age >= sys%wtc%MinAgeNoKids))) &
                                 & FTDisreg = sys%wtc%FT
-                        else
-                            if ((fam%ad(1)%hrs >= sys%wtc%MinHrsNoKids - tol) .and. &
-                                & (fam%ad(1)%age >= sys%wtc%MinAgeNoKids)) FTDisreg = sys%wtc%FT
-                        end if
 
-                    end if
+                        case(lab%famtype%couple_kids)
+                            if (((fam%ad(1)%hrs >= sys%wtc%MinHrsKids - tol) .or. &
+                                & (fam%ad(2)%hrs >= sys%wtc%MinHrsKids - tol)) &
+                                & .and. (fam%ad(1)%hrs + fam%ad(2)%hrs >= sys%wtc%FTHrs-tol)) FTDisreg = sys%wtc%FT
+
+                    end select
 
                 ! 2004 onwards
                 else
-                    if (fam%nkids > 0) then
-                        if (fam%couple == 1) then
-                            if ((fam%ad(1)%hrs >= sys%wtc%MinHrsKids - tol) &
-                                & .or. (fam%ad(2)%hrs >= sys%wtc%MinHrsKids - tol)) &
-                                & FTDisreg = sys%wtc%NewDisreg
-                        else
+
+                    select case(fam%famtype)
+                        case(lab%famtype%single_nokids)
+                            if ((fam%ad(1)%hrs >= sys%wtc%MinHrsNoKids-tol) .and. &
+                                & (fam%ad(1)%age >= sys%wtc%MinAgeNoKids)) FTDisreg = sys%wtc%NewDisreg
+
+                        case(lab%famtype%single_kids)
                             if (fam%ad(1)%hrs >= sys%wtc%MinHrsKids - tol) FTDisreg = sys%wtc%NewDisreg
-                        end if
-                    else
-                        if (fam%couple == 1) then
+
+                        case(lab%famtype%couple_nokids)
                             if (((fam%ad(1)%hrs >= sys%wtc%MinHrsNoKids-tol) .and. &
                                 & (fam%ad(1)%age >= sys%wtc%MinAgeNoKids)) .or. &
                                 & ((fam%ad(2)%hrs >= sys%wtc%MinHrsNoKids-tol) .and. &
                                 & (fam%ad(2)%age >= sys%wtc%MinAgeNoKids))) &
                                 & FTDisreg = sys%wtc%NewDisreg
-                        else
-                            if ((fam%ad(1)%hrs >= sys%wtc%MinHrsNoKids-tol) .and. &
-                                & (fam%ad(1)%age >= sys%wtc%MinAgeNoKids)) FTDisreg = sys%wtc%NewDisreg
-                        end if
-                    end if
+
+                        case(lab%famtype%couple_kids)
+                            if ((fam%ad(1)%hrs >= sys%wtc%MinHrsKids - tol) &
+                                & .or. (fam%ad(2)%hrs >= sys%wtc%MinHrsKids - tol)) &
+                                & FTDisreg = sys%wtc%NewDisreg
+
+                    end select
 
                 end if
 
@@ -1714,12 +1682,13 @@ contains
             end if
 
             !Count number of eligible kids
-            nkidscc = 0
-            do i = 1, fam%nkids
-!                if (fam%kidage(i) <= sys%rebatesys%MaxAgeCC) nkidscc = nkidscc + 1
-! Changed to strict inequality to compare with Taxben, JS 09/06/09
-                if (fam%kidage(i) < sys%rebatesys%MaxAgeCC) nkidscc = nkidscc + 1
-            end do
+            ! nkidscc = 0
+            ! do i = 1, fam%nkids
+            !     ! if (fam%kidage(i) <= sys%rebatesys%MaxAgeCC) nkidscc = nkidscc + 1
+            !     ! Changed to strict inequality to compare with Taxben, JS 09/06/09
+            !     if (fam%kidage(i) < sys%rebatesys%MaxAgeCC) nkidscc = nkidscc + 1
+            ! end do
+            nkidscc = fam%kidagedist(sys%rebatesys%MaxAgeCC - 1)
 
             if ((elig) .and. (nkidscc > 0)) then
 
@@ -1850,14 +1819,14 @@ contains
         integer                 :: i
         integer                 :: maxageloc
         integer                 :: prevKidAge
-        
+
         select case (fam%nkids)
         case (0)
             MaxCTCKid = 0.0_dp
         case (1:)
             if (fam%nkids <= sys%ctc%maxKids) then
                 MaxCTCKid = real(fam%nkids, dp) * sys%ctc%kid
-            
+
             else
                 ! Sort the kidage array
                 kidage = fam%kidage(1:fam%nkids)
@@ -1876,7 +1845,7 @@ contains
                     end if
                     prevKidAge = kidagesorted(i)
                 end do
-                
+
             end if
 
         end select
@@ -1892,7 +1861,7 @@ contains
     !DEC$ ATTRIBUTES FORCEINLINE :: MaxWTCamt
     pure subroutine MaxWTCamt(sys, fam, net, MaxWTC)
 
-        use fortax_type, only : sys_t, fam_t, net_t
+        use fortax_type, only : sys_t, fam_t, net_t, lab
 
         implicit none
 
@@ -1905,10 +1874,28 @@ contains
 
         net%tu%chcaresub = 0.0_dp
 
-        select case (fam%nkids)
-        case (0)
+        select case(fam%famtype)
+            case(lab%famtype%single_nokids)
+                ! Childless singles
+                if (fam%ad(1)%age >= sys%wtc%MinAgeNoKids .and. fam%ad(1)%hrs >= sys%wtc%MinHrsNoKids - tol) then
+                    MaxWTC = sys%wtc%Basic + sys%wtc%FT
+                else
+                    MaxWTC = 0.0_dp
+                end if
 
-            if (fam%couple == 1) then
+            case(lab%famtype%single_kids)
+                ! Lone parents
+                if (fam%ad(1)%hrs >= sys%wtc%MinHrsKids - tol) then
+                    if (fam%ad(1)%hrs >= sys%wtc%FTHrs - tol) then
+                        MaxWTC = sys%wtc%CouLP + sys%wtc%FT
+                    else
+                        MaxWTC = sys%wtc%CouLP
+                    end if
+                else
+                    MaxWTC = 0.0_dp
+                end if
+
+            case(lab%famtype%couple_nokids)
                 ! Childless couples
                 if ((fam%ad(1)%age >= sys%wtc%MinAgeNoKids .and. fam%ad(1)%hrs >= sys%wtc%MinHrsNoKids - tol) &
                     & .or. (fam%ad(2)%age >= sys%wtc%MinAgeNoKids &
@@ -1917,18 +1904,8 @@ contains
                 else
                     MaxWTC = 0.0_dp
                 end if
-            else
-                ! Childless singles
-                if (fam%ad(1)%age >= sys%wtc%MinAgeNoKids .and. fam%ad(1)%hrs >= sys%wtc%MinHrsNoKids - tol) then
-                    MaxWTC = sys%wtc%Basic + sys%wtc%FT
-                else
-                    MaxWTC = 0.0_dp
-                end if
-            end if
 
-        case (1:)
-
-            if (fam%couple == 1) then
+            case(lab%famtype%couple_kids)
                 ! Couple parents
                 if ((fam%ad(1)%hrs >= sys%wtc%MinHrsKids - tol .or. fam%ad(2)%hrs >= sys%wtc%MinHrsKids - tol) &
                     & .and. (fam%ad(1)%hrs + fam%ad(2)%hrs >= sys%wtc%MinHrsCouKids - tol)) then
@@ -1940,28 +1917,17 @@ contains
                 else
                     MaxWTC = 0.0_dp
                 end if
-            else
-                ! Lone parents
-                if (fam%ad(1)%hrs >= sys%wtc%MinHrsKids - tol) then
-                    if (fam%ad(1)%hrs >= sys%wtc%FTHrs - tol) then
-                        MaxWTC = sys%wtc%CouLP + sys%wtc%FT
-                    else
-                        MaxWTC = sys%wtc%CouLP
-                    end if
-                else
-                    MaxWTC = 0.0_dp
-                end if
-            end if
-        case default
+
         end select
 
         ! Childcare element
         if ((MaxWTC > tol) .and. (fam%nkids > 0) .and. (fam%ccexp > tol)) then
 
-            nkidscc = 0
-            do i = 1, fam%nkids
-                if (fam%kidage(i) <= sys%wtc%MaxAgeCC) nkidscc = nkidscc + 1
-            end do
+            ! nkidscc = 0
+            ! do i = 1, fam%nkids
+            !     if (fam%kidage(i) <= sys%wtc%MaxAgeCC) nkidscc = nkidscc + 1
+            ! end do
+            nkidscc = fam%kidagedist(sys%wtc%MaxAgeCC)
 
             if (nkidscc == 1) then
                 if (fam%couple == 0) then
@@ -2093,10 +2059,11 @@ contains
             if ((sys%extra%matgrant == 1) .and. (fam%yngkid == 0)) then
                 !call MatGrant(sys,fam,net,.true.)
                 !MatGrInFC = net%tu%matgrant
-                MatGrInFC = 0.0_dp
-                do i = 1, fam%nkids
-                    if (fam%kidage(i) == 0) MatGrInFC = MatGrInFC + (sys%chben%MatGrantVal / 52.0_dp)
-                end do
+                ! MatGrInFC = 0.0_dp
+                ! do i = 1, fam%nkids
+                !     if (fam%kidage(i) == 0) MatGrInFC = MatGrInFC + (sys%chben%MatGrantVal / 52.0_dp)
+                ! end do
+                MatGrInFC = fam%kidagedist(0) * (sys%chben%MatGrantVal / 52.0_dp)
             else
                 MatGrInFC = 0.0_dp
             end if
@@ -2169,22 +2136,27 @@ contains
             if (MaxFC > tol) then
 
                 !Child credits (doesn't use info about age of kids)
-                do i = 1, fam%nkids
-                    do j = 1, sys%fc%NumAgeRng
-                        if ((fam%kidage(i) >= sys%fc%kidagel(j)) .and. (fam%kidage(i) <= sys%fc%kidageu(j))) then
-                            MaxFC = MaxFC + sys%fc%kidcred(j)
-                            exit
-                        end if
-                    end do
+                ! do i = 1, fam%nkids
+                !     do j = 1, sys%fc%NumAgeRng
+                !         if ((fam%kidage(i) >= sys%fc%kidagel(j)) .and. (fam%kidage(i) <= sys%fc%kidageu(j))) then
+                !             MaxFC = MaxFC + sys%fc%kidcred(j)
+                !             exit
+                !         end if
+                !     end do
+                ! end do
+
+                do j = 1, sys%fc%NumAgeRng
+                    MaxFC = MaxFC + (fam%kidagedist(sys%fc%kidageu(j)) - fam%kidagedist(sys%fc%kidagel(j)-1)) * sys%fc%kidcred(j)
                 end do
 
                 !Childcare credit
                 if ((fam%ccexp > tol) .and. (sys%fc%WFTCMaxCC1 > tol)) then
 
-                    nkidscc = 0
-                    do i = 1, fam%nkids
-                        if (fam%kidage(i) <= sys%fc%WFTCMaxAgeCC) nkidscc = nkidscc + 1
-                    end do
+                    ! nkidscc = 0
+                    ! do i = 1, fam%nkids
+                    !     if (fam%kidage(i) <= sys%fc%WFTCMaxAgeCC) nkidscc = nkidscc + 1
+                    ! end do
+                    nkidscc = fam%kidagedist(sys%fc%WFTCMaxAgeCC)
 
                     if (nkidscc == 1) then
                         if (fam%couple == 0) then
@@ -2242,12 +2214,14 @@ contains
             end if
 
             !Number of children eligible for credit
-            nkidscc = 0
-            do i = 1, fam%nkids
-!                if (fam%kidage(i) <= sys%fc%MaxAgeCC) nkidscc = nkidscc + 1
-! Strict inequality to check with taxben, JS
-                if (fam%kidage(i) < sys%fc%MaxAgeCC) nkidscc = nkidscc + 1
-            end do
+            ! nkidscc = 0
+            ! do i = 1, fam%nkids
+            !     ! if (fam%kidage(i) <= sys%fc%MaxAgeCC) nkidscc = nkidscc + 1
+            !     ! Strict inequality to check with taxben, JS
+            !     if (fam%kidage(i) < sys%fc%MaxAgeCC) nkidscc = nkidscc + 1
+            ! end do
+
+            nkidscc = fam%kidagedist(sys%fc%MaxAgeCC - 1)
 
             if ((elig) .and. (nkidscc > 0))  then
 
@@ -2274,14 +2248,14 @@ contains
     end function FCDisreg
 
 
-    
+
     ! ----------------------CHILDCARE TAX REFUND----------------------
 
     ! CCTaxRefund - Calculates tax refund on childcare spending
 
     ! ----------------------CHILDCARE TAX REFUND----------------------
 
-    
+
     ! CCTaxRefund
     ! ----------------------------------------------------------------
     ! Tax refund on childcare spending
@@ -2294,12 +2268,12 @@ contains
     ! there are any children aged under 11 in the family
     ! MinEarn threshold depends on age-specific minimum wage. TAXBEN
     ! only has the age-25+ min wage threshold so that's all we do here
-    ! WTC/CTC enters the taper for other benefits (e.g. HB) so it's 
-    ! possible that CTC + WTC > CCTaxRefund, but dispinc with tax 
+    ! WTC/CTC enters the taper for other benefits (e.g. HB) so it's
+    ! possible that CTC + WTC > CCTaxRefund, but dispinc with tax
     ! credits < dispinc with CCTaxRefund
     ! This introduces discontinuities in the BC. Does Andrew want these
     ! to be dealt with somehow?
-        
+
     !DEC$ ATTRIBUTES FORCEINLINE :: CCTaxRefund
     pure subroutine CCTaxRefund(sys, fam, net)
 
@@ -2310,35 +2284,36 @@ contains
         type(sys_t), intent(in)    :: sys
         type(fam_t), intent(in)    :: fam
         type(net_t), intent(inout) :: net
-        
+
         integer                    :: nkidselig
         logical                    :: earningsOK
-        
+
         net%tu%cctaxrefund = 0.0_dp
-        
+
         if (fam%ccexp > tol) then
-        
-            nkidselig = count(fam%kidage(:fam%nkids) <= sys%cctaxrefund%MaxAge)
-            
+
+            ! nkidselig = count(fam%kidage(:fam%nkids) <= sys%cctaxrefund%MaxAge)
+            nkidselig = fam%kidagedist(sys%cctaxrefund%MaxAge)
+
             if (nkidselig > 0) then
-              
+
                 ! Earn right amount
                 earningsOK = .true.
                 if ((fam%ad(1)%earn < sys%cctaxrefund%MinEarn - tol) .or. (fam%ad(1)%earn > sys%cctaxrefund%MaxInc + tol)) earningsOK = .false.
                 if (fam%couple == 1) then
                     if ((fam%ad(2)%earn < sys%cctaxrefund%MinEarn - tol) .or. (fam%ad(2)%earn > sys%cctaxrefund%MaxInc + tol)) earningsOK = .false.
                 end if
-              
+
                 if (earningsOK) then
                     net%tu%cctaxrefund = min(fam%ccexp, sys%cctaxrefund%MaxPerChild*real(nkidselig, dp)) * sys%cctaxrefund%receiptProp
                 end if ! earnings OK
-              
+
             end if ! has eligible children
-    
+
         end if ! +ve ccexp
-        
+
     end subroutine CCTaxRefund
-        
+
 
     ! ----------------------CHILD BENEFIT/MAT GRANT/FSM----------------------
 
@@ -2480,16 +2455,22 @@ contains
             !From Apr-11: no maternity grant if there's another child aged under 16 in the family (except for multiple
             ! births)
             if (sys%chBen%MatGrantOnlyFirstKid == 1) then
-              do i = 1, fam%nkids
-                  if ((fam%kidage(i) > 0) .and. (fam%kidage(i) < 16)) dogrant = .false.
-              end do
+                ! do i = 1, fam%nkids
+                !     if ((fam%kidage(i) > 0) .and. (fam%kidage(i) < 16)) dogrant = .false.
+                ! end do
+                dogrant = (fam%kidagedist(15) - fam%kidagedist(0) == 0)
             end if
 
+            ! if (dogrant) then
+            !     do i = 1, fam%nkids
+            !         if (fam%kidage(i) == 0) net%tu%matgrant = net%tu%matgrant + (sys%chben%MatGrantVal / 52.0_dp)
+            !     end do
+            ! end if
+
             if (dogrant) then
-                do i = 1, fam%nkids
-                    if (fam%kidage(i) == 0) net%tu%matgrant = net%tu%matgrant + (sys%chben%MatGrantVal / 52.0_dp)
-                end do
+                net%tu%matgrant = fam%kidagedist(0) * (sys%chben%MatGrantVal / 52.0_dp)
             end if
+
         end if
 
     end subroutine MatGrant
@@ -2523,12 +2504,21 @@ contains
             passesMeansTest = ((net%tu%incsup > tol) .or. ((net%tu%ctc > tol) .and. (net%tu%wtc <= tol) &
                 .and. (net%tu%pretaxearn <= sys%ntc%thr1hi + tol)))
             inEnglandOrScotland = ((fam%region .ne. lab%region%northern_ireland) .and. (fam%region .ne. lab%region%wales))
-            do i = 1, fam%nkids
-                if ((fam%kidage(i) >= sys%incSup%MinAgeFSM) &
-                    & .and. (((fam%kidage(i) <= sys%incSup%MaxAgeUniversalFSM) .and. inEnglandOrScotland) &
-                    & .or. (passesMeansTest))) &
-                    net%tu%fsm = net%tu%fsm + sys%incsup%ValFSM
-            end do
+            ! net%tu%fsm = 0.0_dp
+            ! do i = 1, fam%nkids
+            !     if ((fam%kidage(i) >= sys%incSup%MinAgeFSM) &
+            !         & .and. (((fam%kidage(i) <= sys%incSup%MaxAgeUniversalFSM) .and. inEnglandOrScotland) &
+            !         & .or. (passesMeansTest))) &
+            !         net%tu%fsm = net%tu%fsm + sys%incsup%ValFSM
+            ! end do
+
+            if (passesMeansTest) then
+                net%tu%fsm = (fam%nkids - fam%kidagedist(sys%incSup%MinAgeFSM - 1)) * sys%incsup%ValFSM
+            else
+                if (inEnglandOrScotland .and. (sys%incSup%MaxAgeUniversalFSM > sys%incSup%MinAgeFSM)) then
+                    net%tu%fsm = (fam%kidagedist(sys%incSup%MaxAgeUniversalFSM) - fam%kidagedist(sys%incSup%MinAgeFSM - 1)) * sys%incsup%ValFSM
+                end if
+            end if
         end if
 
 
@@ -2658,15 +2648,16 @@ contains
         integer                 :: maxageloc
         integer                 :: i
         integer                 :: prevKidAge
-        
+
         select case (fam%nkids)
         case (0)
             UCKid = 0.0_dp
         case (1:)
             if (fam%nkids <= sys%uc%MaxKids) then
-                UCKid = sys%uc%FirstKid + real(fam%nkids-1,dp)*sys%uc%OtherKid
+                UCKid = sys%uc%FirstKid + real(fam%nkids - 1, dp) * sys%uc%OtherKid
 
             else
+
                 ! Sort the kidage array
                 kidage = fam%kidage(1:fam%nkids)
                 do i = 1, fam%nkids
@@ -2674,7 +2665,6 @@ contains
                     kidagesorted(i) = kidage(maxageloc)
                     kidage(maxageloc) = -1
                 end do
-            end if
 
                 ! Give child element if (i) within first sys%uc%maxKids children, or (ii) previous child was same age (so multiple birth exemption applies)
                 UCKid = sys%uc%FirstKid
@@ -2685,6 +2675,8 @@ contains
                     end if
                     prevKidAge = kidagesorted(i)
                 end do
+
+            end if
 
         end select
 
@@ -2782,7 +2774,7 @@ contains
     !DEC$ ATTRIBUTES FORCEINLINE :: UCDisreg
     real(dp) pure function UCDisreg(sys, fam, UCHousing)
 
-        use fortax_type, only : sys_t, fam_t
+        use fortax_type, only : sys_t, fam_t, lab
 
         implicit none
 
@@ -2791,39 +2783,36 @@ contains
         real(dp),    intent(in)    :: UCHousing
 
         ! Disregard depends on (couple x parent x help with housing costs)
-
-        if (fam%couple == 1) then
-            if (fam%nkids > 0) then
+        select case(fam%famtype)
+            case(lab%famtype%single_nokids)
                 if (UCHousing > tol) then
-                    UCDisreg = sys%uc%DisregCouKidsLo
+                    UCDisreg = sys%uc%DisregSinNoKidsLo
                 else
-                    UCDisreg = sys%uc%DisregCouKidsHi
+                    UCDisreg = sys%uc%DisregSinNoKidsHi
                 end if
 
-            else
-                if (UCHousing > tol) then
-                    UCDisreg = sys%uc%DisregCouNoKidsLo
-                else
-                    UCDisreg = sys%uc%DisregCouNoKidsHi
-                end if
-            end if
-
-        else
-            if (fam%nkids > 0) then
+            case(lab%famtype%single_kids)
                 if (UCHousing > tol) then
                     UCDisreg = sys%uc%DisregSinKidsLo
                 else
                     UCDisreg = sys%uc%DisregSinKidsHi
                 end if
 
-            else
+            case(lab%famtype%couple_nokids)
                 if (UCHousing > tol) then
-                    UCDisreg = sys%uc%DisregSinNoKidsLo
+                    UCDisreg = sys%uc%DisregCouNoKidsLo
                 else
-                    UCDisreg = sys%uc%DisregSinNoKidsHi
+                    UCDisreg = sys%uc%DisregCouNoKidsHi
                 end if
-            end if
-        end if
+
+            case(lab%famtype%couple_kids)
+                if (UCHousing > tol) then
+                    UCDisreg = sys%uc%DisregCouKidsLo
+                else
+                    UCDisreg = sys%uc%DisregCouKidsHi
+                end if
+
+        end select
 
     end function UCDisreg
 
@@ -2939,37 +2928,30 @@ contains
         if ((fam%region == lab%region%london) .and. (sys%bencap%LondonCapAmt == 1)) then
 
         ! Level of cap depends only on family composition
-            if (fam%couple == 1) then
-                if (fam%nkids > 0) then
-                    BenCapLevel = sys%bencap%LondonCouKids
-                else
-                    BenCapLevel = sys%bencap%LondonCouNoKids
-                end if
-            else
-                if (fam%nkids > 0) then
-                    BenCapLevel = sys%bencap%LondonSinKids
-                else
+            select case(fam%famtype)
+                case(lab%famtype%single_nokids)
                     BenCapLevel = sys%bencap%LondonSinNoKids
-                end if
-            end if
+                case(lab%famtype%single_kids)
+                    BenCapLevel = sys%bencap%LondonSinKids
+                case(lab%famtype%couple_nokids)
+                    BenCapLevel = sys%bencap%LondonCouNoKids
+                case(lab%famtype%couple_kids)
+                    BenCapLevel = sys%bencap%LondonCouKids
+            end select
 
         else
 
             ! Level of cap depends only on family composition
-            if (fam%couple == 1) then
-                if (fam%nkids > 0) then
-                    BenCapLevel = sys%bencap%couKids
-                else
-                    BenCapLevel = sys%bencap%couNoKids
-                end if
-            else
-                if (fam%nkids > 0) then
-                    BenCapLevel = sys%bencap%sinKids
-                else
+            select case(fam%famtype)
+                case(lab%famtype%single_nokids)
                     BenCapLevel = sys%bencap%sinNoKids
-                end if
-            end if
-
+                case(lab%famtype%single_kids)
+                    BenCapLevel = sys%bencap%sinKids
+                case(lab%famtype%couple_nokids)
+                    BenCapLevel = sys%bencap%couNoKids
+                case(lab%famtype%couple_kids)
+                    BenCapLevel = sys%bencap%couKids
+            end select
 
         end if
 
@@ -3111,10 +3093,10 @@ contains
 
         !7. Tax refund on childcare expenditure
         !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        
+
         if (sys%cctaxrefund%doCCTaxRefund == 1) then
             call CCTaxRefund(sys, fam, net)
-            
+
             ! You can't get this tax refund at the same time as tax credits or universal credit, so pick whichever is higher
             ! matgrant eligibility also at stake
             if (sys%fc%dofamcred == 1) then
@@ -3140,13 +3122,13 @@ contains
                     net%tu%cctaxrefund = 0.0_dp
                 end if
             end if
-            
+
         else
             net%tu%cctaxrefund = 0.0_dp
         end if
 
-        
-        
+
+
         !8. HB, CTB AND CCB
         !!!!!!!!!!!!!!!!!!!
 
@@ -3183,11 +3165,11 @@ contains
 
         !9. BENEFIT CAP
         !!!!!!!!!!!!!!!
-        
+
         if (sys%bencap%docap == 1) then
             call imposeBenCap(sys,fam,net)
         end if
-        
+
 
         ! Disposable income
         !!!!!!!!!!!!!!!!!!!
