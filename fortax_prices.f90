@@ -858,45 +858,6 @@ sys2%extra%fsminappamt = sys%extra%fsminappamt
         sys2 = factor_times_sys(real(factor, dp), sys)
     end function factor_times_sys_integer
 
-    ! checkDate
-    ! -----------------------------------------------------------------------
-    ! returns true or false depending on whether date YYYYMMDD is valid
-
-    logical pure function checkDate(date)
-
-        implicit none
-
-        integer, intent(in) :: date
-        integer :: year, month, day, maxday
-
-        year  = date / 10000
-        month = (date - year * 10000) / 100
-        day   = date - (date / 100) * 100
-
-        select case (month)
-            case (1,3,5,7,8,10,12)
-                maxday = 31
-            case (4,6,9,11)
-                maxday = 30
-            case (2)
-                if (((modulo(year, 4) == 0) .and. (modulo(year, 100) .ne. 0)) .or. (modulo(year, 400) == 0)) then
-                    maxday = 29
-                else
-                    maxday = 28
-                end if
-            case default
-                maxday = 0
-        end select
-
-        if ((year >= 0) .and. (month >= 1 .and. month <= 12) .and. (day >= 1 .and. day <= maxday)) then
-            checkDate = .true.
-        else
-            checkDate = .false.
-        end if
-
-    end function checkDate
-
-
     ! loadsysindex
     ! -----------------------------------------------------------------------
     ! provides quick access to the actual system that individuals faced
@@ -984,7 +945,7 @@ sys2%extra%fsminappamt = sys%extra%fsminappamt
 
     subroutine getsysindex(sysindex, date, sysfilepath, sysnum)
 
-        use fortax_util, only : lower, fortaxerror
+        use fortax_util, only : lower, fortaxerror, checkdate
         use fortax_type, only : sysindex_t, len_sysindex
 
         implicit none
