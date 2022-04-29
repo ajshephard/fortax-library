@@ -869,6 +869,37 @@ contains
 
         ! Sort kidage and kidsex arrays
         if (fam%nkids > 0) then
+        
+            fam%kidagedist0 = 0
+            fam%kidagedist1 = 0
+            do i = 1, fam%nkids
+                if (fam%kidsex(i) == 0) then
+                    fam%kidagedist0(fam%kidage(i)) = fam%kidagedist0(fam%kidage(i)) + 1
+                else
+                    fam%kidagedist1(fam%kidage(i)) = fam%kidagedist1(fam%kidage(i)) + 1
+                end if
+            end do
+            fam%kidagedist0 = cumsum(fam%kidagedist0, 20)
+            fam%kidagedist1 = cumsum(fam%kidagedist1, 20)
+            fam%kidagedist = fam%kidagedist0 + fam%kidagedist1
+
+            ! ! insertion sort
+            ! do i = 2, fam%nkids
+            !     tmp1 = fam%kidage(i)
+            !     tmp2 = fam%kidsex(i)
+            !     j = i - 1
+            !     do while (j >= 1)
+            !         if (fam%kidage(j) >= tmp1) exit
+            !         fam%kidage(j + 1) = fam%kidage(j)
+            !         fam%kidsex(j + 1) = fam%kidsex(j)
+            !         j = j - 1
+            !     end do
+            !     fam%kidage(j + 1) = tmp1
+            !     fam%kidsex(j + 1) = tmp2
+            ! end do
+
+            fam%yngkid = minval(fam%kidage(1:fam%nkids))
+
 
             ! insertion sort
             do i = 2, fam%nkids
