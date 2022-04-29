@@ -46,7 +46,16 @@ ${"".join([" "*4 + line+"\n" for line in txt.split("\n")])}$
 
 #:def get_fortax_vardim(kwargs, assumed)
     #:if "dim" in kwargs
+        #:if "lowerdim" in kwargs
+        #:if kwargs["lowerdim"] == "1"
         #:set vardim = "(:)" if assumed else "(" + kwargs["dim"] + ")"
+        #:else
+        #:set upperdim = str(int(kwargs["dim"]) + int(kwargs["lowerdim"]) - 1)
+        #:set vardim = "(:)" if assumed else "(" + kwargs["lowerdim"] + ":" + upperdim + ")"
+        #:endif
+        #:else
+        #:set vardim = "(:)" if assumed else "(" + kwargs["dim"] + ")"
+        #:endif
     #:else
         #:set vardim = ""
     #:endif
@@ -59,7 +68,7 @@ ${"".join([" "*4 + line+"\n" for line in txt.split("\n")])}$
     #:assert attr in ['rate', 'amount', 'minamount', 'null', 'range', 'scale', 'label']
     #:assert type in ['bool', 'integer', 'double']
     #:for kw in kwargs
-        #:assert kw in ['dim', 'dimvar', 'value', 'label', 'ignore']
+        #:assert kw in ['lowerdim', 'dim', 'dimvar', 'value', 'label', 'ignore']
     #:endfor
 #:enddef
 
