@@ -51,7 +51,7 @@ contains
     ! nkids, and earn
 
     !DEC$ ATTRIBUTES FORCEINLINE :: tearn
-    pure subroutine tearn(sys,fam,net)
+    pure subroutine tearn(sys, fam, net)
 
         use fortax_type, only : sys_t, fam_t, net_t
 
@@ -137,6 +137,7 @@ contains
             persAllowUnused2 = max(persAllow2 - fam%ad(2)%earn, 0.0_dp)
 
             ! Calculate whether higher-rate taxpayer
+            ! NOTE: The band that triggers this could be a parameter of the system
             isHRT1 = (net%ad(1)%taxable > sys%inctax%bands(2))
             isHRT2 = (net%ad(2)%taxable > sys%inctax%bands(2))
 
@@ -254,17 +255,14 @@ contains
 
         integer :: pe
         real(dp) :: ctc
-        integer :: yngkid
 
         if ((sys%inctax%ctc > tol) .and. (fam%nkids > 0)) then
 
-            yngkid = minval(fam%kidage(1:fam%nkids))
-
-            if (yngkid < 16) then
+            if (fam%yngkid < 16) then
 
                 !Maximum ctc
                 ctc = sys%inctax%ctc
-                if (yngkid == 0) ctc = ctc + sys%inctax%ctcyng
+                if (fam%yngkid == 0) ctc = ctc + sys%inctax%ctcyng
 
                 !Primary earner
                 if (fam%couple == 0) then
@@ -484,7 +482,7 @@ contains
         real(dp) :: disreg, appamt, othinc, MatGrInIS
         integer :: i
 
-        integer :: maxage, yngkid
+        integer :: maxage
         real(dp) :: maxhrs, MaintDisreg
 
         if (fam%couple == 1) then
@@ -497,12 +495,6 @@ contains
 
         !From 1997, partner can work up to 24 hrs, but code below requires them to work less than 16
         if ((((maxage) >= 18) .or. (fam%nkids > 0)) .and. (maxhrs < sys%incsup%hours - tol)) then
-
-            if (fam%nkids > 0) then
-                yngkid = minval(fam%kidage(1:fam%nkids))
-            else
-                yngkid = -1
-            end if
 
             appamt = ISAppAmt(sys, fam)
             disreg = ISDisreg(sys, fam)
@@ -527,7 +519,7 @@ contains
                 end do
             end if
 
-            if ((sys%extra%matgrant == 1) .and. (yngkid == 0)) then
+            if ((sys%extra%matgrant == 1) .and. (fam%yngkid == 0)) then
                 !add maternity grant to applicable amount
                 !call MatGrant(sys,fam,net,.true.)
                 !MatGrInIS = net%matgrant
@@ -557,7 +549,7 @@ contains
             end if
 
             !re-assign income to correct categories, AS
-            if ((sys%extra%matgrant == 1) .and. (yngkid == 0)) then
+            if ((sys%extra%matgrant == 1) .and. (fam%yngkid == 0)) then
                 net%tu%matgrant = min(net%tu%incsup, MatGrInIS)
                 net%tu%incsup = max(0.0_dp, net%tu%incsup - MatGrInIS)
             end if
@@ -1823,14 +1815,12 @@ contains
 
         type(sys_t), intent(in) :: sys
         type(fam_t), intent(in) :: fam
-        integer :: yngkid
 
         select case (fam%nkids)
         case (0)
             MaxCTCFam = 0.0_dp
         case (1:)
-            yngkid = minval(fam%kidage(1:fam%nkids))
-            select case (yngkid)
+            select case (fam%yngkid)
             case (0)
                 MaxCTCFam = sys%ctc%fam + sys%ctc%baby
             case (1:)
@@ -2064,7 +2054,7 @@ contains
 
 
             ! Award not made below a minimum level (50p)
-            if (net%tu%wtc+net%tu%ctc < sys%ntc%MinAmt) then
+            if (net%tu%wtc + net%tu%ctc < sys%ntc%MinAmt) then
                 net%tu%wtc = 0.0_dp
                 net%tu%ctc = 0.0_dp
             end if
@@ -2091,7 +2081,7 @@ contains
         type(net_t), intent(inout) :: net
 
         real(dp) :: MaxFC, FCDisregAmt, MatGrInFC
-        integer :: i, yngkid
+        integer :: i
 
         call MaxFCamt(sys, fam, net, MaxFC)
 
@@ -2099,14 +2089,8 @@ contains
 
             FCDisregAmt = FCDisreg(sys, fam)
 
-            if (fam%nkids > 0) then
-                yngkid = minval(fam%kidage(1:fam%nkids))
-            else
-                yngkid = -1
-            end if
-
             !calculate maximum maternity grant so we can taper it away with tax credits, AS
-            if ((sys%extra%matgrant == 1) .and. (yngkid == 0)) then
+            if ((sys%extra%matgrant == 1) .and. (fam%yngkid == 0)) then
                 !call MatGrant(sys,fam,net,.true.)
                 !MatGrInFC = net%tu%matgrant
                 MatGrInFC = 0.0_dp
@@ -2124,7 +2108,7 @@ contains
             if (net%tu%fc < sys%fc%MinAmt) net%tu%fc = 0.0_dp
 
             !re-assign income to correct categories, AS
-            if ((sys%extra%matgrant == 1) .and. (yngkid == 0)) then
+            if ((sys%extra%matgrant == 1) .and. (fam%yngkid == 0)) then
                 net%tu%matgrant = min(net%tu%fc, MatGrInFC)
                 net%tu%fc = max(0.0_dp, net%tu%fc - MatGrInFC)
             end if
@@ -2680,7 +2664,7 @@ contains
             UCKid = 0.0_dp
         case (1:)
             if (fam%nkids <= sys%uc%MaxKids) then
-            UCKid = sys%uc%FirstKid + real(fam%nkids-1,dp)*sys%uc%OtherKid
+                UCKid = sys%uc%FirstKid + real(fam%nkids-1,dp)*sys%uc%OtherKid
 
             else
                 ! Sort the kidage array
