@@ -313,10 +313,25 @@ ${"".join([" "*4 + line+"\n" for line in txt.split("\n")])}$
 #! Describing types
 
 #:def fortax_type_desc(name, dt, **defkwargs)
+    #:if "ignore" in defkwargs
+        #:set allow_ignore = defkwargs['ignore']
+    #:else
+        #:set allow_ignore = False
+    #:endif
     #:def fortaxdef(type, var, str, attr, **kwargs)
         #:mute
             $:check_fortax_arg(type, var, str, attr, kwargs)
+            #:if allow_ignore
+                #:if 'ignore' in kwargs
+                    #:set ignore = kwargs["ignore"]
+                #:else
+                    #:set ignore = False
+                #:endif
+            #:else
+                #:set ignore = False
+            #:endif
         #:endmute
+        #:if not ignore         
         #:if dt == ""
         #:set dt1 = ""
         #:else
@@ -333,6 +348,7 @@ ${"".join([" "*4 + line+"\n" for line in txt.split("\n")])}$
         call desc_f90(funit, ${str}$, "${var}$", ${dt1}$${var}$, ${dt1}$${kwargs["dimvar"]}$)
         #:else
         call desc_f90(funit, ${str}$, "${var}$", ${dt1}$${var}$)
+        #:endif
         #:endif
         #:endif
     #:enddef

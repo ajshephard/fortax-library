@@ -194,6 +194,9 @@ integer :: couple
         integer :: intdate
         integer :: famtype
         integer :: yngkid
+        integer :: kidagedist(-1:18)
+        integer :: kidagedist0(-1:18)
+        integer :: kidagedist1(-1:18)
         type(famad_t) :: ad(2)
     end type fam_t
 
@@ -291,6 +294,7 @@ real(dp) :: pretaxearn
     end interface write_f90
 
     interface desc_f90
+        module procedure desc_f90string
         module procedure desc_f90integer
         module procedure desc_f90integer_label
         module procedure desc_f90integerarray
@@ -665,6 +669,9 @@ contains
         fam%intdate = 19900101
         fam%famtype = lab%famtype%single_nokids
         fam%yngkid = 0
+        fam%kidagedist = 0
+        fam%kidagedist0 = 0
+        fam%kidagedist1 = 0
 
         fam%ad%age = 25
         fam%ad%selfemp = 0
@@ -717,8 +724,11 @@ contains
         call desc_f90(funit, "Council tax band", "ctband", fam%ctband, label_ctax(fam%ctband))
         call desc_f90(funit, "Council tax band-D ratio", "banddratio", fam%banddratio)
         call desc_f90(funit, "Interview date", "intdate", fam%intdate)
-        call desc_f90(funit, "Family type", "famtype", fam%famtype, label_famtype(fam%famtype))
-        call desc_f90(funit, "Youngest child", "yngkid", fam%yngkid)
+
+
+
+
+
         write(funit, '(A)') repeat("=", 62)
 
         ! write(funit, *)
@@ -1111,6 +1121,9 @@ integer, intent(in), optional :: age2
         if (present(ctband)) fam%ctband = ctband
         if (present(banddratio)) fam%banddratio = banddratio
         if (present(intdate)) fam%intdate = intdate
+
+
+
 
 
         if (present(age1)) fam%ad(1)%age = age1
@@ -2245,6 +2258,9 @@ integer, intent(in), optional :: age2
         call write_f90(funit, "fam%intdate", fam%intdate)
         call write_f90(funit, "fam%famtype", fam%famtype)
         call write_f90(funit, "fam%yngkid", fam%yngkid)
+        call write_f90(funit, "fam%kidagedist", fam%kidagedist)
+        call write_f90(funit, "fam%kidagedist0", fam%kidagedist0)
+        call write_f90(funit, "fam%kidagedist1", fam%kidagedist1)
 
         call write_f90(funit, "fam%ad(1)%age", fam%ad(1)%age)
         call write_f90(funit, "fam%ad(1)%selfemp", fam%ad(1)%selfemp)
@@ -2329,6 +2345,19 @@ integer, intent(in), optional :: age2
             write(funit, '(A, " = ", ES24.17, "_dp")') str // "(" // intToStr(iX) // ")", val(ix)
         end do
     end subroutine write_f90doublearray2
+
+    subroutine desc_f90string(funit, longstr, shortstr, val)
+        implicit none
+        integer, intent(in) :: funit
+        character(len = *), intent(in) :: longstr
+        character(len = *), intent(in) :: shortstr
+        character(len = *), intent(in) :: val
+        if (longstr .ne. "") then
+            write(funit, '(A40, 2X, A20)') longstr // ' (' // shortstr // ')', val
+        else
+            write(funit, '(A40, 2X, A20)') shortstr, val
+        end if
+    end subroutine desc_f90string
 
     subroutine desc_f90integer(funit, longstr, shortstr, val)
         implicit none
@@ -2510,6 +2539,37 @@ integer, intent(in), optional :: age2
 
         ! Sort kidage and kidsex arrays
         if (fam%nkids > 0) then
+        
+            fam%kidagedist0 = 0
+            fam%kidagedist1 = 0
+            do i = 1, fam%nkids
+                if (fam%kidsex(i) == 0) then
+                    fam%kidagedist0(fam%kidage(i)) = fam%kidagedist0(fam%kidage(i)) + 1
+                else
+                    fam%kidagedist1(fam%kidage(i)) = fam%kidagedist1(fam%kidage(i)) + 1
+                end if
+            end do
+            fam%kidagedist0 = cumsum(fam%kidagedist0, 20)
+            fam%kidagedist1 = cumsum(fam%kidagedist1, 20)
+            fam%kidagedist = fam%kidagedist0 + fam%kidagedist1
+
+            ! ! insertion sort
+            ! do i = 2, fam%nkids
+            !     tmp1 = fam%kidage(i)
+            !     tmp2 = fam%kidsex(i)
+            !     j = i - 1
+            !     do while (j >= 1)
+            !         if (fam%kidage(j) >= tmp1) exit
+            !         fam%kidage(j + 1) = fam%kidage(j)
+            !         fam%kidsex(j + 1) = fam%kidsex(j)
+            !         j = j - 1
+            !     end do
+            !     fam%kidage(j + 1) = tmp1
+            !     fam%kidsex(j + 1) = tmp2
+            ! end do
+
+            fam%yngkid = minval(fam%kidage(1:fam%nkids))
+
 
             ! insertion sort
             do i = 2, fam%nkids
@@ -2550,5 +2610,54 @@ integer, intent(in), optional :: age2
         end if
 
     end subroutine fam_refresh
+
+
+    pure function cumsum(x, n) result(y)
+        !! calculates the cumulative sum of x
+        !DEC$ ATTRIBUTES FORCEINLINE :: cumsum
+
+        implicit none
+
+        ! Arguments
+        integer, intent(in) :: n
+            !! number of x points
+        integer, intent(in) :: x(n)
+            !! value of x points
+        integer :: y(n)
+            !! cumulative sum of x
+        integer :: iX
+
+        y(1) = x(1)
+        do iX = 2, n
+            y(iX) = x(iX) + y(iX - 1)
+        end do
+
+    end function cumsum
+
+
+    ! formatDate
+    ! -----------------------------------------------------------------------
+    ! format date as a string for printing
+
+    function formatDate(date) result(datestr)
+
+        use fortax_util, only : intToStr, checkDate
+
+        implicit none
+
+        integer, intent(in) :: date
+        character(len = :), allocatable :: datestr
+        character(len = :), allocatable :: intstr
+        logical :: valid
+
+        intstr = intToStr(date)
+        valid = checkDate(date)
+        if (valid) then
+            datestr = intstr(1:4) // '/' // intstr(5:6) // '/' // intstr(7:8)
+        else
+            datestr = "invalid (" // trim(adjustl(intstr)) // ')'
+        end if
+
+    end function formatDate
 
 end module fortax_type
