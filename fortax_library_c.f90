@@ -313,6 +313,12 @@ contains
         call FORTAX_fam_init(fam)
     end subroutine c_fam_init
 
+    subroutine c_fam_refresh(fam) bind(C, name = "C_FORTAX_fam_refresh")
+        implicit none
+        type(fam_t), intent(inout) :: fam
+        call FORTAX_fam_refresh(fam)
+    end subroutine c_fam_refresh
+
     subroutine c_net_init(net) bind(C, name = "C_FORTAX_net_init")
         implicit none
         type(net_t), intent(inout) :: net
