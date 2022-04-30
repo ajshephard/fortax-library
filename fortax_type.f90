@@ -34,7 +34,7 @@ module fortax_type
     public :: fam_saveF90, sys_saveF90
     public :: fam_t, net_t, sys_t, rpi_t, sysindex_t, bcout_t
     public :: lab, label_bool, label_ctax, label_region, label_tenure
-    public :: fam_gen, fam_desc, net_desc
+    public :: fam_gen, fam_refresh, fam_desc, net_desc
     public :: operator(+), operator(*), operator(/), operator(-)
 
     ! constants for array bounds and internal values
@@ -723,7 +723,7 @@ contains
         call desc_f90(funit, "Region", "region", fam%region, label_region(fam%region))
         call desc_f90(funit, "Council tax band", "ctband", fam%ctband, label_ctax(fam%ctband))
         call desc_f90(funit, "Council tax band-D ratio", "banddratio", fam%banddratio)
-        call desc_f90(funit, "Interview date", "intdate", fam%intdate)
+        call desc_f90(funit, "Interview date", "intdate", formatDate(fam%intdate))
 
 
 
@@ -2535,7 +2535,10 @@ integer, intent(in), optional :: age2
 
         if (fam%married == 1) fam%couple = 1
 
-        fam%nkids = max(fam%nkids, 0)
+        fam%nkids = min(max(fam%nkids, 0), maxKids)
+        fam%kidage(1:fam%nkids) = min(max(fam%kidage(1:fam%nkids), 0), 18)
+        fam%ad(1)%age = min(max(fam%ad(1)%age, 16), 200)
+        fam%ad(2)%age = min(max(fam%ad(2)%age, 16), 200)
 
         ! Sort kidage and kidsex arrays
         if (fam%nkids > 0) then
@@ -2591,6 +2594,9 @@ integer, intent(in), optional :: age2
         else
 
             fam%yngkid = -1
+            fam%kidagedist0 = 0
+            fam%kidagedist1 = 0
+            fam%kidagedist = 0
 
         end if
 
