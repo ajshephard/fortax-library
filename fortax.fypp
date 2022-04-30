@@ -419,9 +419,7 @@ ${"".join([" "*4 + line+"\n" for line in txt.split("\n")])}$
                 call fortaxError("${var}$${suffix}$ exceeds bounds in fam_gen")
             else
                 fam%${var}$(1:size(${var}$)) = ${var}$${suffix}$
-                if (.not. present(${kwargs["dimvar"]}$)) then
-                    ${parent}$${kwargs["dimvar"]}$ = size(${var}$${suffix}$)
-                end if
+                ${parent}$${kwargs["dimvar"]}$ = max(${parent}$${kwargs["dimvar"]}$, size(${var}$${suffix}$))
             endif
         end if
     #:else

@@ -1095,9 +1095,7 @@ integer, intent(in), optional :: age2
                 call fortaxError("kidage exceeds bounds in fam_gen")
             else
                 fam%kidage(1:size(kidage)) = kidage
-                if (.not. present(nkids)) then
-                    fam%nkids = size(kidage)
-                end if
+                fam%nkids = max(fam%nkids, size(kidage))
             endif
         end if
         if (present(kidsex)) then
@@ -1105,9 +1103,7 @@ integer, intent(in), optional :: age2
                 call fortaxError("kidsex exceeds bounds in fam_gen")
             else
                 fam%kidsex(1:size(kidsex)) = kidsex
-                if (.not. present(nkids)) then
-                    fam%nkids = size(kidsex)
-                end if
+                fam%nkids = max(fam%nkids, size(kidsex))
             endif
         end if
         if (present(nothads)) fam%nothads = nothads
