@@ -68,7 +68,7 @@ ${"".join([" "*4 + line+"\n" for line in txt.split("\n")])}$
     #:assert attr in ['rate', 'amount', 'minamount', 'null', 'range', 'scale', 'label']
     #:assert type in ['bool', 'integer', 'double']
     #:for kw in kwargs
-        #:assert kw in ['lowerdim', 'dim', 'dimvar', 'value', 'label', 'ignore']
+        #:assert kw in ['lowerdim', 'dim', 'dimvar', 'value', 'label', 'ignore', 'fmt']
     #:endfor
 #:enddef
 
@@ -347,7 +347,11 @@ ${"".join([" "*4 + line+"\n" for line in txt.split("\n")])}$
         #:if 'dimvar' in kwargs
         call desc_f90(funit, ${str}$, "${var}$", ${dt1}$${var}$, ${dt1}$${kwargs["dimvar"]}$)
         #:else
+        #:if 'fmt' in kwargs
+        call desc_f90(funit, ${str}$, "${var}$", ${kwargs["fmt"]}$(${dt1}$${var}$))
+        #:else
         call desc_f90(funit, ${str}$, "${var}$", ${dt1}$${var}$)
+        #:endif
         #:endif
         #:endif
         #:endif
