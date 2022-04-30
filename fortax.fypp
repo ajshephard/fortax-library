@@ -494,7 +494,6 @@ lab%${lab}$%${labval}$
         @:fortax_type_list(fam, ignore = True)
         @:fortax_type_list(famad, suffix = 1, ignore = True)
         @:fortax_type_list(famad, suffix = 2, ignore = True)
-        correct
     #:endcall
 
         use fortax_util, only : fortaxError
@@ -505,8 +504,6 @@ lab%${lab}$%${labval}$
         @:fortax_type_def(fam, attributes = "intent(in), optional", assumed = True, ignore = True)
         @:fortax_type_def(famad, attributes = "intent(in), optional", suffix = 1, assumed = True, ignore = True)
         @:fortax_type_def(famad, attributes = "intent(in), optional", suffix = 2, assumed = True, ignore = True)
-        logical, intent(in), optional :: correct
-        logical :: correct2
         integer :: kidSize
         logical :: ad2
 
@@ -516,27 +513,14 @@ lab%${lab}$%${labval}$
         @:fam_gen(famad, fam%ad(1), suffix = 1, ignore = True)
         @:fam_gen(famad, fam%ad(2), suffix = 2, ignore = True)
 
-        if (present(correct)) then
-            correct2 = correct
-        else
-            correct2 = .true.
-        end if
-
-        if (correct2) then
-
-            !if married true, then couple is true regardless of whether specified
-            if (fam%married == 1) fam%couple = 1
-
-            !automatically set couple=.true. if any second adult information is passed
-            if (fam%couple == 0) then
-                ad2 = .false.
-                #:def fortaxdef(type, var, str, attr, **kwargs)
-                if (present(${var}$2)) ad2 = .true.
-                #:enddef
-                #:include "famad_t.inc"
-                if (ad2) fam%couple = 1
-            end if
-
+        !automatically set couple=.true. if any second adult information is passed
+        if (fam%couple == 0) then
+            ad2 = .false.
+            #:def fortaxdef(type, var, str, attr, **kwargs)
+            if (present(${var}$2)) ad2 = .true.
+            #:enddef
+            #:include "famad_t.inc"
+            if (ad2) fam%couple = 1
         end if
 
         call fam_refresh(fam)

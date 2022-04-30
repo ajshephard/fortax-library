@@ -1049,7 +1049,7 @@ end function labstring_famtype
     ! for the respective adult number.
 
     subroutine fam_gen(fam, couple, married, ccexp, maint, nkids, kidage, kidsex, nothads, tenure, rent, rentcap, bedrooms,&
-        & region, ctband, banddratio, intdate, age1, selfemp1, hrs1, earn1, age2, selfemp2, hrs2, earn2, correct)
+        & region, ctband, banddratio, intdate, age1, selfemp1, hrs1, earn1, age2, selfemp2, hrs2, earn2)
 
         use fortax_util, only : fortaxError
 
@@ -1080,8 +1080,6 @@ integer, intent(in), optional :: age2
         integer, intent(in), optional :: selfemp2
         real(dp), intent(in), optional :: hrs2
         real(dp), intent(in), optional :: earn2
-        logical, intent(in), optional :: correct
-        logical :: correct2
         integer :: kidSize
         logical :: ad2
 
@@ -1135,27 +1133,14 @@ integer, intent(in), optional :: age2
         if (present(hrs2)) fam%ad(2)%hrs = hrs2
         if (present(earn2)) fam%ad(2)%earn = earn2
 
-        if (present(correct)) then
-            correct2 = correct
-        else
-            correct2 = .true.
-        end if
-
-        if (correct2) then
-
-            !if married true, then couple is true regardless of whether specified
-            if (fam%married == 1) fam%couple = 1
-
-            !automatically set couple=.true. if any second adult information is passed
-            if (fam%couple == 0) then
-                ad2 = .false.
-                if (present(age2)) ad2 = .true.
-                if (present(selfemp2)) ad2 = .true.
-                if (present(hrs2)) ad2 = .true.
-                if (present(earn2)) ad2 = .true.
-                if (ad2) fam%couple = 1
-            end if
-
+        !automatically set couple=.true. if any second adult information is passed
+        if (fam%couple == 0) then
+            ad2 = .false.
+            if (present(age2)) ad2 = .true.
+            if (present(selfemp2)) ad2 = .true.
+            if (present(hrs2)) ad2 = .true.
+            if (present(earn2)) ad2 = .true.
+            if (ad2) fam%couple = 1
         end if
 
         call fam_refresh(fam)
