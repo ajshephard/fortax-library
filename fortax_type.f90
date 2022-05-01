@@ -39,6 +39,7 @@ module fortax_type
 
     ! constants for array bounds and internal values
     integer, parameter, public :: maxKids = 16
+    integer, parameter, public :: maxKidAge = 19
     integer, parameter, public :: maxRpi = 1024
     integer, parameter, public :: maxSysIndex = 128
     integer, parameter, public :: maxNumAgeRng = 32
@@ -194,9 +195,9 @@ integer :: couple
         integer :: intdate
         integer :: famtype
         integer :: yngkid
-        integer :: kidagedist(-1:18)
-        integer :: kidagedist0(-1:18)
-        integer :: kidagedist1(-1:18)
+        integer :: kidagedist(-1:19)
+        integer :: kidagedist0(-1:19)
+        integer :: kidagedist1(-1:19)
         type(famad_t) :: ad(2)
     end type fam_t
 
@@ -754,11 +755,12 @@ contains
         end if
         write(funit, *)
 
-        close(funit)
+        if (present(fname)) close(funit)
 
     end subroutine fam_desc
 
     ! obtain string labels for the variable value labels
+
 
 
 
@@ -1588,7 +1590,8 @@ integer, intent(in), optional :: age2
         call desc_f90(funit, "Pre-tax earnings", "pretaxearn", net%ad(2)%pretaxearn)
         call desc_f90(funit, "Post-tax earnings", "posttaxearn", net%ad(2)%posttaxearn)
         write(funit, '(A)') repeat("=", 62)
-        close(funit)
+
+        if (present(fname)) close(funit)
 
     end subroutine net_desc
 
@@ -2517,7 +2520,7 @@ integer, intent(in), optional :: age2
         if (fam%married == 1) fam%couple = 1
 
         fam%nkids = min(max(fam%nkids, 0), maxKids)
-        fam%kidage(1:fam%nkids) = min(max(fam%kidage(1:fam%nkids), 0), 18)
+        fam%kidage(1:fam%nkids) = min(max(fam%kidage(1:fam%nkids), 0), maxKidAge)
         fam%ad(1)%age = min(max(fam%ad(1)%age, 16), 200)
         fam%ad(2)%age = min(max(fam%ad(2)%age, 16), 200)
 
@@ -2533,8 +2536,8 @@ integer, intent(in), optional :: age2
                     fam%kidagedist1(fam%kidage(i)) = fam%kidagedist1(fam%kidage(i)) + 1
                 end if
             end do
-            fam%kidagedist0 = cumsum(fam%kidagedist0, 20)
-            fam%kidagedist1 = cumsum(fam%kidagedist1, 20)
+            fam%kidagedist0 = cumsum(fam%kidagedist0, 2+maxKidAge)
+            fam%kidagedist1 = cumsum(fam%kidagedist1, 2+maxKidAge)
             fam%kidagedist = fam%kidagedist0 + fam%kidagedist1
 
             ! ! insertion sort

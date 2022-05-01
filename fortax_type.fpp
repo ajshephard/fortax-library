@@ -282,7 +282,7 @@ contains
         end if
         write(funit, *)
 
-        close(funit)
+        if (present(fname)) close(funit)
 
     end subroutine fam_desc
 
@@ -495,7 +495,8 @@ contains
         write(funit, '(A)') repeat("=", 62)
         @:fortax_type_desc(netad, net%ad(2))
         write(funit, '(A)') repeat("=", 62)
-        close(funit)
+
+        if (present(fname)) close(funit)
 
     end subroutine net_desc
 
@@ -866,7 +867,7 @@ contains
         if (fam%married == 1) fam%couple = 1
 
         fam%nkids = min(max(fam%nkids, 0), maxKids)
-        fam%kidage(1:fam%nkids) = min(max(fam%kidage(1:fam%nkids), 0), 18)
+        fam%kidage(1:fam%nkids) = min(max(fam%kidage(1:fam%nkids), 0), maxKidAge)
         fam%ad(1)%age = min(max(fam%ad(1)%age, 16), 200)
         fam%ad(2)%age = min(max(fam%ad(2)%age, 16), 200)
 
@@ -882,8 +883,8 @@ contains
                     fam%kidagedist1(fam%kidage(i)) = fam%kidagedist1(fam%kidage(i)) + 1
                 end if
             end do
-            fam%kidagedist0 = cumsum(fam%kidagedist0, 20)
-            fam%kidagedist1 = cumsum(fam%kidagedist1, 20)
+            fam%kidagedist0 = cumsum(fam%kidagedist0, 2+maxKidAge)
+            fam%kidagedist1 = cumsum(fam%kidagedist1, 2+maxKidAge)
             fam%kidagedist = fam%kidagedist0 + fam%kidagedist1
 
             ! ! insertion sort
