@@ -1,4 +1,5 @@
 @:fortaxdef(integer, maxKids,          "Maximum number of kids",        range, value = 16)
+@:fortaxdef(integer, maxKidAge,        "Maximum age of kids",           range, value = 19)
 @:fortaxdef(integer, maxRpi,           "Maximum price indices",         range, value = 1024)
 @:fortaxdef(integer, maxSysIndex,      "Maximum system indices",        range, value = 128)
 @:fortaxdef(integer, maxNumAgeRng,     "Maximum age ranges",            range, value = 32)
