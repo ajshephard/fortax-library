@@ -167,6 +167,12 @@ function fam_init()
     return famref[]
 end
 
+function fam_refresh(fam)
+    famref = Ref{fam_t}(fam)
+    ccall((:C_FORTAX_fam_refresh, fortaxlib), Cvoid, (Ref{fam_t}, ), famref)
+    return famref[]
+end
+
 function net_init()
     netref = Ref{net_t}()
     ccall((:C_FORTAX_net_init, fortaxlib), Cvoid, (Ref{net_t}, ), netref)

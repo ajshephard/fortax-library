@@ -1,5 +1,6 @@
 
 const maxKids = 16
+const maxKidAge = 19
 const maxRpi = 1024
 const maxSysIndex = 128
 const maxNumAgeRng = 32
@@ -7,6 +8,8 @@ const maxIncTaxBands = 32
 const maxNatInsBands = 32
 const maxNatInsC4Bands = 32
 const maxKinks = 256
+const maxUnderOccBands = 8
+const maxLHABands = 8
 const sysHuge = 1.0e100
 const len_sysname = 64
 const len_sysdesc = 512
@@ -15,8 +18,17 @@ const len_label = 16
 const len_labstring = 64
 const len_bcdesc = 256
 const lab_bool = (no = 0, yes = 1)
-const lab_ctax =
-    (banda = 1, bandb = 2, bandc = 3, bandd = 4, bande = 5, bandf = 6, bandg = 7, bandh = 8)
+const lab_ctax = (
+    banda = 1,
+    bandb = 2,
+    bandc = 3,
+    bandd = 4,
+    bande = 5,
+    bandf = 6,
+    bandg = 7,
+    bandh = 8,
+    bandi = 9,
+)
 const lab_tenure = (
     own_outright = 1,
     mortgage = 2,
@@ -40,6 +52,8 @@ const lab_region = (
     scotland = 11,
     northern_ireland = 12,
 )
+const lab_sex = (male = 0, female = 1)
+const lab_famtype = (single_nokids = 1, single_kids = 2, couple_nokids = 3, couple_kids = 4)
 
 struct famad_t
     age::Cint
@@ -55,14 +69,21 @@ struct fam_t
     maint::Cdouble
     nkids::Cint
     kidage::SVector{maxKids,Cint}
+    kidsex::SVector{maxKids,Cint}
     nothads::Cint
     tenure::Cint
     rent::Cdouble
     rentcap::Cdouble
+    bedrooms::Cint
     region::Cint
     ctband::Cint
     banddratio::Cdouble
     intdate::Cint
+    famtype::Cint
+    yngkid::Cint
+    kidagedist::SVector{21,Cint}
+    kidagedist0::SVector{21,Cint}
+    kidagedist1::SVector{21,Cint}
     ad::SVector{2,famad_t}
 end
 
@@ -86,6 +107,7 @@ struct nettu_t
     wtc::Cdouble
     ctc::Cdouble
     ccexp::Cdouble
+    cctaxrefund::Cdouble
     incsup::Cdouble
     hben::Cdouble
     polltax::Cdouble
@@ -127,6 +149,8 @@ struct inctax_t
     disablePATaperRounding::Cint
     paTaperThresh::Cdouble
     paTaperRate::Cdouble
+    doTPA::Cint
+    maxTPA::Cdouble
     mma::Cdouble
     ctc::Cdouble
     ctcyng::Cdouble
@@ -190,6 +214,7 @@ struct ctc_t
     fam::Cdouble
     baby::Cdouble
     kid::Cdouble
+    maxKids::Cint
 end
 
 struct wtc_t
@@ -221,16 +246,29 @@ struct ntc_t
     MinAmt::Cdouble
 end
 
+struct cctaxrefund_t
+    doCCTaxRefund::Cint
+    MaxPerChild::Cdouble
+    MaxAge::Cint
+    ReceiptProp::Cdouble
+    MinEarn::Cdouble
+    MaxInc::Cdouble
+end
+
 struct incsup_t
     doIncSup::Cint
     IncChben::Cint
     NumAgeRng::Cint
+    MinAgeMain::Cint
+    MinAgeMainSin::Cint
     MainCou::Cdouble
     YngCou::Cdouble
     MainLP::Cdouble
     YngLP::Cdouble
     MainSin::Cdouble
     YngSin::Cdouble
+    MinAgeFSM::Cint
+    MaxAgeUniversalFSM::Cint
     ValFSM::Cdouble
     DisregLP::Cdouble
     DisregSin::Cdouble
@@ -249,13 +287,30 @@ struct ctax_t
     docounciltax::Cint
     bandD::Cdouble
     SinDis::Cdouble
-    RatioA::Cdouble
-    RatioB::Cdouble
-    RatioC::Cdouble
-    RatioE::Cdouble
-    RatioF::Cdouble
-    RatioG::Cdouble
-    RatioH::Cdouble
+    EnglandRatioA::Cdouble
+    EnglandRatioB::Cdouble
+    EnglandRatioC::Cdouble
+    EnglandRatioE::Cdouble
+    EnglandRatioF::Cdouble
+    EnglandRatioG::Cdouble
+    EnglandRatioH::Cdouble
+    EnglandRatioI::Cdouble
+    ScotlandRatioA::Cdouble
+    ScotlandRatioB::Cdouble
+    ScotlandRatioC::Cdouble
+    ScotlandRatioE::Cdouble
+    ScotlandRatioF::Cdouble
+    ScotlandRatioG::Cdouble
+    ScotlandRatioH::Cdouble
+    ScotlandRatioI::Cdouble
+    WalesRatioA::Cdouble
+    WalesRatioB::Cdouble
+    WalesRatioC::Cdouble
+    WalesRatioE::Cdouble
+    WalesRatioF::Cdouble
+    WalesRatioG::Cdouble
+    WalesRatioH::Cdouble
+    WalesRatioI::Cdouble
 end
 
 struct rebatesys_t
@@ -266,6 +321,8 @@ struct rebatesys_t
     NumAgeRng::Cint
     Restrict::Cint
     docap::Cint
+    MinAgeMain::Cint
+    MinAgeMainSin::Cint
     MainCou::Cdouble
     YngCou::Cdouble
     MainLP::Cdouble
@@ -286,12 +343,22 @@ struct rebatesys_t
     AgeRngl::SVector{maxNumAgeRng,Cint}
     AgeRngu::SVector{maxNumAgeRng,Cint}
     AddKid::SVector{maxNumAgeRng,Cdouble}
+    MaxKids::Cint
 end
 
 struct hben_t
     doHBen::Cint
     taper::Cdouble
     MinAmt::Cdouble
+    doUnderOccCharge::Cint
+    doUnderOccChargeScotland::Cint
+    doUnderOccChargeNI::Cint
+    numUnderOccBands::Cint
+    underOccRates::SVector{maxUnderOccBands,Cdouble}
+    doLHA::Cint
+    LHASharedAccAge::Cint
+    numLHABands::Cint
+    LHARates::SVector{maxLHABands,Cdouble}
 end
 
 struct ctaxben_t
@@ -318,6 +385,7 @@ struct uc_t
     MinAgeMain::Cint
     FirstKid::Cdouble
     OtherKid::Cdouble
+    MaxKids::Cint
     MaxCC1::Cdouble
     MaxCC2::Cdouble
     PropCC::Cdouble
@@ -343,11 +411,17 @@ end
 
 struct bencap_t
     doCap::Cint
+    doNI::Cint
     doThruUC::Cint
     sinNoKids::Cdouble
     sinKids::Cdouble
     couNoKids::Cdouble
     couKids::Cdouble
+    LondonCapAmt::Cint
+    LondonSinNoKids::Cdouble
+    LondonSinKids::Cdouble
+    LondonCouNoKids::Cdouble
+    LondonCouKids::Cdouble
     UCEarnThr::Cdouble
 end
 
@@ -367,6 +441,7 @@ struct sys_t
     ctc::ctc_t
     wtc::wtc_t
     ntc::ntc_t
+    cctaxrefund::cctaxrefund_t
     incsup::incsup_t
     ctax::ctax_t
     rebatesys::rebatesys_t
@@ -394,11 +469,13 @@ function fam_gen(;
     ccexp = 0.0,
     maint = 0.0,
     nkids = 0,
-    kidage = 0,
+    kidage = [0],
+    kidsex = [0],
     nothads = 0,
     tenure = lab_tenure.own_outright,
     rent = 0.0,
     rentcap = 0.0,
+    bedrooms = 0,
     region = lab_region.north_east,
     ctband = lab_ctax.bandd,
     banddratio = 1.0,
@@ -411,7 +488,6 @@ function fam_gen(;
     selfemp2 = nothing,
     hrs2 = nothing,
     earn2 = nothing,
-    correct = true,
 )
     isnothing(age2) && isnothing(selfemp2) && isnothing(hrs2) && isnothing(earn2) ?
     (ad2 = false) : (ad2 = true)
@@ -430,12 +506,60 @@ function fam_gen(;
     elseif thislen < maxKids
         resize!(kidage, maxKids)
         kidage[thislen+1:maxKids] .= 0
-        correct && (nkids = thislen)
+        nkids = max(nkids, thislen)
+    end
+    thislen = length(kidsex)
+    if thislen > maxKids
+        fortaxError("kidsex exceeds bounds in fam_gam")
+    elseif thislen < maxKids
+        resize!(kidsex, maxKids)
+        kidsex[thislen+1:maxKids] .= 0
+        nkids = max(nkids, thislen)
     end
 
-    if (correct)
-        ad2 && (couple = 1)
-        married == 1 && (couple = 1)
+    ad2 && (couple = 1)
+
+    # equivalent to behaviour fam_refresh
+
+    nkids = min(max(nkids, 0), maxKids)
+    kidage[1:nkids] = min.(max.(kidage[1:nkids], 0), 18)
+    age1 = min(max(age1, 16), 200)
+    age2 = min(max(age2, 16), 200)
+
+    married == 1 && (couple = 1)
+
+    kidagedist0 = zeros(Int32, 21)
+    kidagedist1 = zeros(Int32, 21)
+    if (nkids > 0)
+        for i = 1:nkids
+            if (kidsex[i] == 0)
+                kidagedist0[2+kidage[i]] = kidagedist0[2+kidage[i]] + 1
+            else
+                kidagedist1[2+kidage[i]] = kidagedist1[2+kidage[i]] + 1
+            end
+        end
+        kidagedist0 = cumsum(kidagedist0)
+        kidagedist1 = cumsum(kidagedist1)
+        kidagedist = kidagedist0 + kidagedist1
+        yngkid = minimum(kidage[1:nkids])
+    else
+        kidagedist = zeros(Int32, 21)
+        yngkid = -1
+    end
+
+    # familty type
+    if (couple == 0)
+        if (nkids == 0)
+            famtype = lab_famtype.single_nokids
+        else
+            famtype = lab_famtype.single_kids
+        end
+    else
+        if (nkids == 0)
+            famtype = lab_famtype.couple_nokids
+        else
+            famtype = lab_famtype.couple_kids
+        end
     end
 
     fam = fam_t(
@@ -445,14 +569,21 @@ function fam_gen(;
         maint,
         nkids,
         kidage,
+        kidsex,
         nothads,
         tenure,
         rent,
         rentcap,
+        bedrooms,
         region,
         ctband,
         banddratio,
         intdate,
+        famtype,
+        yngkid,
+        kidagedist,
+        kidagedist0,
+        kidagedist1,
         [famad1, famad2],
     )
     return fam
