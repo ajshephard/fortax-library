@@ -89,12 +89,33 @@ contains
 
     subroutine loadindex(rpi, fname)
 
-        use fortax_util, only : fortaxerror, fortaxwarn, inttostr
-        use fortax_type, only : rpi_t, maxRPI
+        use fortax_type, only : rpi_t
 
         implicit none
 
         type(rpi_t), intent(out) :: rpi
+        character(len = *), intent(in), optional :: fname
+
+        call loadindex2(rpi%ndate, rpi%date, rpi%index, fname)
+
+    end subroutine loadindex
+
+
+    ! loadindex
+    ! -----------------------------------------------------------------------
+    ! loads a price index file saved as a comma separated values (CSV) file.
+    ! If fname is not specified it defaults to 'prices/rpi.csv'
+
+    subroutine loadindex2(ndate, date, index, fname)
+
+        use fortax_util, only : fortaxerror, fortaxwarn, inttostr
+        use fortax_type, only : maxRPI
+
+        implicit none
+
+        integer, intent(out) :: ndate
+        integer, intent(out) :: date(maxRPI)
+        real(dp), intent(out) :: index(maxRPI)
         character(len = *), intent(in), optional :: fname
 
         integer :: funit
@@ -102,7 +123,7 @@ contains
         integer :: nrec
 
         logical :: isfile
-        integer :: tempdate, ndate
+        integer :: tempdate
         real(dp) :: tempindex
 
         if (present(fname)) then
@@ -146,8 +167,8 @@ contains
                 if (nrec > maxRPI) then
                     exit
                 else
-                    rpi%date(nrec)  = tempdate
-                    rpi%index(nrec) = tempindex
+                    date(nrec)  = tempdate
+                    index(nrec) = tempindex
                 end if
             end if
 
@@ -157,12 +178,9 @@ contains
 
         if (nrec .ne. ndate) then
             call fortaxerror('number of rpi records does not equal number declared on line 1')
-        else
-            rpi%ndate = ndate
         end if
 
-    end subroutine loadindex
-
+    end subroutine loadindex2
 
     ! getindex
     ! -----------------------------------------------------------------------
@@ -233,10 +251,26 @@ contains
         if (present(newdate)) sys%extra%prices = newdate
 
         #:for SYS in SYSLIST
-        @:fortax_uprate(${SYS}$, sys%${SYS}$, factor, amount = True. minamount = True)
+        @:fortax_uprate(${SYS}$, sys%${SYS}$, factor, amount = True, minamount = True)
         #:endfor
 
     end subroutine upratesys
+
+    subroutine upratefam(fam, factor)
+
+        use fortax_type, only : fam_t
+        use fortax_util, only : fortaxwarn
+
+        implicit none
+
+        type(fam_t), intent(inout) :: fam
+        real(dp), intent(in) :: factor
+
+        @:fortax_uprate(fam, fam, factor, amount = True, minamount = True)
+        @:fortax_uprate(famad, fam%ad(1), factor, amount = True, minamount = True)
+        @:fortax_uprate(famad, fam%ad(2), factor, amount = True, minamount = True)
+
+    end subroutine upratefam
 
     function sys_times_factor(sys, factor) result(sys2)
         use fortax_type, only : sys_t
@@ -245,7 +279,7 @@ contains
         real(dp), intent(in) :: factor
         type(sys_t) :: sys2
         #:for SYS in SYSLIST
-        @:fortax_uprate_op(${SYS}$, sys2%${SYS}$, sys%${SYS}$, factor, amount = True. minamount = True)
+        @:fortax_uprate_op(${SYS}$, sys2%${SYS}$, sys%${SYS}$, factor, amount = True, minamount = True)
         #:endfor
     end function sys_times_factor
 
@@ -313,6 +347,29 @@ contains
         type(sysindex_t), intent(out) :: sysindex
         character(len = *), intent(in), optional :: sysindexfile
 
+        call loadsysindex2(sysindex%nsys, sysindex%date0, sysindex%date1, sysindex%fname, sysindexfile)
+
+    end subroutine loadsysindex
+
+
+    ! loadsysindex2
+    ! -----------------------------------------------------------------------
+    ! provides quick access to the actual system that individuals faced
+    ! requires an external system index file (sysindexfile)
+
+    subroutine loadsysindex2(nsys, date0, date1, fname, sysindexfile)
+
+        use fortax_util, only : fortaxerror, inttostr
+        use fortax_type, only : len_sysindex, maxSysIndex
+        use, intrinsic :: iso_c_binding
+
+        implicit none
+
+        integer, intent(out) :: nsys
+        integer, intent(out) :: date0(maxSysIndex), date1(maxSysIndex)
+        character(kind = c_char) :: fname(len_sysindex, maxSysIndex)
+        character(len = *), intent(in), optional :: sysindexfile
+
         integer :: funit
         integer :: istat, nrec
 
@@ -338,12 +395,12 @@ contains
 
         read (funit, *, iostat = istat) ndate
 
-        call freesysindex(sysindex)
+        !call freesysindex(sysindex)
 
         if (istat .ne. 0) then
             call fortaxerror('error reading number of records on line 1')
         else
-            sysindex%nsys = ndate
+            nsys = ndate
         end if
 
         nrec = 0
@@ -361,13 +418,12 @@ contains
                 if (nrec > maxSysIndex) then
                     call fortaxerror('nrec > maxSysIndex')
                 end if
-                sysindex%date0(nrec) = tempdate0
-                sysindex%date1(nrec) = tempdate1
-                sysindex%fname(:, nrec) = transfer(tempfname, sysindex%fname(:, nrec))
+                date0(nrec) = tempdate0
+                date1(nrec) = tempdate1
+                fname(:, nrec) = transfer(tempfname, fname(:, nrec))
             end if
 
         end do
-
 
         close(funit)
 
@@ -375,7 +431,7 @@ contains
             call fortaxerror('number of records does not equal number declared on line 1')
         end if
 
-    end subroutine loadsysindex
+    end subroutine loadsysindex2
 
 
     ! getsysindex
@@ -385,28 +441,52 @@ contains
 
     subroutine getsysindex(sysindex, date, sysfilepath, sysnum)
 
-        use fortax_util, only : lower, fortaxerror, checkdate
         use fortax_type, only : sysindex_t, len_sysindex
 
         implicit none
 
         type(sysindex_t), intent(in)  :: sysindex
         integer, intent(in) :: date
-        character(len = 256), intent(out) :: sysfilepath
+        character(len = len_sysindex), intent(out) :: sysfilepath
+        integer, intent(out) :: sysnum
+
+        call getsysindex2(sysindex%nsys, sysindex%date0, sysindex%date1, sysindex%fname, date, sysfilepath, sysnum)
+
+    end subroutine getsysindex
+
+
+    ! getsysindex2
+    ! -----------------------------------------------------------------------
+    ! returns information which allows the user to easily identify which
+    ! tax system operated at any given YYYYMMDD date as specified in sysindex
+
+    subroutine getsysindex2(nsys, date0, date1, fname, date, sysfilepath, sysnum)
+
+        use fortax_util, only : lower, fortaxerror, checkdate
+        use fortax_type, only : len_sysindex, maxSysIndex
+        use iso_c_binding
+
+        implicit none
+
+        integer, intent(in) :: nsys
+        integer, intent(in) :: date0(maxSysIndex), date1(maxSysIndex)
+        character(kind = c_char), intent(in) :: fname(len_sysindex, maxSysIndex)
+        integer, intent(in) :: date
+        character(len = len_sysindex), intent(out) :: sysfilepath
         integer, intent(out) :: sysnum
 
         integer :: i
         character(len = len_sysindex):: sysname
 
-        if (sysindex%nsys == 0) then
+        if (nsys == 0) then
             call fortaxerror('system index file is not in memory')
         end if
 
         if (checkdate(date)) then
             sysnum = 0
-            do i = 1, sysindex%nsys
-                if (date >= sysindex%date0(i) .and. date <= sysindex%date1(i)) then
-                    sysname = transfer(sysindex%fname(:, i), sysname)
+            do i = 1, nsys
+                if (date >= date0(i) .and. date <= date1(i)) then
+                    sysname = transfer(fname(:, i), sysname)
                     sysfilepath = 'systems/fortax/' // trim(adjustl(sysname)) // '.json'
                     sysnum = i
                     exit
@@ -419,8 +499,7 @@ contains
             call fortaxerror('invalid date in getsysindex')
         end if
 
-    end subroutine getsysindex
-
+    end subroutine getsysindex2
 
     ! freesysindex
     ! -----------------------------------------------------------------------
