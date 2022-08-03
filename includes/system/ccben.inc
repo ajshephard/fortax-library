@@ -2,4 +2,4 @@
 @:fortaxdef(double, taper,     "", rate)
 @:fortaxdef(double, PropElig,  "", scale)
 @:fortaxdef(double, MinAmt,    "", minamount)
-@:fortaxdef(double, CCrate,    "", rate)
+@:fortaxdef(double, CCrate,    "", amount)
