@@ -32,8 +32,8 @@ module fortax_prices
 
     private
 
-    public :: loadindex, setindex, getindex, upratefactor, upratesys
-    public :: checkdate, loadsysindex, getsysindex, rpi_saveF90
+    public :: loadindex, loadindex2, setindex, getindex, upratefactor, upratesys, upratefam
+    public :: checkdate, loadsysindex, loadsysindex2, getsysindex, getsysindex2, rpi_saveF90
     public :: operator(*), operator(/)
 
     interface operator(*)
@@ -41,11 +41,17 @@ module fortax_prices
         module procedure sys_times_factor_integer
         module procedure factor_times_sys
         module procedure factor_times_sys_integer
+        module procedure fam_times_factor
+        module procedure fam_times_factor_integer
+        module procedure factor_times_fam
+        module procedure factor_times_fam_integer
     end interface
 
     interface operator(/)
         module procedure sys_div_factor
         module procedure sys_div_factor_integer
+        module procedure fam_div_factor
+        module procedure fam_div_factor_integer
     end interface
 
 contains
@@ -88,12 +94,33 @@ contains
 
     subroutine loadindex(rpi, fname)
 
-        use fortax_util, only : fortaxerror, fortaxwarn, inttostr
-        use fortax_type, only : rpi_t, maxRPI
+        use fortax_type, only : rpi_t
 
         implicit none
 
         type(rpi_t), intent(out) :: rpi
+        character(len = *), intent(in), optional :: fname
+
+        call loadindex2(rpi%ndate, rpi%date, rpi%index, fname)
+
+    end subroutine loadindex
+
+
+    ! loadindex
+    ! -----------------------------------------------------------------------
+    ! loads a price index file saved as a comma separated values (CSV) file.
+    ! If fname is not specified it defaults to 'prices/rpi.csv'
+
+    subroutine loadindex2(ndate, date, index, fname)
+
+        use fortax_util, only : fortaxerror, fortaxwarn, inttostr
+        use fortax_type, only : maxRPI
+
+        implicit none
+
+        integer, intent(out) :: ndate
+        integer, intent(out) :: date(maxRPI)
+        real(dp), intent(out) :: index(maxRPI)
         character(len = *), intent(in), optional :: fname
 
         integer :: funit
@@ -101,7 +128,7 @@ contains
         integer :: nrec
 
         logical :: isfile
-        integer :: tempdate, ndate
+        integer :: tempdate
         real(dp) :: tempindex
 
         if (present(fname)) then
@@ -145,8 +172,8 @@ contains
                 if (nrec > maxRPI) then
                     exit
                 else
-                    rpi%date(nrec)  = tempdate
-                    rpi%index(nrec) = tempindex
+                    date(nrec)  = tempdate
+                    index(nrec) = tempindex
                 end if
             end if
 
@@ -156,12 +183,9 @@ contains
 
         if (nrec .ne. ndate) then
             call fortaxerror('number of rpi records does not equal number declared on line 1')
-        else
-            rpi%ndate = ndate
         end if
 
-    end subroutine loadindex
-
+    end subroutine loadindex2
 
     ! getindex
     ! -----------------------------------------------------------------------
@@ -256,6 +280,7 @@ sys%fc%adult = sys%fc%adult * factor
             sys%fc%MaxCC2 = sys%fc%MaxCC2 * factor
             sys%fc%WFTCMaxCC1 = sys%fc%WFTCMaxCC1 * factor
             sys%fc%WFTCMaxCC2 = sys%fc%WFTCMaxCC2 * factor
+            sys%fc%MinAmt = sys%fc%MinAmt * factor
             sys%fc%kidcred = sys%fc%kidcred * factor
 sys%ctc%fam = sys%ctc%fam * factor
             sys%ctc%baby = sys%ctc%baby * factor
@@ -268,6 +293,7 @@ sys%wtc%Basic = sys%wtc%Basic * factor
 sys%ntc%thr1lo = sys%ntc%thr1lo * factor
             sys%ntc%thr1hi = sys%ntc%thr1hi * factor
             sys%ntc%thr2 = sys%ntc%thr2 * factor
+            sys%ntc%MinAmt = sys%ntc%MinAmt * factor
 sys%cctaxrefund%MaxPerChild = sys%cctaxrefund%MaxPerChild * factor
             sys%cctaxrefund%MinEarn = sys%cctaxrefund%MinEarn * factor
             sys%cctaxrefund%MaxInc = sys%cctaxrefund%MaxInc * factor
@@ -301,9 +327,10 @@ sys%rebatesys%MainCou = sys%rebatesys%MainCou * factor
             sys%rebatesys%MaxCC1 = sys%rebatesys%MaxCC1 * factor
             sys%rebatesys%MaxCC2 = sys%rebatesys%MaxCC2 * factor
             sys%rebatesys%AddKid = sys%rebatesys%AddKid * factor
+sys%hben%MinAmt = sys%hben%MinAmt * factor
 
-
-
+sys%ccben%MinAmt = sys%ccben%MinAmt * factor
+            sys%ccben%CCrate = sys%ccben%CCrate * factor
 sys%uc%MainCou = sys%uc%MainCou * factor
             sys%uc%YngCou = sys%uc%YngCou * factor
             sys%uc%MainSin = sys%uc%MainSin * factor
@@ -320,6 +347,7 @@ sys%uc%MainCou = sys%uc%MainCou * factor
             sys%uc%DisregCouNoKidsLo = sys%uc%DisregCouNoKidsLo * factor
             sys%uc%DisregCouKidsHi = sys%uc%DisregCouKidsHi * factor
             sys%uc%DisregCouKidsLo = sys%uc%DisregCouKidsLo * factor
+            sys%uc%MinAmt = sys%uc%MinAmt * factor
 
 sys%bencap%sinNoKids = sys%bencap%sinNoKids * factor
             sys%bencap%sinKids = sys%bencap%sinKids * factor
@@ -333,6 +361,25 @@ sys%bencap%sinNoKids = sys%bencap%sinNoKids * factor
 
 
     end subroutine upratesys
+
+    subroutine upratefam(fam, factor)
+
+        use fortax_type, only : fam_t
+        use fortax_util, only : fortaxwarn
+
+        implicit none
+
+        type(fam_t), intent(inout) :: fam
+        real(dp), intent(in) :: factor
+
+fam%ccexp = fam%ccexp * factor
+            fam%maint = fam%maint * factor
+            fam%rent = fam%rent * factor
+            fam%rentcap = fam%rentcap * factor
+fam%ad(1)%earn = fam%ad(1)%earn * factor
+fam%ad(2)%earn = fam%ad(2)%earn * factor
+
+    end subroutine upratefam
 
     function sys_times_factor(sys, factor) result(sys2)
         use fortax_type, only : sys_t
@@ -392,7 +439,7 @@ sys2%fc%dofamcred = sys%fc%dofamcred
         sys2%fc%WFTCMaxCC1 = sys%fc%WFTCMaxCC1 * factor
         sys2%fc%WFTCMaxCC2 = sys%fc%WFTCMaxCC2 * factor
         sys2%fc%WFTCPropCC = sys%fc%WFTCPropCC
-        sys2%fc%MinAmt = sys%fc%MinAmt
+        sys2%fc%MinAmt = sys%fc%MinAmt * factor
         sys2%fc%kidagel = sys%fc%kidagel
         sys2%fc%kidageu = sys%fc%kidageu
         sys2%fc%kidcred = sys%fc%kidcred * factor
@@ -422,7 +469,7 @@ sys2%ntc%donewtaxcred = sys%ntc%donewtaxcred
         sys2%ntc%taper1 = sys%ntc%taper1
         sys2%ntc%taper2 = sys%ntc%taper2
         sys2%ntc%taperCTCInOneGo = sys%ntc%taperCTCInOneGo
-        sys2%ntc%MinAmt = sys%ntc%MinAmt
+        sys2%ntc%MinAmt = sys%ntc%MinAmt * factor
 sys2%cctaxrefund%doCCTaxRefund = sys%cctaxrefund%doCCTaxRefund
         sys2%cctaxrefund%MaxPerChild = sys%cctaxrefund%MaxPerChild * factor
         sys2%cctaxrefund%MaxAge = sys%cctaxrefund%MaxAge
@@ -513,7 +560,7 @@ sys2%rebatesys%RulesUnderFC = sys%rebatesys%RulesUnderFC
         sys2%rebatesys%MaxKids = sys%rebatesys%MaxKids
 sys2%hben%doHBen = sys%hben%doHBen
         sys2%hben%taper = sys%hben%taper
-        sys2%hben%MinAmt = sys%hben%MinAmt
+        sys2%hben%MinAmt = sys%hben%MinAmt * factor
         sys2%hben%doUnderOccCharge = sys%hben%doUnderOccCharge
         sys2%hben%doUnderOccChargeScotland = sys%hben%doUnderOccChargeScotland
         sys2%hben%doUnderOccChargeNI = sys%hben%doUnderOccChargeNI
@@ -530,8 +577,8 @@ sys2%ctaxben%docounciltaxben = sys%ctaxben%docounciltaxben
 sys2%ccben%dopolltax = sys%ccben%dopolltax
         sys2%ccben%taper = sys%ccben%taper
         sys2%ccben%PropElig = sys%ccben%PropElig
-        sys2%ccben%MinAmt = sys%ccben%MinAmt
-        sys2%ccben%CCrate = sys%ccben%CCrate
+        sys2%ccben%MinAmt = sys%ccben%MinAmt * factor
+        sys2%ccben%CCrate = sys%ccben%CCrate * factor
 sys2%uc%doUnivCred = sys%uc%doUnivCred
         sys2%uc%MainCou = sys%uc%MainCou * factor
         sys2%uc%YngCou = sys%uc%YngCou * factor
@@ -555,7 +602,7 @@ sys2%uc%doUnivCred = sys%uc%doUnivCred
         sys2%uc%DisregCouKidsHi = sys%uc%DisregCouKidsHi * factor
         sys2%uc%DisregCouKidsLo = sys%uc%DisregCouKidsLo * factor
         sys2%uc%taper = sys%uc%taper
-        sys2%uc%MinAmt = sys%uc%MinAmt
+        sys2%uc%MinAmt = sys%uc%MinAmt * factor
 sys2%statepen%doStatePen = sys%statepen%doStatePen
         sys2%statepen%PenAgeMan = sys%statepen%PenAgeMan
         sys2%statepen%PenAgeWoman = sys%statepen%PenAgeWoman
@@ -664,7 +711,7 @@ sys2%fc%dofamcred = sys%fc%dofamcred
         sys2%fc%WFTCMaxCC1 = sys%fc%WFTCMaxCC1 * factor
         sys2%fc%WFTCMaxCC2 = sys%fc%WFTCMaxCC2 * factor
         sys2%fc%WFTCPropCC = sys%fc%WFTCPropCC
-        sys2%fc%MinAmt = sys%fc%MinAmt
+        sys2%fc%MinAmt = sys%fc%MinAmt * factor
         sys2%fc%kidagel = sys%fc%kidagel
         sys2%fc%kidageu = sys%fc%kidageu
         sys2%fc%kidcred = sys%fc%kidcred * factor
@@ -694,7 +741,7 @@ sys2%ntc%donewtaxcred = sys%ntc%donewtaxcred
         sys2%ntc%taper1 = sys%ntc%taper1
         sys2%ntc%taper2 = sys%ntc%taper2
         sys2%ntc%taperCTCInOneGo = sys%ntc%taperCTCInOneGo
-        sys2%ntc%MinAmt = sys%ntc%MinAmt
+        sys2%ntc%MinAmt = sys%ntc%MinAmt * factor
 sys2%cctaxrefund%doCCTaxRefund = sys%cctaxrefund%doCCTaxRefund
         sys2%cctaxrefund%MaxPerChild = sys%cctaxrefund%MaxPerChild * factor
         sys2%cctaxrefund%MaxAge = sys%cctaxrefund%MaxAge
@@ -785,7 +832,7 @@ sys2%rebatesys%RulesUnderFC = sys%rebatesys%RulesUnderFC
         sys2%rebatesys%MaxKids = sys%rebatesys%MaxKids
 sys2%hben%doHBen = sys%hben%doHBen
         sys2%hben%taper = sys%hben%taper
-        sys2%hben%MinAmt = sys%hben%MinAmt
+        sys2%hben%MinAmt = sys%hben%MinAmt * factor
         sys2%hben%doUnderOccCharge = sys%hben%doUnderOccCharge
         sys2%hben%doUnderOccChargeScotland = sys%hben%doUnderOccChargeScotland
         sys2%hben%doUnderOccChargeNI = sys%hben%doUnderOccChargeNI
@@ -802,8 +849,8 @@ sys2%ctaxben%docounciltaxben = sys%ctaxben%docounciltaxben
 sys2%ccben%dopolltax = sys%ccben%dopolltax
         sys2%ccben%taper = sys%ccben%taper
         sys2%ccben%PropElig = sys%ccben%PropElig
-        sys2%ccben%MinAmt = sys%ccben%MinAmt
-        sys2%ccben%CCrate = sys%ccben%CCrate
+        sys2%ccben%MinAmt = sys%ccben%MinAmt * factor
+        sys2%ccben%CCrate = sys%ccben%CCrate * factor
 sys2%uc%doUnivCred = sys%uc%doUnivCred
         sys2%uc%MainCou = sys%uc%MainCou * factor
         sys2%uc%YngCou = sys%uc%YngCou * factor
@@ -827,7 +874,7 @@ sys2%uc%doUnivCred = sys%uc%doUnivCred
         sys2%uc%DisregCouKidsHi = sys%uc%DisregCouKidsHi * factor
         sys2%uc%DisregCouKidsLo = sys%uc%DisregCouKidsLo * factor
         sys2%uc%taper = sys%uc%taper
-        sys2%uc%MinAmt = sys%uc%MinAmt
+        sys2%uc%MinAmt = sys%uc%MinAmt * factor
 sys2%statepen%doStatePen = sys%statepen%doStatePen
         sys2%statepen%PenAgeMan = sys%statepen%PenAgeMan
         sys2%statepen%PenAgeWoman = sys%statepen%PenAgeWoman
@@ -858,6 +905,117 @@ sys2%extra%fsminappamt = sys%extra%fsminappamt
         sys2 = factor_times_sys(real(factor, dp), sys)
     end function factor_times_sys_integer
 
+
+    function fam_times_factor(fam, factor) result(fam2)
+        use fortax_type, only : fam_t
+        implicit none
+        type(fam_t), intent(in) :: fam
+        real(dp), intent(in) :: factor
+        type(fam_t) :: fam2
+fam2%couple = fam%couple
+        fam2%married = fam%married
+        fam2%ccexp = fam%ccexp * factor
+        fam2%maint = fam%maint * factor
+        fam2%nkids = fam%nkids
+        fam2%kidage = fam%kidage
+        fam2%kidsex = fam%kidsex
+        fam2%nothads = fam%nothads
+        fam2%tenure = fam%tenure
+        fam2%rent = fam%rent * factor
+        fam2%rentcap = fam%rentcap * factor
+        fam2%bedrooms = fam%bedrooms
+        fam2%region = fam%region
+        fam2%ctband = fam%ctband
+        fam2%banddratio = fam%banddratio
+        fam2%intdate = fam%intdate
+        fam2%famtype = fam%famtype
+        fam2%yngkid = fam%yngkid
+        fam2%kidagedist = fam%kidagedist
+        fam2%kidagedist0 = fam%kidagedist0
+        fam2%kidagedist1 = fam%kidagedist1
+fam2%ad(1)%age = fam%ad(1)%age
+        fam2%ad(1)%selfemp = fam%ad(1)%selfemp
+        fam2%ad(1)%hrs = fam%ad(1)%hrs
+        fam2%ad(1)%earn = fam%ad(1)%earn * factor
+fam2%ad(2)%age = fam%ad(2)%age
+        fam2%ad(2)%selfemp = fam%ad(2)%selfemp
+        fam2%ad(2)%hrs = fam%ad(2)%hrs
+        fam2%ad(2)%earn = fam%ad(2)%earn * factor
+    end function fam_times_factor
+
+    function fam_times_factor_integer(fam, factor) result(fam2)
+        use fortax_type, only : fam_t
+        implicit none
+        type(fam_t), intent(in) :: fam
+        integer, intent(in) :: factor
+        type(fam_t) :: fam2
+        fam2 = fam_times_factor(fam, real(factor, dp))
+    end function fam_times_factor_integer
+
+    function fam_div_factor(fam, factor) result(fam2)
+        use fortax_type, only : fam_t
+        implicit none
+        type(fam_t), intent(in) :: fam
+        real(dp), intent(in) :: factor
+        type(fam_t) :: fam2
+        fam2 = fam_times_factor(fam, (1.0_dp / factor))
+    end function fam_div_factor
+
+    function fam_div_factor_integer(fam, factor) result(fam2)
+        use fortax_type, only : fam_t
+        implicit none
+        type(fam_t), intent(in) :: fam
+        integer, intent(in) :: factor
+        type(fam_t) :: fam2
+        fam2 = fam_times_factor(fam, (1.0_dp / real(factor, dp)))
+    end function fam_div_factor_integer
+
+    function factor_times_fam(factor, fam) result(fam2)
+        use fortax_type, only : fam_t
+        implicit none
+        real(dp), intent(in) :: factor
+        type(fam_t), intent(in) :: fam
+        type(fam_t) :: fam2
+fam2%couple = fam%couple
+        fam2%married = fam%married
+        fam2%ccexp = fam%ccexp * factor
+        fam2%maint = fam%maint * factor
+        fam2%nkids = fam%nkids
+        fam2%kidage = fam%kidage
+        fam2%kidsex = fam%kidsex
+        fam2%nothads = fam%nothads
+        fam2%tenure = fam%tenure
+        fam2%rent = fam%rent * factor
+        fam2%rentcap = fam%rentcap * factor
+        fam2%bedrooms = fam%bedrooms
+        fam2%region = fam%region
+        fam2%ctband = fam%ctband
+        fam2%banddratio = fam%banddratio
+        fam2%intdate = fam%intdate
+        fam2%famtype = fam%famtype
+        fam2%yngkid = fam%yngkid
+        fam2%kidagedist = fam%kidagedist
+        fam2%kidagedist0 = fam%kidagedist0
+        fam2%kidagedist1 = fam%kidagedist1
+fam2%ad(1)%age = fam%ad(1)%age
+        fam2%ad(1)%selfemp = fam%ad(1)%selfemp
+        fam2%ad(1)%hrs = fam%ad(1)%hrs
+        fam2%ad(1)%earn = fam%ad(1)%earn * factor
+fam2%ad(2)%age = fam%ad(2)%age
+        fam2%ad(2)%selfemp = fam%ad(2)%selfemp
+        fam2%ad(2)%hrs = fam%ad(2)%hrs
+        fam2%ad(2)%earn = fam%ad(2)%earn * factor
+    end function factor_times_fam
+
+    function factor_times_fam_integer(factor, fam) result(fam2)
+        use fortax_type, only : fam_t
+        implicit none
+        integer, intent(in) :: factor
+        type(fam_t), intent(in) :: fam
+        type(fam_t) :: fam2
+        fam2 = factor_times_fam(real(factor, dp), fam)
+    end function factor_times_fam_integer
+
     ! loadsysindex
     ! -----------------------------------------------------------------------
     ! provides quick access to the actual system that individuals faced
@@ -871,6 +1029,29 @@ sys2%extra%fsminappamt = sys%extra%fsminappamt
         implicit none
 
         type(sysindex_t), intent(out) :: sysindex
+        character(len = *), intent(in), optional :: sysindexfile
+
+        call loadsysindex2(sysindex%nsys, sysindex%date0, sysindex%date1, sysindex%fname, sysindexfile)
+
+    end subroutine loadsysindex
+
+
+    ! loadsysindex2
+    ! -----------------------------------------------------------------------
+    ! provides quick access to the actual system that individuals faced
+    ! requires an external system index file (sysindexfile)
+
+    subroutine loadsysindex2(nsys, date0, date1, fname, sysindexfile)
+
+        use fortax_util, only : fortaxerror, inttostr
+        use fortax_type, only : len_sysindex, maxSysIndex
+        use, intrinsic :: iso_c_binding
+
+        implicit none
+
+        integer, intent(out) :: nsys
+        integer, intent(out) :: date0(maxSysIndex), date1(maxSysIndex)
+        character(kind = c_char) :: fname(len_sysindex, maxSysIndex)
         character(len = *), intent(in), optional :: sysindexfile
 
         integer :: funit
@@ -898,12 +1079,12 @@ sys2%extra%fsminappamt = sys%extra%fsminappamt
 
         read (funit, *, iostat = istat) ndate
 
-        call freesysindex(sysindex)
+        !call freesysindex(sysindex)
 
         if (istat .ne. 0) then
             call fortaxerror('error reading number of records on line 1')
         else
-            sysindex%nsys = ndate
+            nsys = ndate
         end if
 
         nrec = 0
@@ -921,13 +1102,12 @@ sys2%extra%fsminappamt = sys%extra%fsminappamt
                 if (nrec > maxSysIndex) then
                     call fortaxerror('nrec > maxSysIndex')
                 end if
-                sysindex%date0(nrec) = tempdate0
-                sysindex%date1(nrec) = tempdate1
-                sysindex%fname(:, nrec) = transfer(tempfname, sysindex%fname(:, nrec))
+                date0(nrec) = tempdate0
+                date1(nrec) = tempdate1
+                fname(:, nrec) = transfer(tempfname, fname(:, nrec))
             end if
 
         end do
-
 
         close(funit)
 
@@ -935,7 +1115,7 @@ sys2%extra%fsminappamt = sys%extra%fsminappamt
             call fortaxerror('number of records does not equal number declared on line 1')
         end if
 
-    end subroutine loadsysindex
+    end subroutine loadsysindex2
 
 
     ! getsysindex
@@ -945,28 +1125,52 @@ sys2%extra%fsminappamt = sys%extra%fsminappamt
 
     subroutine getsysindex(sysindex, date, sysfilepath, sysnum)
 
-        use fortax_util, only : lower, fortaxerror, checkdate
         use fortax_type, only : sysindex_t, len_sysindex
 
         implicit none
 
         type(sysindex_t), intent(in)  :: sysindex
         integer, intent(in) :: date
-        character(len = 256), intent(out) :: sysfilepath
+        character(len = len_sysindex), intent(out) :: sysfilepath
+        integer, intent(out) :: sysnum
+
+        call getsysindex2(sysindex%nsys, sysindex%date0, sysindex%date1, sysindex%fname, date, sysfilepath, sysnum)
+
+    end subroutine getsysindex
+
+
+    ! getsysindex2
+    ! -----------------------------------------------------------------------
+    ! returns information which allows the user to easily identify which
+    ! tax system operated at any given YYYYMMDD date as specified in sysindex
+
+    subroutine getsysindex2(nsys, date0, date1, fname, date, sysfilepath, sysnum)
+
+        use fortax_util, only : lower, fortaxerror, checkdate
+        use fortax_type, only : len_sysindex, maxSysIndex
+        use iso_c_binding
+
+        implicit none
+
+        integer, intent(in) :: nsys
+        integer, intent(in) :: date0(maxSysIndex), date1(maxSysIndex)
+        character(kind = c_char), intent(in) :: fname(len_sysindex, maxSysIndex)
+        integer, intent(in) :: date
+        character(len = len_sysindex), intent(out) :: sysfilepath
         integer, intent(out) :: sysnum
 
         integer :: i
         character(len = len_sysindex):: sysname
 
-        if (sysindex%nsys == 0) then
+        if (nsys == 0) then
             call fortaxerror('system index file is not in memory')
         end if
 
         if (checkdate(date)) then
             sysnum = 0
-            do i = 1, sysindex%nsys
-                if (date >= sysindex%date0(i) .and. date <= sysindex%date1(i)) then
-                    sysname = transfer(sysindex%fname(:, i), sysname)
+            do i = 1, nsys
+                if (date >= date0(i) .and. date <= date1(i)) then
+                    sysname = transfer(fname(:, i), sysname)
                     sysfilepath = 'systems/fortax/' // trim(adjustl(sysname)) // '.json'
                     sysnum = i
                     exit
@@ -979,8 +1183,7 @@ sys2%extra%fsminappamt = sys%extra%fsminappamt
             call fortaxerror('invalid date in getsysindex')
         end if
 
-    end subroutine getsysindex
-
+    end subroutine getsysindex2
 
     ! freesysindex
     ! -----------------------------------------------------------------------

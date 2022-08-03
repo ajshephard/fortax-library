@@ -33,8 +33,8 @@ module fortax_prices
 
     private
 
-    public :: loadindex, setindex, getindex, upratefactor, upratesys
-    public :: checkdate, loadsysindex, getsysindex, rpi_saveF90
+    public :: loadindex, loadindex2, setindex, getindex, upratefactor, upratesys, upratefam
+    public :: checkdate, loadsysindex, loadsysindex2, getsysindex, getsysindex2, rpi_saveF90
     public :: operator(*), operator(/)
 
     interface operator(*)
@@ -42,11 +42,17 @@ module fortax_prices
         module procedure sys_times_factor_integer
         module procedure factor_times_sys
         module procedure factor_times_sys_integer
+        module procedure fam_times_factor
+        module procedure fam_times_factor_integer
+        module procedure factor_times_fam
+        module procedure factor_times_fam_integer
     end interface
 
     interface operator(/)
         module procedure sys_div_factor
         module procedure sys_div_factor_integer
+        module procedure fam_div_factor
+        module procedure fam_div_factor_integer
     end interface
 
 contains
@@ -319,7 +325,7 @@ contains
         type(sys_t), intent(in) :: sys
         type(sys_t) :: sys2
         #:for SYS in SYSLIST
-        @:fortax_uprate_op(${SYS}$, sys2%${SYS}$, sys%${SYS}$, factor, amount = True. minamount = True)
+        @:fortax_uprate_op(${SYS}$, sys2%${SYS}$, sys%${SYS}$, factor, amount = True, minamount = True)
         #:endfor
     end function factor_times_sys
 
@@ -331,6 +337,65 @@ contains
         type(sys_t) :: sys2
         sys2 = factor_times_sys(real(factor, dp), sys)
     end function factor_times_sys_integer
+
+
+    function fam_times_factor(fam, factor) result(fam2)
+        use fortax_type, only : fam_t
+        implicit none
+        type(fam_t), intent(in) :: fam
+        real(dp), intent(in) :: factor
+        type(fam_t) :: fam2
+        @:fortax_uprate_op(fam, fam2, fam, factor, amount = True, minamount = True)
+        @:fortax_uprate_op(famad, fam2%ad(1), fam%ad(1), factor, amount = True, minamount = True)
+        @:fortax_uprate_op(famad, fam2%ad(2), fam%ad(2), factor, amount = True, minamount = True)
+    end function fam_times_factor
+
+    function fam_times_factor_integer(fam, factor) result(fam2)
+        use fortax_type, only : fam_t
+        implicit none
+        type(fam_t), intent(in) :: fam
+        integer, intent(in) :: factor
+        type(fam_t) :: fam2
+        fam2 = fam_times_factor(fam, real(factor, dp))
+    end function fam_times_factor_integer
+
+    function fam_div_factor(fam, factor) result(fam2)
+        use fortax_type, only : fam_t
+        implicit none
+        type(fam_t), intent(in) :: fam
+        real(dp), intent(in) :: factor
+        type(fam_t) :: fam2
+        fam2 = fam_times_factor(fam, (1.0_dp / factor))
+    end function fam_div_factor
+
+    function fam_div_factor_integer(fam, factor) result(fam2)
+        use fortax_type, only : fam_t
+        implicit none
+        type(fam_t), intent(in) :: fam
+        integer, intent(in) :: factor
+        type(fam_t) :: fam2
+        fam2 = fam_times_factor(fam, (1.0_dp / real(factor, dp)))
+    end function fam_div_factor_integer
+
+    function factor_times_fam(factor, fam) result(fam2)
+        use fortax_type, only : fam_t
+        implicit none
+        real(dp), intent(in) :: factor
+        type(fam_t), intent(in) :: fam
+        type(fam_t) :: fam2
+        @:fortax_uprate_op(fam, fam2, fam, factor, amount = True, minamount = True)
+        @:fortax_uprate_op(famad, fam2%ad(1), fam%ad(1), factor, amount = True, minamount = True)
+        @:fortax_uprate_op(famad, fam2%ad(2), fam%ad(2), factor, amount = True, minamount = True)
+    end function factor_times_fam
+
+    function factor_times_fam_integer(factor, fam) result(fam2)
+        use fortax_type, only : fam_t
+        implicit none
+        integer, intent(in) :: factor
+        type(fam_t), intent(in) :: fam
+        type(fam_t) :: fam2
+        fam2 = factor_times_fam(real(factor, dp), fam)
+    end function factor_times_fam_integer
 
     ! loadsysindex
     ! -----------------------------------------------------------------------
