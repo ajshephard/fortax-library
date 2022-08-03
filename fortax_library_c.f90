@@ -62,6 +62,14 @@ contains
         call FORTAX_CalcNetInc(sys, fam, net)
     end function c_CalcNetInc
 
+    subroutine c_CalcNetInc2(sys, fam, net) bind(C, name = "C_FORTAX_calcNetInc2")
+        implicit none
+        type(sys_t), intent(in)  :: sys
+        type(fam_t), intent(in)  :: fam
+        type(net_t), intent(out) :: net
+        call FORTAX_CalcNetInc(sys, fam, net)
+    end subroutine c_CalcNetInc2
+
     ! fortax_extra
 
     subroutine c_setMinAmount(sys, minamt) bind(C, name = "C_FORTAX_setMinAmount")
@@ -252,6 +260,22 @@ contains
         end if
     end subroutine c_loadIndex
 
+    subroutine c_loadIndex2(ndate, date, index, fname, len_fname) bind(C, name = "C_FORTAX_loadIndex2")
+        use fortax_type, only : maxRPI
+        use fortax_prices, only : loadIndex2
+        implicit none
+        integer, intent(out) :: ndate
+        integer, intent(out) :: date(maxRpi)
+        real(kind=c_double), intent(out) :: index(maxRpi)
+        character(kind=c_char), dimension(*), intent(in), optional :: fname
+        integer(kind=c_int), intent(in), optional :: len_fname
+        if (present(fname) .and. present(len_fname)) then
+            call loadIndex2(ndate, date, index, copy_a2s(fname(1:len_fname)))
+        else
+            call loadIndex2(ndate, date, index)
+        end if
+    end subroutine c_loadIndex2
+
     function c_upratefactor(rpi, date0, date1) bind(C, name = "C_FORTAX_uprateFactor")
         implicit none
         type(rpi_t), intent(in) :: rpi
@@ -268,9 +292,16 @@ contains
         call FORTAX_upratesys(sys, factor, newdate)
     end subroutine c_upratesys
 
+    subroutine c_upratefam(fam, factor) bind(C, name = "C_FORTAX_uprateFam")
+        implicit none
+        type(fam_t), intent(inout) :: fam
+        real(kind=c_double), intent(in) :: factor
+        call FORTAX_upratefam(fam, factor)
+    end subroutine c_upratefam
+
     subroutine c_loadsysindex(sysindex, fname, len_fname) bind(C, name = "C_FORTAX_loadSysIndex")
         implicit none
-        type(sysindex_t), intent(out) :: sysindex
+        type(sysindex_t), intent(inout) :: sysindex
         character(kind=c_char), dimension(*), intent(in), optional :: fname
         integer(kind=c_int), intent(in), optional :: len_fname
         if (present(fname) .and. present(len_fname)) then
@@ -280,19 +311,56 @@ contains
         end if
     end subroutine c_loadsysindex
 
+    subroutine c_loadsysindex2(nsys, date0, date1, sysname, fname, len_fname) bind(C, name = "C_FORTAX_loadSysIndex2")
+        use fortax_type
+        use fortax_prices, only : loadsysindex2
+        implicit none
+        integer(kind=c_int), intent(out) :: nsys
+        integer(kind=c_int), intent(out) :: date0(maxSysIndex)
+        integer(kind=c_int), intent(out) :: date1(maxSysIndex)
+        character(kind=c_char), intent(out) :: sysname(len_sysindex, maxSysIndex)
+        character(kind=c_char), dimension(*), intent(in), optional :: fname
+        integer(kind=c_int), intent(in), optional :: len_fname
+        if (present(fname) .and. present(len_fname)) then
+            call loadsysindex2(nsys, date0, date1, sysname, copy_a2s(fname(1:len_fname)))
+        else
+            call loadsysindex2(nsys, date0, date1, sysname)
+        end if
+    end subroutine c_loadsysindex2
+
     subroutine c_getsysindex(sysindex, date, c_sysfilepath, len_sysfilepath, sysnum) &
         bind(C, name = "C_FORTAX_getSysIndex")
+        use fortax_type, only : len_sysindex
         implicit none
         type(sysindex_t), intent(in) :: sysindex
         integer(kind=c_int), intent(in) :: date
-        character(kind=c_char), dimension(256), intent(out) :: c_sysfilepath
+        character(kind=c_char), dimension(len_sysindex), intent(out) :: c_sysfilepath
         integer(kind=c_int), intent(out) :: len_sysfilepath
         integer(kind=c_int), intent(out) :: sysnum
-        character(len = 256) :: sysfilepath
+        character(len = len_sysindex) :: sysfilepath
         call FORTAX_getsysindex(sysindex, date, sysfilepath, sysnum)
         len_sysfilepath = len_trim(sysfilepath)
         c_sysfilepath = copy_s2a(sysfilepath)
     end subroutine c_getsysindex
+
+    subroutine c_getsysindex2(nsys, date0, date1, sysname, date, c_sysfilepath, len_sysfilepath, sysnum) &
+        bind(C, name = "C_FORTAX_getSysIndex2")
+        use fortax_prices, only : getsysindex2
+        use fortax_type, only : len_sysindex, maxSysIndex
+        implicit none
+        integer(kind=c_int), intent(in) :: nsys
+        integer(kind=c_int), intent(in) :: date0(maxSysIndex)
+        integer(kind=c_int), intent(in) :: date1(maxSysIndex)
+        character(kind=c_char), intent(in) :: sysname(len_sysindex, maxSysIndex)
+        integer(kind=c_int), intent(in) :: date
+        character(kind=c_char), dimension(len_sysindex), intent(out) :: c_sysfilepath
+        integer(kind=c_int), intent(out) :: len_sysfilepath
+        integer(kind=c_int), intent(out) :: sysnum
+        character(len = len_sysindex) :: sysfilepath
+        call getsysindex2(nsys, date0, date1, sysname, date, sysfilepath, sysnum)
+        len_sysfilepath = len_trim(sysfilepath)
+        c_sysfilepath = copy_s2a(sysfilepath)
+    end subroutine c_getsysindex2
 
     ! fortax_read
 
@@ -302,10 +370,45 @@ contains
         character(kind=c_char), dimension(*), intent(in) :: systemFile
         integer(kind=c_int), intent(in) :: len_systemFile
         integer(kind=c_int), optional, intent(in) :: prices
-        call FORTAX_readFortaxParams(sys, copy_a2s(systemFile(1:len_systemFile)), prices)
+        if (present(prices)) then
+            call FORTAX_readFortaxParams(sys, copy_a2s(systemFile(1:len_systemFile)), prices)
+        else
+            call FORTAX_readFortaxParams(sys, copy_a2s(systemFile(1:len_systemFile)))
+        end if
     end subroutine c_readFortaxParams
 
     ! fortax type
+
+    subroutine c_fam_hrsearn(fam, hours1, earn1, hours2, earn2) bind(C, name = "C_FORTAX_fam_hrsearn")
+        implicit none
+        type(fam_t), intent(inout) :: fam
+        real(kind = c_double), intent(in) :: hours1
+        real(kind = c_double), intent(in) :: earn1
+        real(kind = c_double), intent(in) :: hours2
+        real(kind = c_double), intent(in) :: earn2
+        fam%ad(1)%hrs = hours1
+        fam%ad(1)%earn = earn1
+        fam%ad(2)%hrs = hours2
+        fam%ad(2)%earn = earn2
+    end subroutine c_fam_hrsearn
+
+    subroutine c_fam_hrsearn1(fam, hours1, earn1) bind(C, name = "C_FORTAX_fam_hrsearn1")
+        implicit none
+        type(fam_t), intent(inout) :: fam
+        real(kind = c_double), intent(in) :: hours1
+        real(kind = c_double), intent(in) :: earn1
+        fam%ad(1)%hrs = hours1
+        fam%ad(1)%earn = earn1
+    end subroutine c_fam_hrsearn1
+
+    subroutine c_fam_hrsearn2(fam, hours2, earn2) bind(C, name = "C_FORTAX_fam_hrsearn2")
+        implicit none
+        type(fam_t), intent(inout) :: fam
+        real(kind = c_double), intent(in) :: hours2
+        real(kind = c_double), intent(in) :: earn2
+        fam%ad(2)%hrs = hours2
+        fam%ad(2)%earn = earn2
+    end subroutine c_fam_hrsearn2
 
     subroutine c_fam_init(fam) bind(C, name = "C_FORTAX_fam_init")
         implicit none
